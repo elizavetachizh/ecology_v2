@@ -1,4 +1,9 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import {
@@ -12,6 +17,7 @@ import {
   AlertTitle,
   Button,
   Input,
+  PageContextBar,
 } from "../../../../shared/ui";
 import {
   findParentId,
@@ -82,6 +88,7 @@ export function UnitFormPage({
 
   const pod9List = useMemo(() => {
     if (!savedId) return [];
+    void pod9Tick;
     return getUnitPod9Children(savedId);
   }, [savedId, pod9Tick]);
 
@@ -166,22 +173,25 @@ export function UnitFormPage({
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {savedId ? "Структурная единица" : "Новая структурная единица"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {parentLabel ? (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageContextBar
+        eyebrow="Структура организации"
+        title={
+          savedId
+            ? form.name || "Структурная единица"
+            : "Новая структурная единица"
+        }
+        description={
+          parentLabel ? (
             <>
               Родитель:{" "}
               <span className="font-medium text-foreground">{parentLabel}</span>
             </>
           ) : (
-            "Корневой уровень. Название задаёте вы — подразделение, цех, площадка и т.д."
-          )}
-        </p>
-      </div>
+            "Корневой уровень организации"
+          )
+        }
+      />
 
       {!savedId ? (
         <Alert variant="info">
@@ -205,10 +215,10 @@ export function UnitFormPage({
 
       <form
         onSubmit={handleSave}
-        className="grid gap-4 rounded-xl border border-border bg-card p-4"
+        className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2"
       >
         {error ? (
-          <Alert variant="error">
+          <Alert variant="error" className="md:col-span-2">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
@@ -234,7 +244,7 @@ export function UnitFormPage({
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-1 md:col-span-2">
           <Button type="submit" disabled={pending}>
             {pending ? "Сохранение…" : "Сохранить"}
           </Button>
@@ -286,6 +296,7 @@ export function UnitFormPage({
                   <Link
                     to="/directories/structure/pod9/$pod9Id"
                     params={{ pod9Id: item.id }}
+                    search={{ instructionId: undefined }}
                     className="min-w-0 hover:underline"
                   >
                     <div className="font-medium">{item.name}</div>

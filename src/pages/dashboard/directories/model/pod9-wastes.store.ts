@@ -1,3 +1,4 @@
+import { DEFAULT_INSTRUCTION_ID } from "../../../../entities/regulatory-document";
 import {
   findParentId,
   findStructureNode,
@@ -7,6 +8,7 @@ import {
 /** Карточка отхода в справочнике (без привязок) */
 export type DirectoryWaste = {
   id: string;
+  instructionId: string;
   name: string;
   hazardClass: string;
   unit: string;
@@ -16,6 +18,7 @@ export type DirectoryWaste = {
 /** Привязка: один отход → много единиц и ПОД-9 */
 export type WasteBinding = {
   id: string;
+  instructionId: string;
   wasteId: string;
   unitId: string;
   pod9Id: string;
@@ -64,6 +67,7 @@ type Listener = () => void;
 const MOCK_WASTES: DirectoryWaste[] = [
   {
     id: "w-1",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     name: "Мусор от офисных и бытовых помещений организаций",
     hazardClass: "IV",
     unit: "т",
@@ -71,6 +75,7 @@ const MOCK_WASTES: DirectoryWaste[] = [
   },
   {
     id: "w-2",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     name: "Отходы бумаги и картона от канцелярской деятельности",
     hazardClass: "V",
     unit: "т",
@@ -78,6 +83,7 @@ const MOCK_WASTES: DirectoryWaste[] = [
   },
   {
     id: "w-3",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     name: "Обтирочный материал, загрязненный нефтью или нефтепродуктами",
     hazardClass: "III",
     unit: "т",
@@ -88,24 +94,28 @@ const MOCK_WASTES: DirectoryWaste[] = [
 const MOCK_BINDINGS: WasteBinding[] = [
   {
     id: "wb-1",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     wasteId: "w-1",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
   },
   {
     id: "wb-1b",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     wasteId: "w-1",
     unitId: "unit-1-2",
     pod9Id: "pod9-3",
   },
   {
     id: "wb-2",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     wasteId: "w-2",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
   },
   {
     id: "wb-3",
+    instructionId: DEFAULT_INSTRUCTION_ID,
     wasteId: "w-3",
     unitId: "unit-2-1",
     pod9Id: "pod9-4",
@@ -127,21 +137,42 @@ export function getAllWastes(): DirectoryWaste[] {
   return wastes;
 }
 
+export function getWastesByInstruction(
+  instructionId: string | null,
+): DirectoryWaste[] {
+  if (!instructionId) return [];
+  return wastes.filter((item) => item.instructionId === instructionId);
+}
+
 export function findWaste(id: string): DirectoryWaste | null {
   return wastes.find((item) => item.id === id) ?? null;
 }
 
-export function getWasteBindings(wasteId: string): WasteBinding[] {
-  return bindings.filter((item) => item.wasteId === wasteId);
+export function getWasteBindings(
+  wasteId: string,
+  instructionId?: string | null,
+): WasteBinding[] {
+  return bindings.filter(
+    (item) =>
+      item.wasteId === wasteId &&
+      (instructionId === undefined || item.instructionId === instructionId),
+  );
 }
 
 export function getAllBindings(): WasteBinding[] {
   return bindings;
 }
 
-export function getPod9Wastes(pod9Id: string): Pod9Waste[] {
+export function getPod9Wastes(
+  pod9Id: string,
+  instructionId?: string | null,
+): Pod9Waste[] {
   return bindings
-    .filter((item) => item.pod9Id === pod9Id)
+    .filter(
+      (item) =>
+        item.pod9Id === pod9Id &&
+        (instructionId === undefined || item.instructionId === instructionId),
+    )
     .map((binding) => {
       const waste = findWaste(binding.wasteId);
       if (!waste) return null;
@@ -174,9 +205,13 @@ export function getPod9WastesSnapshot(): number {
   return storeVersion;
 }
 
-export function createWaste(values: WasteFormValues): DirectoryWaste {
+export function createWaste(
+  values: WasteFormValues,
+  instructionId: string,
+): DirectoryWaste {
   const waste: DirectoryWaste = {
     id: `w-${crypto.randomUUID().slice(0, 8)}`,
+    instructionId,
     name: values.name.trim(),
     hazardClass: values.hazardClass.trim(),
     unit: values.unit.trim(),
@@ -208,12 +243,29 @@ export function updateWaste(
   return next;
 }
 
+export function deleteWaste(id: string): boolean {
+  const next = wastes.filter((item) => item.id !== id);
+  if (next.length === wastes.length) return false;
+  wastes = next;
+  bindings = bindings.filter((item) => item.wasteId !== id);
+  emit();
+  return true;
+}
+
 export function addWasteBinding(input: {
   wasteId: string;
   unitId: string;
   pod9Id: string;
 }): WasteBinding | null {
-  if (!findWaste(input.wasteId)) return null;
+  const waste = findWaste(input.wasteId);
+  const pod9 = findStructureNode(getStructureTree(), input.pod9Id);
+  if (
+    !waste ||
+    !pod9 ||
+    pod9.type !== "pod9"
+  ) {
+    return null;
+  }
 
   const duplicate = bindings.some(
     (item) =>
@@ -225,6 +277,7 @@ export function addWasteBinding(input: {
 
   const binding: WasteBinding = {
     id: `wb-${crypto.randomUUID().slice(0, 8)}`,
+    instructionId: waste.instructionId,
     wasteId: input.wasteId,
     unitId: input.unitId,
     pod9Id: input.pod9Id,
@@ -240,18 +293,36 @@ export function removeWasteBinding(bindingId: string) {
   emit();
 }
 
+export function removeBindingsForStructureNodes(nodeIds: string[]) {
+  const ids = new Set(nodeIds);
+  const next = bindings.filter(
+    (item) => !ids.has(item.unitId) && !ids.has(item.pod9Id),
+  );
+  if (next.length === bindings.length) return;
+  bindings = next;
+  emit();
+}
+
 /**
  * С карточки ПОД-9: создаёт отход в справочнике и сразу привязывает
  * (отход сначала появляется в каталоге, затем binding).
  */
 export function addPod9Waste(
   pod9Id: string,
+  instructionId: string,
   values: WasteFormValues,
 ): Pod9Waste | null {
   const unitId = findParentId(getStructureTree(), pod9Id);
-  if (typeof unitId !== "string") return null;
+  const pod9 = findStructureNode(getStructureTree(), pod9Id);
+  if (
+    typeof unitId !== "string" ||
+    !pod9 ||
+    pod9.type !== "pod9"
+  ) {
+    return null;
+  }
 
-  const waste = createWaste(values);
+  const waste = createWaste(values, instructionId);
   const binding = addWasteBinding({
     wasteId: waste.id,
     unitId,

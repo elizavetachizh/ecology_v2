@@ -1,6 +1,17 @@
 export { Button, buttonVariants, type ButtonProps } from "./button";
 export { Input, type InputProps } from "./input";
 export { Select, type SelectProps } from "./select";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+export {
+  PageContextBar,
+  type PageContextBarProps,
+} from "./page-context-bar";
+export { ConfirmDialog, type ConfirmDialogProps } from "./confirm-dialog";
+export {
+  MultipleCombobox,
+  type MultipleComboboxOption,
+  type MultipleComboboxProps,
+} from "./multiple-combobox";
 export {
   Alert,
   AlertTitle,
@@ -35,7 +46,11 @@ export {
   DataTableColumnHeader,
   DataTableEmpty,
   DataTableExpandCell,
+  DataTableRowAction,
+  DataTableRowActions,
   type DataTableProps,
+  type DataTableRowActionProps,
+  type DataTableRowActionsProps,
   type ColumnDef,
   type ExpandedState,
   type Row,

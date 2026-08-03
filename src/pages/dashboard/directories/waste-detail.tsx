@@ -12,6 +12,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
+import { findInstruction } from "../../../entities/regulatory-document";
 import {
   emptyPod9Form,
   POD9_STATUS_OPTIONS,
@@ -22,6 +23,7 @@ import {
   AlertTitle,
   Button,
   Input,
+  PageContextBar,
   Select,
 } from "../../../shared/ui";
 import {
@@ -106,6 +108,7 @@ function BindingCard({
           <Link
             to="/directories/structure/pod9/$pod9Id"
             params={{ pod9Id: binding.pod9Id }}
+            search={{ instructionId: binding.instructionId }}
             className="text-sm font-medium hover:underline"
           >
             {pod9Label}
@@ -138,7 +141,8 @@ export function WasteDetailPage() {
   );
 
   const waste = findWaste(wasteId);
-  const bindings = getWasteBindings(wasteId);
+  const instruction = waste ? findInstruction(waste.instructionId) : null;
+  const bindings = getWasteBindings(wasteId, waste?.instructionId);
   const units = listStructureUnits();
 
   const [form, setForm] = useState<WasteFormValues | null>(null);
@@ -178,7 +182,12 @@ export function WasteDetailPage() {
           <AlertDescription>Отход не найден.</AlertDescription>
         </Alert>
         <Button asChild variant="outline" size="sm">
-          <Link to="/directories/wastes">К отходам</Link>
+          <Link
+            to="/directories/wastes"
+            search={{ instructionId: search.instructionId }}
+          >
+            К отходам
+          </Link>
         </Button>
       </div>
     );
@@ -240,7 +249,6 @@ export function WasteDetailPage() {
       setError("Выберите структурную единицу");
       return;
     }
-
     let nextPod9Id = pod9Id;
 
     if (createPod9Mode) {
@@ -282,21 +290,22 @@ export function WasteDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {wasteForm.name.trim() || "Отход"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Карточка отхода в справочнике. Поля можно менять сразу на этой
-            странице.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/wastes">К отходам</Link>
-        </Button>
-      </div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <PageContextBar
+        eyebrow={`Справочники / Отходы / ${instruction?.number ?? "Инструкция"}`}
+        title={wasteForm.name.trim() || "Отход"}
+        description="Карточка вида отхода. Изменения полей и привязок выполняются ниже."
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link
+              to="/directories/wastes"
+              search={{ instructionId: waste.instructionId }}
+            >
+              К отходам
+            </Link>
+          </Button>
+        }
+      />
 
       {search.created ? (
         <Alert variant="success">
@@ -310,9 +319,9 @@ export function WasteDetailPage() {
 
       <form
         onSubmit={handleSaveFields}
-        className="grid gap-4 rounded-xl border border-border bg-card p-4"
+        className="grid gap-4 rounded-xl border border-border bg-card p-4 lg:grid-cols-2"
       >
-        <div className="space-y-1">
+        <div className="space-y-1 lg:col-span-2">
           <h2 className="font-semibold text-foreground">Данные отхода</h2>
           <p className="text-sm text-muted-foreground">
             Наименование, класс опасности, единица измерения и источник
@@ -321,13 +330,13 @@ export function WasteDetailPage() {
         </div>
 
         {fieldsError ? (
-          <Alert variant="error">
+          <Alert variant="error" className="lg:col-span-2">
             <AlertDescription>{fieldsError}</AlertDescription>
           </Alert>
         ) : null}
 
         {fieldsSaved ? (
-          <Alert variant="success">
+          <Alert variant="success" className="lg:col-span-2">
             <AlertDescription>Изменения сохранены.</AlertDescription>
           </Alert>
         ) : null}
@@ -381,7 +390,7 @@ export function WasteDetailPage() {
           />
         </div>
 
-        <div>
+        <div className="lg:col-span-2">
           <Button type="submit" size="sm" disabled={fieldsPending}>
             {fieldsPending ? "Сохранение…" : "Сохранить изменения"}
           </Button>
@@ -440,6 +449,13 @@ export function WasteDetailPage() {
             <div className="text-sm font-medium text-foreground">
               Новая привязка
             </div>
+            <span className="text-xs text-muted-foreground">
+              Привязка для инструкции:{" "}
+              <strong className="font-medium text-foreground">
+                {instruction?.number ?? "—"} —{" "}
+                {instruction?.title ?? "Не найдена"}
+              </strong>
+            </span>
 
             {error ? (
               <Alert variant="error">
@@ -626,7 +642,12 @@ export function WasteDetailPage() {
           type="button"
           variant="secondary"
           size="sm"
-          onClick={() => void navigate({ to: "/directories/wastes" })}
+          onClick={() =>
+            void navigate({
+              to: "/directories/wastes",
+              search: { instructionId: waste.instructionId },
+            })
+          }
         >
           Готово
         </Button>

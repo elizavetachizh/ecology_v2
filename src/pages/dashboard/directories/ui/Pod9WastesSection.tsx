@@ -1,12 +1,16 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Plus, Unlink } from "lucide-react";
+import { findInstruction } from "../../../../entities/regulatory-document";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
+  ConfirmDialog,
   DataTable,
+  DataTableRowAction,
+  DataTableRowActions,
   Input,
   Modal,
   ModalContent,
@@ -15,15 +19,19 @@ import {
   ModalHeader,
   ModalTitle,
   Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   type ColumnDef,
 } from "../../../../shared/ui";
 import {
   addPod9Waste,
   bindExistingWasteToPod9,
   emptyPod9WasteForm,
-  getAllWastes,
   getPod9Wastes,
+  getWastesByInstruction,
   HAZARD_CLASS_OPTIONS,
+  removeWasteBinding,
   WASTE_UNIT_OPTIONS,
   type Pod9Waste,
   type Pod9WasteFormValues,
@@ -31,6 +39,7 @@ import {
 
 type Pod9WastesSectionProps = {
   pod9Id: string;
+  instructionId: string;
   wastes: Pod9Waste[];
   onChanged: () => void;
 };
@@ -51,6 +60,7 @@ function FieldLabel({
 
 export function Pod9WastesSection({
   pod9Id,
+  instructionId,
   wastes,
   onChanged,
 }: Pod9WastesSectionProps) {
@@ -59,9 +69,13 @@ export function Pod9WastesSection({
   const [selectedWasteId, setSelectedWasteId] = useState("");
   const [form, setForm] = useState<Pod9WasteFormValues>(emptyPod9WasteForm);
   const [error, setError] = useState<string | null>(null);
+  const [detachingWaste, setDetachingWaste] = useState<Pod9Waste | null>(null);
+  const instruction = findInstruction(instructionId);
 
-  const catalog = getAllWastes();
-  const alreadyBound = new Set(getPod9Wastes(pod9Id).map((item) => item.id));
+  const catalog = getWastesByInstruction(instructionId);
+  const alreadyBound = new Set(
+    getPod9Wastes(pod9Id, instructionId).map((item) => item.id),
+  );
   const available = catalog.filter((item) => !alreadyBound.has(item.id));
 
   const columns = useMemo<ColumnDef<Pod9Waste>[]>(
@@ -73,6 +87,7 @@ export function Pod9WastesSection({
           <Link
             to="/directories/wastes/$wasteId"
             params={{ wasteId: row.original.id }}
+            search={{ instructionId }}
             className="font-medium hover:underline"
           >
             {row.original.name}
@@ -94,8 +109,33 @@ export function Pod9WastesSection({
         header: "Источник образования",
         cell: ({ row }) => row.original.source,
       },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Действия</div>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <DataTableRowActions>
+            <DataTableRowAction asChild label="Открыть карточку отхода">
+              <Link
+                to="/directories/wastes/$wasteId"
+                params={{ wasteId: row.original.id }}
+                search={{ instructionId }}
+              >
+                Открыть
+              </Link>
+            </DataTableRowAction>
+            <DataTableRowAction
+              label="Отвязать отход от ПОД-9"
+              onClick={() => setDetachingWaste(row.original)}
+            >
+              <Unlink />
+              Отвязать
+            </DataTableRowAction>
+          </DataTableRowActions>
+        ),
+      },
     ],
-    [],
+    [instructionId],
   );
 
   const reset = () => {
@@ -149,7 +189,7 @@ export function Pod9WastesSection({
       return;
     }
 
-    const created = addPod9Waste(pod9Id, form);
+    const created = addPod9Waste(pod9Id, instructionId, form);
     if (!created) {
       setError("Не удалось создать и привязать отход");
       return;
@@ -167,6 +207,10 @@ export function Pod9WastesSection({
             К журналу привязываются отходы из справочника. Один отход может
             учитываться в нескольких ПОД-9.
           </p>
+          <span className="inline-flex max-w-full rounded-md bg-info-muted px-2 py-1 text-xs font-medium text-info">
+            Инструкция: {instruction?.number ?? "—"} —{" "}
+            {instruction?.title ?? "Не найдена"}
+          </span>
         </div>
         <Button type="button" size="sm" onClick={() => setOpen(true)}>
           <Plus className="size-3.5" />
@@ -183,14 +227,21 @@ export function Pod9WastesSection({
       />
 
       <Modal open={open} onOpenChange={handleOpenChange}>
-        <ModalContent className="max-w-md">
+        <ModalContent className="max-w-xl">
           <form onSubmit={handleSubmit}>
             <ModalHeader>
-              <ModalTitle>Отход в журнале ПОД-9</ModalTitle>
+              <ModalTitle>Добавление отхода в журнал ПОД-9</ModalTitle>
               <ModalDescription>
-                Сначала отход должен быть в справочнике, затем его привязывают к
-                ПОД-9.
+                Выберите существующий вид отхода либо создайте новый вид в
+                справочнике.
               </ModalDescription>
+              <span className="text-xs text-muted-foreground">
+                Отходы фильтруются по инструкции:{" "}
+                <strong className="font-medium text-foreground">
+                  {instruction?.number ?? "—"} —{" "}
+                  {instruction?.title ?? "Не найдена"}
+                </strong>
+              </span>
             </ModalHeader>
 
             <div className="grid gap-4 py-2">
@@ -200,43 +251,50 @@ export function Pod9WastesSection({
                 </Alert>
               ) : null}
 
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={mode === "bind" ? "default" : "outline"}
-                  onClick={() => {
-                    setMode("bind");
-                    setError(null);
-                  }}
-                  disabled={available.length === 0}
-                >
-                  Из справочника
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={mode === "create" ? "default" : "outline"}
-                  onClick={() => {
-                    setMode("create");
-                    setError(null);
-                  }}
-                >
-                  Создать и привязать
-                </Button>
-              </div>
+              <Tabs
+                value={mode}
+                onValueChange={(value) => {
+                  setMode(value as "bind" | "create");
+                  setError(null);
+                }}
+              >
+                <TabsList className="grid h-auto w-full grid-cols-2">
+                  <TabsTrigger value="bind" disabled={available.length === 0}>
+                    Выбрать существующий
+                  </TabsTrigger>
+                  <TabsTrigger value="create">Создать новый вид</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              <Alert variant="info">
+                <AlertTitle>
+                  {mode === "bind"
+                    ? "Выберите существующий отход из справочника"
+                    : "Создайте новый вид отхода"}
+                </AlertTitle>
+                <AlertDescription>
+                  {mode === "bind"
+                    ? "К этому ПОД-9 будет привязан существующий вид отхода из справочника выбранной инструкции."
+                    : "Новый вид появится в общем справочнике отходов выбранной инструкции и сразу будет привязан к этому ПОД-9."}
+                </AlertDescription>
+              </Alert>
 
               {mode === "bind" ? (
                 available.length === 0 ? (
                   <Alert variant="info">
-                    <AlertTitle>Справочник пуст или всё уже привязано</AlertTitle>
+                    <AlertTitle>
+                      Справочник пуст или всё уже привязано
+                    </AlertTitle>
                     <AlertDescription className="space-y-2">
                       <p>
                         Создайте отход в справочнике либо воспользуйтесь
                         «Создать и привязать».
                       </p>
                       <Button asChild size="sm" variant="outline">
-                        <Link to="/directories/wastes/new">
+                        <Link
+                          to="/directories/wastes/new"
+                          search={{ instructionId }}
+                        >
                           Открыть справочник отходов
                         </Link>
                       </Button>
@@ -264,12 +322,6 @@ export function Pod9WastesSection({
                 )
               ) : (
                 <>
-                  <Alert variant="info">
-                    <AlertDescription>
-                      Будет создана карточка в справочнике отходов, затем
-                      привязка к этому ПОД-9.
-                    </AlertDescription>
-                  </Alert>
                   <div className="grid gap-1.5">
                     <FieldLabel htmlFor="waste-name">Наименование</FieldLabel>
                     <Input
@@ -343,6 +395,26 @@ export function Pod9WastesSection({
           </form>
         </ModalContent>
       </Modal>
+
+      <ConfirmDialog
+        open={detachingWaste !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setDetachingWaste(null);
+        }}
+        title="Убрать отход из ПОД-9?"
+        confirmLabel="Отвязать"
+        description={
+          <>
+            Отход «{detachingWaste?.name}» будет удалён только из этого журнала
+            ПОД-9. Карточка вида отхода сохранится в справочнике.
+          </>
+        }
+        onConfirm={() => {
+          if (!detachingWaste) return;
+          removeWasteBinding(detachingWaste.bindingId);
+          onChanged();
+        }}
+      />
     </section>
   );
 }

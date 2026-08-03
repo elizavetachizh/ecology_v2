@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronRight, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronsUpDown,
+  GalleryVerticalEnd,
+  X,
+} from "lucide-react";
 import {
   navigationGroups,
   type NavGroup,
@@ -18,17 +23,19 @@ function NavTreeItem({
   pathname,
   openIds,
   onToggle,
+  onNavigate,
   collapsed,
 }: {
   item: NavGroup;
   pathname: string;
   openIds: Set<string>;
   onToggle: (id: string) => void;
+  onNavigate?: () => void;
   collapsed: boolean;
 }) {
   const Icon = item.icon;
   const hasChildren = Boolean(item.children?.length);
-  const isOpen = !collapsed && openIds.has(item.id);
+  const isOpen = openIds.has(item.id);
   const childActive = item.children?.some((child) =>
     isActivePath(pathname, child.to),
   );
@@ -39,33 +46,20 @@ function NavTreeItem({
       <Link
         to={item.to ?? "/"}
         title={collapsed ? item.title : undefined}
+        onClick={onNavigate}
         className={cn(
           "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm",
-          collapsed && "justify-center px-0",
+          collapsed && "md:justify-center md:px-0",
           selfActive
             ? "bg-sidebar-accent font-medium text-sidebar-foreground"
             : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
         )}
       >
         <Icon className="size-4 shrink-0" />
-        {!collapsed && <span className="truncate">{item.title}</span>}
+        <span className={cn("truncate", collapsed && "md:hidden")}>
+          {item.title}
+        </span>
       </Link>
-    );
-  }
-
-  if (collapsed) {
-    return (
-      <button
-        type="button"
-        title={item.title}
-        className={cn(
-          "flex w-full items-center justify-center rounded-md py-1.5 text-sm",
-          "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-          childActive && "font-medium text-sidebar-foreground",
-        )}
-      >
-        <Icon className="size-4 shrink-0" />
-      </button>
     );
   }
 
@@ -76,28 +70,43 @@ function NavTreeItem({
         onClick={() => onToggle(item.id)}
         className={cn(
           "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+          collapsed && "md:justify-center md:px-0",
           "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
           childActive && "font-medium text-sidebar-foreground",
         )}
       >
         <Icon className="size-4 shrink-0" />
-        <span className="flex-1 truncate text-left">{item.title}</span>
+        <span
+          className={cn(
+            "flex-1 truncate text-left",
+            collapsed && "md:hidden",
+          )}
+        >
+          {item.title}
+        </span>
         <ChevronRight
           className={cn(
             "size-4 shrink-0 text-muted-foreground transition-transform",
             isOpen && "rotate-90",
+            collapsed && "md:hidden",
           )}
         />
       </button>
 
       {isOpen && item.children ? (
-        <div className="relative ml-3.5 border-l border-sidebar-border py-0.5 pl-3.5">
+        <div
+          className={cn(
+            "relative ml-3.5 border-l border-sidebar-border py-0.5 pl-3.5",
+            collapsed && "md:hidden",
+          )}
+        >
           {item.children.map((child) => {
             const active = isActivePath(pathname, child.to);
             return (
               <Link
                 key={child.id}
                 to={child.to}
+                onClick={onNavigate}
                 className={cn(
                   "block rounded-md px-2 py-1.5 text-sm",
                   active
@@ -117,9 +126,129 @@ function NavTreeItem({
 
 type AppSidebarProps = {
   collapsed: boolean;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 };
 
-export default function AppSidebar({ collapsed }: AppSidebarProps) {
+type SidebarPanelProps = {
+  collapsed: boolean;
+  pathname: string;
+  openIds: Set<string>;
+  onToggle: (id: string) => void;
+  onNavigate?: () => void;
+  onClose?: () => void;
+  className?: string;
+};
+
+function SidebarPanel({
+  collapsed,
+  pathname,
+  openIds,
+  onToggle,
+  onNavigate,
+  onClose,
+  className,
+}: SidebarPanelProps) {
+  return (
+    <aside
+      className={cn(
+        "flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-1 border-b border-sidebar-border p-2">
+        <button
+          type="button"
+          title={collapsed ? "Acme Inc" : undefined}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
+            collapsed && "md:justify-center md:px-0",
+            "hover:bg-sidebar-accent",
+            "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
+        >
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
+            <GalleryVerticalEnd className="size-4" />
+          </div>
+          <div
+            className={cn(
+              "min-w-0 flex-1 leading-tight",
+              collapsed && "md:hidden",
+            )}
+          >
+            <div className="truncate text-sm font-semibold">ПО Эколог</div>
+            <div className="truncate text-xs text-muted-foreground">
+              Экологический мониторинг
+            </div>
+          </div>
+        </button>
+        {onClose ? (
+          <button
+            type="button"
+            aria-label="Закрыть меню"
+            onClick={onClose}
+            className="flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+          >
+            <X className="size-4" />
+          </button>
+        ) : null}
+      </div>
+
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
+        {navigationGroups.map((item) => (
+          <NavTreeItem
+            key={item.id}
+            item={item}
+            pathname={pathname}
+            openIds={openIds}
+            onToggle={onToggle}
+            onNavigate={onNavigate}
+            collapsed={collapsed}
+          />
+        ))}
+      </nav>
+
+      <div className="border-t border-sidebar-border p-2">
+        <button
+          type="button"
+          title={collapsed ? "shadcn" : undefined}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
+            collapsed && "md:justify-center md:px-0",
+            "hover:bg-sidebar-accent",
+            "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
+        >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-medium text-white">
+            sh
+          </span>
+          <span
+            className={cn("min-w-0 flex-1", collapsed && "md:hidden")}
+          >
+            <span className="block truncate text-sm font-medium leading-tight">
+              shadcn
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              m@example.com
+            </span>
+          </span>
+          <ChevronsUpDown
+            className={cn(
+              "size-4 shrink-0 text-muted-foreground",
+              collapsed && "md:hidden",
+            )}
+          />
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+export default function AppSidebar({
+  collapsed,
+  mobileOpen,
+  onMobileClose,
+}: AppSidebarProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
@@ -138,79 +267,42 @@ export default function AppSidebar({ collapsed }: AppSidebarProps) {
   };
 
   return (
-    <aside
-      className={cn(
-        "flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200",
-        collapsed ? "w-14" : "w-64",
-      )}
-    >
-      <div className="border-b border-sidebar-border p-2">
-        <button
-          type="button"
-          title={collapsed ? "Acme Inc" : undefined}
-          className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
-            collapsed && "justify-center px-0",
-            "hover:bg-sidebar-accent",
-            "outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
-            <GalleryVerticalEnd className="size-4" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1 leading-tight">
-              <div className="truncate text-sm font-semibold">ПО Эколог</div>
-              <div className="truncate text-xs text-muted-foreground">
-                Экологический мониторинг
-              </div>
-            </div>
-          )}
-        </button>
-      </div>
+    <>
+      <SidebarPanel
+        collapsed={collapsed}
+        pathname={pathname}
+        openIds={openIds}
+        onToggle={toggle}
+        className={cn(
+          "hidden shrink-0 transition-[width] duration-200 md:flex",
+          collapsed ? "md:w-14" : "md:w-64",
+        )}
+      />
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
-        {navigationGroups.map((item) => (
-          <NavTreeItem
-            key={item.id}
-            item={item}
+      {mobileOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Главное меню"
+          className="fixed inset-0 z-50 md:hidden"
+        >
+          <button
+            type="button"
+            aria-label="Закрыть меню"
+            className="absolute inset-0 bg-black/50"
+            onClick={onMobileClose}
+          />
+          <SidebarPanel
+            collapsed={false}
             pathname={pathname}
             openIds={openIds}
             onToggle={toggle}
-            collapsed={collapsed}
+            onNavigate={onMobileClose}
+            onClose={onMobileClose}
+            className="relative z-10 w-[min(20rem,calc(100vw-3rem))]"
           />
-        ))}
-      </nav>
-
-      <div className="border-t border-sidebar-border p-2">
-        <button
-          type="button"
-          title={collapsed ? "shadcn" : undefined}
-          className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
-            collapsed && "justify-center px-0",
-            "hover:bg-sidebar-accent",
-            "outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-medium text-white">
-            sh
-          </span>
-          {!collapsed && (
-            <>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium leading-tight">
-                  shadcn
-                </span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  m@example.com
-                </span>
-              </span>
-              <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
-            </>
-          )}
-        </button>
-      </div>
-    </aside>
+        </div>
+      ) : null}
+    </>
   );
 }

@@ -156,6 +156,58 @@ export function insertPod9(input: InsertPod9Input): StructureNode {
   return node;
 }
 
+export type UpdatePod9Input = {
+  id: string;
+  name: string;
+  period: string;
+  status: string;
+  responsible: string;
+};
+
+export function updatePod9(input: UpdatePod9Input): StructureNode | null {
+  const existing = findStructureNode(tree, input.id);
+  if (!existing || existing.type !== "pod9") return null;
+
+  tree = mapTree(tree, (node) =>
+    node.id === input.id
+      ? {
+          ...node,
+          name: input.name.trim(),
+          period: input.period.trim() || "—",
+          status: input.status.trim() || "Черновик",
+          responsible: input.responsible.trim() || undefined,
+        }
+      : node,
+  );
+  emit();
+  return findStructureNode(tree, input.id);
+}
+
+function collectNodeIds(node: StructureNode): string[] {
+  return [
+    node.id,
+    ...(node.children ?? []).flatMap((child) => collectNodeIds(child)),
+  ];
+}
+
+export function deleteStructureNode(id: string): string[] {
+  let removedIds: string[] = [];
+
+  const removeFromTree = (nodes: StructureNode[]): StructureNode[] =>
+    nodes.flatMap((node) => {
+      if (node.id === id) {
+        removedIds = collectNodeIds(node);
+        return [];
+      }
+      if (!node.children?.length) return [node];
+      return [{ ...node, children: removeFromTree(node.children) }];
+    });
+
+  tree = removeFromTree(tree);
+  if (removedIds.length > 0) emit();
+  return removedIds;
+}
+
 export function getUnitPod9Children(unitId: string): StructureNode[] {
   const unit = findStructureNode(tree, unitId);
   if (!unit || unit.type !== "unit") return [];

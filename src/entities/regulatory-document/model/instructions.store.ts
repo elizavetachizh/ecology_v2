@@ -1,3 +1,5 @@
+export const DEFAULT_INSTRUCTION_ID = "instr-demo-2026";
+
 export type Instruction = {
   id: string;
   title: string;
@@ -30,8 +32,16 @@ export const INSTRUCTION_STATUS_LABEL: Record<Instruction["status"], string> = {
 
 type Listener = () => void;
 
-/** Стартуем пустым: эколог сначала создаёт свой документ */
-let instructions: Instruction[] = [];
+let instructions: Instruction[] = [
+  {
+    id: DEFAULT_INSTRUCTION_ID,
+    title: "Инструкция по обращению с отходами",
+    number: "И-01/2026",
+    approvedAt: "2026-01-01",
+    responsible: "Эколог организации",
+    status: "active",
+  },
+];
 const listeners = new Set<Listener>();
 
 function emit() {
@@ -90,4 +100,12 @@ export function updateInstruction(
   ];
   emit();
   return next;
+}
+
+export function deleteInstruction(id: string): boolean {
+  const next = instructions.filter((item) => item.id !== id);
+  if (next.length === instructions.length) return false;
+  instructions = next;
+  emit();
+  return true;
 }

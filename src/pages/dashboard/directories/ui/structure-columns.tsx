@@ -1,9 +1,11 @@
-import { Plus } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
   Button,
   DataTableColumnHeader,
   DataTableExpandCell,
+  DataTableRowAction,
+  DataTableRowActions,
   type ColumnDef,
 } from "../../../../shared/ui";
 import {
@@ -13,10 +15,12 @@ import {
 
 export type StructureColumnsOptions = {
   onAddUnit: (parentId: string) => void;
+  onDeleteNode: (node: StructureNode) => void;
 };
 
 export function createStructureColumns({
   onAddUnit,
+  onDeleteNode,
 }: StructureColumnsOptions): ColumnDef<StructureNode>[] {
   return [
     {
@@ -80,6 +84,7 @@ export function createStructureColumns({
               <Link
                 to="/directories/structure/pod9/$pod9Id"
                 params={{ pod9Id: row.original.id }}
+                search={{ instructionId: undefined }}
                 className="min-w-0 hover:underline"
                 onClick={(event) => event.stopPropagation()}
               >
@@ -150,6 +155,50 @@ export function createStructureColumns({
           >
             {status}
           </span>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">Действия</div>,
+      enableSorting: false,
+      cell: ({ row }) => {
+        if (row.original.type === "actions") return null;
+        const isUnit = row.original.type === "unit";
+
+        return (
+          <DataTableRowActions>
+            <DataTableRowAction
+              asChild
+              label={isUnit ? "Редактировать единицу" : "Открыть ПОД-9"}
+            >
+              {isUnit ? (
+                <Link
+                  to="/directories/structure/units/$unitId"
+                  params={{ unitId: row.original.id }}
+                >
+                  <Pencil />
+                  Изменить
+                </Link>
+              ) : (
+                <Link
+                  to="/directories/structure/pod9/$pod9Id"
+                  params={{ pod9Id: row.original.id }}
+                  search={{ instructionId: undefined }}
+                >
+                  <ExternalLink />
+                  Открыть
+                </Link>
+              )}
+            </DataTableRowAction>
+            <DataTableRowAction
+              label={isUnit ? "Удалить единицу" : "Удалить ПОД-9"}
+              onClick={() => onDeleteNode(row.original)}
+            >
+              <Trash2 className="text-destructive" />
+              Удалить
+            </DataTableRowAction>
+          </DataTableRowActions>
         );
       },
     },

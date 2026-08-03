@@ -26,6 +26,7 @@ import {
   EditWastePage,
 } from "../pages/dashboard/directories/waste-form";
 import { WasteDetailPage } from "../pages/dashboard/directories/waste-detail";
+import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 
 const rootRoute = createRootRoute({
   component: AppLayout,
@@ -99,29 +100,42 @@ const directoriesCreatePod9Route = createRoute({
 const directoriesPod9Route = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/structure/pod9/$pod9Id",
+  validateSearch: (search: Record<string, unknown>) => ({
+    instructionId:
+      typeof search.instructionId === "string"
+        ? search.instructionId
+        : undefined,
+  }),
   component: Pod9Page,
-});
-
-const directoriesDepartmentsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/directories/departments",
-  component: () => <DirectoryStubPage title="Подразделения" />,
 });
 
 const directoriesWastesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/wastes",
+  validateSearch: (search: Record<string, unknown>) => ({
+    instructionId:
+      typeof search.instructionId === "string"
+        ? search.instructionId
+        : undefined,
+  }),
   component: WastesDirectoryPage,
 });
 
 const directoriesCreateWasteRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/wastes/new",
+  validateSearch: (search: Record<string, unknown>) => ({
+    instructionId:
+      typeof search.instructionId === "string"
+        ? search.instructionId
+        : undefined,
+  }),
   component: CreateWastePage,
 });
 
 type WasteDetailSearch = {
   created?: boolean;
+  instructionId?: string;
 };
 
 const directoriesWasteDetailRoute = createRoute({
@@ -129,6 +143,10 @@ const directoriesWasteDetailRoute = createRoute({
   path: "/directories/wastes/$wasteId",
   validateSearch: (search: Record<string, unknown>): WasteDetailSearch => ({
     created: search.created === true || search.created === "true",
+    instructionId:
+      typeof search.instructionId === "string"
+        ? search.instructionId
+        : undefined,
   }),
   component: WasteDetailPage,
 });
@@ -169,6 +187,12 @@ const directoriesEditInstructionRoute = createRoute({
   component: EditInstructionPage,
 });
 
+const pod9ReportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/reports/pod-9",
+  component: Pod9ReportPage,
+});
+
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "$",
@@ -184,7 +208,6 @@ const routeTree = rootRoute.addChildren([
   directoriesEditUnitRoute,
   directoriesCreatePod9Route,
   directoriesPod9Route,
-  directoriesDepartmentsRoute,
   directoriesWastesRoute,
   directoriesCreateWasteRoute,
   directoriesWasteEditRoute,
@@ -194,6 +217,7 @@ const routeTree = rootRoute.addChildren([
   directoriesInstructionsRoute,
   directoriesCreateInstructionRoute,
   directoriesEditInstructionRoute,
+  pod9ReportRoute,
   catchAllRoute,
 ]);
 

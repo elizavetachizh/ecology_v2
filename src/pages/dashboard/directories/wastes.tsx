@@ -1,25 +1,55 @@
-import { useMemo, useSyncExternalStore } from "react";
-import { Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
-import { Button, DataTable, type ColumnDef } from "../../../shared/ui";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import {
+  getInstructions,
+  subscribeInstructions,
+} from "../../../entities/regulatory-document";
+import {
+  Button,
+  ConfirmDialog,
+  DataTable,
+  DataTableRowAction,
+  DataTableRowActions,
+  Select,
+  type ColumnDef,
+} from "../../../shared/ui";
+import {
+  deleteWaste,
   formatBindingLabels,
   getPod9WastesSnapshot,
   getWasteBindings,
-  getWastesSnapshot,
+  getWastesByInstruction,
   subscribeWastes,
   type DirectoryWaste,
 } from "./model/pod9-wastes.store";
 import { getStructureTree, subscribeStructure } from "./model/structure.store";
 
 export function WastesDirectoryPage() {
+  const [deletingWaste, setDeletingWaste] = useState<DirectoryWaste | null>(
+    null,
+  );
+  const navigate = useNavigate();
+  const search = useSearch({ from: "/directories/wastes" });
+  const instructions = useSyncExternalStore(
+    subscribeInstructions,
+    getInstructions,
+    getInstructions,
+  );
   useSyncExternalStore(subscribeStructure, getStructureTree, getStructureTree);
   const storeVersion = useSyncExternalStore(
     subscribeWastes,
     getPod9WastesSnapshot,
     getPod9WastesSnapshot,
   );
-  const wastes = useMemo(() => getWastesSnapshot(), [storeVersion]);
+  const instructionId = search.instructionId ?? instructions[0]?.id ?? null;
+  const wastes = useMemo(
+    () => {
+      void storeVersion;
+      return getWastesByInstruction(instructionId);
+    },
+    [instructionId, storeVersion],
+  );
 
   const columns = useMemo<ColumnDef<DirectoryWaste>[]>(
     () => [
@@ -30,6 +60,7 @@ export function WastesDirectoryPage() {
           <Link
             to="/directories/wastes/$wasteId"
             params={{ wasteId: row.original.id }}
+            search={{ instructionId: row.original.instructionId }}
             className="font-medium hover:underline"
           >
             {row.original.name}
@@ -55,7 +86,10 @@ export function WastesDirectoryPage() {
         id: "bindings",
         header: "Где образуется / ПОД-9",
         cell: ({ row }) => {
-          const bindings = getWasteBindings(row.original.id);
+          const bindings = getWasteBindings(
+            row.original.id,
+            row.original.instructionId,
+          );
           if (bindings.length === 0) {
             return (
               <span className="text-xs text-muted-foreground">
@@ -87,6 +121,32 @@ export function WastesDirectoryPage() {
           );
         },
       },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Действия</div>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <DataTableRowActions>
+            <DataTableRowAction asChild label="Открыть и изменить отход">
+              <Link
+                to="/directories/wastes/$wasteId"
+                params={{ wasteId: row.original.id }}
+                search={{ instructionId: row.original.instructionId }}
+              >
+                <Pencil />
+                Изменить
+              </Link>
+            </DataTableRowAction>
+            <DataTableRowAction
+              label="Удалить отход"
+              onClick={() => setDeletingWaste(row.original)}
+            >
+              <Trash2 className="text-destructive" />
+              Удалить
+            </DataTableRowAction>
+          </DataTableRowActions>
+        ),
+      },
     ],
     [],
   );
@@ -102,10 +162,36 @@ export function WastesDirectoryPage() {
             Создайте отход в справочнике, затем привяжите его к структурным
             единицам и журналам ПОД-9.
           </p>
+          <Select
+            aria-label="Фильтр по инструкции"
+            value={instructionId ?? ""}
+            onChange={(event) =>
+              void navigate({
+                to: "/directories/wastes",
+                search: { instructionId: event.target.value || undefined },
+                replace: true,
+              })
+            }
+            disabled={instructions.length === 0}
+            className="mt-2 max-w-xl"
+          >
+            {instructions.length === 0 ? (
+              <option value="">Инструкций пока нет</option>
+            ) : (
+              instructions.map((instruction) => (
+                <option key={instruction.id} value={instruction.id}>
+                  {instruction.number} — {instruction.title}
+                </option>
+              ))
+            )}
+          </Select>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild size="sm">
-            <Link to="/directories/wastes/new">
+            <Link
+              to="/directories/wastes/new"
+              search={{ instructionId: instructionId ?? undefined }}
+            >
               <Plus className="size-3.5" />
               Создать отход
             </Link>
@@ -121,7 +207,24 @@ export function WastesDirectoryPage() {
         data={wastes}
         getRowId={(row) => row.id}
         emptyTitle="Отходов пока нет"
-        emptyDescription="Создайте отход в справочнике — привязки к единицам и ПОД-9 добавите после."
+        emptyDescription="В выбранной инструкции отходов пока нет. Создайте отход — привязки к единицам и ПОД-9 добавите после."
+      />
+
+      <ConfirmDialog
+        open={deletingWaste !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingWaste(null);
+        }}
+        title="Удалить вид отхода?"
+        description={
+          <>
+            Вид отхода «{deletingWaste?.name}» и все его привязки к структурным
+            единицам и ПОД-9 будут удалены. Это действие нельзя отменить.
+          </>
+        }
+        onConfirm={() => {
+          if (deletingWaste) deleteWaste(deletingWaste.id);
+        }}
       />
     </div>
   );

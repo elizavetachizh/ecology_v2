@@ -1,22 +1,29 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
+  ConfirmDialog,
   DataTable,
+  DataTableRowAction,
+  DataTableRowActions,
   type ColumnDef,
 } from "../../../shared/ui";
 import {
   getInstructions,
   INSTRUCTION_STATUS_LABEL,
   subscribeInstructions,
+  deleteInstruction,
   type Instruction,
-} from "./model/instructions.store";
+} from "../../../entities/regulatory-document";
+import { getWastesByInstruction } from "./model/pod9-wastes.store";
 
 export function InstructionsPage() {
+  const [deletingInstruction, setDeletingInstruction] =
+    useState<Instruction | null>(null);
   const list = useSyncExternalStore(
     subscribeInstructions,
     getInstructions,
@@ -60,6 +67,31 @@ export function InstructionsPage() {
           <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {INSTRUCTION_STATUS_LABEL[row.original.status]}
           </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Действия</div>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <DataTableRowActions>
+            <DataTableRowAction asChild label="Редактировать инструкцию">
+              <Link
+                to="/directories/instructions/$instructionId"
+                params={{ instructionId: row.original.id }}
+              >
+                <Pencil />
+                Изменить
+              </Link>
+            </DataTableRowAction>
+            <DataTableRowAction
+              label="Удалить инструкцию"
+              onClick={() => setDeletingInstruction(row.original)}
+            >
+              <Trash2 className="text-destructive" />
+              Удалить
+            </DataTableRowAction>
+          </DataTableRowActions>
         ),
       },
     ],
@@ -107,6 +139,37 @@ export function InstructionsPage() {
         getRowId={(row) => row.id}
         emptyTitle="Инструкций пока нет"
         emptyDescription="Создайте первую инструкцию — это отправная точка заполнения справочников."
+      />
+
+      <ConfirmDialog
+        open={deletingInstruction !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingInstruction(null);
+        }}
+        title="Удалить инструкцию?"
+        description={
+          deletingInstruction &&
+          getWastesByInstruction(deletingInstruction.id).length > 0 ? (
+            <span className="text-destructive">
+              Инструкцию «{deletingInstruction.title}» нельзя удалить, пока к
+              ней привязаны отходы.
+            </span>
+          ) : (
+            <>
+              Инструкция «{deletingInstruction?.title}» будет удалена без
+              возможности восстановления.
+            </>
+          )
+        }
+        confirmDisabled={
+          deletingInstruction !== null &&
+          getWastesByInstruction(deletingInstruction.id).length > 0
+        }
+        onConfirm={() => {
+          if (deletingInstruction) {
+            deleteInstruction(deletingInstruction.id);
+          }
+        }}
       />
     </div>
   );

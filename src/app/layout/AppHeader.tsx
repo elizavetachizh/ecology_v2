@@ -1,26 +1,40 @@
 import { useState } from "react";
 import { Bell, ChevronsUpDown, PanelLeft } from "lucide-react";
 import { ORGANIZATIONS } from "../../shared/config/organizations";
-import { Button } from "../../shared/ui/button";
-import { Select } from "../../shared/ui/select";
+import { Button } from "../../shared/ui";
+import { Select } from "../../shared/ui";
 
 type AppHeaderProps = {
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
+  onOpenMobileSidebar: () => void;
 };
 
 export default function AppHeader({
   sidebarCollapsed,
   onToggleSidebar,
+  onOpenMobileSidebar,
 }: AppHeaderProps) {
   const [organizationId, setOrganizationId] = useState(ORGANIZATIONS[0].id);
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4">
+    <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-2 sm:px-4">
       <Button
         type="button"
         variant="ghost"
         size="icon"
+        className="md:hidden"
+        aria-label="Открыть меню"
+        onClick={onOpenMobileSidebar}
+      >
+        <PanelLeft />
+      </Button>
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="hidden md:inline-flex"
         aria-label={sidebarCollapsed ? "Развернуть меню" : "Свернуть меню"}
         aria-pressed={sidebarCollapsed}
         onClick={onToggleSidebar}

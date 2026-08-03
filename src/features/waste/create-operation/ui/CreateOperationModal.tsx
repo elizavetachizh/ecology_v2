@@ -79,7 +79,7 @@ export function CreateOperationModal({
       return false;
     }
 
-    if (currentStep === 2 && !form.wasteId) {
+    if (currentStep === 2 && (!form.wasteId || !selectedWaste)) {
       setError("Выберите отход");
       return false;
     }

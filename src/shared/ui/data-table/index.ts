@@ -2,6 +2,12 @@ export { DataTable, type DataTableProps } from "./DataTable";
 export { DataTableColumnHeader } from "./DataTableColumnHeader";
 export { DataTableEmpty } from "./DataTableEmpty";
 export { DataTableExpandCell } from "./DataTableExpandCell";
+export {
+  DataTableRowAction,
+  DataTableRowActions,
+  type DataTableRowActionProps,
+  type DataTableRowActionsProps,
+} from "./DataTableRowActions";
 export type {
   ColumnDef,
   ExpandedState,

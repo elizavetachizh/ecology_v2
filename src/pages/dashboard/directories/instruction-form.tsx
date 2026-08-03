@@ -6,6 +6,7 @@ import {
   AlertTitle,
   Button,
   Input,
+  PageContextBar,
 } from "../../../shared/ui";
 import {
   createInstruction,
@@ -13,7 +14,7 @@ import {
   findInstruction,
   updateInstruction,
   type InstructionFormValues,
-} from "./model/instructions.store";
+} from "../../../entities/regulatory-document";
 
 function FieldLabel({
   htmlFor,
@@ -134,15 +135,12 @@ export function InstructionFormPage({
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {savedId ? "Инструкция" : "Новая инструкция"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Документ эколога — отправная точка заполнения справочников.
-        </p>
-      </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <PageContextBar
+        eyebrow="Справочники / Инструкции"
+        title={savedId ? form.title || "Инструкция" : "Новая инструкция"}
+        description="Документ эколога — отправная точка заполнения справочников."
+      />
 
       {!savedId ? (
         <Alert variant="info">
@@ -178,10 +176,10 @@ export function InstructionFormPage({
 
       <form
         onSubmit={handleSave}
-        className="grid gap-4 rounded-xl border border-border bg-card p-4"
+        className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2"
       >
         {error ? (
-          <Alert variant="error">
+          <Alert variant="error" className="md:col-span-2">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
@@ -228,7 +226,7 @@ export function InstructionFormPage({
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-1 md:col-span-2">
           <Button type="submit" disabled={pending}>
             {pending ? "Сохранение…" : "Сохранить"}
           </Button>

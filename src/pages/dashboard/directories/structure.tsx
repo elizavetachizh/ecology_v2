@@ -1,15 +1,24 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { Button, DataTable, type ExpandedState } from "../../../shared/ui";
+import {
+  Button,
+  ConfirmDialog,
+  DataTable,
+  type ExpandedState,
+} from "../../../shared/ui";
 import { withActionRows, type StructureNode } from "./model/structure.mock";
-import { getStructureTree, subscribeStructure } from "./model/structure.store";
+import {
+  deleteStructureNode,
+  getStructureTree,
+  subscribeStructure,
+} from "./model/structure.store";
+import { removeBindingsForStructureNodes } from "./model/pod9-wastes.store";
 import { createStructureColumns } from "./ui/structure-columns";
 
 function mergeExpanded(
@@ -36,20 +45,17 @@ export function DirectoriesStructurePage() {
     getStructureTree,
   );
 
-  const [expanded, setExpanded] = useState<ExpandedState>({
-    "unit-1": true,
-    "unit-1-1": true,
-  });
-  const [focusId, setFocusId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (search.focusId || search.expandId) {
-      setFocusId(search.focusId ?? null);
-      setExpanded((prev) =>
-        mergeExpanded(prev, [search.expandId, search.focusId]),
-      );
-    }
-  }, [search.focusId, search.expandId]);
+  const [expanded, setExpanded] = useState<ExpandedState>(() =>
+    mergeExpanded(
+      {
+        "unit-1": true,
+        "unit-1-1": true,
+      },
+      [search.expandId, search.focusId],
+    ),
+  );
+  const [deletingNode, setDeletingNode] = useState<StructureNode | null>(null);
+  const focusId = search.focusId ?? null;
 
   const data = useMemo(() => withActionRows(structure), [structure]);
 
@@ -67,6 +73,7 @@ export function DirectoriesStructurePage() {
     () =>
       createStructureColumns({
         onAddUnit: (parentId) => openCreateUnit(parentId),
+        onDeleteNode: setDeletingNode,
       }),
     [openCreateUnit],
   );
@@ -112,6 +119,36 @@ export function DirectoriesStructurePage() {
             return "bg-info-muted/60 ring-1 ring-inset ring-info/30";
           }
           return undefined;
+        }}
+      />
+
+      <ConfirmDialog
+        open={deletingNode !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingNode(null);
+        }}
+        title={
+          deletingNode?.type === "unit"
+            ? "Удалить структурную единицу?"
+            : "Удалить журнал ПОД-9?"
+        }
+        description={
+          deletingNode?.type === "unit" ? (
+            <>
+              Единица «{deletingNode.name}», все дочерние единицы, журналы
+              ПОД-9 и связанные привязки отходов будут удалены.
+            </>
+          ) : (
+            <>
+              Журнал «{deletingNode?.name}» и его привязки к отходам будут
+              удалены. Карточки отходов сохранятся в справочнике.
+            </>
+          )
+        }
+        onConfirm={() => {
+          if (!deletingNode) return;
+          const removedIds = deleteStructureNode(deletingNode.id);
+          removeBindingsForStructureNodes(removedIds);
         }}
       />
     </div>

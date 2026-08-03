@@ -25,14 +25,6 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/structure",
   },
   {
-    id: "departments",
-    title: "Подразделения",
-    description: "Список подразделений организации",
-    count: 3,
-    fillStatus: "ready",
-    to: "/directories/departments",
-  },
-  {
     id: "wastes",
     title: "Отходы",
     description:

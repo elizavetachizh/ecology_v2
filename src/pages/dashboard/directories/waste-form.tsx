@@ -1,13 +1,7 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  Input,
-  Select,
-} from "../../../shared/ui";
+import {type FormEvent, type ReactNode, useEffect, useState, useSyncExternalStore,} from "react";
+import {Link, useNavigate, useParams, useSearch,} from "@tanstack/react-router";
+import {getInstructions, subscribeInstructions,} from "../../../entities/regulatory-document";
+import {Alert, AlertDescription, AlertTitle, Button, Input, PageContextBar, Select,} from "../../../shared/ui";
 import {
   createWaste,
   emptyWasteForm,
@@ -35,11 +29,27 @@ function FieldLabel({
 type WasteCatalogFormProps = {
   mode: "create" | "edit";
   wasteId?: string;
+  initialInstructionId?: string;
 };
 
-export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
+export function WasteCatalogForm({
+  mode,
+  wasteId,
+  initialInstructionId,
+}: WasteCatalogFormProps) {
   const navigate = useNavigate();
+  const instructions = useSyncExternalStore(
+    subscribeInstructions,
+    getInstructions,
+    getInstructions,
+  );
   const existing = mode === "edit" && wasteId ? findWaste(wasteId) : null;
+  const [instructionId, setInstructionId] = useState(
+    existing?.instructionId ??
+      initialInstructionId ??
+      instructions[0]?.id ??
+      "",
+  );
 
   const [form, setForm] = useState<WasteFormValues>(() =>
     existing
@@ -73,6 +83,10 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
       setError("Укажите источник образования");
       return;
     }
+    if (!instructionId) {
+      setError("Выберите инструкцию по обращению с отходами");
+      return;
+    }
 
     setPending(true);
     try {
@@ -85,11 +99,11 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
         return;
       }
 
-      const created = createWaste(form);
+      const created = createWaste(form, instructionId);
       void navigate({
         to: "/directories/wastes/$wasteId",
         params: { wasteId: created.id },
-        search: { created: true },
+        search: { created: true, instructionId },
       });
     } catch {
       setError("Не удалось сохранить отход");
@@ -104,23 +118,43 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
           <AlertDescription>Отход не найден.</AlertDescription>
         </Alert>
         <Button asChild variant="outline" size="sm">
-          <Link to="/directories/wastes">К отходам</Link>
+          <Link
+            to="/directories/wastes"
+            search={{ instructionId: instructionId || undefined }}
+          >
+            К отходам
+          </Link>
         </Button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {mode === "create" ? "Новый отход" : "Редактирование отхода"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Создайте отход в справочнике. После сохранения привяжите отход к
-          структурным единицам и журналам ПОД-9.
-        </p>
-      </div>
+    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl space-y-6">
+      <PageContextBar
+        eyebrow="Справочники / Отходы"
+        title={mode === "create" ? "Новый отход" : form.name || "Отход"}
+        description="После сохранения отход можно привязать к структурным единицам и журналам ПОД-9."
+        actions={
+          <Select
+            aria-label="Инструкция для отхода"
+            value={instructionId}
+            onChange={(event) => setInstructionId(event.target.value)}
+            disabled={mode === "edit" || instructions.length === 0}
+            className="w-80 max-w-full"
+          >
+            {instructions.length === 0 ? (
+              <option value="">Сначала создайте инструкцию</option>
+            ) : (
+              instructions.map((instruction) => (
+                <option key={instruction.id} value={instruction.id}>
+                  {instruction.number} — {instruction.title}
+                </option>
+              ))
+            )}
+          </Select>
+        }
+      />
 
       <Alert variant="info">
         <AlertTitle>Два шага</AlertTitle>
@@ -131,9 +165,9 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-4 rounded-xl border border-border bg-card p-4">
+      <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         {error ? (
-          <Alert variant="error">
+          <Alert variant="error" className="md:col-span-2">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
@@ -199,13 +233,22 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
         </Button>
         {mode === "edit" && wasteId ? (
           <Button asChild type="button" variant="outline" disabled={pending}>
-            <Link to="/directories/wastes/$wasteId" params={{ wasteId }}>
+            <Link
+              to="/directories/wastes/$wasteId"
+              params={{ wasteId }}
+              search={{ instructionId }}
+            >
               Отмена
             </Link>
           </Button>
         ) : (
           <Button asChild type="button" variant="outline" disabled={pending}>
-            <Link to="/directories/wastes">Отмена</Link>
+            <Link
+              to="/directories/wastes"
+              search={{ instructionId: instructionId || undefined }}
+            >
+              Отмена
+            </Link>
           </Button>
         )}
       </div>
@@ -214,7 +257,13 @@ export function WasteCatalogForm({ mode, wasteId }: WasteCatalogFormProps) {
 }
 
 export function CreateWastePage() {
-  return <WasteCatalogForm mode="create" />;
+  const search = useSearch({ from: "/directories/wastes/new" });
+  return (
+    <WasteCatalogForm
+      mode="create"
+      initialInstructionId={search.instructionId}
+    />
+  );
 }
 
 export function EditWastePage() {

@@ -5,6 +5,7 @@ import {
   AlertDescription,
   Button,
   Input,
+  PageContextBar,
   Select,
 } from "../../../../shared/ui";
 import {
@@ -82,6 +83,7 @@ export function CreatePod9Form({
       await navigate({
         to: "/directories/structure/pod9/$pod9Id",
         params: { pod9Id: result.id },
+        search: { instructionId: undefined },
       });
     } catch {
       setError("Не удалось создать журнал ПОД-9");
@@ -90,20 +92,21 @@ export function CreatePod9Form({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Новый журнал ПОД-9
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Структурная единица:{" "}
-          <span className="font-medium text-foreground">{parentLabel}</span>
-        </p>
-      </div>
+    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl space-y-6">
+      <PageContextBar
+        eyebrow="Структура организации / ПОД-9"
+        title="Новый журнал ПОД-9"
+        description={
+          <>
+            Структурная единица:{" "}
+            <span className="font-medium text-foreground">{parentLabel}</span>
+          </>
+        }
+      />
 
-      <div className="grid gap-4 rounded-xl border border-border bg-card p-4">
+      <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         {error ? (
-          <Alert variant="error">
+          <Alert variant="error" className="md:col-span-2">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
