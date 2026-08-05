@@ -19,7 +19,7 @@ import {
   deleteInstruction,
   type Instruction,
 } from "../../../entities/regulatory-document";
-import { getWastesByInstruction } from "./model/pod9-wastes.store";
+import { getWastesByInstruction } from "../../../entities/waste/directory";
 
 export function InstructionsPage() {
   const [deletingInstruction, setDeletingInstruction] =

@@ -12,7 +12,7 @@ import {
   ModalTitle,
   Select,
 } from "../../../../shared/ui";
-import { getAllWastes } from "../../../../pages/dashboard/directories/model/pod9-wastes.store";
+import { getAllWastes } from "../../../../entities/waste/directory";
 import { listStructureUnits } from "../../../../pages/dashboard/directories/model/structure.store";
 import {
   CREATE_OPERATION_STEPS,
@@ -206,10 +206,6 @@ export function CreateOperationModal({
                 <div>
                   <span className="text-muted-foreground">Ед. изм.: </span>
                   {selectedWaste.unit}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Источник: </span>
-                  {selectedWaste.source}
                 </div>
               </div>
             ) : null}

@@ -3,6 +3,18 @@ import { Link } from "@tanstack/react-router";
 import { Plus, Unlink } from "lucide-react";
 import { findInstruction } from "../../../../entities/regulatory-document";
 import {
+  addPod9Waste,
+  bindExistingWasteToPod9,
+  emptyPod9WasteForm,
+  getWastesByInstruction,
+  HAZARD_CLASS_OPTIONS,
+  removeWasteBinding,
+  WASTE_UNIT_OPTIONS,
+  type Pod9Waste,
+  type Pod9WasteFormValues,
+} from "../../../../entities/waste/directory";
+import { FormationSourceSelect } from "../../../../features/waste/select-formation-source";
+import {
   Alert,
   AlertDescription,
   AlertTitle,
@@ -24,18 +36,6 @@ import {
   TabsTrigger,
   type ColumnDef,
 } from "../../../../shared/ui";
-import {
-  addPod9Waste,
-  bindExistingWasteToPod9,
-  emptyPod9WasteForm,
-  getPod9Wastes,
-  getWastesByInstruction,
-  HAZARD_CLASS_OPTIONS,
-  removeWasteBinding,
-  WASTE_UNIT_OPTIONS,
-  type Pod9Waste,
-  type Pod9WasteFormValues,
-} from "../model/pod9-wastes.store";
 
 type Pod9WastesSectionProps = {
   pod9Id: string;
@@ -67,16 +67,13 @@ export function Pod9WastesSection({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"bind" | "create">("bind");
   const [selectedWasteId, setSelectedWasteId] = useState("");
+  const [sourceId, setSourceId] = useState("");
   const [form, setForm] = useState<Pod9WasteFormValues>(emptyPod9WasteForm);
   const [error, setError] = useState<string | null>(null);
   const [detachingWaste, setDetachingWaste] = useState<Pod9Waste | null>(null);
   const instruction = findInstruction(instructionId);
 
   const catalog = getWastesByInstruction(instructionId);
-  const alreadyBound = new Set(
-    getPod9Wastes(pod9Id, instructionId).map((item) => item.id),
-  );
-  const available = catalog.filter((item) => !alreadyBound.has(item.id));
 
   const columns = useMemo<ColumnDef<Pod9Waste>[]>(
     () => [
@@ -105,9 +102,9 @@ export function Pod9WastesSection({
         cell: ({ row }) => row.original.unit,
       },
       {
-        accessorKey: "source",
+        accessorKey: "sourceName",
         header: "Источник образования",
-        cell: ({ row }) => row.original.source,
+        cell: ({ row }) => row.original.sourceName,
       },
       {
         id: "actions",
@@ -139,8 +136,9 @@ export function Pod9WastesSection({
   );
 
   const reset = () => {
-    setMode(available.length > 0 ? "bind" : "create");
+    setMode(catalog.length > 0 ? "bind" : "create");
     setSelectedWasteId("");
+    setSourceId("");
     setForm(emptyPod9WasteForm());
     setError(null);
   };
@@ -148,7 +146,7 @@ export function Pod9WastesSection({
   const handleOpenChange = (next: boolean) => {
     if (!next) reset();
     else {
-      setMode(available.length > 0 ? "bind" : "create");
+      setMode(catalog.length > 0 ? "bind" : "create");
       setError(null);
     }
     setOpen(next);
@@ -165,14 +163,25 @@ export function Pod9WastesSection({
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
+    if (!sourceId) {
+      setError("Выберите или создайте источник образования");
+      return;
+    }
+
     if (mode === "bind") {
       if (!selectedWasteId) {
         setError("Выберите отход из справочника");
         return;
       }
-      const binding = bindExistingWasteToPod9(selectedWasteId, pod9Id);
+      const binding = bindExistingWasteToPod9(
+        selectedWasteId,
+        pod9Id,
+        sourceId,
+      );
       if (!binding) {
-        setError("Не удалось привязать отход");
+        setError(
+          "Не удалось привязать отход. Возможно, такая привязка уже есть.",
+        );
         return;
       }
       onChanged();
@@ -184,12 +193,8 @@ export function Pod9WastesSection({
       setError("Укажите наименование отхода");
       return;
     }
-    if (!form.source.trim()) {
-      setError("Укажите источник образования");
-      return;
-    }
 
-    const created = addPod9Waste(pod9Id, instructionId, form);
+    const created = addPod9Waste(pod9Id, instructionId, form, sourceId);
     if (!created) {
       setError("Не удалось создать и привязать отход");
       return;
@@ -204,8 +209,8 @@ export function Pod9WastesSection({
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">Отходы</h2>
           <p className="text-sm text-muted-foreground">
-            К журналу привязываются отходы из справочника. Один отход может
-            учитываться в нескольких ПОД-9.
+            К журналу привязываются отходы из справочника с указанием источника
+            образования. Один отход может учитываться с разными источниками.
           </p>
           <span className="inline-flex max-w-full rounded-md bg-info-muted px-2 py-1 text-xs font-medium text-info">
             Инструкция: {instruction?.number ?? "—"} —{" "}
@@ -232,8 +237,8 @@ export function Pod9WastesSection({
             <ModalHeader>
               <ModalTitle>Добавление отхода в журнал ПОД-9</ModalTitle>
               <ModalDescription>
-                Выберите существующий вид отхода либо создайте новый вид в
-                справочнике.
+                Укажите источник образования и выберите существующий отход либо
+                создайте новый вид в справочнике.
               </ModalDescription>
               <span className="text-xs text-muted-foreground">
                 Отходы фильтруются по инструкции:{" "}
@@ -259,7 +264,7 @@ export function Pod9WastesSection({
                 }}
               >
                 <TabsList className="grid h-auto w-full grid-cols-2">
-                  <TabsTrigger value="bind" disabled={available.length === 0}>
+                  <TabsTrigger value="bind" disabled={catalog.length === 0}>
                     Выбрать существующий
                   </TabsTrigger>
                   <TabsTrigger value="create">Создать новый вид</TabsTrigger>
@@ -274,21 +279,19 @@ export function Pod9WastesSection({
                 </AlertTitle>
                 <AlertDescription>
                   {mode === "bind"
-                    ? "К этому ПОД-9 будет привязан существующий вид отхода из справочника выбранной инструкции."
-                    : "Новый вид появится в общем справочнике отходов выбранной инструкции и сразу будет привязан к этому ПОД-9."}
+                    ? "К этому ПОД-9 будет привязан существующий вид отхода с выбранным источником образования."
+                    : "Новый вид появится в справочнике отходов и сразу будет привязан к этому ПОД-9 с указанным источником."}
                 </AlertDescription>
               </Alert>
 
               {mode === "bind" ? (
-                available.length === 0 ? (
+                catalog.length === 0 ? (
                   <Alert variant="info">
-                    <AlertTitle>
-                      Справочник пуст или всё уже привязано
-                    </AlertTitle>
+                    <AlertTitle>Справочник пуст</AlertTitle>
                     <AlertDescription className="space-y-2">
                       <p>
                         Создайте отход в справочнике либо воспользуйтесь
-                        «Создать и привязать».
+                        «Создать новый вид».
                       </p>
                       <Button asChild size="sm" variant="outline">
                         <Link
@@ -312,7 +315,7 @@ export function Pod9WastesSection({
                       }}
                     >
                       <option value="">Выберите отход…</option>
-                      {available.map((item) => (
+                      {catalog.map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.name} (кл. {item.hazardClass})
                         </option>
@@ -363,20 +366,18 @@ export function Pod9WastesSection({
                       ))}
                     </Select>
                   </div>
-                  <div className="grid gap-1.5">
-                    <FieldLabel htmlFor="waste-source">
-                      Источник образования
-                    </FieldLabel>
-                    <Input
-                      id="waste-source"
-                      value={form.source}
-                      onChange={(e) => update("source", e.target.value)}
-                    />
-                  </div>
                 </>
               )}
             </div>
-
+            <div className="py-2">
+              <FormationSourceSelect
+                value={sourceId}
+                onChange={(next) => {
+                  setSourceId(next);
+                  setError(null);
+                }}
+              />
+            </div>
             <ModalFooter>
               <Button
                 type="button"
@@ -387,7 +388,7 @@ export function Pod9WastesSection({
               </Button>
               <Button
                 type="submit"
-                disabled={mode === "bind" && available.length === 0}
+                disabled={mode === "bind" && catalog.length === 0}
               >
                 {mode === "bind" ? "Привязать" : "Создать и привязать"}
               </Button>
@@ -405,8 +406,9 @@ export function Pod9WastesSection({
         confirmLabel="Отвязать"
         description={
           <>
-            Отход «{detachingWaste?.name}» будет удалён только из этого журнала
-            ПОД-9. Карточка вида отхода сохранится в справочнике.
+            Отход «{detachingWaste?.name}» ({detachingWaste?.sourceName}) будет
+            удалён только из этого журнала ПОД-9. Карточка вида отхода
+            сохранится в справочнике.
           </>
         }
         onConfirm={() => {

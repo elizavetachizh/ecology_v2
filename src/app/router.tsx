@@ -1,8 +1,9 @@
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import type { AuthContextValue } from "../shared/auth/auth.types";
 import { AppLayout } from "./layout/AppLayout";
 import { HomePage } from "../pages/dashboard/HomePage";
 import { WasteOperationsPage } from "../pages/dashboard/waste/operations";
@@ -26,9 +27,19 @@ import {
   EditWastePage,
 } from "../pages/dashboard/directories/waste-form";
 import { WasteDetailPage } from "../pages/dashboard/directories/waste-detail";
+import { FormationSourcesPage } from "../pages/dashboard/directories/formation-sources";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
+import { ForbiddenPage } from "../pages/system/ForbiddenPage";
+import { NotFoundPage } from "../pages/system/NotFoundPage";
 
-const rootRoute = createRootRoute({
+export type RouterContext = {
+  auth: AuthContextValue;
+};
+
+const rootRoute = createRootRouteWithContext<RouterContext>()({
+  beforeLoad: async ({ context }) => {
+    if (!context.auth.authenticated) await context.auth.login();
+  },
   component: AppLayout,
 });
 
@@ -163,6 +174,12 @@ const directoriesLimitsRoute = createRoute({
   component: () => <DirectoryStubPage title="Лимиты накопления" />,
 });
 
+const directoriesFormationSourcesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/formation-sources",
+  component: FormationSourcesPage,
+});
+
 const directoriesNormsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/norms",
@@ -193,10 +210,16 @@ const pod9ReportRoute = createRoute({
   component: Pod9ReportPage,
 });
 
+const forbiddenRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/forbidden",
+  component: ForbiddenPage,
+});
+
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "$",
-  component: HomePage,
+  component: NotFoundPage,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -212,18 +235,24 @@ const routeTree = rootRoute.addChildren([
   directoriesCreateWasteRoute,
   directoriesWasteEditRoute,
   directoriesWasteDetailRoute,
+  directoriesFormationSourcesRoute,
   directoriesLimitsRoute,
   directoriesNormsRoute,
   directoriesInstructionsRoute,
   directoriesCreateInstructionRoute,
   directoriesEditInstructionRoute,
   pod9ReportRoute,
+  forbiddenRoute,
   catchAllRoute,
 ]);
+
 
 export const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  context: {
+    auth: undefined as unknown as AuthContextValue,
+  },
 });
 
 declare module "@tanstack/react-router" {

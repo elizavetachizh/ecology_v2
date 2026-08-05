@@ -1,8 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-
-// 1. Create a client instance
-const queryClient = new QueryClient();
+import { queryClient } from "../shared/lib/query-client";
+import { AuthProvider } from "./providers/auth/AuthProvider";
+import { TenantProvider } from "./providers/tenant/TenantProvider";
+import {
+  clearSessionState,
+  clearTenantState,
+} from "../shared/auth/cleanup-session";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -10,6 +14,12 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider onSessionInvalidated={clearSessionState}>
+        <TenantProvider onTenantChange={clearTenantState}>
+          {children}
+        </TenantProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

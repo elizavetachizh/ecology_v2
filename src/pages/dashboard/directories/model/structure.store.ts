@@ -21,6 +21,11 @@ export function subscribeStructure(listener: Listener) {
   return () => listeners.delete(listener);
 }
 
+export function resetStructureStore() {
+  tree = structuredClone(MOCK_STRUCTURE);
+  emit();
+}
+
 export function findStructureNode(
   nodes: StructureNode[],
   id: string,

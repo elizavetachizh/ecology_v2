@@ -34,6 +34,14 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/wastes",
   },
   {
+    id: "formation-sources",
+    title: "Источники образования",
+    description: "Источники образования отходов предприятия",
+    count: 3,
+    fillStatus: "partial",
+    to: "/directories/formation-sources",
+  },
+  {
     id: "limits",
     title: "Лимиты накопления",
     description: "Лимиты по местам хранения",

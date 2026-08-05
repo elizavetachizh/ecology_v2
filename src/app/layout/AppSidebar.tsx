@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   ChevronRight,
-  ChevronsUpDown,
   GalleryVerticalEnd,
+  LogOut,
   X,
 } from "lucide-react";
 import {
@@ -11,6 +11,8 @@ import {
   type NavGroup,
 } from "../../shared/config/navigation";
 import { cn } from "../../shared/lib/cn";
+import { useTenant } from "../providers/tenant/tenant-context";
+import { useLogout } from "../../features/auth/logout";
 
 function isActivePath(pathname: string, to?: string) {
   if (!to) return false;
@@ -149,6 +151,10 @@ function SidebarPanel({
   onClose,
   className,
 }: SidebarPanelProps) {
+  const { user } = useTenant();
+  const { logout, isLoggingOut } = useLogout();
+  const initials = user.username.slice(0, 2).toUpperCase();
+
   return (
     <aside
       className={cn(
@@ -211,7 +217,10 @@ function SidebarPanel({
       <div className="border-t border-sidebar-border p-2">
         <button
           type="button"
-          title={collapsed ? "shadcn" : undefined}
+          title={collapsed ? `Выйти: ${user.username}` : undefined}
+          aria-label={`Выйти из учетной записи ${user.username}`}
+          disabled={isLoggingOut}
+          onClick={() => void logout()}
           className={cn(
             "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
             collapsed && "md:justify-center md:px-0",
@@ -220,19 +229,19 @@ function SidebarPanel({
           )}
         >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-medium text-white">
-            sh
+            {initials}
           </span>
           <span
             className={cn("min-w-0 flex-1", collapsed && "md:hidden")}
           >
             <span className="block truncate text-sm font-medium leading-tight">
-              shadcn
+              {user.username}
             </span>
             <span className="block truncate text-xs text-muted-foreground">
-              m@example.com
+              {user.email ?? user.realm}
             </span>
           </span>
-          <ChevronsUpDown
+          <LogOut
             className={cn(
               "size-4 shrink-0 text-muted-foreground",
               collapsed && "md:hidden",

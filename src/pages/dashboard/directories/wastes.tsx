@@ -22,7 +22,7 @@ import {
   getWastesByInstruction,
   subscribeWastes,
   type DirectoryWaste,
-} from "./model/pod9-wastes.store";
+} from "../../../entities/waste/directory";
 import { getStructureTree, subscribeStructure } from "./model/structure.store";
 
 export function WastesDirectoryPage() {
@@ -78,11 +78,6 @@ export function WastesDirectoryPage() {
         cell: ({ row }) => row.original.unit,
       },
       {
-        accessorKey: "source",
-        header: "Источник образования",
-        cell: ({ row }) => row.original.source,
-      },
-      {
         id: "bindings",
         header: "Где образуется / ПОД-9",
         cell: ({ row }) => {
@@ -101,18 +96,19 @@ export function WastesDirectoryPage() {
           return (
             <div className="flex max-w-md flex-wrap gap-1.5">
               {bindings.map((binding) => {
-                const { unitLabel, pod9Label } = formatBindingLabels(binding);
+                const { unitLabel, pod9Label, sourceLabel } =
+                  formatBindingLabels(binding);
                 return (
                   <span
                     key={binding.id}
                     className="inline-flex max-w-full flex-col rounded-md border border-border bg-muted/40 px-2 py-1 text-xs leading-tight"
-                    title={`${unitLabel} → ${pod9Label}`}
+                    title={`${sourceLabel} · ${unitLabel} → ${pod9Label}`}
                   >
                     <span className="truncate font-medium text-foreground">
-                      {unitLabel}
+                      {sourceLabel}
                     </span>
                     <span className="truncate text-muted-foreground">
-                      → {pod9Label}
+                      {unitLabel} → {pod9Label}
                     </span>
                   </span>
                 );

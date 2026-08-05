@@ -1,66 +1,17 @@
-import { DEFAULT_INSTRUCTION_ID } from "../../../../entities/regulatory-document";
+import { DEFAULT_INSTRUCTION_ID } from "../../../regulatory-document";
+import { findFormationSource } from "../../formation-source";
+// TODO: перенести structure в entities — убрать зависимость entity → pages
 import {
   findParentId,
   findStructureNode,
   getStructureTree,
-} from "./structure.store";
-
-/** Карточка отхода в справочнике (без привязок) */
-export type DirectoryWaste = {
-  id: string;
-  instructionId: string;
-  name: string;
-  hazardClass: string;
-  unit: string;
-  source: string;
-};
-
-/** Привязка: один отход → много единиц и ПОД-9 */
-export type WasteBinding = {
-  id: string;
-  instructionId: string;
-  wasteId: string;
-  unitId: string;
-  pod9Id: string;
-};
-
-export type WasteFormValues = {
-  name: string;
-  hazardClass: string;
-  unit: string;
-  source: string;
-};
-
-/** @deprecated alias for POD-9 section form */
-export type Pod9WasteFormValues = WasteFormValues;
-
-/** Строка таблицы на карточке ПОД-9 */
-export type Pod9Waste = DirectoryWaste & {
-  bindingId: string;
-  unitId: string;
-  pod9Id: string;
-};
-
-export const HAZARD_CLASS_OPTIONS = [
-  "I",
-  "II",
-  "III",
-  "IV",
-  "V",
-] as const;
-
-export const WASTE_UNIT_OPTIONS = ["т", "кг", "м³", "л", "шт"] as const;
-
-export function emptyWasteForm(): WasteFormValues {
-  return {
-    name: "",
-    hazardClass: "IV",
-    unit: "т",
-    source: "",
-  };
-}
-
-export const emptyPod9WasteForm = emptyWasteForm;
+} from "../../../../pages/dashboard/directories/model/structure.store";
+import type {
+  DirectoryWaste,
+  Pod9Waste,
+  WasteBinding,
+  WasteFormValues,
+} from "./waste.types";
 
 type Listener = () => void;
 
@@ -68,26 +19,29 @@ const MOCK_WASTES: DirectoryWaste[] = [
   {
     id: "w-1",
     instructionId: DEFAULT_INSTRUCTION_ID,
+    classifierId: "1",
+    code: 9120400,
     name: "Мусор от офисных и бытовых помещений организаций",
     hazardClass: "IV",
     unit: "т",
-    source: "Административное здание",
   },
   {
     id: "w-2",
     instructionId: DEFAULT_INSTRUCTION_ID,
+    classifierId: "2",
+    code: 1870600,
     name: "Отходы бумаги и картона от канцелярской деятельности",
     hazardClass: "V",
     unit: "т",
-    source: "Офисные помещения",
   },
   {
     id: "w-3",
     instructionId: DEFAULT_INSTRUCTION_ID,
+    classifierId: "3",
+    code: 5470100,
     name: "Обтирочный материал, загрязненный нефтью или нефтепродуктами",
     hazardClass: "III",
     unit: "т",
-    source: "Производственный корпус А",
   },
 ];
 
@@ -98,6 +52,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
     wasteId: "w-1",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
+    sourceId: "src-1",
   },
   {
     id: "wb-1b",
@@ -105,6 +60,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
     wasteId: "w-1",
     unitId: "unit-1-2",
     pod9Id: "pod9-3",
+    sourceId: "src-1",
   },
   {
     id: "wb-2",
@@ -112,6 +68,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
     wasteId: "w-2",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
+    sourceId: "src-2",
   },
   {
     id: "wb-3",
@@ -119,6 +76,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
     wasteId: "w-3",
     unitId: "unit-2-1",
     pod9Id: "pod9-4",
+    sourceId: "src-3",
   },
 ];
 
@@ -176,11 +134,14 @@ export function getPod9Wastes(
     .map((binding) => {
       const waste = findWaste(binding.wasteId);
       if (!waste) return null;
+      const source = findFormationSource(binding.sourceId);
       return {
         ...waste,
         bindingId: binding.id,
         unitId: binding.unitId,
         pod9Id: binding.pod9Id,
+        sourceId: binding.sourceId,
+        sourceName: source?.name ?? "—",
       };
     })
     .filter((item): item is Pod9Waste => item !== null);
@@ -189,6 +150,12 @@ export function getPod9Wastes(
 export function subscribeWastes(listener: Listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+export function resetWastesStore() {
+  wastes = [...MOCK_WASTES];
+  bindings = [...MOCK_BINDINGS];
+  emit();
 }
 
 export const subscribePod9Wastes = subscribeWastes;
@@ -212,10 +179,11 @@ export function createWaste(
   const waste: DirectoryWaste = {
     id: `w-${crypto.randomUUID().slice(0, 8)}`,
     instructionId,
+    classifierId: values.classifierId.trim(),
+    code: values.code,
     name: values.name.trim(),
     hazardClass: values.hazardClass.trim(),
     unit: values.unit.trim(),
-    source: values.source.trim(),
   };
 
   wastes = [waste, ...wastes];
@@ -232,10 +200,11 @@ export function updateWaste(
 
   const next: DirectoryWaste = {
     ...wastes[index]!,
+    classifierId: values.classifierId.trim(),
+    code: values.code,
     name: values.name.trim(),
     hazardClass: values.hazardClass.trim(),
     unit: values.unit.trim(),
-    source: values.source.trim(),
   };
 
   wastes = [...wastes.slice(0, index), next, ...wastes.slice(index + 1)];
@@ -256,14 +225,12 @@ export function addWasteBinding(input: {
   wasteId: string;
   unitId: string;
   pod9Id: string;
+  sourceId: string;
 }): WasteBinding | null {
   const waste = findWaste(input.wasteId);
   const pod9 = findStructureNode(getStructureTree(), input.pod9Id);
-  if (
-    !waste ||
-    !pod9 ||
-    pod9.type !== "pod9"
-  ) {
+  const source = findFormationSource(input.sourceId);
+  if (!waste || !pod9 || pod9.type !== "pod9" || !source) {
     return null;
   }
 
@@ -271,7 +238,8 @@ export function addWasteBinding(input: {
     (item) =>
       item.wasteId === input.wasteId &&
       item.unitId === input.unitId &&
-      item.pod9Id === input.pod9Id,
+      item.pod9Id === input.pod9Id &&
+      item.sourceId === input.sourceId,
   );
   if (duplicate) return null;
 
@@ -281,6 +249,7 @@ export function addWasteBinding(input: {
     wasteId: input.wasteId,
     unitId: input.unitId,
     pod9Id: input.pod9Id,
+    sourceId: input.sourceId,
   };
 
   bindings = [...bindings, binding];
@@ -311,14 +280,11 @@ export function addPod9Waste(
   pod9Id: string,
   instructionId: string,
   values: WasteFormValues,
+  sourceId: string,
 ): Pod9Waste | null {
   const unitId = findParentId(getStructureTree(), pod9Id);
   const pod9 = findStructureNode(getStructureTree(), pod9Id);
-  if (
-    typeof unitId !== "string" ||
-    !pod9 ||
-    pod9.type !== "pod9"
-  ) {
+  if (typeof unitId !== "string" || !pod9 || pod9.type !== "pod9") {
     return null;
   }
 
@@ -327,41 +293,47 @@ export function addPod9Waste(
     wasteId: waste.id,
     unitId,
     pod9Id,
+    sourceId,
   });
   if (!binding) return null;
 
+  const source = findFormationSource(sourceId);
   return {
     ...waste,
     bindingId: binding.id,
     unitId,
     pod9Id,
+    sourceId,
+    sourceName: source?.name ?? "—",
   };
 }
 
-/** Привязать уже существующий отход к ПОД-9 */
+/** Привязать уже существующий отход к ПОД-9 с источником образования */
 export function bindExistingWasteToPod9(
   wasteId: string,
   pod9Id: string,
+  sourceId: string,
 ): WasteBinding | null {
   const unitId = findParentId(getStructureTree(), pod9Id);
   if (typeof unitId !== "string") return null;
-  return addWasteBinding({ wasteId, unitId, pod9Id });
+  return addWasteBinding({ wasteId, unitId, pod9Id, sourceId });
 }
 
 export function formatBindingLabels(binding: WasteBinding): {
   unitLabel: string;
   pod9Label: string;
+  sourceLabel: string;
 } {
   const tree = getStructureTree();
   const unit = findStructureNode(tree, binding.unitId);
   const pod9 = findStructureNode(tree, binding.pod9Id);
+  const source = findFormationSource(binding.sourceId);
 
   return {
-    unitLabel: unit
-      ? `${unit.name}${unit.code ? ` (${unit.code})` : ""}`
-      : "—",
+    unitLabel: unit ? `${unit.name}${unit.code ? ` (${unit.code})` : ""}` : "—",
     pod9Label: pod9
       ? `${pod9.name}${pod9.period ? ` · ${pod9.period}` : ""}`
       : "—",
+    sourceLabel: source?.name ?? "—",
   };
 }

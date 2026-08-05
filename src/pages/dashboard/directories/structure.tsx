@@ -18,7 +18,7 @@ import {
   getStructureTree,
   subscribeStructure,
 } from "./model/structure.store";
-import { removeBindingsForStructureNodes } from "./model/pod9-wastes.store";
+import { removeBindingsForStructureNodes } from "../../../entities/waste/directory";
 import { createStructureColumns } from "./ui/structure-columns";
 
 function mergeExpanded(

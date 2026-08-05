@@ -2,16 +2,14 @@ export { Button, buttonVariants, type ButtonProps } from "./button";
 export { Input, type InputProps } from "./input";
 export { Select, type SelectProps } from "./select";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
-export {
-  PageContextBar,
-  type PageContextBarProps,
-} from "./page-context-bar";
+export { PageContextBar, type PageContextBarProps } from "./page-context-bar";
 export { ConfirmDialog, type ConfirmDialogProps } from "./confirm-dialog";
 export {
   MultipleCombobox,
   type MultipleComboboxOption,
   type MultipleComboboxProps,
 } from "./multiple-combobox";
+export { AsyncCombobox, type AsyncComboboxProps } from "./async-combobox";
 export {
   Alert,
   AlertTitle,

@@ -17,6 +17,7 @@ import {
   emptyPod9Form,
   POD9_STATUS_OPTIONS,
 } from "../../../features/directories/create-structure-node";
+import { FormationSourceSelect } from "../../../features/waste/select-formation-source";
 import {
   Alert,
   AlertDescription,
@@ -39,7 +40,7 @@ import {
   WASTE_UNIT_OPTIONS,
   type WasteBinding,
   type WasteFormValues,
-} from "./model/pod9-wastes.store";
+} from "../../../entities/waste/directory";
 import {
   getStructureTree,
   getUnitPod9Children,
@@ -86,11 +87,11 @@ function BindingCard({
   binding: WasteBinding;
   onRemove: () => void;
 }) {
-  const { unitLabel, pod9Label } = formatBindingLabels(binding);
+  const { unitLabel, pod9Label, sourceLabel } = formatBindingLabels(binding);
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border bg-background p-3">
-      <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+      <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-3">
         <div>
           <div className="text-xs text-muted-foreground">
             Структурная единица
@@ -113,6 +114,12 @@ function BindingCard({
           >
             {pod9Label}
           </Link>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">
+            Источник образования
+          </div>
+          <div className="text-sm font-medium">{sourceLabel}</div>
         </div>
       </div>
       <Button
@@ -152,6 +159,7 @@ export function WasteDetailPage() {
 
   const [unitId, setUnitId] = useState("");
   const [pod9Id, setPod9Id] = useState("");
+  const [sourceId, setSourceId] = useState("");
   const [createPod9Mode, setCreatePod9Mode] = useState(false);
   const [pod9Draft, setPod9Draft] = useState<NewPod9Draft>(emptyNewPod9Draft);
   const [error, setError] = useState<string | null>(null);
@@ -161,10 +169,11 @@ export function WasteDetailPage() {
     form ??
     (waste
       ? {
+          classifierId: waste.classifierId,
+          code: waste.code,
           name: waste.name,
           hazardClass: waste.hazardClass,
           unit: waste.unit,
-          source: waste.source,
         }
       : null);
 
@@ -199,10 +208,11 @@ export function WasteDetailPage() {
   ) => {
     setForm((prev) => ({
       ...(prev ?? {
+        classifierId: waste.classifierId,
+        code: waste.code,
         name: waste.name,
         hazardClass: waste.hazardClass,
         unit: waste.unit,
-        source: waste.source,
       }),
       [key]: value,
     }));
@@ -215,10 +225,6 @@ export function WasteDetailPage() {
 
     if (!wasteForm.name.trim()) {
       setFieldsError("Укажите наименование отхода");
-      return;
-    }
-    if (!wasteForm.source.trim()) {
-      setFieldsError("Укажите источник образования");
       return;
     }
 
@@ -237,6 +243,7 @@ export function WasteDetailPage() {
   const resetBindingForm = () => {
     setUnitId("");
     setPod9Id("");
+    setSourceId("");
     setCreatePod9Mode(false);
     setPod9Draft(emptyNewPod9Draft());
     setError(null);
@@ -247,6 +254,10 @@ export function WasteDetailPage() {
 
     if (!unitId) {
       setError("Выберите структурную единицу");
+      return;
+    }
+    if (!sourceId) {
+      setError("Выберите или создайте источник образования");
       return;
     }
     let nextPod9Id = pod9Id;
@@ -278,6 +289,7 @@ export function WasteDetailPage() {
       wasteId,
       unitId,
       pod9Id: nextPod9Id,
+      sourceId,
     });
 
     if (!binding) {
@@ -312,7 +324,7 @@ export function WasteDetailPage() {
           <AlertTitle>Отход создан в справочнике</AlertTitle>
           <AlertDescription>
             При необходимости отредактируйте поля ниже, затем добавьте привязки:
-            где отход образуется и в каких журналах ПОД-9 учитывается.
+            структурная единица, журнал ПОД-9 и источник образования.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -324,8 +336,8 @@ export function WasteDetailPage() {
         <div className="space-y-1 lg:col-span-2">
           <h2 className="font-semibold text-foreground">Данные отхода</h2>
           <p className="text-sm text-muted-foreground">
-            Наименование, класс опасности, единица измерения и источник
-            образования.
+            Наименование, класс опасности и единица измерения. Источник
+            образования задаётся при привязке к журналу ПОД-9.
           </p>
         </div>
 
@@ -380,16 +392,6 @@ export function WasteDetailPage() {
           </Select>
         </div>
 
-        <div className="grid gap-1.5">
-          <FieldLabel htmlFor="waste-source">Источник образования</FieldLabel>
-          <Input
-            id="waste-source"
-            value={wasteForm.source}
-            onChange={(e) => updateField("source", e.target.value)}
-            placeholder="Типовой источник (уточняется в привязках)"
-          />
-        </div>
-
         <div className="lg:col-span-2">
           <Button type="submit" size="sm" disabled={fieldsPending}>
             {fieldsPending ? "Сохранение…" : "Сохранить изменения"}
@@ -404,8 +406,9 @@ export function WasteDetailPage() {
               Структурные единицы и ПОД-9 согласно инструкции
             </h2>
             <p className="text-sm text-muted-foreground">
-              Один отход может образовываться в нескольких структурных единицах
-              и учитываться в нескольких ПОД-9.
+              Один отход может образовываться в нескольких структурных единицах,
+              учитываться в нескольких ПОД-9 и иметь разные источники
+              образования.
             </p>
           </div>
           <Button
@@ -426,7 +429,8 @@ export function WasteDetailPage() {
             <AlertTitle>Привязок пока нет</AlertTitle>
             <AlertDescription>
               Отход уже есть в справочнике, но ещё нигде не учитывается.
-              Добавьте первую пару «структурная единица → ПОД-9».
+              Добавьте первую привязку: структурная единица → ПОД-9 → источник
+              образования.
             </AlertDescription>
           </Alert>
         ) : (
@@ -480,6 +484,15 @@ export function WasteDetailPage() {
               </Alert>
             ) : (
               <>
+                <FormationSourceSelect
+                  id="bind-source"
+                  value={sourceId}
+                  onChange={(next) => {
+                    setSourceId(next);
+                    setError(null);
+                  }}
+                />
+
                 <div className="grid gap-1.5">
                   <FieldLabel htmlFor="bind-unit">
                     Структурная единица

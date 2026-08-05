@@ -32,7 +32,7 @@ export const INSTRUCTION_STATUS_LABEL: Record<Instruction["status"], string> = {
 
 type Listener = () => void;
 
-let instructions: Instruction[] = [
+const INITIAL_INSTRUCTIONS: Instruction[] = [
   {
     id: DEFAULT_INSTRUCTION_ID,
     title: "Инструкция по обращению с отходами",
@@ -42,6 +42,7 @@ let instructions: Instruction[] = [
     status: "active",
   },
 ];
+let instructions: Instruction[] = structuredClone(INITIAL_INSTRUCTIONS);
 const listeners = new Set<Listener>();
 
 function emit() {
@@ -55,6 +56,11 @@ export function getInstructions(): Instruction[] {
 export function subscribeInstructions(listener: Listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+export function resetInstructionsStore() {
+  instructions = structuredClone(INITIAL_INSTRUCTIONS);
+  emit();
 }
 
 export function findInstruction(id: string): Instruction | null {

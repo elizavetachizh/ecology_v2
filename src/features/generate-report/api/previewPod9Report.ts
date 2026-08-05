@@ -1,12 +1,9 @@
 import { parseExcelPreview } from "../lib/parseExcelPreview";
+import { apiFetch } from "../../../shared/api/api-client";
 import type {
   Pod9ReportPreviewParams,
   ReportPreview,
 } from "../model/preview.types";
-
-const POD9_PREVIEW_ENDPOINT =
-  "https://ecolog-test.mingas.by/api/w/pod-9/";
-const REPORT_PREVIEW_TOKEN = import.meta.env.VITE_REPORT_PREVIEW_TOKEN;
 
 function getFileName(contentDisposition: string | null): string {
   if (!contentDisposition) return "POD-9.xlsx";
@@ -31,22 +28,10 @@ export async function previewPod9Report(
     start_date: params.startDate,
     end_date: params.endDate,
   });
-  const response = await fetch(
-    `${POD9_PREVIEW_ENDPOINT}?${searchParams.toString()}`,
-    {
-      signal,
-      credentials: "include",
-      headers: {
-        ...(REPORT_PREVIEW_TOKEN
-          ? { Authorization: `Bearer ${REPORT_PREVIEW_TOKEN}` }
-          : {}),
-      },
-    },
+  const response = await apiFetch(
+    `/api/w/pod-9/?${searchParams.toString()}`,
+    { signal, tenantScoped: true },
   );
-
-  if (!response.ok) {
-    throw new Error(`Сервер вернул ошибку ${response.status}`);
-  }
 
   const contentType = response.headers.get("Content-Type") || "";
   if (

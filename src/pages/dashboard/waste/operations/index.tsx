@@ -5,7 +5,7 @@ import {
   OPERATION_TYPES,
   type CreateOperationForm,
 } from "../../../../features/waste/create-operation";
-import { findWaste } from "../../directories/model/pod9-wastes.store";
+import { findWaste } from "../../../../entities/waste/directory";
 import {
   findStructureNode,
   getStructureTree,

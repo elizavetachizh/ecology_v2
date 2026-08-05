@@ -32,7 +32,7 @@ import {
   getPod9Wastes,
   getPod9WastesSnapshot,
   subscribePod9Wastes,
-} from "./model/pod9-wastes.store";
+} from "../../../entities/waste/directory";
 import { Pod9WastesSection } from "./ui/Pod9WastesSection";
 
 type Pod9DetailsForm = {
