@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import {
@@ -12,28 +12,64 @@ import {
   DataTableRowActions,
   type ColumnDef,
 } from "../../../shared/ui";
+import { getWastesByInstruction } from "../../../entities/waste/directory";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useDebounce } from "../../../shared/hooks";
 import {
+  deleteInstruction,
   getInstructions,
   INSTRUCTION_STATUS_LABEL,
-  subscribeInstructions,
-  deleteInstruction,
+  instructionsQueryKeys,
   type Instruction,
-} from "../../../entities/regulatory-document";
-import { getWastesByInstruction } from "../../../entities/waste/directory";
+} from "../../../entities/waste/instructions";
+import { queryClient } from "../../../shared/lib/query-client";
+
+export function useInstructionsOptions() {
+  const [search, setSearch] = useState<string>("");
+  const debouncedSearch = useDebounce(search, 400);
+  const instructionsQuery = useQuery({
+    queryKey: ["instructions", debouncedSearch],
+    queryFn: ({ signal }) =>
+      getInstructions(
+        { search: debouncedSearch, limit: 20, offset: 0 },
+        signal,
+      ),
+    select: (data) => data.items,
+  });
+
+  return {
+    options: instructionsQuery.data ?? [],
+    loading: instructionsQuery.isLoading,
+    error: instructionsQuery.error,
+    search,
+    setSearch,
+  };
+}
 
 export function InstructionsPage() {
+  const {
+    options: instructions,
+    loading,
+    search,
+    setSearch,
+  } = useInstructionsOptions();
   const [deletingInstruction, setDeletingInstruction] =
     useState<Instruction | null>(null);
-  const list = useSyncExternalStore(
-    subscribeInstructions,
-    getInstructions,
-    getInstructions,
-  );
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteInstruction(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: instructionsQueryKeys.lists(),
+      });
+      setDeletingInstruction(null);
+    },
+  });
 
   const columns = useMemo<ColumnDef<Instruction>[]>(
     () => [
       {
-        accessorKey: "title",
+        accessorKey: "name",
         header: "Наименование",
         cell: ({ row }) => (
           <Link
@@ -41,25 +77,11 @@ export function InstructionsPage() {
             params={{ instructionId: row.original.id }}
             className="font-medium hover:underline"
           >
-            {row.original.title}
+            {row.original.name}
           </Link>
         ),
       },
-      {
-        accessorKey: "number",
-        header: "Номер",
-        cell: ({ row }) => row.original.number,
-      },
-      {
-        accessorKey: "approvedAt",
-        header: "Дата утверждения",
-        cell: ({ row }) => row.original.approvedAt,
-      },
-      {
-        accessorKey: "responsible",
-        header: "Ответственный",
-        cell: ({ row }) => row.original.responsible,
-      },
+
       {
         accessorKey: "status",
         header: "Статус",
@@ -123,7 +145,7 @@ export function InstructionsPage() {
         </div>
       </div>
 
-      {list.length === 0 ? (
+      {instructions.length === 0 ? (
         <Alert variant="info">
           <AlertTitle>Начните с инструкции</AlertTitle>
           <AlertDescription>
@@ -135,7 +157,7 @@ export function InstructionsPage() {
 
       <DataTable
         columns={columns}
-        data={list}
+        data={instructions}
         getRowId={(row) => row.id}
         emptyTitle="Инструкций пока нет"
         emptyDescription="Создайте первую инструкцию — это отправная точка заполнения справочников."
@@ -151,12 +173,12 @@ export function InstructionsPage() {
           deletingInstruction &&
           getWastesByInstruction(deletingInstruction.id).length > 0 ? (
             <span className="text-destructive">
-              Инструкцию «{deletingInstruction.title}» нельзя удалить, пока к
-              ней привязаны отходы.
+              Инструкцию «{deletingInstruction.name}» нельзя удалить, пока к ней
+              привязаны отходы.
             </span>
           ) : (
             <>
-              Инструкция «{deletingInstruction?.title}» будет удалена без
+              Инструкция «{deletingInstruction?.name}» будет удалена без
               возможности восстановления.
             </>
           )
@@ -167,7 +189,7 @@ export function InstructionsPage() {
         }
         onConfirm={() => {
           if (deletingInstruction) {
-            deleteInstruction(deletingInstruction.id);
+            void deleteMutation.mutateAsync(deletingInstruction.id);
           }
         }}
       />

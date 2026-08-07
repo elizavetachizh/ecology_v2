@@ -5,10 +5,7 @@ import {
   useParams,
   useSearch,
 } from "@tanstack/react-router";
-import {
-  getInstructions,
-  subscribeInstructions,
-} from "../../../entities/regulatory-document";
+
 import { POD9_STATUS_OPTIONS } from "../../../features/directories/create-structure-node";
 import {
   Alert,
@@ -156,11 +153,6 @@ export function Pod9Page() {
   const search = useSearch({
     from: "/directories/structure/pod9/$pod9Id",
   });
-  const instructions = useSyncExternalStore(
-    subscribeInstructions,
-    getInstructions,
-    getInstructions,
-  );
 
   useSyncExternalStore(subscribeStructure, getStructureTree, getStructureTree);
   useSyncExternalStore(
@@ -168,7 +160,7 @@ export function Pod9Page() {
     getPod9WastesSnapshot,
     getPod9WastesSnapshot,
   );
-  const instructionId = search.instructionId ?? instructions[0]?.id ?? null;
+  const instructionId = search.instructionId as string | null;
 
   const [, setTick] = useState(0);
   const pod9 = findStructureNode(getStructureTree(), pod9Id);
@@ -243,17 +235,9 @@ export function Pod9Page() {
           aria-label="Инструкции"
           className="max-w-full justify-start overflow-x-auto"
         >
-          {instructions.map((instruction) => (
-            <TabsTrigger
-              key={instruction.id}
-              value={instruction.id}
-              className="max-w-72 shrink-0"
-            >
-              <span className="truncate">
-                {instruction.number} — {instruction.title}
-              </span>
-            </TabsTrigger>
-          ))}
+          <TabsTrigger value="instr-demo-2026" className="max-w-72 shrink-0">
+            <span className="truncate">Инструкция 2026</span>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 

@@ -1,10 +1,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import {
-  getInstructions,
-  subscribeInstructions,
-} from "../../../entities/regulatory-document";
+
 import {
   Button,
   ConfirmDialog,
@@ -31,25 +28,18 @@ export function WastesDirectoryPage() {
   );
   const navigate = useNavigate();
   const search = useSearch({ from: "/directories/wastes" });
-  const instructions = useSyncExternalStore(
-    subscribeInstructions,
-    getInstructions,
-    getInstructions,
-  );
+
   useSyncExternalStore(subscribeStructure, getStructureTree, getStructureTree);
   const storeVersion = useSyncExternalStore(
     subscribeWastes,
     getPod9WastesSnapshot,
     getPod9WastesSnapshot,
   );
-  const instructionId = search.instructionId ?? instructions[0]?.id ?? null;
-  const wastes = useMemo(
-    () => {
-      void storeVersion;
-      return getWastesByInstruction(instructionId);
-    },
-    [instructionId, storeVersion],
-  );
+  const instructionId = search.instructionId as string | null;
+  const wastes = useMemo(() => {
+    void storeVersion;
+    return getWastesByInstruction(instructionId);
+  }, [instructionId, storeVersion]);
 
   const columns = useMemo<ColumnDef<DirectoryWaste>[]>(
     () => [
@@ -168,17 +158,13 @@ export function WastesDirectoryPage() {
                 replace: true,
               })
             }
-            disabled={instructions.length === 0}
+            disabled={instructionId === null}
             className="mt-2 max-w-xl"
           >
-            {instructions.length === 0 ? (
+            {instructionId === null ? (
               <option value="">Инструкций пока нет</option>
             ) : (
-              instructions.map((instruction) => (
-                <option key={instruction.id} value={instruction.id}>
-                  {instruction.number} — {instruction.title}
-                </option>
-              ))
+              <option value="instr-demo-2026">Инструкция 2026</option>
             )}
           </Select>
         </div>

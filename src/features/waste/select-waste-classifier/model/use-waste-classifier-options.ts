@@ -14,7 +14,7 @@ export function useWasteClassifierOptions() {
         signal,
       ),
     select: (data) => data.items,
-  });
+  }); 
 
   return {
     options: wasteClassifiersQuery.data ?? [],

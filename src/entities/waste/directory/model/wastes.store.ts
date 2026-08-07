@@ -1,4 +1,3 @@
-import { DEFAULT_INSTRUCTION_ID } from "../../../regulatory-document";
 import { findFormationSource } from "../../formation-source";
 // TODO: перенести structure в entities — убрать зависимость entity → pages
 import {
@@ -18,7 +17,7 @@ type Listener = () => void;
 const MOCK_WASTES: DirectoryWaste[] = [
   {
     id: "w-1",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     classifierId: "1",
     code: 9120400,
     name: "Мусор от офисных и бытовых помещений организаций",
@@ -27,7 +26,7 @@ const MOCK_WASTES: DirectoryWaste[] = [
   },
   {
     id: "w-2",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     classifierId: "2",
     code: 1870600,
     name: "Отходы бумаги и картона от канцелярской деятельности",
@@ -36,7 +35,7 @@ const MOCK_WASTES: DirectoryWaste[] = [
   },
   {
     id: "w-3",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     classifierId: "3",
     code: 5470100,
     name: "Обтирочный материал, загрязненный нефтью или нефтепродуктами",
@@ -48,7 +47,7 @@ const MOCK_WASTES: DirectoryWaste[] = [
 const MOCK_BINDINGS: WasteBinding[] = [
   {
     id: "wb-1",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     wasteId: "w-1",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
@@ -56,7 +55,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
   },
   {
     id: "wb-1b",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     wasteId: "w-1",
     unitId: "unit-1-2",
     pod9Id: "pod9-3",
@@ -64,7 +63,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
   },
   {
     id: "wb-2",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     wasteId: "w-2",
     unitId: "unit-1-1",
     pod9Id: "pod9-1",
@@ -72,7 +71,7 @@ const MOCK_BINDINGS: WasteBinding[] = [
   },
   {
     id: "wb-3",
-    instructionId: DEFAULT_INSTRUCTION_ID,
+    instructionId: "instr-demo-2026",
     wasteId: "w-3",
     unitId: "unit-2-1",
     pod9Id: "pod9-4",

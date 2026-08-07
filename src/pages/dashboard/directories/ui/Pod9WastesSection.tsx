@@ -1,7 +1,6 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Plus, Unlink } from "lucide-react";
-import { findInstruction } from "../../../../entities/regulatory-document";
 import {
   addPod9Waste,
   bindExistingWasteToPod9,
@@ -71,7 +70,6 @@ export function Pod9WastesSection({
   const [form, setForm] = useState<Pod9WasteFormValues>(emptyPod9WasteForm);
   const [error, setError] = useState<string | null>(null);
   const [detachingWaste, setDetachingWaste] = useState<Pod9Waste | null>(null);
-  const instruction = findInstruction(instructionId);
 
   const catalog = getWastesByInstruction(instructionId);
 
@@ -213,8 +211,7 @@ export function Pod9WastesSection({
             образования. Один отход может учитываться с разными источниками.
           </p>
           <span className="inline-flex max-w-full rounded-md bg-info-muted px-2 py-1 text-xs font-medium text-info">
-            Инструкция: {instruction?.number ?? "—"} —{" "}
-            {instruction?.title ?? "Не найдена"}
+            Инструкция: Инструкция 2026
           </span>
         </div>
         <Button type="button" size="sm" onClick={() => setOpen(true)}>
@@ -243,8 +240,7 @@ export function Pod9WastesSection({
               <span className="text-xs text-muted-foreground">
                 Отходы фильтруются по инструкции:{" "}
                 <strong className="font-medium text-foreground">
-                  {instruction?.number ?? "—"} —{" "}
-                  {instruction?.title ?? "Не найдена"}
+                  Инструкция 2026
                 </strong>
               </span>
             </ModalHeader>

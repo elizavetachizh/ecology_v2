@@ -49,7 +49,6 @@ export function WasteCatalogForm({
 }: WasteCatalogFormProps) {
   const {
     existing,
-    instructions,
     instructionId,
     setInstructionId,
     form,
@@ -95,17 +94,13 @@ export function WasteCatalogForm({
             aria-label="Инструкция для отхода"
             value={instructionId}
             onChange={(event) => setInstructionId(event.target.value)}
-            disabled={mode === "edit" || instructions.length === 0}
+            disabled={mode === "edit" || instructionId === null}
             className="w-80 max-w-full"
           >
-            {instructions.length === 0 ? (
+            {instructionId === null ? (
               <option value="">Сначала создайте инструкцию</option>
             ) : (
-              instructions.map((instruction) => (
-                <option key={instruction.id} value={instruction.id}>
-                  {instruction.number} — {instruction.title}
-                </option>
-              ))
+              <option value="instr-demo-2026">Инструкция 2026</option>
             )}
           </Select>
         }

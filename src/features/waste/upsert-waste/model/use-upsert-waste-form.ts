@@ -1,8 +1,5 @@
-import { useState, useSyncExternalStore, type FormEvent } from "react";
-import {
-  getInstructions,
-  subscribeInstructions,
-} from "../../../../entities/regulatory-document";
+import { useState, type FormEvent } from "react";
+
 import {
   createWaste,
   emptyWasteForm,
@@ -30,18 +27,10 @@ export function useUpsertWasteForm({
   onCreated,
   onUpdated,
 }: UseUpsertWasteFormParams) {
-  const instructions = useSyncExternalStore(
-    subscribeInstructions,
-    getInstructions,
-    getInstructions,
-  );
   const existing = mode === "edit" && wasteId ? findWaste(wasteId) : null;
 
   const [instructionId, setInstructionId] = useState(
-    existing?.instructionId ??
-      initialInstructionId ??
-      instructions[0]?.id ??
-      "",
+    existing?.instructionId ?? initialInstructionId ?? "",
   );
   const [form, setForm] = useState<WasteFormValues>(() =>
     existing
@@ -107,7 +96,6 @@ export function useUpsertWasteForm({
     mode,
     wasteId,
     existing,
-    instructions,
     instructionId,
     setInstructionId,
     form,

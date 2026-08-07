@@ -12,7 +12,6 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
-import { findInstruction } from "../../../entities/regulatory-document";
 import {
   emptyPod9Form,
   POD9_STATUS_OPTIONS,
@@ -148,7 +147,6 @@ export function WasteDetailPage() {
   );
 
   const waste = findWaste(wasteId);
-  const instruction = waste ? findInstruction(waste.instructionId) : null;
   const bindings = getWasteBindings(wasteId, waste?.instructionId);
   const units = listStructureUnits();
 
@@ -304,7 +302,7 @@ export function WasteDetailPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <PageContextBar
-        eyebrow={`Справочники / Отходы / ${instruction?.number ?? "Инструкция"}`}
+        eyebrow={`Справочники / Отходы / Инструкция 2026`}
         title={wasteForm.name.trim() || "Отход"}
         description="Карточка вида отхода. Изменения полей и привязок выполняются ниже."
         actions={
@@ -456,8 +454,7 @@ export function WasteDetailPage() {
             <span className="text-xs text-muted-foreground">
               Привязка для инструкции:{" "}
               <strong className="font-medium text-foreground">
-                {instruction?.number ?? "—"} —{" "}
-                {instruction?.title ?? "Не найдена"}
+                Инструкция 2026
               </strong>
             </span>
 
