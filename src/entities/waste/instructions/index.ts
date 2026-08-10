@@ -8,10 +8,18 @@ export type {
   Instruction,
   InstructionListResponse,
   InstructionStatus,
+  InstructionSortField,
+  InstructionSortOrder,
   InstructionCreate,
   InstructionUpdate,
+  GetInstructionsParams,
 } from "./model/instructions.types";
 export {
   INSTRUCTION_STATUS_LABEL,
   InstructionStatusValues,
+  InstructionSortFields,
+  DEFAULT_INSTRUCTIONS_LIST_LIMIT,
+  DEFAULT_INSTRUCTIONS_OPTIONS_LIMIT,
 } from "./model/instructions.types";
+export { useInstructionsOptions } from "./model/use-instructions-query";
+export { useInstructionsListQuery } from "./model/use-instructions-list-query";

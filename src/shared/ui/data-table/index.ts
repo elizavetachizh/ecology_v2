@@ -3,6 +3,10 @@ export { DataTableColumnHeader } from "./DataTableColumnHeader";
 export { DataTableEmpty } from "./DataTableEmpty";
 export { DataTableExpandCell } from "./DataTableExpandCell";
 export {
+  DataTablePagination,
+  type DataTablePaginationProps,
+} from "./DataTablePagination";
+export {
   DataTableRowAction,
   DataTableRowActions,
   type DataTableRowActionProps,

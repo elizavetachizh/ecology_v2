@@ -6,7 +6,7 @@ export function toInstructionWriteBody(
 ): InstructionCreate {
   return {
     name: values.name.trim(),
-    short_name: values.short_name.trim() || null,
+    short_name: values.short_name.trim() || undefined,
     start_date: values.start_date || null,
     end_date: values.end_date || null,
     status: values.status,

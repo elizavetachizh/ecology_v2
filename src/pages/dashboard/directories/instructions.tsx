@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useTenant } from "../../../app/providers/tenant/tenant-context";
 import {
   Alert,
   AlertDescription,
@@ -8,53 +9,66 @@ import {
   Button,
   ConfirmDialog,
   DataTable,
+  DataTablePagination,
   DataTableRowAction,
   DataTableRowActions,
+  Input,
+  Select,
   type ColumnDef,
 } from "../../../shared/ui";
 import { getWastesByInstruction } from "../../../entities/waste/directory";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useDebounce } from "../../../shared/hooks";
+import { useMutation } from "@tanstack/react-query";
 import {
+  DEFAULT_INSTRUCTIONS_LIST_LIMIT,
   deleteInstruction,
-  getInstructions,
   INSTRUCTION_STATUS_LABEL,
+  InstructionStatusValues,
   instructionsQueryKeys,
+  useInstructionsListQuery,
   type Instruction,
+  type InstructionStatus,
 } from "../../../entities/waste/instructions";
 import { queryClient } from "../../../shared/lib/query-client";
 
-export function useInstructionsOptions() {
-  const [search, setSearch] = useState<string>("");
-  const debouncedSearch = useDebounce(search, 400);
-  const instructionsQuery = useQuery({
-    queryKey: ["instructions", debouncedSearch],
-    queryFn: ({ signal }) =>
-      getInstructions(
-        { search: debouncedSearch, limit: 20, offset: 0 },
-        signal,
-      ),
-    select: (data) => data.items,
-  });
-
-  return {
-    options: instructionsQuery.data ?? [],
-    loading: instructionsQuery.isLoading,
-    error: instructionsQuery.error,
-    search,
-    setSearch,
-  };
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return value;
+  return `${day}.${month}.${year}`;
 }
 
 export function InstructionsPage() {
+  const { activeTenantId } = useTenant();
+  const navigate = useNavigate({ from: "/directories/instructions" });
+  const search = useSearch({ from: "/directories/instructions" });
+
+  const listParams = useMemo(
+    () => ({
+      search: search.q || undefined,
+      status: search.status,
+      sort: search.sort ?? ("name" as const),
+      order: search.order ?? ("asc" as const),
+      limit: search.limit ?? DEFAULT_INSTRUCTIONS_LIST_LIMIT,
+      offset: search.offset ?? 0,
+    }),
+    [search],
+  );
+
   const {
-    options: instructions,
+    items: instructions,
+    total,
+    limit,
+    offset,
     loading,
-    search,
-    setSearch,
-  } = useInstructionsOptions();
+    error,
+  } = useInstructionsListQuery({
+    tenantId: activeTenantId,
+    params: listParams,
+  });
+
   const [deletingInstruction, setDeletingInstruction] =
     useState<Instruction | null>(null);
+  const [searchInput, setSearchInput] = useState(search.q ?? "");
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteInstruction(id),
@@ -65,6 +79,22 @@ export function InstructionsPage() {
       setDeletingInstruction(null);
     },
   });
+
+  const patchSearch = (patch: {
+    q?: string | undefined;
+    status?: InstructionStatus | undefined;
+    offset?: number;
+  }) => {
+    void navigate({
+      search: (prev) => {
+        const next = { ...prev, ...patch };
+        if ("q" in patch || "status" in patch) {
+          next.offset = patch.offset ?? 0;
+        }
+        return next;
+      },
+    });
+  };
 
   const columns = useMemo<ColumnDef<Instruction>[]>(
     () => [
@@ -81,7 +111,21 @@ export function InstructionsPage() {
           </Link>
         ),
       },
-
+      {
+        accessorKey: "short_name",
+        header: "Краткое",
+        cell: ({ row }) => row.original.short_name || "—",
+      },
+      {
+        accessorKey: "start_date",
+        header: "Начало",
+        cell: ({ row }) => formatDate(row.original.start_date),
+      },
+      {
+        accessorKey: "end_date",
+        header: "Окончание",
+        cell: ({ row }) => formatDate(row.original.end_date),
+      },
       {
         accessorKey: "status",
         header: "Статус",
@@ -120,6 +164,27 @@ export function InstructionsPage() {
     [],
   );
 
+  if (!activeTenantId) {
+    return (
+      <Alert variant="info">
+        <AlertTitle>Выберите организацию</AlertTitle>
+        <AlertDescription>
+          Чтобы работать со справочником инструкций, выберите организацию в
+          верхней панели.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="error">
+        <AlertTitle>Не удалось загрузить инструкции</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -145,7 +210,47 @@ export function InstructionsPage() {
         </div>
       </div>
 
-      {instructions.length === 0 ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          className="max-w-xs"
+          placeholder="Поиск по названию или краткому"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              patchSearch({ q: searchInput.trim() || undefined });
+            }
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => patchSearch({ q: searchInput.trim() || undefined })}
+        >
+          Найти
+        </Button>
+        <Select
+          aria-label="Статус"
+          className="w-44"
+          value={search.status ?? ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            patchSearch({
+              status: value ? (value as InstructionStatus) : undefined,
+            });
+          }}
+        >
+          <option value="">Все статусы</option>
+          {InstructionStatusValues.map((status) => (
+            <option key={status} value={status}>
+              {INSTRUCTION_STATUS_LABEL[status]}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      {!loading && instructions.length === 0 ? (
         <Alert variant="info">
           <AlertTitle>Начните с инструкции</AlertTitle>
           <AlertDescription>
@@ -159,8 +264,17 @@ export function InstructionsPage() {
         columns={columns}
         data={instructions}
         getRowId={(row) => row.id}
+        isLoading={loading}
         emptyTitle="Инструкций пока нет"
         emptyDescription="Создайте первую инструкцию — это отправная точка заполнения справочников."
+      />
+
+      <DataTablePagination
+        total={total}
+        limit={limit}
+        offset={offset}
+        disabled={loading}
+        onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
       />
 
       <ConfirmDialog

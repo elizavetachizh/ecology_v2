@@ -9,6 +9,11 @@ import {
 import { getTenants, type Tenant } from "../../../entities/tenant";
 import { getCurrentUser } from "../../../entities/user";
 import { setTenantIdResolver } from "../../../shared/api/api-client";
+import {
+  clearActiveTenantId,
+  readActiveTenantId,
+  writeActiveTenantId,
+} from "../../../shared/auth/active-tenant-storage";
 import { Button } from "../../../shared/ui";
 import { TenantContext } from "./tenant-context";
 
@@ -22,6 +27,12 @@ function flattenTenants(tenants: Tenant[]): Tenant[] {
     tenant,
     ...flattenTenants(tenant.children ?? []),
   ]);
+}
+
+function isKnownTenant(flatTenants: Tenant[], tenantId: string | null) {
+  return Boolean(
+    tenantId && flatTenants.some((tenant) => tenant.id === tenantId),
+  );
 }
 
 export function TenantProvider({
@@ -47,13 +58,42 @@ export function TenantProvider({
     () => flattenTenants(tenantsQuery.data ?? []),
     [tenantsQuery.data],
   );
-  const resolvedTenantId = flatTenants.some(
-    (tenant) => tenant.id === activeTenantId,
-  )
+  const realm = userQuery.data?.realm ?? null;
+
+  const resolvedTenantId = isKnownTenant(flatTenants, activeTenantId)
     ? activeTenantId
     : flatTenants.length === 1
       ? flatTenants[0]!.id
       : null;
+
+  // Hydrate из sessionStorage после /me + /tenants (realm уже известен).
+  useEffect(() => {
+    if (!realm || tenantsQuery.data === undefined) return;
+
+    if (isKnownTenant(flatTenants, activeTenantId)) return;
+
+    const storedId = readActiveTenantId(realm);
+    if (isKnownTenant(flatTenants, storedId)) {
+      setActiveTenantId(storedId);
+      return;
+    }
+
+    if (storedId) {
+      clearActiveTenantId(realm);
+    }
+
+    if (flatTenants.length === 1) {
+      setActiveTenantId(flatTenants[0]!.id);
+    }
+  }, [realm, tenantsQuery.data, flatTenants, activeTenantId]);
+
+  // Persist валидный resolved id (включая auto-select единственного tenant).
+  useEffect(() => {
+    if (!realm) return;
+    if (resolvedTenantId) {
+      writeActiveTenantId(realm, resolvedTenantId);
+    }
+  }, [realm, resolvedTenantId]);
 
   useEffect(() => {
     setTenantIdResolver(() => resolvedTenantId);
@@ -63,8 +103,11 @@ export function TenantProvider({
   const selectTenant = useCallback(
     async (tenantId: string) => {
       if (tenantId === resolvedTenantId) return;
-      if (!flatTenants.some((tenant) => tenant.id === tenantId)) {
+      if (!isKnownTenant(flatTenants, tenantId)) {
         throw new Error("Выбранный tenant недоступен пользователю");
+      }
+      if (!realm) {
+        throw new Error("Realm пользователя ещё не загружен");
       }
 
       await queryClient.cancelQueries({
@@ -74,9 +117,10 @@ export function TenantProvider({
         predicate: (query) => query.meta?.tenantScoped === true,
       });
       await onTenantChange();
+      writeActiveTenantId(realm, tenantId);
       setActiveTenantId(tenantId);
     },
-    [flatTenants, onTenantChange, queryClient, resolvedTenantId],
+    [flatTenants, onTenantChange, queryClient, realm, resolvedTenantId],
   );
 
   if (userQuery.isPending || tenantsQuery.isPending) {

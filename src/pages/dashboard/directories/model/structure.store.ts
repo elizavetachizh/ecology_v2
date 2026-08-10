@@ -21,10 +21,6 @@ export function subscribeStructure(listener: Listener) {
   return () => listeners.delete(listener);
 }
 
-export function resetStructureStore() {
-  tree = structuredClone(MOCK_STRUCTURE);
-  emit();
-}
 
 export function findStructureNode(
   nodes: StructureNode[],
@@ -93,45 +89,6 @@ export type UpsertUnitInput = {
   code?: string;
   parentId: string | null;
 };
-
-export function upsertStructureUnit(input: UpsertUnitInput): StructureNode {
-  const existing = findStructureNode(tree, input.id);
-
-  if (existing && existing.type === "unit") {
-    tree = mapTree(tree, (node) =>
-      node.id === input.id
-        ? {
-            ...node,
-            name: input.name,
-            code: input.code || "—",
-          }
-        : node,
-    );
-    emit();
-    return findStructureNode(tree, input.id)!;
-  }
-
-  const node: StructureNode = {
-    id: input.id,
-    name: input.name,
-    code: input.code || "—",
-    type: "unit",
-    typeLabel: "Структурная единица",
-    children: [],
-  };
-
-  if (input.parentId === null) {
-    tree = [...tree, node];
-  } else {
-    tree = updateChildren(tree, input.parentId, (children) => [
-      ...children,
-      node,
-    ]);
-  }
-
-  emit();
-  return node;
-}
 
 export type InsertPod9Input = {
   id: string;

@@ -29,14 +29,15 @@ export function useUpsertInstructionForm({
   initial,
   onSaved,
 }: UseUpsertInstructionFormParams) {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const form = useForm<InstructionFormValues>({
     resolver: zodResolver(instructionFormSchema),
     defaultValues: initial
       ? {
           name: initial.name,
-          short_name: initial.short_name,
-          start_date: initial.start_date,
-          end_date: initial.end_date,
+          short_name: initial.short_name ?? "",
+          start_date: initial.start_date ?? "",
+          end_date: initial.end_date ?? "",
           status: initial.status,
         }
       : instructionFormDefaultValues,
@@ -51,7 +52,9 @@ export function useUpsertInstructionForm({
         queryKey: instructionsQueryKeys.lists(),
       });
       onSaved(created, { close: vars.close });
+      setSuccessMessage("Инструкция успешно создана");
     },
+    onError: (err) => setError(err.message),
   });
 
   const updateMutation = useMutation({
@@ -62,15 +65,17 @@ export function useUpsertInstructionForm({
         queryKey: instructionsQueryKeys.lists(),
       });
       void queryClient.invalidateQueries({
-        queryKey: instructionsQueryKeys.detail(updated.id),
+        queryKey: instructionsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
+      setSuccessMessage("Инструкция успешно обновлена");
     },
     onError: (err) => setError(err.message),
   });
 
   const onSubmit = (close: boolean, values: InstructionFormValues) => {
     setError(null);
+    setSuccessMessage(null);
     if (mode === "edit") updateMutation.mutate({ values, close });
     else createMutation.mutate({ values, close });
   };
@@ -80,5 +85,6 @@ export function useUpsertInstructionForm({
     error,
     pending: createMutation.isPending || updateMutation.isPending,
     onSubmit,
+    successMessage,
   };
 }

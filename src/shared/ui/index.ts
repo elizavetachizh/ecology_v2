@@ -44,9 +44,11 @@ export {
   DataTableColumnHeader,
   DataTableEmpty,
   DataTableExpandCell,
+  DataTablePagination,
   DataTableRowAction,
   DataTableRowActions,
   type DataTableProps,
+  type DataTablePaginationProps,
   type DataTableRowActionProps,
   type DataTableRowActionsProps,
   type ColumnDef,
@@ -54,3 +56,4 @@ export {
   type Row,
   type SortingState,
 } from "./data-table";
+export { FieldLabel } from "./field-lavel";

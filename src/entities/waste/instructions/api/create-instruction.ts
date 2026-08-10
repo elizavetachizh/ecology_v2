@@ -10,6 +10,9 @@ export function createInstruction(
 ) {
   return apiJson<Instruction>("/api/v1/mdm/instructions", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(body),
     tenantScoped: true,
     signal,

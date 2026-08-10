@@ -1,16 +1,9 @@
 import { apiJson } from "../../../../shared/api/api-client";
 import type {
+  GetInstructionsParams,
   InstructionListResponse,
-  InstructionStatus,
 } from "../model/instructions.types";
-export interface GetInstructionsParams {
-  search?: string;
-  status?: InstructionStatus;
-  sort?: string;
-  order?: string;
-  limit: number;
-  offset: number;
-}
+
 export function getInstructions(
   params: GetInstructionsParams,
   signal?: AbortSignal,

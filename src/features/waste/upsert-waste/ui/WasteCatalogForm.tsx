@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   HAZARD_CLASS_OPTIONS,
@@ -11,24 +10,11 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
+  FieldLabel,
   PageContextBar,
   Select,
 } from "../../../../shared/ui";
 import { useUpsertWasteForm } from "../model/use-upsert-waste-form";
-
-function FieldLabel({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: ReactNode;
-}) {
-  return (
-    <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
-      {children}
-    </label>
-  );
-}
 
 type WasteCatalogFormProps = {
   mode: "create" | "edit";

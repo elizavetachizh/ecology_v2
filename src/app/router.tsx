@@ -31,9 +31,23 @@ import { FormationSourcesPage } from "../pages/dashboard/directories/formation-s
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
+import type {
+  InstructionSortField,
+  InstructionSortOrder,
+  InstructionStatus,
+} from "../entities/waste/instructions";
 
 export type RouterContext = {
   auth: AuthContextValue;
+};
+
+type InstructionsSearch = {
+  q?: string;
+  status?: InstructionStatus;
+  sort?: InstructionSortField;
+  order?: InstructionSortOrder;
+  limit?: number;
+  offset?: number;
 };
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -64,6 +78,7 @@ const directoriesRoute = createRoute({
 type StructureSearch = {
   focusId?: string;
   expandId?: string;
+  q?: string;
 };
 
 const directoriesStructureRoute = createRoute({
@@ -72,6 +87,7 @@ const directoriesStructureRoute = createRoute({
   validateSearch: (search: Record<string, unknown>): StructureSearch => ({
     focusId: typeof search.focusId === "string" ? search.focusId : undefined,
     expandId: typeof search.expandId === "string" ? search.expandId : undefined,
+    q: typeof search.q === "string" && search.q.trim() ? search.q : undefined,
   }),
   component: DirectoriesStructurePage,
 });
@@ -189,6 +205,54 @@ const directoriesNormsRoute = createRoute({
 const directoriesInstructionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/instructions",
+  validateSearch: (search: Record<string, unknown>): InstructionsSearch => {
+    const statusRaw = search.status;
+    const status =
+      statusRaw === "draft" ||
+      statusRaw === "active" ||
+      statusRaw === "inactive"
+        ? statusRaw
+        : undefined;
+
+    const sortRaw = search.sort;
+    const sort =
+      typeof sortRaw === "string" &&
+      (
+        [
+          "name",
+          "short_name",
+          "status",
+          "start_date",
+          "end_date",
+          "created_at",
+          "id",
+        ] as const
+      ).includes(sortRaw as InstructionSortField)
+        ? (sortRaw as InstructionSortField)
+        : undefined;
+
+    const orderRaw = search.order;
+    const order =
+      orderRaw === "asc" || orderRaw === "desc" ? orderRaw : undefined;
+
+    const limitRaw = Number(search.limit);
+    const offsetRaw = Number(search.offset);
+
+    return {
+      q: typeof search.q === "string" && search.q.trim() ? search.q : undefined,
+      status,
+      sort,
+      order,
+      limit:
+        Number.isFinite(limitRaw) && limitRaw >= 1 && limitRaw <= 200
+          ? Math.floor(limitRaw)
+          : undefined,
+      offset:
+        Number.isFinite(offsetRaw) && offsetRaw >= 0
+          ? Math.floor(offsetRaw)
+          : undefined,
+    };
+  },
   component: InstructionsPage,
 });
 
@@ -245,7 +309,6 @@ const routeTree = rootRoute.addChildren([
   forbiddenRoute,
   catchAllRoute,
 ]);
-
 
 export const router = createRouter({
   routeTree,

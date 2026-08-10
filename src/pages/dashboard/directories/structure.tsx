@@ -1,25 +1,29 @@
-import {
-  useCallback,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Button,
   ConfirmDialog,
   DataTable,
+  DataTableExpandCell,
+  DataTableRowAction,
+  DataTableRowActions,
+  Input,
+  type ColumnDef,
   type ExpandedState,
 } from "../../../shared/ui";
-import { withActionRows, type StructureNode } from "./model/structure.mock";
 import {
-  deleteStructureNode,
-  getStructureTree,
-  subscribeStructure,
-} from "./model/structure.store";
-import { removeBindingsForStructureNodes } from "../../../entities/waste/directory";
-import { createStructureColumns } from "./ui/structure-columns";
+  deleteUnit,
+  unitsQueryKeys,
+  useUnitsTreeQuery,
+  type UnitTree,
+} from "../../../entities/waste/units";
+import { useTenant } from "../../../app/providers/tenant/tenant-context";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../../../shared/lib/query-client";
 
 function mergeExpanded(
   prev: ExpandedState,
@@ -36,47 +40,155 @@ function mergeExpanded(
 }
 
 export function DirectoriesStructurePage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/directories/structure" });
   const search = useSearch({ from: "/directories/structure" });
+  const { activeTenantId } = useTenant();
 
-  const structure = useSyncExternalStore(
-    subscribeStructure,
-    getStructureTree,
-    getStructureTree,
+  const treeParams = useMemo(
+    () => ({
+      search: search.q || undefined,
+      sort: "name" as const,
+      order: "asc" as const,
+    }),
+    [search.q],
   );
 
+  const { tree, loading, error } = useUnitsTreeQuery({
+    tenantId: activeTenantId,
+    params: treeParams,
+  });
+
+  const [deletingUnit, setDeletingUnit] = useState<UnitTree | null>(null);
+  const [searchInput, setSearchInput] = useState(search.q ?? "");
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
-    mergeExpanded(
-      {
-        "unit-1": true,
-        "unit-1-1": true,
-      },
-      [search.expandId, search.focusId],
-    ),
+    mergeExpanded({}, [search.expandId, search.focusId]),
   );
-  const [deletingNode, setDeletingNode] = useState<StructureNode | null>(null);
+
   const focusId = search.focusId ?? null;
 
-  const data = useMemo(() => withActionRows(structure), [structure]);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteUnit(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: unitsQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: unitsQueryKeys.trees(),
+      });
+      setDeletingUnit(null);
+    },
+  });
 
   const openCreateUnit = useCallback(
     (parentId?: string) => {
       void navigate({
         to: "/directories/structure/units/new",
-        search: parentId ? { parentId } : { parentId: "" },
+        search: { parentId: parentId ?? "" },
       });
     },
     [navigate],
   );
 
-  const columns = useMemo(
-    () =>
-      createStructureColumns({
-        onAddUnit: (parentId) => openCreateUnit(parentId),
-        onDeleteNode: setDeletingNode,
+  const patchSearch = (patch: { q?: string | undefined }) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        ...patch,
       }),
+    });
+  };
+
+  const columns = useMemo<ColumnDef<UnitTree>[]>(
+    () => [
+      {
+        id: "name",
+        header: "Название",
+        accessorKey: "name",
+        cell: ({ row }) => (
+          <DataTableExpandCell row={row}>
+            <Link
+              to="/directories/structure/units/$unitId"
+              params={{ unitId: row.original.id }}
+              className="font-medium hover:underline"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {row.original.name}
+            </Link>
+          </DataTableExpandCell>
+        ),
+      },
+      {
+        id: "short_name",
+        header: "Краткое",
+        accessorKey: "short_name",
+        cell: ({ row }) => row.original.short_name || "—",
+      },
+      {
+        id: "region",
+        header: "Регион",
+        cell: ({ row }) => row.original.region?.name ?? "—",
+      },
+      {
+        id: "district",
+        header: "Район",
+        cell: ({ row }) => row.original.district?.name ?? "—",
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Действия</div>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <DataTableRowActions>
+            <DataTableRowAction
+              label="Добавить дочернюю единицу"
+              onClick={() => openCreateUnit(row.original.id)}
+            >
+              <Plus />
+              Дочерняя
+            </DataTableRowAction>
+            <DataTableRowAction asChild label="Редактировать единицу">
+              <Link
+                to="/directories/structure/units/$unitId"
+                params={{ unitId: row.original.id }}
+              >
+                <Pencil />
+                Изменить
+              </Link>
+            </DataTableRowAction>
+            <DataTableRowAction
+              label="Удалить единицу"
+              onClick={() => setDeletingUnit(row.original)}
+            >
+              <Trash2 className="text-destructive" />
+              Удалить
+            </DataTableRowAction>
+          </DataTableRowActions>
+        ),
+      },
+    ],
     [openCreateUnit],
   );
+
+  if (!activeTenantId) {
+    return (
+      <Alert variant="info">
+        <AlertTitle>Выберите организацию</AlertTitle>
+        <AlertDescription>
+          Чтобы работать со структурой организации, выберите организацию в
+          верхней панели.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="error">
+        <AlertTitle>Не удалось загрузить структуру</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -86,9 +198,8 @@ export function DirectoriesStructurePage() {
             Структура организации
           </h1>
           <p className="text-sm text-muted-foreground">
-            Вложенные структурные единицы. Создайте структурные подразделения,
-            цеха, площадки, которые ведут учет отходов. Журналы ПОД-9
-            отображаются в дереве и создаются на карточке единицы.
+            Иерархия структурных единиц: подразделения, цеха, площадки. Дочерние
+            узлы создаются в контексте родителя.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -102,19 +213,39 @@ export function DirectoriesStructurePage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          className="max-w-xs"
+          placeholder="Поиск по названию или краткому"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              patchSearch({ q: searchInput.trim() || undefined });
+            }
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => patchSearch({ q: searchInput.trim() || undefined })}
+        >
+          Найти
+        </Button>
+      </div>
+
       <DataTable
         columns={columns}
-        data={data}
-        getRowId={(row: StructureNode) => row.id}
-        getSubRows={(row: StructureNode) => row.children}
+        data={tree}
+        getRowId={(row) => row.id}
+        getSubRows={(row) => row.children}
         expanded={expanded}
         onExpandedChange={setExpanded}
+        isLoading={loading}
         emptyTitle="Структура пуста"
         emptyDescription="Добавьте структурную единицу."
         getRowClassName={(row) => {
-          if (row.original.type === "actions") {
-            return "bg-muted/30 hover:bg-muted/40";
-          }
           if (focusId && row.original.id === focusId) {
             return "bg-info-muted/60 ring-1 ring-inset ring-info/30";
           }
@@ -123,32 +254,22 @@ export function DirectoriesStructurePage() {
       />
 
       <ConfirmDialog
-        open={deletingNode !== null}
+        open={deletingUnit !== null}
         onOpenChange={(open) => {
-          if (!open) setDeletingNode(null);
+          if (!open) setDeletingUnit(null);
         }}
-        title={
-          deletingNode?.type === "unit"
-            ? "Удалить структурную единицу?"
-            : "Удалить журнал ПОД-9?"
-        }
+        title="Удалить структурную единицу?"
         description={
-          deletingNode?.type === "unit" ? (
+          deletingUnit ? (
             <>
-              Единица «{deletingNode.name}», все дочерние единицы, журналы
-              ПОД-9 и связанные привязки отходов будут удалены.
+              Единица «{deletingUnit.name}» будет удалена. Убедитесь, что нет
+              зависимых данных.
             </>
-          ) : (
-            <>
-              Журнал «{deletingNode?.name}» и его привязки к отходам будут
-              удалены. Карточки отходов сохранятся в справочнике.
-            </>
-          )
+          ) : null
         }
         onConfirm={() => {
-          if (!deletingNode) return;
-          const removedIds = deleteStructureNode(deletingNode.id);
-          removeBindingsForStructureNodes(removedIds);
+          if (!deletingUnit) return;
+          void deleteMutation.mutateAsync(deletingUnit.id);
         }}
       />
     </div>
