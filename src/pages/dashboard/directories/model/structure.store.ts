@@ -83,13 +83,6 @@ function updateChildren(
   });
 }
 
-export type UpsertUnitInput = {
-  id: string;
-  name: string;
-  code?: string;
-  parentId: string | null;
-};
-
 export type InsertPod9Input = {
   id: string;
   name: string;
@@ -145,31 +138,6 @@ export function updatePod9(input: UpdatePod9Input): StructureNode | null {
   return findStructureNode(tree, input.id);
 }
 
-function collectNodeIds(node: StructureNode): string[] {
-  return [
-    node.id,
-    ...(node.children ?? []).flatMap((child) => collectNodeIds(child)),
-  ];
-}
-
-export function deleteStructureNode(id: string): string[] {
-  let removedIds: string[] = [];
-
-  const removeFromTree = (nodes: StructureNode[]): StructureNode[] =>
-    nodes.flatMap((node) => {
-      if (node.id === id) {
-        removedIds = collectNodeIds(node);
-        return [];
-      }
-      if (!node.children?.length) return [node];
-      return [{ ...node, children: removeFromTree(node.children) }];
-    });
-
-  tree = removeFromTree(tree);
-  if (removedIds.length > 0) emit();
-  return removedIds;
-}
-
 export function getUnitPod9Children(unitId: string): StructureNode[] {
   const unit = findStructureNode(tree, unitId);
   if (!unit || unit.type !== "unit") return [];
@@ -186,21 +154,6 @@ export function listStructureUnits(): StructureNode[] {
         result.push(node);
         if (node.children?.length) walk(node.children);
       }
-    }
-  };
-
-  walk(tree);
-  return result;
-}
-
-/** Все журналы ПОД-9 в дереве */
-export function listAllPod9(): StructureNode[] {
-  const result: StructureNode[] = [];
-
-  const walk = (nodes: StructureNode[]) => {
-    for (const node of nodes) {
-      if (node.type === "pod9") result.push(node);
-      if (node.children?.length) walk(node.children);
     }
   };
 

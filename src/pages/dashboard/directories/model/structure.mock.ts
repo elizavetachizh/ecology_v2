@@ -22,14 +22,6 @@ export type StructureNode = {
   children?: StructureNode[];
 };
 
-export const STRUCTURE_TYPE_LABEL: Record<
-  Exclude<StructureNodeType, "actions">,
-  string
-> = {
-  unit: "Структурная единица",
-  pod9: "ПОД-9",
-};
-
 export const MOCK_STRUCTURE: StructureNode[] = [
   {
     id: "unit-1",
@@ -167,24 +159,3 @@ export const MOCK_STRUCTURE: StructureNode[] = [
   },
 ];
 
-/** Вставляет строку с кнопкой добавления дочерней единицы под каждой unit */
-export function withActionRows(nodes: StructureNode[]): StructureNode[] {
-  return nodes.map((node) => {
-    if (node.type !== "unit") return node;
-
-    const children = node.children ?? [];
-    return {
-      ...node,
-      children: [
-        {
-          id: `${node.id}__actions`,
-          name: "",
-          type: "actions",
-          typeLabel: "",
-          parentId: node.id,
-        },
-        ...withActionRows(children),
-      ],
-    };
-  });
-}
