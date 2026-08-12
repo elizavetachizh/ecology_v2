@@ -212,7 +212,7 @@ export function CreateOperationModal({
                 {wastes.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.waste_classifier?.name
-                      ? `${item.waste_classifier?.name} (${item.waste_classifier?.short_name})`
+                      ? `${item.waste_classifier?.name}`
                       : item.waste_classifier?.name}
                   </option>
                 ))}

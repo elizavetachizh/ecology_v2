@@ -10,7 +10,6 @@ export function getRegionClassifiers(
   params: GetRegionClassifiersParams,
   signal?: AbortSignal,
 ): Promise<RegionClassifierListResponse> {
-  // 2. Убираем пустую строку поиска, чтобы не спамить в URL пустой переменной "?search="
   const searchParams = new URLSearchParams({
     limit: String(params.limit),
     offset: String(params.offset),

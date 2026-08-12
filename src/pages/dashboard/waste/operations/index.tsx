@@ -5,7 +5,6 @@ import {
   OPERATION_TYPES,
   type CreateOperationForm,
 } from "../../../../features/waste/create-operation";
-import { findWaste } from "../../../../entities/waste/directory";
 import {
   findStructureNode,
   getStructureTree,
@@ -18,7 +17,7 @@ import { operationsColumns } from "./ui/operations-columns";
 
 function mapFormToRow(form: CreateOperationForm): OperationRow {
   const unit = findStructureNode(getStructureTree(), form.unitId);
-  const waste = findWaste(form.wasteId);
+
   const operationType = OPERATION_TYPES.find(
     (item) => item.id === form.operationTypeId,
   );
@@ -28,10 +27,10 @@ function mapFormToRow(form: CreateOperationForm): OperationRow {
     date: form.date,
     department: unit?.name ?? "—",
     facility: "—",
-    waste: waste?.name ?? "—",
+    waste:  "—",
     operationType: operationType?.name ?? "—",
     quantity: Number(form.quantity),
-    unit: waste?.unit ?? "",
+    unit: "",
     storagePlace: "—",
     document: "—",
     status: "draft",
