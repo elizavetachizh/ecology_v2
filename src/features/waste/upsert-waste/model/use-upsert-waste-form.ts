@@ -1,108 +1,90 @@
-import { useState, type FormEvent } from "react";
-
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
   createWaste,
-  emptyWasteForm,
-  findWaste,
   updateWaste,
-  type DirectoryWaste,
+  wastesQueryKeys,
+  type Waste,
+} from "../../../../entities/waste/wastes";
+import { queryClient } from "../../../../shared/lib/query-client";
+import {
+  wasteFormDefaultValues,
+  wasteFormSchema,
   type WasteFormValues,
-} from "../../../../entities/waste/directory";
-import type { WasteClassifier } from "../../../../entities/waste/waste-classifier";
-
-type Mode = "create" | "edit";
+} from "./waste-form.schema";
+import { toWasteWriteBody } from "./map-waste-form";
 
 type UseUpsertWasteFormParams = {
-  mode: Mode;
+  mode: "create" | "edit";
   wasteId?: string;
-  initialInstructionId?: string;
-  onCreated?: (waste: DirectoryWaste) => void;
-  onUpdated?: (wasteId: string) => void;
+  initial?: Waste | null;
+  onSaved: (waste: Waste, meta: { close: boolean }) => void;
 };
 
 export function useUpsertWasteForm({
   mode,
   wasteId,
-  initialInstructionId,
-  onCreated,
-  onUpdated,
+  initial,
+  onSaved,
 }: UseUpsertWasteFormParams) {
-  const existing = mode === "edit" && wasteId ? findWaste(wasteId) : null;
-
-  const [instructionId, setInstructionId] = useState(
-    existing?.instructionId ?? initialInstructionId ?? "",
-  );
-  const [form, setForm] = useState<WasteFormValues>(() =>
-    existing
-      ? {
-          classifierId: existing.classifierId,
-          code: existing.code,
-          name: existing.name,
-          hazardClass: existing.hazardClass,
-          unit: existing.unit,
-        }
-      : emptyWasteForm(),
-  );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
 
-  const update = <K extends keyof WasteFormValues>(
-    key: K,
-    value: WasteFormValues[K],
-  ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const form = useForm<WasteFormValues>({
+    resolver: zodResolver(wasteFormSchema),
+    defaultValues: initial
+      ? {
+          waste_classifier_id: initial.waste_classifier_id,
+          hazard_class: initial.hazard_class,
+          uom: initial.uom,
+          physical_state: initial.physical_state,
+        }
+      : wasteFormDefaultValues,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (vars: { values: WasteFormValues; close: boolean }) =>
+      createWaste(toWasteWriteBody(vars.values)),
+    onSuccess: (created, vars) => {
+      void queryClient.invalidateQueries({
+        queryKey: wastesQueryKeys.lists(),
+      });
+      onSaved(created, { close: vars.close });
+      setSuccessMessage("Отход успешно создан");
+    },
+    onError: (err) => setError(err.message),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (vars: { values: WasteFormValues; close: boolean }) =>
+      updateWaste(wasteId!, toWasteWriteBody(vars.values)),
+    onSuccess: (updated, vars) => {
+      void queryClient.invalidateQueries({
+        queryKey: wastesQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: wastesQueryKeys.details(),
+      });
+      onSaved(updated, { close: vars.close });
+      setSuccessMessage("Отход успешно обновлён");
+    },
+    onError: (err) => setError(err.message),
+  });
+
+  const onSubmit = (close: boolean, values: WasteFormValues) => {
     setError(null);
-  };
-
-  const handleWasteClassifierChange = (item: WasteClassifier | null) => {
-    setForm((prev) => ({
-      ...prev,
-      classifierId: item ? String(item.id) : "",
-      code: item?.code ?? null,
-      name: item?.name ?? "",
-    }));
-    setError(null);
-  };
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-
-    if (!form.classifierId || form.code === null || !form.name.trim()) {
-      setError("Выберите отход из классификатора");
-      return;
-    }
-    if (!instructionId) {
-      setError("Выберите инструкцию по обращению с отходами");
-      return;
-    }
-
-    setPending(true);
-    try {
-      if (mode === "edit" && wasteId) {
-        updateWaste(wasteId, form);
-        onUpdated?.(wasteId);
-        return;
-      }
-
-      const created = createWaste(form, instructionId);
-      onCreated?.(created);
-    } catch {
-      setError("Не удалось сохранить отход");
-      setPending(false);
-    }
+    setSuccessMessage(null);
+    if (mode === "edit") updateMutation.mutate({ values, close });
+    else createMutation.mutate({ values, close });
   };
 
   return {
-    mode,
-    wasteId,
-    existing,
-    instructionId,
-    setInstructionId,
     form,
     error,
-    pending,
-    update,
-    handleWasteClassifierChange,
-    handleSubmit,
+    pending: createMutation.isPending || updateMutation.isPending,
+    onSubmit,
+    successMessage,
   };
 }

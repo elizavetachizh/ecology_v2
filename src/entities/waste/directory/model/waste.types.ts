@@ -39,10 +39,6 @@ export type Pod9Waste = DirectoryWaste & {
   sourceName: string;
 };
 
-export const HAZARD_CLASS_OPTIONS = ["I", "II", "III", "IV", "V"] as const;
-
-export const WASTE_UNIT_OPTIONS = ["т", "кг", "м³", "л", "шт"] as const;
-
 export function emptyWasteForm(): WasteFormValues {
   return {
     name: "",

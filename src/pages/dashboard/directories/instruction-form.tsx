@@ -91,7 +91,7 @@ export function EditInstructionPage() {
 
   return (
     <InstructionForm
-      mode="edit"
+      mode="edit" 
       instructionId={instructionId}
       initial={instructionQuery.data}
       showNextStepCta

@@ -1,51 +1,20 @@
-import { Link, useSearch } from "@tanstack/react-router";
-import { CreatePod9Form } from "../../../features/directories/create-structure-node";
-import { Alert, AlertDescription, Button } from "../../../shared/ui";
-import {
-  findStructureNode,
-  getStructureTree,
-  insertPod9,
-} from "./model/structure.store";
+import { Navigate } from "@tanstack/react-router";
 
+/**
+ * Legacy mock create-POD-9 page.
+ * Redirect to unit create with is_pod9 prefilled.
+ */
 export function CreatePod9Page() {
-  const { parentId } = useSearch({
-    from: "/directories/structure/pod9/new",
-  });
-
-  const parent = parentId
-    ? findStructureNode(getStructureTree(), parentId)
-    : null;
-
-  if (!parentId || !parent || parent.type !== "unit") {
-    return (
-      <div className="mx-auto max-w-xl space-y-4">
-        <Alert variant="error">
-          <AlertDescription>
-            Не удалось определить структурную единицу. Откройте создание ПОД-9
-            с карточки единицы.
-          </AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/structure">К структуре</Link>
-        </Button>
-      </div>
-    );
-  }
+  const parentId =
+    typeof window !== "undefined"
+      ? (new URLSearchParams(window.location.search).get("parentId") ?? "")
+      : "";
 
   return (
-    <CreatePod9Form
-      parentId={parentId}
-      parentLabel={`${parent.name}${parent.code ? ` (${parent.code})` : ""}`}
-      onCreated={(result) => {
-        insertPod9({
-          id: result.id,
-          name: result.name,
-          period: result.period,
-          status: result.status,
-          responsible: result.responsible,
-          parentId: result.parentId,
-        });
-      }}
+    <Navigate
+      to="/directories/structure/units/new"
+      search={{ parentId, isPod9: true }}
+      replace
     />
   );
 }

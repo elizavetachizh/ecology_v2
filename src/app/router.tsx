@@ -9,8 +9,6 @@ import { HomePage } from "../pages/dashboard/HomePage";
 import { WasteOperationsPage } from "../pages/dashboard/waste/operations";
 import { DirectoriesHubPage } from "../pages/dashboard/directories";
 import { DirectoriesStructurePage } from "../pages/dashboard/directories/structure";
-import { CreatePod9Page } from "../pages/dashboard/directories/create-pod9";
-import { Pod9Page } from "../pages/dashboard/directories/pod9";
 import {
   CreateUnitPage,
   EditUnitPage,
@@ -26,16 +24,30 @@ import {
   CreateWastePage,
   EditWastePage,
 } from "../pages/dashboard/directories/waste-form";
-import { WasteDetailPage } from "../pages/dashboard/directories/waste-detail";
-import { FormationSourcesPage } from "../pages/dashboard/directories/formation-sources";
+import { WasteSourcesPage } from "../pages/dashboard/directories/waste-sources";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
-import type {
-  InstructionSortField,
-  InstructionSortOrder,
-  InstructionStatus,
+import {
+  InstructionSortFields,
+  type InstructionSortField,
+  type InstructionSortOrder,
+  type InstructionStatus,
 } from "../entities/waste/instructions";
+import {
+  HazardClassValues,
+  PhysicalStateValues,
+  WasteSortFields,
+  type HazardClass,
+  type PhysicalState,
+  type WasteSortField,
+  type WasteSortOrder,
+} from "../entities/waste/wastes";
+import {
+  WasteSourceSortFields,
+  type WasteSourceSortField,
+  type WasteSourceSortOrder,
+} from "../entities/waste/waste-sources";
 
 export type RouterContext = {
   auth: AuthContextValue;
@@ -46,6 +58,24 @@ type InstructionsSearch = {
   status?: InstructionStatus;
   sort?: InstructionSortField;
   order?: InstructionSortOrder;
+  limit?: number;
+  offset?: number;
+};
+
+type WastesSearch = {
+  q?: string;
+  hazard_class?: HazardClass;
+  physical_state?: PhysicalState;
+  sort?: WasteSortField;
+  order?: WasteSortOrder;
+  limit?: number;
+  offset?: number;
+};
+
+type WasteSourcesSearch = {
+  q?: string;
+  sort?: WasteSourceSortField;
+  order?: WasteSourceSortOrder;
   limit?: number;
   offset?: number;
 };
@@ -94,6 +124,7 @@ const directoriesStructureRoute = createRoute({
 
 type CreateUnitSearch = {
   parentId: string;
+  isPod9?: boolean;
 };
 
 const directoriesCreateUnitRoute = createRoute({
@@ -101,6 +132,7 @@ const directoriesCreateUnitRoute = createRoute({
   path: "/directories/structure/units/new",
   validateSearch: (search: Record<string, unknown>): CreateUnitSearch => ({
     parentId: typeof search.parentId === "string" ? search.parentId : "",
+    isPod9: search.isPod9 === true || search.isPod9 === "true",
   }),
   component: CreateUnitPage,
 });
@@ -108,79 +140,75 @@ const directoriesCreateUnitRoute = createRoute({
 const directoriesEditUnitRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/structure/units/$unitId",
-  component: EditUnitPage,
-});
-
-type CreatePod9Search = {
-  parentId: string;
-};
-
-const directoriesCreatePod9Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/directories/structure/pod9/new",
-  validateSearch: (search: Record<string, unknown>): CreatePod9Search => ({
-    parentId: typeof search.parentId === "string" ? search.parentId : "",
-  }),
-  component: CreatePod9Page,
-});
-
-const directoriesPod9Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/directories/structure/pod9/$pod9Id",
   validateSearch: (search: Record<string, unknown>) => ({
     instructionId:
       typeof search.instructionId === "string"
         ? search.instructionId
         : undefined,
   }),
-  component: Pod9Page,
+  component: EditUnitPage,
 });
 
 const directoriesWastesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/wastes",
-  validateSearch: (search: Record<string, unknown>) => ({
-    instructionId:
-      typeof search.instructionId === "string"
-        ? search.instructionId
-        : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): WastesSearch => {
+    const sortRaw = search.sort;
+    const sort =
+      typeof sortRaw === "string" &&
+      WasteSortFields.includes(sortRaw as WasteSortField)
+        ? (sortRaw as WasteSortField)
+        : undefined;
+
+    const orderRaw = search.order;
+    const order =
+      orderRaw === "asc" || orderRaw === "desc" ? orderRaw : undefined;
+
+    const hazardRaw = search.hazard_class;
+    const hazard_class =
+      typeof hazardRaw === "string" &&
+      HazardClassValues.includes(hazardRaw as HazardClass)
+        ? (hazardRaw as HazardClass)
+        : undefined;
+
+    const physicalRaw = search.physical_state;
+    const physical_state =
+      typeof physicalRaw === "string" &&
+      PhysicalStateValues.includes(physicalRaw as PhysicalState)
+        ? (physicalRaw as PhysicalState)
+        : undefined;
+
+    const limitRaw = Number(search.limit);
+    const offsetRaw = Number(search.offset);
+
+    return {
+      q: typeof search.q === "string" && search.q.trim() ? search.q : undefined,
+      hazard_class,
+      physical_state,
+      sort,
+      order,
+      limit:
+        Number.isFinite(limitRaw) && limitRaw >= 1 && limitRaw <= 200
+          ? Math.floor(limitRaw)
+          : undefined,
+      offset:
+        Number.isFinite(offsetRaw) && offsetRaw >= 0
+          ? Math.floor(offsetRaw)
+          : undefined,
+    };
+  },
   component: WastesDirectoryPage,
 });
 
 const directoriesCreateWasteRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/wastes/new",
-  validateSearch: (search: Record<string, unknown>) => ({
-    instructionId:
-      typeof search.instructionId === "string"
-        ? search.instructionId
-        : undefined,
-  }),
   component: CreateWastePage,
-});
-
-type WasteDetailSearch = {
-  created?: boolean;
-  instructionId?: string;
-};
-
-const directoriesWasteDetailRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/directories/wastes/$wasteId",
-  validateSearch: (search: Record<string, unknown>): WasteDetailSearch => ({
-    created: search.created === true || search.created === "true",
-    instructionId:
-      typeof search.instructionId === "string"
-        ? search.instructionId
-        : undefined,
-  }),
-  component: WasteDetailPage,
 });
 
 const directoriesWasteEditRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/wastes/$wasteId/edit",
+  path: "/directories/wastes/$wasteId",
   component: EditWastePage,
 });
 
@@ -190,10 +218,39 @@ const directoriesLimitsRoute = createRoute({
   component: () => <DirectoryStubPage title="Лимиты накопления" />,
 });
 
-const directoriesFormationSourcesRoute = createRoute({
+const directoriesWasteSourcesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/formation-sources",
-  component: FormationSourcesPage,
+  path: "/directories/waste-sources",
+  validateSearch: (search: Record<string, unknown>): WasteSourcesSearch => {
+    const sortRaw = search.sort;
+    const sort =
+      typeof sortRaw === "string" &&
+      WasteSourceSortFields.includes(sortRaw as WasteSourceSortField)
+        ? (sortRaw as WasteSourceSortField)
+        : undefined;
+
+    const orderRaw = search.order;
+    const order =
+      orderRaw === "asc" || orderRaw === "desc" ? orderRaw : undefined;
+
+    const limitRaw = Number(search.limit);
+    const offsetRaw = Number(search.offset);
+
+    return {
+      q: typeof search.q === "string" && search.q.trim() ? search.q : undefined,
+      sort,
+      order,
+      limit:
+        Number.isFinite(limitRaw) && limitRaw >= 1 && limitRaw <= 200
+          ? Math.floor(limitRaw)
+          : undefined,
+      offset:
+        Number.isFinite(offsetRaw) && offsetRaw >= 0
+          ? Math.floor(offsetRaw)
+          : undefined,
+    };
+  },
+  component: WasteSourcesPage,
 });
 
 const directoriesNormsRoute = createRoute({
@@ -217,17 +274,7 @@ const directoriesInstructionsRoute = createRoute({
     const sortRaw = search.sort;
     const sort =
       typeof sortRaw === "string" &&
-      (
-        [
-          "name",
-          "short_name",
-          "status",
-          "start_date",
-          "end_date",
-          "created_at",
-          "id",
-        ] as const
-      ).includes(sortRaw as InstructionSortField)
+      InstructionSortFields.includes(sortRaw as InstructionSortField)
         ? (sortRaw as InstructionSortField)
         : undefined;
 
@@ -293,13 +340,10 @@ const routeTree = rootRoute.addChildren([
   directoriesStructureRoute,
   directoriesCreateUnitRoute,
   directoriesEditUnitRoute,
-  directoriesCreatePod9Route,
-  directoriesPod9Route,
   directoriesWastesRoute,
   directoriesCreateWasteRoute,
   directoriesWasteEditRoute,
-  directoriesWasteDetailRoute,
-  directoriesFormationSourcesRoute,
+  directoriesWasteSourcesRoute,
   directoriesLimitsRoute,
   directoriesNormsRoute,
   directoriesInstructionsRoute,

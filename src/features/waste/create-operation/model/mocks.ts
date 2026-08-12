@@ -6,7 +6,6 @@ export type OperationType = {
 export type CreateOperationForm = {
   /** Структурная единица из MOCK_STRUCTURE / дерева структуры */
   unitId: string;
-  /** Отход из справочника (MOCK_WASTES) */
   wasteId: string;
   date: string;
   operationTypeId: string;

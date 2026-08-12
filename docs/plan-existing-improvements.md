@@ -6,27 +6,34 @@
 
 **Связанные источники:**  
 `eco-frontend-architecture.md`, `eco-keycloak-authentication.md`, `eco-waste-wireframe.md`,  
-backend docs: `keycloak.md`, `tenants.md`, `users_me.md`, `mdm_instructions.md`, `mdm_units.md`, `mdm_wastes.md`, `classifiers_*.md`.
+backend docs: `keycloak.md`, `tenants.md`, `users_me.md`, `mdm_instructions.md`, `mdm_units.md`, `mdm_wastes.md`, `mdm_waste_sources.md`, `classifiers_*.md`.
 
-**Связанный документ:** [`plan-new-features.md`](./plan-new-features.md) — то, чего ещё нет в UI/API на фронте.
+**Связанные документы:**  
+- [`plan-adr-implementation.md`](./plan-adr-implementation.md) — **план реализации по обновлённому ADR** (scope MDM + UIW).  
+- [`plan-new-features.md`](./plan-new-features.md) — то, чего ещё нет в UI/API на фронте (вне ADR scope).  
+- [`plan-directories-review.md`](./plan-directories-review.md) — ревью справочников (2026-08-11) + выравнивание под эталон/FSD.
 
 ---
 
 ## 0. Вердикт код-ревью (кратко)
 
+> Обновление 2026-08-11: MDM catalog cutover (wastes, waste-sources) уже в коде; детали отклонений — в [`plan-directories-review.md`](./plan-directories-review.md).
+
 | Зона | Оценка | Комментарий |
 |------|--------|-------------|
 | Auth (Keycloak + `api-client`) | Хорошо | PKCE, in-memory tokens, refresh, 401 retry — по ADR |
-| Tenant + `/me` | Хорошо, с дырами | Header работает; cache invalidate сломан; нет persistence |
-| Instructions CRUD | Хорошо как эталон | Реальный API; форма RHF+Zod; есть мелкие UX/query gaps |
-| Waste classifier select | Хорошо | Shared classifier, debounce — правильный паттерн |
-| POD-9 preview | Рабочий прототип | Legacy blob adapter ок; страница — test harness |
-| Structure / wastes / sources / ops | UI-прототип на моках | Модели **не совпадают** с backend MDM |
-| FSD / layout / DataTable | Каркас ок | Нарушения import rules; нет `widgets`; Zustand из ADR не подключён |
+| Tenant + `/me` | Хорошо, с дырами | Persist OK; **cache clear на смене tenant всё ещё сломан** (`meta.tenantScoped`) |
+| Instructions CRUD | Эталон | API OK; delete всё ещё смотрит на **mock** directory |
+| Units / structure | Хорошо | API tree/form OK; не invalidate `trees()`; POD-9 mock рядом |
+| MDM wastes catalog | Хорошо | API list/form; mock `directory` остался для POD-9/ops |
+| Waste sources | Хорошо | API page OK; select/POD-9 на mock `formation-source`; naming drift |
+| Waste classifier select | Хорошо | Shared classifier, debounce |
+| POD-9 / ops / hub | Прототип на моках | Не смешивать с MDM pages |
+| FSD / layout / DataTable | Каркас ок | features→app/pages, shared→entities/pages |
 | RBAC UI | Не доведено | `<Can>` есть, нигде не используется |
 
-**Эталонный слайс для копирования паттерна:** `entities/waste/instructions` + `features/waste/upsert-instruction`.  
-Не плодить новые «самописные сторы на `useSyncExternalStore`» для server state — это временный прототип; целевой путь: TanStack Query + API entity.
+**Эталонный слайс:** `entities/waste/instructions` + `features/waste/upsert-instruction`.  
+Server state только через TanStack Query + entity API — не расширять `useSyncExternalStore` mocks.
 
 ---
 
@@ -38,10 +45,10 @@ backend docs: `keycloak.md`, `tenants.md`, `users_me.md`, `mdm_instructions.md`,
 | `/me`, `/tenants`, `X-Tenant-Id` | Реализовано | Да | **Баг + доводка** |
 | Instructions list/CRUD | Реализовано | Да | Доводка list/query/типов |
 | Classifier wastes search | Реализовано (select) | Да | Доводка; admin CRUD — new features |
-| Units / structure tree | Частичный cutover на API (~35%) | Да (`/mdm/units`) | **Довести контракт + форму + tree** (см. §5) |
+| Units / structure tree | API cutover основной path | Да (`/mdm/units`) | Доводка invalidate tree + POD-9 boundary (см. §5 + directories-review) |
 | Regions / districts classifiers | List API + selects есть | Да | Доводка cascade/retrieve (см. §7) |
-| MDM wastes catalog | UI + mock store | Да (`/mdm/wastes`) | **Замена мока на API** (см. §6) |
-| Formation sources | UI + mock | **Нет docs** | Оставить mock / ждать API → new features |
+| MDM wastes catalog | API list/CRUD | Да (`/mdm/wastes`) | Изоляция от mock directory; UX parity |
+| Formation / waste sources | API page CRUD | Да (`/mdm/waste-sources`) | Select cutover + naming; см. directories-review |
 | Operations journal | UI + mock | Нет docs | → new features |
 | Report POD-9 preview | API harness | Legacy `/api/w/pod-9/` | Доводка UX параметров |
 | Header: org / instruction / period | Только org | — | Доводка под wireframe |

@@ -1,111 +1,135 @@
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
+import { useTenant } from "../../../app/providers/tenant/tenant-context";
 import {
+  DEFAULT_WASTES_LIST_LIMIT,
+  deleteWaste,
+  HAZARD_CLASS_LABEL,
+  HazardClassValues,
+  PHYSICAL_STATE_LABEL,
+  PhysicalStateValues,
+  UOM_LABEL,
+  useWastesListQuery,
+  wastesQueryKeys,
+  type HazardClass,
+  type PhysicalState,
+  type Waste,
+} from "../../../entities/waste/wastes";
+import { queryClient } from "../../../shared/lib/query-client";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Button,
   ConfirmDialog,
   DataTable,
+  DataTablePagination,
   DataTableRowAction,
   DataTableRowActions,
+  Input,
   Select,
   type ColumnDef,
 } from "../../../shared/ui";
-import {
-  deleteWaste,
-  formatBindingLabels,
-  getPod9WastesSnapshot,
-  getWasteBindings,
-  getWastesByInstruction,
-  subscribeWastes,
-  type DirectoryWaste,
-} from "../../../entities/waste/directory";
-import { getStructureTree, subscribeStructure } from "./model/structure.store";
 
 export function WastesDirectoryPage() {
-  const [deletingWaste, setDeletingWaste] = useState<DirectoryWaste | null>(
-    null,
-  );
-  const navigate = useNavigate();
+  const { activeTenantId } = useTenant();
+  const [deletingWaste, setDeletingWaste] = useState<Waste | null>(null);
+  const navigate = useNavigate({ from: "/directories/wastes" });
   const search = useSearch({ from: "/directories/wastes" });
+  const [searchInput, setSearchInput] = useState(search.q ?? "");
 
-  useSyncExternalStore(subscribeStructure, getStructureTree, getStructureTree);
-  const storeVersion = useSyncExternalStore(
-    subscribeWastes,
-    getPod9WastesSnapshot,
-    getPod9WastesSnapshot,
+  const listParams = useMemo(
+    () => ({
+      search: search.q || undefined,
+      hazard_class: search.hazard_class,
+      physical_state: search.physical_state,
+      sort: search.sort ?? ("name" as const),
+      order: search.order ?? ("asc" as const),
+      limit: search.limit ?? DEFAULT_WASTES_LIST_LIMIT,
+      offset: search.offset ?? 0,
+    }),
+    [search],
   );
-  const instructionId = search.instructionId as string | null;
-  const wastes = useMemo(() => {
-    void storeVersion;
-    return getWastesByInstruction(instructionId);
-  }, [instructionId, storeVersion]);
 
-  const columns = useMemo<ColumnDef<DirectoryWaste>[]>(
+  const {
+    items: wastes,
+    total,
+    limit,
+    offset,
+    loading,
+    error,
+  } = useWastesListQuery({
+    tenantId: activeTenantId,
+    params: listParams,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteWaste(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: wastesQueryKeys.lists(),
+      });
+      setDeletingWaste(null);
+    },
+  });
+
+  const patchSearch = (patch: {
+    q?: string | undefined;
+    hazard_class?: HazardClass | undefined;
+    physical_state?: PhysicalState | undefined;
+    offset?: number;
+  }) => {
+    void navigate({
+      search: (prev) => {
+        const next = { ...prev, ...patch };
+        if ("q" in patch || "hazard_class" in patch || "physical_state" in patch) {
+          next.offset = patch.offset ?? 0;
+        }
+        return next;
+      },
+    });
+  };
+
+  const columns = useMemo<ColumnDef<Waste>[]>(
     () => [
       {
-        accessorKey: "name",
+        id: "code",
+        header: "Код",
+        cell: ({ row }) => row.original.waste_classifier.code,
+      },
+      {
+        id: "name",
         header: "Наименование",
         cell: ({ row }) => (
           <Link
             to="/directories/wastes/$wasteId"
             params={{ wasteId: row.original.id }}
-            search={{ instructionId: row.original.instructionId }}
             className="font-medium hover:underline"
           >
-            {row.original.name}
+            {row.original.waste_classifier.name}
           </Link>
         ),
       },
       {
-        accessorKey: "hazardClass",
+        accessorKey: "hazard_class",
         header: "Класс опасности",
-        cell: ({ row }) => row.original.hazardClass,
+        cell: ({ row }) => HAZARD_CLASS_LABEL[row.original.hazard_class],
       },
       {
-        accessorKey: "unit",
+        accessorKey: "physical_state",
+        header: "Состояние",
+        cell: ({ row }) =>
+          row.original.physical_state
+            ? PHYSICAL_STATE_LABEL[row.original.physical_state]
+            : "—",
+      },
+      {
+        accessorKey: "uom",
         header: "Ед. изм.",
-        cell: ({ row }) => row.original.unit,
-      },
-      {
-        id: "bindings",
-        header: "Где образуется / ПОД-9",
-        cell: ({ row }) => {
-          const bindings = getWasteBindings(
-            row.original.id,
-            row.original.instructionId,
-          );
-          if (bindings.length === 0) {
-            return (
-              <span className="text-xs text-muted-foreground">
-                Нет привязок
-              </span>
-            );
-          }
-
-          return (
-            <div className="flex max-w-md flex-wrap gap-1.5">
-              {bindings.map((binding) => {
-                const { unitLabel, pod9Label, sourceLabel } =
-                  formatBindingLabels(binding);
-                return (
-                  <span
-                    key={binding.id}
-                    className="inline-flex max-w-full flex-col rounded-md border border-border bg-muted/40 px-2 py-1 text-xs leading-tight"
-                    title={`${sourceLabel} · ${unitLabel} → ${pod9Label}`}
-                  >
-                    <span className="truncate font-medium text-foreground">
-                      {sourceLabel}
-                    </span>
-                    <span className="truncate text-muted-foreground">
-                      {unitLabel} → {pod9Label}
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
-          );
-        },
+        cell: ({ row }) => UOM_LABEL[row.original.uom],
       },
       {
         id: "actions",
@@ -113,11 +137,10 @@ export function WastesDirectoryPage() {
         enableSorting: false,
         cell: ({ row }) => (
           <DataTableRowActions>
-            <DataTableRowAction asChild label="Открыть и изменить отход">
+            <DataTableRowAction asChild label="Изменить отход">
               <Link
                 to="/directories/wastes/$wasteId"
                 params={{ wasteId: row.original.id }}
-                search={{ instructionId: row.original.instructionId }}
               >
                 <Pencil />
                 Изменить
@@ -137,6 +160,27 @@ export function WastesDirectoryPage() {
     [],
   );
 
+  if (!activeTenantId) {
+    return (
+      <Alert variant="info">
+        <AlertTitle>Выберите организацию</AlertTitle>
+        <AlertDescription>
+          Чтобы работать со справочником отходов, выберите организацию в верхней
+          панели.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="error">
+        <AlertTitle>Не удалось загрузить отходы</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -148,32 +192,10 @@ export function WastesDirectoryPage() {
             Создайте отход в справочнике, затем привяжите его к структурным
             единицам и журналам ПОД-9.
           </p>
-          <Select
-            aria-label="Фильтр по инструкции"
-            value={instructionId ?? ""}
-            onChange={(event) =>
-              void navigate({
-                to: "/directories/wastes",
-                search: { instructionId: event.target.value || undefined },
-                replace: true,
-              })
-            }
-            disabled={instructionId === null}
-            className="mt-2 max-w-xl"
-          >
-            {instructionId === null ? (
-              <option value="">Инструкций пока нет</option>
-            ) : (
-              <option value="instr-demo-2026">Инструкция 2026</option>
-            )}
-          </Select>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild size="sm">
-            <Link
-              to="/directories/wastes/new"
-              search={{ instructionId: instructionId ?? undefined }}
-            >
+            <Link to="/directories/wastes/new">
               <Plus className="size-3.5" />
               Создать отход
             </Link>
@@ -184,12 +206,79 @@ export function WastesDirectoryPage() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          className="max-w-xs"
+          placeholder="Поиск по коду или названию"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              patchSearch({ q: searchInput.trim() || undefined });
+            }
+          }}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => patchSearch({ q: searchInput.trim() || undefined })}
+        >
+          Найти
+        </Button>
+        <Select
+          aria-label="Фильтр по классу опасности"
+          className="w-56"
+          value={search.hazard_class ?? ""}
+          onChange={(e) =>
+            patchSearch({
+              hazard_class: (e.target.value || undefined) as
+                | HazardClass
+                | undefined,
+            })
+          }
+        >
+          <option value="">Все классы опасности</option>
+          {HazardClassValues.map((value) => (
+            <option key={value} value={value}>
+              {HAZARD_CLASS_LABEL[value]}
+            </option>
+          ))}
+        </Select>
+        <Select
+          aria-label="Фильтр по агрегатному состоянию"
+          className="w-48"
+          value={search.physical_state ?? ""}
+          onChange={(e) =>
+            patchSearch({
+              physical_state: (e.target.value || undefined) as
+                | PhysicalState
+                | undefined,
+            })
+          }
+        >
+          <option value="">Все состояния</option>
+          {PhysicalStateValues.map((value) => (
+            <option key={value} value={value}>
+              {PHYSICAL_STATE_LABEL[value]}
+            </option>
+          ))}
+        </Select>
+      </div>
+
       <DataTable
         columns={columns}
         data={wastes}
         getRowId={(row) => row.id}
         emptyTitle="Отходов пока нет"
-        emptyDescription="В выбранной инструкции отходов пока нет. Создайте отход — привязки к единицам и ПОД-9 добавите после."
+        emptyDescription="Создайте отход из классификатора — код и наименование подтянутся автоматически."
+      />
+      <DataTablePagination
+        total={total}
+        limit={limit}
+        offset={offset}
+        disabled={loading}
+        onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
       />
 
       <ConfirmDialog
@@ -197,15 +286,16 @@ export function WastesDirectoryPage() {
         onOpenChange={(open) => {
           if (!open) setDeletingWaste(null);
         }}
-        title="Удалить вид отхода?"
+        title="Удалить отход?"
         description={
           <>
-            Вид отхода «{deletingWaste?.name}» и все его привязки к структурным
-            единицам и ПОД-9 будут удалены. Это действие нельзя отменить.
+            Отход «
+            {deletingWaste?.waste_classifier.name ?? "—"}» будет удалён из
+            справочника. Это действие нельзя отменить.
           </>
         }
         onConfirm={() => {
-          if (deletingWaste) deleteWaste(deletingWaste.id);
+          if (deletingWaste) void deleteMutation.mutateAsync(deletingWaste.id);
         }}
       />
     </div>

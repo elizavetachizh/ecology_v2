@@ -17,7 +17,7 @@ type UseInstructionsOptionsArgs = {
   status?: InstructionStatus;
   limit?: number;
 };
-
+ 
 /**
  * Options для combobox / async select: debounce search, небольшой limit.
  * Для таблицы справочника используйте `useInstructionsListQuery`.

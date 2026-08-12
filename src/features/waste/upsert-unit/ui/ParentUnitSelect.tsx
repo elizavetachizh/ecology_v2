@@ -12,6 +12,8 @@ type ParentUnitSelectProps = {
   value: string;
   /** Текущая единица (edit) — нельзя выбрать себя родителем. */
   excludeUnitId?: string;
+  /** Для ПОД-9 родитель обязателен — меняем placeholder. */
+  required?: boolean;
   onChange: (unit: Unit | null) => void;
 };
 
@@ -19,6 +21,7 @@ export function ParentUnitSelect({
   tenantId,
   value,
   excludeUnitId,
+  required = false,
   onChange,
 }: ParentUnitSelectProps) {
   const { options, loading, search, setSearch } = useUnitsOptions({
@@ -57,10 +60,16 @@ export function ParentUnitSelect({
           (parentDetailQuery.data?.id === id ? parentDetailQuery.data : null);
         onChange(item);
       }}
-      placeholder="Без родителя (корневая единица)"
-      searchPlaceholder="Поиск структурной единицы"
+      placeholder={
+        required
+          ? "Выберите родительскую единицу…"
+          : "Без родителя (корневая единица) или выберите…"
+      }
+      searchPlaceholder="Поиск по названию или краткому"
       emptyMessage={
-        loading ? "Загрузка…" : "Начните вводить название единицы"
+        loading
+          ? "Загрузка…"
+          : "Ничего не найдено. Создайте родителя или уточните поиск."
       }
       className="w-full"
       contentClassName="w-full"

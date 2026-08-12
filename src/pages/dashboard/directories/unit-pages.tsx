@@ -1,7 +1,13 @@
-import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { UnitForm } from "../../../features/waste/upsert-unit";
-import { useTenant } from "../../../app/providers/tenant/tenant-context";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UnitForm } from "../../../features/waste/upsert-unit";
+import { UnitInstructionWastesSection } from "../../../features/waste/bind-unit-instruction-waste";
+import { useTenant } from "../../../app/providers/tenant/tenant-context";
 import { getUnit, unitsQueryKeys } from "../../../entities/waste/units";
 import {
   Alert,
@@ -13,7 +19,7 @@ import {
 export function CreateUnitPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-  const { parentId } = useSearch({
+  const { parentId, isPod9 } = useSearch({
     from: "/directories/structure/units/new",
   });
 
@@ -32,8 +38,20 @@ export function CreateUnitPage() {
   return (
     <UnitForm
       mode="create"
+      activeTenantId={activeTenantId}
       defaultParentId={parentId || undefined}
+      defaultIsPod9={Boolean(isPod9)}
       onSaved={(unit, { close }) => {
+        // После создания ПОД-9 всегда открываем карточку с привязками отходов.
+        if (unit.is_pod9) {
+          void navigate({
+            to: "/directories/structure/units/$unitId",
+            params: { unitId: unit.id },
+            search: { instructionId: undefined },
+            replace: true,
+          });
+          return;
+        }
         if (close) {
           void navigate({
             to: "/directories/structure",
@@ -44,6 +62,7 @@ export function CreateUnitPage() {
         void navigate({
           to: "/directories/structure/units/$unitId",
           params: { unitId: unit.id },
+          search: { instructionId: undefined },
           replace: true,
         });
       }}
@@ -56,7 +75,8 @@ export function EditUnitPage() {
   const { unitId } = useParams({
     from: "/directories/structure/units/$unitId",
   });
-  const navigate = useNavigate();
+  const search = useSearch({ from: "/directories/structure/units/$unitId" });
+  const navigate = useNavigate({ from: "/directories/structure/units/$unitId" });
   const queryClient = useQueryClient();
   const { activeTenantId } = useTenant();
   const unitQuery = useQuery({
@@ -94,23 +114,45 @@ export function EditUnitPage() {
     );
   }
 
+  const unit = unitQuery.data;
+
   return (
-    <UnitForm
-      mode="edit"
-      unitId={unitId}
-      initial={unitQuery.data}
-      onSaved={(unit, { close }) => {
-        if (close)
-          void navigate({
-            to: "/directories/structure",
-            search: { focusId: unit.id },
-          });
-        else
-          void queryClient.invalidateQueries({
-            queryKey: unitsQueryKeys.detail(activeTenantId, unitId),
-          });
-      }}
-      onCancel={() => void navigate({ to: "/directories/structure" })}
-    />
+    <div className="space-y-6">
+      <UnitForm
+        mode="edit"
+        activeTenantId={activeTenantId}
+        unitId={unitId}
+        initial={unit}
+        onSaved={(saved, { close }) => {
+          if (close)
+            void navigate({
+              to: "/directories/structure",
+              search: { focusId: saved.id },
+            });
+          else
+            void queryClient.invalidateQueries({
+              queryKey: unitsQueryKeys.detail(activeTenantId, unitId),
+            });
+        }}
+        onCancel={() => void navigate({ to: "/directories/structure" })}
+      />
+
+      {unit.is_pod9 ? (
+        <UnitInstructionWastesSection
+          tenantId={activeTenantId}
+          unitId={unitId}
+          instructionId={search.instructionId}
+          onInstructionChange={(nextInstructionId) => {
+            void navigate({
+              search: (prev) => ({
+                ...prev,
+                instructionId: nextInstructionId,
+              }),
+              replace: true,
+            });
+          }}
+        />
+      ) : null}
+    </div>
   );
 }

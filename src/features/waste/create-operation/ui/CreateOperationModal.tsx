@@ -12,14 +12,15 @@ import {
   ModalTitle,
   Select,
 } from "../../../../shared/ui";
-import { getAllWastes } from "../../../../entities/waste/directory";
-import { listStructureUnits } from "../../../../pages/dashboard/directories/model/structure.store";
 import {
   CREATE_OPERATION_STEPS,
   OPERATION_TYPES,
   createEmptyOperationForm,
   type CreateOperationForm,
 } from "../model/mocks";
+import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useUnitsOptions } from "../../../../entities/waste/units";
+import { useWastesListQuery } from "../../../../entities/waste/wastes";
 
 type CreateOperationModalProps = {
   open: boolean;
@@ -46,12 +47,30 @@ export function CreateOperationModal({
   onOpenChange,
   onSubmit,
 }: CreateOperationModalProps) {
+  const { activeTenantId } = useTenant();
+
+  const { options, loading, search, setSearch } = useUnitsOptions({
+    tenantId: activeTenantId,
+    limit: 20,
+  });
+
+  const { items: wastes } = useWastesListQuery({
+    tenantId: activeTenantId,
+    params: {
+      search: "",
+      sort: "name",
+      order: "asc",
+      limit: 20,
+      offset: 0,
+    },
+  });
+
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<CreateOperationForm>(createEmptyOperationForm);
+  const [form, setForm] = useState<CreateOperationForm>(
+    createEmptyOperationForm,
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const structureUnits = listStructureUnits();
-  const wastes = getAllWastes();
   const selectedWaste = wastes.find((item) => item.id === form.wasteId);
 
   const reset = () => {
@@ -167,10 +186,11 @@ export function CreateOperationModal({
                 onChange={(event) => updateField("unitId", event.target.value)}
               >
                 <option value="">Выберите структурную единицу</option>
-                {structureUnits.map((item) => (
+                {options.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name}
-                    {item.code ? ` (${item.code})` : ""}
+                    {item.short_name
+                      ? `${item.name} (${item.short_name})`
+                      : item.name}
                   </option>
                 ))}
               </Select>
@@ -191,7 +211,9 @@ export function CreateOperationModal({
                 <option value="">Выберите отход</option>
                 {wastes.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name}
+                    {item.waste_classifier?.name
+                      ? `${item.waste_classifier?.name} (${item.waste_classifier?.short_name})`
+                      : item.waste_classifier?.name}
                   </option>
                 ))}
               </Select>
@@ -200,12 +222,14 @@ export function CreateOperationModal({
             {selectedWaste ? (
               <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Класс опасности: </span>
-                  {selectedWaste.hazardClass}
+                  <span className="text-muted-foreground">
+                    Класс опасности:{" "}
+                  </span>
+                  {selectedWaste.hazard_class}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Ед. изм.: </span>
-                  {selectedWaste.unit}
+                  {selectedWaste.uom}
                 </div>
               </div>
             ) : null}
@@ -246,7 +270,7 @@ export function CreateOperationModal({
             <div className="space-y-2">
               <FieldLabel htmlFor="quantity">
                 Количество
-                {selectedWaste ? ` (${selectedWaste.unit})` : ""}
+                {selectedWaste ? ` (${selectedWaste.uom})` : ""}
               </FieldLabel>
               <Input
                 id="quantity"
@@ -255,7 +279,9 @@ export function CreateOperationModal({
                 step="any"
                 placeholder="0"
                 value={form.quantity}
-                onChange={(event) => updateField("quantity", event.target.value)}
+                onChange={(event) =>
+                  updateField("quantity", event.target.value)
+                }
               />
             </div>
           </div>

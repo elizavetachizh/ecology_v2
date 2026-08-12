@@ -26,14 +26,6 @@ vi.mock("../../../entities/tenant", () => ({
   getTenants: vi.fn(),
 }));
 
-vi.mock("../../../entities/waste/directory", () => ({
-  resetWastesStore: vi.fn(),
-}));
-
-vi.mock("../../../entities/waste/formation-source", () => ({
-  resetFormationSourcesStore: vi.fn(),
-}));
-
 const getCurrentUserMock = vi.mocked(getCurrentUser);
 const getTenantsMock = vi.mocked(getTenants);
 

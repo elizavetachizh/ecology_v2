@@ -13,3 +13,4 @@ export const instructionsQueryKeys = {
   detail: (tenantId: string, id: string) =>
     [...instructionsQueryKeys.details(), tenantId, id] as const,
 };
+ 

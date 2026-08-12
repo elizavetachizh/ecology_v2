@@ -6,21 +6,12 @@ export type {
   WasteFormValues,
 } from "./model/waste.types";
 
-export {
-  emptyPod9WasteForm,
-  emptyWasteForm,
-  HAZARD_CLASS_OPTIONS,
-  WASTE_UNIT_OPTIONS,
-} from "./model/waste.types";
+export { emptyPod9WasteForm, emptyWasteForm } from "./model/waste.types";
 
 export {
-  addPod9Waste,
-  addWasteBinding,
-  bindExistingWasteToPod9,
   createWaste,
   deleteWaste,
   findWaste,
-  formatBindingLabels,
   getAllBindings,
   getAllWastes,
   getPod9Wastes,
@@ -28,8 +19,6 @@ export {
   getWasteBindings,
   getWastesByInstruction,
   getWastesSnapshot,
-  removeBindingsForStructureNodes,
-  removeWasteBinding,
   resetWastesStore,
   subscribePod9Wastes,
   subscribeWastes,

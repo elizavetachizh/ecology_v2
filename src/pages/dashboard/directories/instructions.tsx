@@ -16,7 +16,6 @@ import {
   Select,
   type ColumnDef,
 } from "../../../shared/ui";
-import { getWastesByInstruction } from "../../../entities/waste/directory";
 import { useMutation } from "@tanstack/react-query";
 import {
   DEFAULT_INSTRUCTIONS_LIST_LIMIT,
@@ -283,24 +282,9 @@ export function InstructionsPage() {
           if (!open) setDeletingInstruction(null);
         }}
         title="Удалить инструкцию?"
-        description={
-          deletingInstruction &&
-          getWastesByInstruction(deletingInstruction.id).length > 0 ? (
-            <span className="text-destructive">
-              Инструкцию «{deletingInstruction.name}» нельзя удалить, пока к ней
-              привязаны отходы.
-            </span>
-          ) : (
-            <>
-              Инструкция «{deletingInstruction?.name}» будет удалена без
-              возможности восстановления.
-            </>
-          )
-        }
-        confirmDisabled={
-          deletingInstruction !== null &&
-          getWastesByInstruction(deletingInstruction.id).length > 0
-        }
+        description={`Инструкция «{deletingInstruction?.name}» будет удалена без
+              возможности восстановления.`}
+        confirmDisabled={deletingInstruction !== null}
         onConfirm={() => {
           if (deletingInstruction) {
             void deleteMutation.mutateAsync(deletingInstruction.id);

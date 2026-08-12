@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   ConfirmDialog,
   DataTable,
@@ -80,10 +81,13 @@ export function DirectoriesStructurePage() {
   });
 
   const openCreateUnit = useCallback(
-    (parentId?: string) => {
+    (parentId?: string, options?: { isPod9?: boolean }) => {
       void navigate({
         to: "/directories/structure/units/new",
-        search: { parentId: parentId ?? "" },
+        search: {
+          parentId: parentId ?? "",
+          isPod9: options?.isPod9 ? true : undefined,
+        },
       });
     },
     [navigate],
@@ -109,6 +113,7 @@ export function DirectoriesStructurePage() {
             <Link
               to="/directories/structure/units/$unitId"
               params={{ unitId: row.original.id }}
+              search={{ instructionId: undefined }}
               className="font-medium hover:underline"
               onClick={(event) => event.stopPropagation()}
             >
@@ -122,6 +127,12 @@ export function DirectoriesStructurePage() {
         header: "Краткое",
         accessorKey: "short_name",
         cell: ({ row }) => row.original.short_name || "—",
+      },
+      {
+        id: "is_pod9",
+        header: "ПОД-9",
+        cell: ({ row }) =>
+          row.original.is_pod9 ? <Badge variant="info">ПОД-9</Badge> : "—",
       },
       {
         id: "region",
@@ -146,10 +157,18 @@ export function DirectoriesStructurePage() {
               <Plus />
               Дочерняя
             </DataTableRowAction>
+            <DataTableRowAction
+              label="Создать журнал ПОД-9"
+              onClick={() => openCreateUnit(row.original.id, { isPod9: true })}
+            >
+              <ClipboardList />
+              ПОД-9
+            </DataTableRowAction>
             <DataTableRowAction asChild label="Редактировать единицу">
               <Link
                 to="/directories/structure/units/$unitId"
                 params={{ unitId: row.original.id }}
+                search={{ instructionId: undefined }}
               >
                 <Pencil />
                 Изменить

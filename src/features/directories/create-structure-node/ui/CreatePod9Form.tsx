@@ -81,9 +81,8 @@ export function CreatePod9Form({
       const result = await createPod9Api(form);
       onCreated({ ...result, parentId });
       await navigate({
-        to: "/directories/structure/pod9/$pod9Id",
-        params: { pod9Id: result.id },
-        search: { instructionId: undefined },
+        to: "/directories/structure/units/new",
+        search: { parentId, isPod9: true },
       });
     } catch {
       setError("Не удалось создать журнал ПОД-9");
@@ -165,6 +164,7 @@ export function CreatePod9Form({
           <Link
             to="/directories/structure/units/$unitId"
             params={{ unitId: parentId }}
+            search={{ instructionId: undefined }}
           >
             Отмена
           </Link>

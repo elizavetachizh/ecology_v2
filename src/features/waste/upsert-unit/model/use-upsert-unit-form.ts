@@ -21,6 +21,8 @@ type UseUpsertUnitFormParams = {
   unitId?: string;
   /** Предзаполнение родителя (например из ?parentId=). */
   defaultParentId?: string;
+  /** Предзаполнение флага ПОД-9 (например из ?isPod9=true). */
+  defaultIsPod9?: boolean;
   initial?: Unit | null;
   onSaved: (unit: Unit, meta: { close: boolean }) => void;
 };
@@ -29,6 +31,7 @@ export function useUpsertUnitForm({
   mode,
   unitId,
   defaultParentId,
+  defaultIsPod9 = false,
   initial,
   onSaved,
 }: UseUpsertUnitFormParams) {
@@ -42,10 +45,12 @@ export function useUpsertUnitForm({
           parent_id: initial.parent_id ?? "",
           region_id: initial.region?.id,
           district_id: initial.district?.id,
+          is_pod9: initial.is_pod9 ?? false,
         }
       : {
           ...unitFormDefaultValues,
           parent_id: defaultParentId ?? "",
+          is_pod9: defaultIsPod9,
         },
   });
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +61,9 @@ export function useUpsertUnitForm({
     onSuccess: (created, vars) => {
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: unitsQueryKeys.trees(),
       });
       onSaved(created, { close: vars.close });
       setSuccessMessage("Единица успешно создана");
@@ -69,6 +77,9 @@ export function useUpsertUnitForm({
     onSuccess: (updated, vars) => {
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: unitsQueryKeys.trees(),
       });
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.details(),

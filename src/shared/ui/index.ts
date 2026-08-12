@@ -56,4 +56,13 @@ export {
   type Row,
   type SortingState,
 } from "./data-table";
-export { FieldLabel } from "./field-lavel";
+export {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+  FormSection,
+} from "./field-lavel";
+export { Switch } from "./switch";
+export { Badge, badgeVariants, type BadgeProps } from "./badge";
+
