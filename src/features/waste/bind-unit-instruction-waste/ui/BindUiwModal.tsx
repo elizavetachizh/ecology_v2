@@ -170,6 +170,8 @@ export function BindUiwModal({
                     }))}
                     value={field.value}
                     onValueChange={field.onChange}
+                    search={sources.search}
+                    setSearch={sources.setSearch}
                     placeholder="Необязательно — выберите источники"
                     searchPlaceholder="Поиск источника"
                     emptyMessage={

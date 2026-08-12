@@ -3,11 +3,15 @@ import type { GetWastesParams } from "./wastes.types";
 import { wastesQueryKeys } from "./waste-query-keys";
 import { getWastes } from "../api/get-wastes";
 
+/** Списки MDM: держим ответ в кэше при переключении sort/filter. */
+const LIST_STALE_TIME_MS = 60_000;
+
 type UseWastesListQueryArgs = {
   tenantId: string | null;
   params: GetWastesParams;
   enabled?: boolean;
 };
+
 export function useWastesListQuery({
   tenantId,
   params,
@@ -19,6 +23,7 @@ export function useWastesListQuery({
     queryKey: wastesQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getWastes(params, signal),
     enabled: canFetch,
+    staleTime: LIST_STALE_TIME_MS,
   });
 
   return {

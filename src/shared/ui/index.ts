@@ -3,6 +3,14 @@ export { Input, type InputProps } from "./input";
 export { Select, type SelectProps } from "./select";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 export { PageContextBar, type PageContextBarProps } from "./page-context-bar";
+export {
+  TenantRequiredGate,
+  type TenantRequiredGateProps,
+} from "./tenant-required-gate";
+export {
+  ListSearchField,
+  type ListSearchFieldProps,
+} from "./list-search-field";
 export { ConfirmDialog, type ConfirmDialogProps } from "./confirm-dialog";
 export {
   MultipleCombobox,
@@ -62,7 +70,7 @@ export {
   FieldDescription,
   FieldError,
   FormSection,
-} from "./field-lavel";
+} from "./field-label";
 export { Switch } from "./switch";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 

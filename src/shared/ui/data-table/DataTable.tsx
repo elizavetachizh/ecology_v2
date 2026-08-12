@@ -7,6 +7,7 @@ import {
   useReactTable,
   type ColumnDef,
   type ExpandedState,
+  type OnChangeFn,
   type Row,
   type SortingState,
 } from "@tanstack/react-table";
@@ -24,23 +25,11 @@ import { DataTableEmpty } from "./DataTableEmpty";
 /**
  * DataTable (TanStack Table)
  *
- * data — массив строк таблицы (обычно view-model после маппинга ответа бэка).
- * columns — что показать и как отрисовать. Сопоставление с полями строки:
+ * Server lists: `manualSorting` + controlled `sorting` / `onSortingChange`
+ * (URL `sort`/`order` → API). Client-only tables: omit manualSorting.
  *
- *   {
- *     accessorKey: "date",  // поле в объекте строки (row.date); также база для sort/filter
- *     header: "Дата",       // заголовок: строка или ({ column }) => <DataTableColumnHeader … />
- *     cell: ({ row }) => row.original.date, // опционально: кастомный рендер ячейки
- *   }
- *
- * - без `cell` показывается значение из accessorKey;
- * - `cell` нужен для формата, бейджа, кнопок и т.п.;
- * - вложенное/вычисляемое поле: accessorFn: (row) => row.waste.name вместо accessorKey;
- * - getRowId обязателен (стабильный id строки).
- *
- * Иерархия (tree):
- * - передайте getSubRows: (row) => row.children
- * - в первой колонке используйте <DataTableExpandCell row={row}>…</DataTableExpandCell>
+ * header: ({ column }) => <DataTableColumnHeader column={column} title="…" />
+ * id колонки должен совпадать с API sort field.
  */
 export type DataTableProps<TData, TValue = unknown> = {
   columns: ColumnDef<TData, TValue>[];
@@ -54,6 +43,15 @@ export type DataTableProps<TData, TValue = unknown> = {
   /** Контролируемое раскрытие (приоритетнее initialExpanded) */
   expanded?: ExpandedState;
   onExpandedChange?: (expanded: ExpandedState) => void;
+  /** Контролируемая сортировка (URL/API). Без props — локальный state. */
+  sorting?: SortingState;
+  /** Вызывается с уже вычисленным SortingState (не Updater). */
+  onSortingChange?: (sorting: SortingState) => void;
+  /**
+   * Серверная сортировка: UI только меняет state, data уже отсортирована API.
+   * Для MDM list pages с пагинацией — всегда true.
+   */
+  manualSorting?: boolean;
   className?: string;
   isLoading?: boolean;
   emptyTitle?: string;
@@ -71,6 +69,9 @@ export function DataTable<TData, TValue = unknown>({
   initialExpanded = {},
   expanded: expandedProp,
   onExpandedChange,
+  sorting: sortingProp,
+  onSortingChange,
+  manualSorting = false,
   className,
   isLoading = false,
   emptyTitle,
@@ -78,9 +79,18 @@ export function DataTable<TData, TValue = unknown>({
   onRowClick,
   getRowClassName,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sortingInternal, setSortingInternal] = useState<SortingState>([]);
   const [expandedInternal, setExpandedInternal] =
     useState<ExpandedState>(initialExpanded);
+
+  const isSortingControlled = sortingProp !== undefined;
+  const sorting = isSortingControlled ? sortingProp : sortingInternal;
+
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    const next = typeof updater === "function" ? updater(sorting) : updater;
+    if (!isSortingControlled) setSortingInternal(next);
+    onSortingChange?.(next);
+  };
 
   const isExpandedControlled = expandedProp !== undefined;
   const expanded = isExpandedControlled ? expandedProp : expandedInternal;
@@ -99,10 +109,11 @@ export function DataTable<TData, TValue = unknown>({
     getRowId: (row, index) => getRowId(row, index),
     getSubRows,
     state: { sorting, expanded },
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     onExpandedChange: handleExpandedChange,
+    manualSorting,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
     getExpandedRowModel: getExpandedRowModel(),
   });
 

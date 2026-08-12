@@ -204,7 +204,7 @@ export function UnitInstructionWastesSection({
           </h2>
           <p className="text-sm text-muted-foreground">
             Выберите инструкцию на вкладке — ниже список привязанных отходов для
-            этого подразделения ПОД-9.
+            этого ПОД-9.
           </p>
         </div>
         <Button

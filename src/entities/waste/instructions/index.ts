@@ -16,6 +16,7 @@ export type {
 } from "./model/instructions.types";
 export {
   INSTRUCTION_STATUS_LABEL,
+  INSTRUCTION_STATUS_BADGE_VARIANT,
   InstructionStatusValues,
   InstructionSortFields,
   DEFAULT_INSTRUCTIONS_LIST_LIMIT,
@@ -23,3 +24,4 @@ export {
 } from "./model/instructions.types";
 export { useInstructionsOptions } from "./model/use-instructions-query";
 export { useInstructionsListQuery } from "./model/use-instructions-list-query";
+export { InstructionStatusBadge } from "./ui/InstructionStatusBadge";

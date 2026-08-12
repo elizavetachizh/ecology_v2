@@ -6,6 +6,11 @@ export type PageContextBarProps = {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  /**
+   * Sticky chrome for forms (default).
+   * List pages: `sticky={false}` — обычный page header без прилипания.
+   */
+  sticky?: boolean;
   className?: string;
 };
 
@@ -14,13 +19,16 @@ export function PageContextBar({
   title,
   description,
   actions,
+  sticky = true,
   className,
 }: PageContextBarProps) {
   return (
     <div
       data-slot="page-context-bar"
       className={cn(
-        "sticky top-0 z-20 -mx-2 flex flex-wrap items-start justify-between gap-3 border-b border-border bg-background/95 px-2 py-3 backdrop-blur",
+        "flex flex-wrap items-start justify-between gap-3",
+        sticky &&
+          "sticky top-0 z-20 -mx-2 border-b bg-background/95 px-2 py-3 backdrop-blur",
         className,
       )}
     >
@@ -30,7 +38,12 @@ export function PageContextBar({
             {eyebrow}
           </div>
         ) : null}
-        <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+        <h1
+          className={cn(
+            "text-2xl font-semibold tracking-tight text-foreground",
+            sticky && "truncate",
+          )}
+        >
           {title}
         </h1>
         {description ? (

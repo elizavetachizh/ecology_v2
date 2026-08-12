@@ -58,9 +58,3 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/norms",
   },
 ];
-
-export const FILL_STATUS_LABEL: Record<DirectoryCard["fillStatus"], string> = {
-  empty: "Не заполнен",
-  partial: "Частично",
-  ready: "Готов",
-};

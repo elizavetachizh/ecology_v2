@@ -18,3 +18,4 @@ export type {
   UnitSortField,
   UnitSortOrder,
 } from "./model/units.types";
+export { UnitSortFields } from "./model/units.types";

@@ -3,6 +3,8 @@ import { getInstructions } from "../api/get-instructions";
 import type { GetInstructionsParams } from "./instructions.types";
 import { instructionsQueryKeys } from "./instruction-query-keys";
 
+const LIST_STALE_TIME_MS = 60_000;
+
 type UseInstructionsListQueryArgs = {
   tenantId: string | null;
   params: GetInstructionsParams;
@@ -24,6 +26,7 @@ export function useInstructionsListQuery({
     queryKey: instructionsQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getInstructions(params, signal),
     enabled: canFetch,
+    staleTime: LIST_STALE_TIME_MS,
   });
 
   return {

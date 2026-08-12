@@ -21,12 +21,10 @@ export type MultipleComboboxProps = {
   className?: string;
   contentClassName?: string;
   maxVisibleValues?: number;
+  search: string;
+  setSearch: (value: string) => void;
   "aria-label"?: string;
 };
-
-function normalizeSearchValue(value: string) {
-  return value.trim().toLocaleLowerCase("ru");
-}
 
 export function MultipleCombobox({
   options,
@@ -39,27 +37,17 @@ export function MultipleCombobox({
   className,
   contentClassName,
   maxVisibleValues = 2,
+  search,
+  setSearch,
   "aria-label": ariaLabel,
 }: MultipleComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
   const listboxId = React.useId();
 
   const selectedOptions = React.useMemo(() => {
     const selected = new Set(value);
     return options.filter((option) => selected.has(option.value));
   }, [options, value]);
-
-  const filteredOptions = React.useMemo(() => {
-    const query = normalizeSearchValue(search);
-    if (!query) return options;
-
-    return options.filter((option) =>
-      [option.label, option.value, ...(option.keywords ?? [])]
-        .map(normalizeSearchValue)
-        .some((candidate) => candidate.includes(query)),
-    );
-  }, [options, search]);
 
   const toggleOption = (option: MultipleComboboxOption) => {
     if (option.disabled) return;
@@ -174,12 +162,12 @@ export function MultipleCombobox({
             aria-multiselectable="true"
             className="max-h-64 overflow-y-auto p-1"
           >
-            {filteredOptions.length === 0 ? (
+            {options.length === 0 ? (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
                 {emptyMessage}
               </p>
             ) : (
-              filteredOptions.map((option) => {
+              options.map((option) => {
                 const selected = value.includes(option.value);
 
                 return (

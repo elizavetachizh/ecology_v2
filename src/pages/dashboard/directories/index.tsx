@@ -2,15 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "../../../shared/ui";
 import {
   DIRECTORY_CARDS,
-  FILL_STATUS_LABEL,
-  type DirectoryCard,
-} from "./model/directories.mock";
-
-const fillTone: Record<DirectoryCard["fillStatus"], string> = {
-  empty: "bg-muted text-muted-foreground",
-  partial: "bg-warning-muted text-warning-foreground",
-  ready: "bg-success-muted text-success",
-};
+} from "../../../shared/config/directories";
 
 export function DirectoriesHubPage() {
   return (
@@ -34,11 +26,6 @@ export function DirectoriesHubPage() {
             <div className="space-y-1">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-semibold text-foreground">{card.title}</h2>
-                <span
-                  className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-medium ${fillTone[card.fillStatus]}`}
-                >
-                  {FILL_STATUS_LABEL[card.fillStatus]}
-                </span>
               </div>
               <p className="text-sm text-muted-foreground">{card.description}</p>
             </div>

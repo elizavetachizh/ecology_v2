@@ -12,3 +12,4 @@ export const unitsQueryKeys = {
   detail: (tenantId: string, id: string) =>
     [...unitsQueryKeys.details(), tenantId, id] as const,
 };
+А

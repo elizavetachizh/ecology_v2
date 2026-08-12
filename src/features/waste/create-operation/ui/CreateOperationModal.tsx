@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import {
   Alert,
   AlertDescription,
+  AsyncCombobox,
   Button,
   Input,
   Modal,
@@ -179,21 +180,28 @@ export function CreateOperationModal({
               <FieldLabel htmlFor="structure-unit">
                 Структурная единица
               </FieldLabel>
-              <Select
-                id="structure-unit"
-                className="w-full"
+              <AsyncCombobox
+                options={options.map((unit) => ({
+                  value: unit.id,
+                  label: unit.short_name
+                    ? `${unit.name} (${unit.short_name})`
+                    : unit.name,
+                }))}
                 value={form.unitId}
-                onChange={(event) => updateField("unitId", event.target.value)}
-              >
-                <option value="">Выберите структурную единицу</option>
-                {options.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.short_name
-                      ? `${item.name} (${item.short_name})`
-                      : item.name}
-                  </option>
-                ))}
-              </Select>
+                onValueChange={(id) => updateField("unitId", id ?? "")}
+                placeholder={"Выберите структурную единицу…"}
+                searchPlaceholder="Поиск по названию или краткому"
+                emptyMessage={
+                  loading
+                    ? "Загрузка…"
+                    : "Ничего не найдено. Создайте структурную единицу в справочнике или уточните поиск."
+                }
+                className="w-full"
+                contentClassName="w-full"
+                search={search}
+                setSearch={setSearch}
+                aria-label="Структурная единица"
+              />
             </div>
           </div>
         ) : null}

@@ -5,7 +5,7 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react";
-import { DIRECTORY_CARDS } from "../../pages/dashboard/directories/model/directories.mock";
+import { DIRECTORY_CARDS } from "./directories";
 
 export type NavLeaf = {
   id: string;

@@ -6,17 +6,12 @@ import {
   type CreateOperationForm,
 } from "../../../../features/waste/create-operation";
 import {
-  findStructureNode,
-  getStructureTree,
-} from "../../directories/model/structure.store";
-import {
   MOCK_OPERATIONS,
   type OperationRow,
 } from "./model/operations.mock";
 import { operationsColumns } from "./ui/operations-columns";
 
 function mapFormToRow(form: CreateOperationForm): OperationRow {
-  const unit = findStructureNode(getStructureTree(), form.unitId);
 
   const operationType = OPERATION_TYPES.find(
     (item) => item.id === form.operationTypeId,
@@ -25,7 +20,7 @@ function mapFormToRow(form: CreateOperationForm): OperationRow {
   return {
     id: `op-${crypto.randomUUID()}`,
     date: form.date,
-    department: unit?.name ?? "—",
+    department: "—",
     facility: "—",
     waste:  "—",
     operationType: operationType?.name ?? "—",

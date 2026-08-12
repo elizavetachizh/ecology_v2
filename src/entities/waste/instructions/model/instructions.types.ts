@@ -52,6 +52,16 @@ export const INSTRUCTION_STATUS_LABEL: Record<InstructionStatus, string> = {
   inactive: "Не действует",
 };
 
+/** Цвет Badge: черновик / действует / не действует */
+export const INSTRUCTION_STATUS_BADGE_VARIANT: Record<
+  InstructionStatus,
+  "secondary" | "success" | "destructive"
+> = {
+  draft: "secondary",
+  active: "success",
+  inactive: "destructive",
+};
+
 export type InstructionCreate = {
   name: string;
   short_name?: string | null;
