@@ -12,6 +12,7 @@ function appendCommonParams(
     search?: string;
     region_id?: number;
     district_id?: number;
+    is_pod9?: boolean;
     sort?: string;
     order?: string;
   },
@@ -22,6 +23,9 @@ function appendCommonParams(
   }
   if (params.district_id != null) {
     searchParams.set("district_id", String(params.district_id));
+  }
+  if (params.is_pod9 != null) {
+    searchParams.set("is_pod9", String(params.is_pod9));
   }
   if (params.sort) searchParams.set("sort", params.sort);
   if (params.order) searchParams.set("order", params.order);

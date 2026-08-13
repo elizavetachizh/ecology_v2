@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { UnitTree } from "../../../../entities/waste/units";
+import type { Unit, UnitTree } from "../../../../entities/waste/units";
 import {
   Badge,
   DataTableColumnHeader,
@@ -8,13 +8,21 @@ import {
   DataTableRowActions,
   type ColumnDef,
 } from "../../../../shared/ui";
-import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+
+type UnitsColumnsOptions = {
+  /** Дерево: expand + действия «Дочерняя» / «ПОД-9». Flat: только edit/delete. */
+  hierarchical?: boolean;
+};
 
 /** id колонок = API UnitSortField (где сортировка поддерживается) */
 function unitsColumns(
   openCreateUnit: (unitId: string, options?: { isPod9?: boolean }) => void,
-  setDeletingUnit: (unit: UnitTree | null) => void,
+  setDeletingUnit: (unit: Unit | null) => void,
+  options: UnitsColumnsOptions = {},
 ): ColumnDef<UnitTree>[] {
+  const hierarchical = options.hierarchical ?? true;
+
   return [
     {
       id: "name",
@@ -22,8 +30,8 @@ function unitsColumns(
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Название" />
       ),
-      cell: ({ row }) => (
-        <DataTableExpandCell row={row}>
+      cell: ({ row }) => {
+        const link = (
           <Link
             to="/directories/structure/units/$unitId"
             params={{ unitId: row.original.id }}
@@ -33,8 +41,12 @@ function unitsColumns(
           >
             {row.original.name}
           </Link>
-        </DataTableExpandCell>
-      ),
+        );
+
+        if (!hierarchical) return link;
+
+        return <DataTableExpandCell row={row}>{link}</DataTableExpandCell>;
+      },
     },
     {
       id: "short_name",
@@ -71,41 +83,51 @@ function unitsColumns(
       id: "actions",
       header: () => <div className="text-right">Действия</div>,
       enableSorting: false,
-      cell: ({ row }) => (
-        <DataTableRowActions>
-          <DataTableRowAction
-            label="Добавить дочернюю единицу"
-            onClick={() => openCreateUnit(row.original.id)}
-          >
-            <Plus />
-            Дочерняя
-          </DataTableRowAction>
-          <DataTableRowAction
-            label="Создать журнал ПОД-9"
-            onClick={() => openCreateUnit(row.original.id, { isPod9: true })}
-          >
-            <ClipboardList />
-            ПОД-9
-          </DataTableRowAction>
-          <DataTableRowAction asChild label="Редактировать единицу">
-            <Link
-              to="/directories/structure/units/$unitId"
-              params={{ unitId: row.original.id }}
-              search={{ instructionId: undefined }}
+      cell: ({ row }) => {
+        const unit = row.original;
+        // У узла ПОД-9 нет дочерних / вложенных ПОД-9 — только edit/delete.
+        const canAddChildren = hierarchical && !unit.is_pod9;
+
+        return (
+          <DataTableRowActions>
+            {canAddChildren ? (
+              <>
+                <DataTableRowAction
+                  label="Добавить дочернюю единицу"
+                  onClick={() => openCreateUnit(unit.id)}
+                >
+                  <Plus />
+                  Дочерняя
+                </DataTableRowAction>
+                <DataTableRowAction
+                  label="Создать журнал ПОД-9"
+                  onClick={() => openCreateUnit(unit.id, { isPod9: true })}
+                >
+                  <Plus />
+                  ПОД-9
+                </DataTableRowAction>
+              </>
+            ) : null}
+            <DataTableRowAction asChild label="Редактировать единицу">
+              <Link
+                to="/directories/structure/units/$unitId"
+                params={{ unitId: unit.id }}
+                search={{ instructionId: undefined }}
+              >
+                <Pencil />
+                Изменить
+              </Link>
+            </DataTableRowAction>
+            <DataTableRowAction
+              label="Удалить единицу"
+              onClick={() => setDeletingUnit(unit)}
             >
-              <Pencil />
-              Изменить
-            </Link>
-          </DataTableRowAction>
-          <DataTableRowAction
-            label="Удалить единицу"
-            onClick={() => setDeletingUnit(row.original)}
-          >
-            <Trash2 className="text-destructive" />
-            Удалить
-          </DataTableRowAction>
-        </DataTableRowActions>
-      ),
+              <Trash2 className="text-destructive" />
+              Удалить
+            </DataTableRowAction>
+          </DataTableRowActions>
+        );
+      },
     },
   ];
 }

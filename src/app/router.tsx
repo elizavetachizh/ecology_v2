@@ -37,6 +37,7 @@ import {
 } from "../entities/waste/wastes";
 import { WasteSourceSortFields } from "../entities/waste/waste-sources";
 import {
+  parseSearchBoolean,
   parseSearchEnum,
   parseSearchLimit,
   parseSearchOffset,
@@ -83,6 +84,9 @@ const directoriesStructureRoute = createRoute({
     q: parseSearchQuery(search.q),
     sort: parseSearchEnum(search.sort, UnitSortFields),
     order: parseSearchOrder(search.order),
+    is_pod9: parseSearchBoolean(search.is_pod9) === true ? true : undefined,
+    limit: parseSearchLimit(search.limit),
+    offset: parseSearchOffset(search.offset),
   }),
   component: DirectoriesStructurePage,
 });

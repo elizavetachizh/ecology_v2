@@ -35,11 +35,18 @@ export type WastesSearch = ListSearchParams<WasteSortField> & {
 
 export type WasteSourcesSearch = ListSearchParams<WasteSourceSortField>;
 
-/** Дерево структуры: без пагинации, с focus/expand */
+/**
+ * Структура: дерево по умолчанию; при is_pod9=true — плоский список журналов ПОД-9
+ * (hierarchical=false) с пагинацией limit/offset.
+ */
 export type StructureSearch = {
   q?: string;
   sort?: UnitSortField;
   order?: "asc" | "desc";
+  /** true = только журналы ПОД-9 (flat list) */
+  is_pod9?: boolean;
+  limit?: number;
+  offset?: number;
   focusId?: string;
   expandId?: string;
 };
@@ -70,4 +77,11 @@ export function parseSearchEnum<T extends string>(
     (allowed as readonly string[]).includes(value)
     ? (value as T)
     : undefined;
+}
+
+/** URL bool: true / "true" / false / "false"; иначе undefined (фильтр сброшен). */
+export function parseSearchBoolean(value: unknown): boolean | undefined {
+  if (value === true || value === "true") return true;
+  if (value === false || value === "false") return false;
+  return undefined;
 }

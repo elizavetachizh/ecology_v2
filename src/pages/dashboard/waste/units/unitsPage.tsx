@@ -8,15 +8,20 @@ import {
   Button,
   ConfirmDialog,
   DataTable,
+  DataTablePagination,
   ListSearchField,
   PageContextBar,
+  Switch,
   TenantRequiredGate,
   type ExpandedState,
 } from "../../../../shared/ui";
 import {
+  DEFAULT_UNITS_LIST_LIMIT,
   deleteUnit,
   unitsQueryKeys,
+  useUnitsListQuery,
   useUnitsTreeQuery,
+  type Unit,
   type UnitSortField,
   type UnitSortOrder,
   type UnitTree,
@@ -44,10 +49,16 @@ function mergeExpanded(
   return next;
 }
 
+function toTreeRows(items: Unit[]): UnitTree[] {
+  return items.map((item) => ({ ...item, children: [] }));
+}
+
 export function DirectoriesStructurePage() {
   const navigate = useNavigate({ from: "/directories/structure" });
   const search = useSearch({ from: "/directories/structure" });
   const { activeTenantId } = useTenant();
+
+  const pod9Only = search.is_pod9 === true;
 
   const treeParams = useMemo(
     () => ({
@@ -58,17 +69,43 @@ export function DirectoriesStructurePage() {
     [search.q, search.sort, search.order],
   );
 
+  const listParams = useMemo(
+    () => ({
+      search: search.q || undefined,
+      sort: search.sort ?? ("name" as const),
+      order: search.order ?? ("asc" as const),
+      is_pod9: true as const,
+      limit: search.limit ?? DEFAULT_UNITS_LIST_LIMIT,
+      offset: search.offset ?? 0,
+    }),
+    [search.q, search.sort, search.order, search.limit, search.offset],
+  );
+
   const sorting = useMemo(
     () => sortingFromSearch(search.sort ?? "name", search.order ?? "asc"),
     [search.sort, search.order],
   );
 
-  const { tree, loading, error } = useUnitsTreeQuery({
+  const treeQuery = useUnitsTreeQuery({
     tenantId: activeTenantId,
     params: treeParams,
+    enabled: !pod9Only,
   });
 
-  const [deletingUnit, setDeletingUnit] = useState<UnitTree | null>(null);
+  const listQuery = useUnitsListQuery({
+    tenantId: activeTenantId,
+    params: listParams,
+    enabled: pod9Only,
+  });
+
+  const rows = useMemo(
+    () => (pod9Only ? toTreeRows(listQuery.items) : treeQuery.tree),
+    [pod9Only, listQuery.items, treeQuery.tree],
+  );
+  const loading = pod9Only ? listQuery.loading : treeQuery.loading;
+  const error = pod9Only ? listQuery.error : treeQuery.error;
+
+  const [deletingUnit, setDeletingUnit] = useState<Unit | null>(null);
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
     mergeExpanded({}, [search.expandId, search.focusId]),
   );
@@ -105,18 +142,36 @@ export function DirectoriesStructurePage() {
     q?: string | undefined;
     sort?: UnitSortField | undefined;
     order?: UnitSortOrder | undefined;
+    is_pod9?: boolean | undefined;
+    limit?: number | undefined;
+    offset?: number | undefined;
   }) => {
     void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
+      search: (prev) => {
+        const next = { ...prev, ...patch };
+        if (
+          "q" in patch ||
+          "sort" in patch ||
+          "order" in patch ||
+          "is_pod9" in patch
+        ) {
+          next.offset = patch.offset ?? 0;
+        }
+        if ("is_pod9" in patch && patch.is_pod9 !== true) {
+          next.limit = undefined;
+          next.offset = undefined;
+        }
+        return next;
+      },
     });
   };
 
   const columns = useMemo(
-    () => unitsColumns(openCreateUnit, setDeletingUnit),
-    [openCreateUnit],
+    () =>
+      unitsColumns(openCreateUnit, setDeletingUnit, {
+        hierarchical: !pod9Only,
+      }),
+    [openCreateUnit, pod9Only],
   );
 
   if (error) {
@@ -151,19 +206,33 @@ export function DirectoriesStructurePage() {
           }
         />
 
-        <ListSearchField
-          value={search.q ?? ""}
-          placeholder="Поиск по названию или краткому"
-          onSearch={(q) => patchSearch({ q: q || undefined })}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <ListSearchField
+            value={search.q ?? ""}
+            placeholder="Поиск по названию или краткому"
+            onSearch={(q) => patchSearch({ q: q || undefined })}
+          />
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <Switch
+              checked={pod9Only}
+              onCheckedChange={(checked) =>
+                patchSearch({
+                  is_pod9: checked ? true : undefined,
+                })
+              }
+              aria-label="Только журналы ПОД-9"
+            />
+            Только журналы ПОД-9
+          </label>
+        </div>
 
         <DataTable
           columns={columns}
-          data={tree}
+          data={rows}
           getRowId={(row) => row.id}
-          getSubRows={(row) => row.children}
-          expanded={expanded}
-          onExpandedChange={setExpanded}
+          getSubRows={pod9Only ? undefined : (row) => row.children}
+          expanded={pod9Only ? undefined : expanded}
+          onExpandedChange={pod9Only ? undefined : setExpanded}
           isLoading={loading}
           manualSorting
           sorting={sorting}
@@ -174,8 +243,12 @@ export function DirectoriesStructurePage() {
               order,
             });
           }}
-          emptyTitle="Структура пуста"
-          emptyDescription="Добавьте структурную единицу."
+          emptyTitle={pod9Only ? "Журналов ПОД-9 нет" : "Структура пуста"}
+          emptyDescription={
+            pod9Only
+              ? "Создайте журнал ПОД-9 из дерева структуры у родительской единицы."
+              : "Добавьте структурную единицу."
+          }
           getRowClassName={(row) => {
             if (focusId && row.original.id === focusId) {
               return "bg-info-muted/60 ring-1 ring-inset ring-info/30";
@@ -183,6 +256,16 @@ export function DirectoriesStructurePage() {
             return undefined;
           }}
         />
+
+        {pod9Only ? (
+          <DataTablePagination
+            total={listQuery.total}
+            limit={listQuery.limit}
+            offset={listQuery.offset}
+            disabled={loading}
+            onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+          />
+        ) : null}
 
         <ConfirmDialog
           open={deletingUnit !== null}

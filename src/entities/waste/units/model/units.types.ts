@@ -59,11 +59,14 @@ export const UnitSortFields = [
 export type UnitSortField = (typeof UnitSortFields)[number];
 export type UnitSortOrder = "asc" | "desc";
 
+export const DEFAULT_UNITS_LIST_LIMIT = 50;
+
 /** Flat list (Page). */
 export type GetUnitsParams = {
   search?: string;
   region_id?: number;
   district_id?: number;
+  is_pod9?: boolean;
   limit: number;
   offset: number;
   sort?: UnitSortField;
@@ -75,6 +78,7 @@ export type GetUnitsTreeParams = {
   search?: string;
   region_id?: number;
   district_id?: number;
+  is_pod9?: boolean;
   sort?: UnitSortField;
   order?: UnitSortOrder;
 };
