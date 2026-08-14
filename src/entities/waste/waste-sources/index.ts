@@ -5,6 +5,7 @@ export { getWasteSources } from "./api/get-waste-sources";
 export { updateWasteSource } from "./api/update-waste-source";
 export type {
   WasteSource,
+  WasteSourceBrief,
   WasteSourceCreate,
   WasteSourceUpdate,
   WasteSourceListResponse,

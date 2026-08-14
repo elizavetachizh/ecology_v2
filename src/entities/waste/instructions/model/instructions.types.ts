@@ -39,6 +39,11 @@ export type Instruction = {
   updated_by: UserProfile;
 };
 
+export type InstructionBrief = Pick<
+  Instruction,
+  "id" | "name" | "short_name" | "start_date" | "end_date" | "status"
+>;
+
 export type InstructionListResponse = {
   total: number;
   limit: number;
@@ -70,13 +75,7 @@ export type InstructionCreate = {
   status?: InstructionStatus;
 };
 
-export type InstructionUpdate = {
-  name?: string;
-  short_name?: string | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  status?: InstructionStatus;
-};
+export type InstructionUpdate = Partial<InstructionCreate>;
 
 export type GetInstructionsParams = {
   search?: string;

@@ -17,12 +17,12 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/instructions",
   },
   {
-    id: "structure",
+    id: "units",
     title: "Структура организации",
     description: "Вложенные структурные единицы и журналы ПОД-9 в одном дереве",
     count: 3,
     fillStatus: "ready",
-    to: "/directories/structure",
+    to: "/directories/units",
   },
   {
     id: "wastes",

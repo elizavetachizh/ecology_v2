@@ -42,19 +42,41 @@ export function AsyncCombobox({
   selectedLabel,
 }: AsyncComboboxProps) {
   const [open, setOpen] = React.useState(false);
+  /** Label выбранного value после сброса поиска (пишется только в handlers). */
+  const [cachedSelection, setCachedSelection] = React.useState<{
+    value: string;
+    label: string;
+  } | null>(() =>
+    selectedLabel && value ? { value, label: selectedLabel } : null,
+  );
   const listboxId = React.useId();
 
-  const selectedOption = React.useMemo(() => {
-    return (
-      options.find((option) => option.value === value) ??
-      (value && selectedLabel ? { value, label: selectedLabel } : undefined)
-    );
-  }, [options, value, selectedLabel]);
+  const selectedFromOptions = options.find((option) => option.value === value);
+
+  const resolvedLabel = value
+    ? (selectedFromOptions?.label ??
+      selectedLabel ??
+      (cachedSelection?.value === value ? cachedSelection.label : undefined))
+    : undefined;
+
+  const selectedOption =
+    selectedFromOptions ??
+    (value && resolvedLabel ? { value, label: resolvedLabel } : undefined);
+
+  const clearSelection = () => {
+    setCachedSelection(null);
+    onValueChange("");
+    setOpen(false);
+    setSearch("");
+  };
 
   const toggleOption = (option: AsyncComboboxOption) => {
     if (option.disabled) return;
 
+    setCachedSelection({ value: option.value, label: option.label });
     onValueChange(option.value);
+    setOpen(false);
+    setSearch("");
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -184,7 +206,7 @@ export function AsyncCombobox({
             <div className="border-t border-border p-1">
               <button
                 type="button"
-                onClick={() => onValueChange("")}
+                onClick={clearSelection}
                 className="w-full rounded-sm px-2 py-1.5 text-center text-xs text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent"
               >
                 Очистить выбор

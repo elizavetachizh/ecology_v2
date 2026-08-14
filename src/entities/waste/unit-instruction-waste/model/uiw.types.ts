@@ -1,28 +1,17 @@
 import type { UserProfile } from "../../../user";
-import type { WasteClassifier } from "../../waste-classifier";
-import type { HazardClass, Uom } from "../../wastes";
-
-/** Nested expand MDM waste (без audit / physical_state) */
-export type WasteBrief = {
-  id: string;
-  waste_classifier_id: number;
-  waste_classifier: WasteClassifier;
-  hazard_class: HazardClass;
-  uom: Uom;
-};
-
-/** Nested expand источника */
-export type WasteSourceBrief = {
-  id: string;
-  name: string;
-};
+import type { InstructionBrief } from "../../instructions";
+import type { UnitBrief } from "../../units";
+import type { WasteSourceBrief } from "../../waste-sources";
+import type { WasteBrief } from "../../wastes";
 
 /** UnitInstructionWasteRead */
 export type UnitInstructionWaste = {
   id: string;
   tenant_id: string;
   unit_id: string;
+  unit: UnitBrief;
   instruction_id: string;
+  instruction: InstructionBrief;
   waste_id: string;
   waste_source_ids: string[];
   transport_unit: string;
@@ -41,11 +30,7 @@ export type UnitInstructionWasteCreate = {
 };
 
 /** PATCH: omit = не трогать; waste_source_ids[] = полная замена / очистка */
-export type UnitInstructionWasteUpdate = {
-  waste_id?: string;
-  waste_source_ids?: string[];
-  transport_unit?: string;
-};
+export type UnitInstructionWasteUpdate = Partial<UnitInstructionWasteCreate>;
 
 export type UnitInstructionWasteListResponse = {
   total: number;

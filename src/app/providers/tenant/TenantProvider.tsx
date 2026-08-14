@@ -16,6 +16,7 @@ import {
 } from "../../../shared/auth/active-tenant-storage";
 import { Button } from "../../../shared/ui";
 import { TenantContext } from "./tenant-context";
+import { DEFAULT_STALE_TIME_MS } from "../../../shared/lib/query-client";
 
 type TenantProviderProps = {
   children: ReactNode;
@@ -45,13 +46,13 @@ export function TenantProvider({
     queryKey: ["auth", "me"],
     queryFn: ({ signal }) => getCurrentUser(signal),
     retry: false,
-    staleTime: 60_000,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
   const tenantsQuery = useQuery({
     queryKey: ["auth", "tenants"],
     queryFn: ({ signal }) => getTenants(signal),
     retry: false,
-    staleTime: 60_000,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   const flatTenants = useMemo(

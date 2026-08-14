@@ -11,7 +11,6 @@ import {
 import {
   Alert,
   AlertDescription,
-  AlertTitle,
   Button,
   FieldLabel,
   PageContextBar,
@@ -69,15 +68,6 @@ export function WasteCatalogForm({
             : (initial?.waste_classifier.name ?? "Отход")
         }
       />
-
-      <Alert variant="info">
-        <AlertTitle>Два шага</AlertTitle>
-        <AlertDescription>
-          1) Создайте вид отхода в справочнике. 2) При добавлении в журнал ПОД-9
-          укажите источник образования — при необходимости его можно создать на
-          месте.
-        </AlertDescription>
-      </Alert>
 
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         {error ? (

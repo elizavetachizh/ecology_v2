@@ -17,6 +17,8 @@ export type Unit = {
   updated_by: UserProfile;
 };
 
+export type UnitBrief = Pick<Unit, "id" | "name" | "short_name">;
+
 /** Hierarchical read: Unit + children (GET ?hierarchical=true). */
 export type UnitTree = Unit & {
   children: UnitTree[];

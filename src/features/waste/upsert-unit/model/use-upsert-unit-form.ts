@@ -23,37 +23,49 @@ type UseUpsertUnitFormParams = {
   defaultParentId?: string;
   /** Предзаполнение флага ПОД-9 (например из ?isPod9=true). */
   defaultIsPod9?: boolean;
+  /** Наследование territory от родителя при create с ?parentId=. */
+  defaultRegionId?: number;
+  defaultDistrictId?: number;
   initial?: Unit | null;
   onSaved: (unit: Unit, meta: { close: boolean }) => void;
 };
+
+function valuesFromUnit(unit: Unit): UnitFormValues {
+  return {
+    name: unit.name,
+    short_name: unit.short_name ?? "",
+    parent_id: unit.parent_id ?? "",
+    region_id: unit.region?.id,
+    district_id: unit.district?.id,
+    is_pod9: unit.is_pod9 ?? false,
+  };
+}
 
 export function useUpsertUnitForm({
   mode,
   unitId,
   defaultParentId,
   defaultIsPod9 = false,
+  defaultRegionId,
+  defaultDistrictId,
   initial,
   onSaved,
 }: UseUpsertUnitFormParams) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitFormSchema),
     defaultValues: initial
-      ? {
-          name: initial.name,
-          short_name: initial.short_name ?? "",
-          parent_id: initial.parent_id ?? "",
-          region_id: initial.region?.id,
-          district_id: initial.district?.id,
-          is_pod9: initial.is_pod9 ?? false,
-        }
+      ? valuesFromUnit(initial)
       : {
           ...unitFormDefaultValues,
           parent_id: defaultParentId ?? "",
           is_pod9: defaultIsPod9,
+          region_id: defaultRegionId,
+          district_id: defaultDistrictId,
         },
   });
-  const [error, setError] = useState<string | null>(null);
 
   const createMutation = useMutation({
     mutationFn: (vars: { values: UnitFormValues; close: boolean }) =>

@@ -7,8 +7,10 @@ export { unitsQueryKeys } from "./model/unit-query-keys";
 export { useUnitsListQuery } from "./model/use-units-list-query";
 export { useUnitsTreeQuery } from "./model/use-units-tree-query";
 export { useUnitsOptions } from "./model/use-units-query";
+export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
 export type {
   Unit,
+  UnitBrief,
   UnitTree,
   UnitListResponse,
   UnitCreate,

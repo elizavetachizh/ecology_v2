@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "../lib/cn";
 
 export type PageContextBarProps = {
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
@@ -34,9 +34,13 @@ export function PageContextBar({
     >
       <div className="min-w-0 space-y-1">
         {eyebrow ? (
-          <div className="text-xs font-medium text-muted-foreground">
-            {eyebrow}
-          </div>
+          typeof eyebrow === "string" ? (
+            <div className="text-xs font-medium text-muted-foreground">
+              {eyebrow}
+            </div>
+          ) : (
+            <div className="min-w-0">{eyebrow}</div>
+          )
         ) : null}
         <h1
           className={cn(

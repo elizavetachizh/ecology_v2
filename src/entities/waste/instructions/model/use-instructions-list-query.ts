@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getInstructions } from "../api/get-instructions";
 import type { GetInstructionsParams } from "./instructions.types";
 import { instructionsQueryKeys } from "./instruction-query-keys";
-
-const LIST_STALE_TIME_MS = 60_000;
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client";
 
 type UseInstructionsListQueryArgs = {
   tenantId: string | null;
@@ -26,7 +25,7 @@ export function useInstructionsListQuery({
     queryKey: instructionsQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getInstructions(params, signal),
     enabled: canFetch,
-    staleTime: LIST_STALE_TIME_MS,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   return {
@@ -40,4 +39,3 @@ export function useInstructionsListQuery({
     refetch: query.refetch,
   };
 }
- 

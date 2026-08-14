@@ -73,4 +73,12 @@ export {
 } from "./field-label";
 export { Switch } from "./switch";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./breadcrumb";
 

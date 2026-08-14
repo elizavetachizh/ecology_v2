@@ -11,13 +11,13 @@ export type WasteSource = {
   updated_by: UserProfile;
 };
 
+export type WasteSourceBrief = Pick<WasteSource, "id" | "name">;
+
 export type WasteSourceCreate = {
   name: string;
 };
 
-export type WasteSourceUpdate = {
-  name?: string;
-};
+export type WasteSourceUpdate = Partial<WasteSourceCreate>;
 
 export type WasteSourceListResponse = {
   total: number;

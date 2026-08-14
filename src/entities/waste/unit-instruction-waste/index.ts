@@ -4,8 +4,6 @@ export { getUnitInstructionWaste } from "./api/get-unit-instruction-waste";
 export { getUnitInstructionWastes } from "./api/get-unit-instruction-wastes";
 export { updateUnitInstructionWaste } from "./api/update-unit-instruction-waste";
 export type {
-  WasteBrief,
-  WasteSourceBrief,
   UnitInstructionWaste,
   UnitInstructionWasteCreate,
   UnitInstructionWasteUpdate,

@@ -2,9 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { GetWastesParams } from "./wastes.types";
 import { wastesQueryKeys } from "./waste-query-keys";
 import { getWastes } from "../api/get-wastes";
-
-/** Списки MDM: держим ответ в кэше при переключении sort/filter. */
-const LIST_STALE_TIME_MS = 60_000;
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client";
 
 type UseWastesListQueryArgs = {
   tenantId: string | null;
@@ -23,7 +21,7 @@ export function useWastesListQuery({
     queryKey: wastesQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getWastes(params, signal),
     enabled: canFetch,
-    staleTime: LIST_STALE_TIME_MS,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   return {
@@ -37,4 +35,3 @@ export function useWastesListQuery({
     refetch: query.refetch,
   };
 }
- 

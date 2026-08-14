@@ -6,6 +6,7 @@ export { getInstruction } from "./api/get-instruction";
 export { instructionsQueryKeys } from "./model/instruction-query-keys";
 export type {
   Instruction,
+  InstructionBrief,
   InstructionListResponse,
   InstructionStatus,
   InstructionSortField,

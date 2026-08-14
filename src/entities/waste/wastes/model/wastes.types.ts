@@ -50,6 +50,11 @@ export type Waste = {
   updated_by: UserProfile;
 };
 
+export type WasteBrief = Pick<
+  Waste,
+  "id" | "waste_classifier_id" | "waste_classifier" | "hazard_class" | "uom"
+>;
+
 export type WasteCreate = {
   waste_classifier_id: number;
   hazard_class?: HazardClass;
@@ -57,12 +62,7 @@ export type WasteCreate = {
   physical_state?: PhysicalState | null;
 };
 
-export type WasteUpdate = {
-  waste_classifier_id?: number;
-  hazard_class?: HazardClass;
-  uom?: Uom;
-  physical_state?: PhysicalState | null;
-};
+export type WasteUpdate = Partial<WasteCreate>;
 
 export type WasteListResponse = {
   total: number;

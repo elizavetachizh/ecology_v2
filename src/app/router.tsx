@@ -8,22 +8,13 @@ import { AppLayout } from "./layout/AppLayout";
 import { HomePage } from "../pages/dashboard/HomePage";
 import { WasteOperationsPage } from "../pages/dashboard/waste/operations";
 import { DirectoriesHubPage } from "../pages/dashboard/directories";
-import { DirectoriesStructurePage } from "../pages/dashboard/waste/units/unitsPage";
-import {
-  CreateUnitPage,
-  EditUnitPage,
-} from "../pages/dashboard/directories/unit-form";
+import { UnitsPage } from "../pages/dashboard/waste/units/UnitsPage";
+import { EditUnitPage } from "../pages/dashboard/waste/units/EditUnitPage";
 import { DirectoryStubPage } from "../pages/dashboard/directories/DirectoryStubPage";
 import { InstructionsPage } from "../pages/dashboard/waste/instructions/InstructionsPage";
-import {
-  CreateInstructionPage,
-  EditInstructionPage,
-} from "../pages/dashboard/directories/instruction-form";
+import { EditInstructionPage } from "../pages/dashboard/waste/instructions/EditInstructionPage";
 import { WastesDirectoryPage } from "../pages/dashboard/waste/wastes/WastesPage";
-import {
-  CreateWastePage,
-  EditWastePage,
-} from "../pages/dashboard/directories/waste-form";
+import { EditWastePage } from "../pages/dashboard/waste/wastes/EditWastePage";
 import { WasteSourcesPage } from "../pages/dashboard/waste/waste-sources/WasteSourcesPage";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
@@ -49,6 +40,9 @@ import {
   type WasteSourcesSearch,
   type WastesSearch,
 } from "./router/search-params";
+import { CreateUnitPage } from "../pages/dashboard/waste/units/CreateUnitPage";
+import { CreateWastePage } from "../pages/dashboard/waste/wastes/CreateWastePage";
+import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/CreateInstructionPage";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context }) => {
@@ -77,7 +71,7 @@ const directoriesRoute = createRoute({
 
 const directoriesStructureRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/structure",
+  path: "/directories/units",
   validateSearch: (search: Record<string, unknown>): StructureSearch => ({
     focusId: typeof search.focusId === "string" ? search.focusId : undefined,
     expandId: typeof search.expandId === "string" ? search.expandId : undefined,
@@ -88,7 +82,7 @@ const directoriesStructureRoute = createRoute({
     limit: parseSearchLimit(search.limit),
     offset: parseSearchOffset(search.offset),
   }),
-  component: DirectoriesStructurePage,
+  component: UnitsPage,
 });
 
 type CreateUnitSearch = {
@@ -98,7 +92,7 @@ type CreateUnitSearch = {
 
 const directoriesCreateUnitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/structure/units/new",
+  path: "/directories/units/new",
   validateSearch: (search: Record<string, unknown>): CreateUnitSearch => ({
     parentId: typeof search.parentId === "string" ? search.parentId : "",
     isPod9: search.isPod9 === true || search.isPod9 === "true",
@@ -108,7 +102,7 @@ const directoriesCreateUnitRoute = createRoute({
 
 const directoriesEditUnitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/structure/units/$unitId",
+  path: "/directories/units/$unitId",
   validateSearch: (search: Record<string, unknown>) => ({
     instructionId:
       typeof search.instructionId === "string"
