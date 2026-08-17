@@ -20,6 +20,7 @@ import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
 import { InstructionSortFields } from "../entities/waste/instructions";
+import { OperationTypeValues } from "../entities/waste/operations";
 import { UnitSortFields } from "../entities/waste/units";
 import {
   HazardClassValues,
@@ -30,11 +31,13 @@ import { WasteSourceSortFields } from "../entities/waste/waste-sources";
 import {
   parseSearchBoolean,
   parseSearchEnum,
+  parseSearchIsoDate,
   parseSearchLimit,
   parseSearchOffset,
   parseSearchOrder,
   parseSearchQuery,
   type InstructionsSearch,
+  type OperationsSearch,
   type RouterContext,
   type StructureSearch,
   type WasteSourcesSearch,
@@ -60,6 +63,15 @@ const indexRoute = createRoute({
 const wasteOperationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/waste/operations",
+  validateSearch: (search: Record<string, unknown>): OperationsSearch => ({
+    unit_id: parseSearchQuery(search.unit_id),
+    waste_id: parseSearchQuery(search.waste_id),
+    operation_type: parseSearchEnum(search.operation_type, OperationTypeValues),
+    date_from: parseSearchIsoDate(search.date_from),
+    date_to: parseSearchIsoDate(search.date_to),
+    limit: parseSearchLimit(search.limit),
+    offset: parseSearchOffset(search.offset),
+  }),
   component: WasteOperationsPage,
 });
 
@@ -141,6 +153,12 @@ const directoriesCreateWasteRoute = createRoute({
 const directoriesWasteEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/wastes/$wasteId",
+  validateSearch: (search: Record<string, unknown>) => ({
+    instructionId:
+      typeof search.instructionId === "string"
+        ? search.instructionId
+        : undefined,
+  }),
   component: EditWastePage,
 });
 

@@ -1,4 +1,4 @@
-import { apiJson } from "../../../../shared/api/api-client";
+import { apiSendJson } from "../../../../shared/api/api-client";
 import type {
   UnitInstructionWaste,
   UnitInstructionWasteScope,
@@ -12,10 +12,9 @@ export function updateUnitInstructionWaste(
   body: UnitInstructionWasteUpdate,
   signal?: AbortSignal,
 ): Promise<UnitInstructionWaste> {
-  return apiJson<UnitInstructionWaste>(uiwItemPath(scope, bindingId), {
+  return apiSendJson<UnitInstructionWaste>(uiwItemPath(scope, bindingId), {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body,
     tenantScoped: true,
     signal,
   });

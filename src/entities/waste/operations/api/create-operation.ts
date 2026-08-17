@@ -1,15 +1,14 @@
-import { apiJson } from "../../../../shared/api/api-client";
+import { apiSendJson } from "../../../../shared/api/api-client";
 import type { Operation, OperationCreate } from "../model/operations.types";
 
 export function createOperation(
   body: OperationCreate,
   signal?: AbortSignal,
 ): Promise<Operation> {
-  return apiJson<Operation>(`/operations`, {
+  return apiSendJson<Operation>("/api/v1/operations", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    body,
     tenantScoped: true,
-    body: JSON.stringify(body),
     signal,
   });
 }

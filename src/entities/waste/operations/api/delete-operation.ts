@@ -1,8 +1,5 @@
-import { apiFetch } from "../../../../shared/api/api-client";
+import { apiDelete } from "../../../../shared/api/api-client";
 
-export async function deleteOperation(operationId: string): Promise<void> {
-  await apiFetch(`/operations/${operationId}`, {
-    method: "DELETE",
-    tenantScoped: true,
-  });
+export function deleteOperation(operationId: string): Promise<void> {
+  return apiDelete(`/api/v1/operations/${operationId}`, { tenantScoped: true });
 }

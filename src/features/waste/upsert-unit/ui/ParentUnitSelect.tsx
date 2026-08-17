@@ -5,7 +5,7 @@ import {
   unitsQueryKeys,
   type Unit,
 } from "../../../../entities/waste/units";
-import { AsyncCombobox } from "../../../../shared/ui";
+import { AsyncCombobox, Badge } from "../../../../shared/ui";
 
 type ParentUnitSelectProps = {
   tenantId: string | null;
@@ -16,6 +16,26 @@ type ParentUnitSelectProps = {
   required?: boolean;
   onChange: (unit: Unit | null) => void;
 };
+
+function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
+  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
+}
+
+function renderUnitOption(
+  option: { value: string; label: string },
+  isPod9: boolean,
+) {
+  return (
+    <>
+      <span className="min-w-0 flex-1 truncate">{option.label}</span>
+      {isPod9 ? (
+        <Badge variant="info" className="shrink-0">
+          ПОД-9
+        </Badge>
+      ) : null}
+    </>
+  );
+}
 
 export function ParentUnitSelect({
   tenantId,
@@ -36,20 +56,31 @@ export function ParentUnitSelect({
   });
 
   const filtered = options.filter((unit) => unit.id !== excludeUnitId);
-  const selectedLabel =
-    filtered.find((unit) => unit.id === value)?.name ??
-    parentDetailQuery.data?.name;
+  const selectedUnit =
+    filtered.find((unit) => unit.id === value) ??
+    (parentDetailQuery.data?.id === value ? parentDetailQuery.data : null);
+
+  const isPod9ById = new Map(
+    filtered.map((unit) => [unit.id, unit.is_pod9] as const),
+  );
+  if (selectedUnit) {
+    isPod9ById.set(selectedUnit.id, selectedUnit.is_pod9);
+  }
 
   return (
     <AsyncCombobox
       options={filtered.map((unit) => ({
         value: unit.id,
-        label: unit.short_name
-          ? `${unit.name} (${unit.short_name})`
-          : unit.name,
+        label: unitLabel(unit),
       }))}
       value={value}
-      selectedLabel={selectedLabel}
+      selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
+      renderOption={(option) =>
+        renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
+      }
+      renderValue={(option) =>
+        renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
+      }
       onValueChange={(id) => {
         if (!id) {
           onChange(null);

@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { queryClient } from "../shared/lib/query-client";
+import { Toaster } from "../shared/ui";
 import { AuthProvider } from "./providers/auth/AuthProvider";
 import { TenantProvider } from "./providers/tenant/TenantProvider";
 import {
@@ -18,6 +19,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       <AuthProvider onSessionInvalidated={clearSessionState}>
         <TenantProvider onTenantChange={clearTenantState}>
           {children}
+          <Toaster />
         </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
 import {
   DEFAULT_WASTES_LIST_LIMIT,
   deleteWaste,
@@ -36,6 +36,7 @@ import {
   PageContextBar,
   Select,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 import { wastesColumns } from "./wastes-columns";
 
@@ -45,7 +46,6 @@ export function WastesDirectoryPage() {
   const navigate = useNavigate({ from: "/directories/wastes" });
   const search = useSearch({ from: "/directories/wastes" });
   const columns = wastesColumns(setDeletingWaste);
-
   const listParams = useMemo(
     () => ({
       search: search.q || undefined,
@@ -83,7 +83,9 @@ export function WastesDirectoryPage() {
         queryKey: wastesQueryKeys.lists(),
       });
       setDeletingWaste(null);
+      toast.success("Отход успешно удалён");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const patchSearch = (patch: {

@@ -22,7 +22,18 @@ export class ApiError extends Error {
 
 type ApiRequestOptions = RequestInit & {
   tenantScoped?: boolean;
-  
+};
+
+type ApiSendJsonOptions = {
+  method: "POST" | "PATCH";
+  body: unknown;
+  signal?: AbortSignal;
+  tenantScoped?: boolean;
+};
+
+type ApiDeleteOptions = {
+  signal?: AbortSignal;
+  tenantScoped?: boolean;
 };
 
 type TenantIdResolver = () => string | null;
@@ -149,4 +160,28 @@ export async function apiJson<T>(
 ): Promise<T> {
   const response = await apiFetch(path, options);
   return response.json() as Promise<T>;
+}
+
+export function apiSendJson<T>(
+  path: string,
+  options: ApiSendJsonOptions,
+): Promise<T> {
+  return apiJson<T>(path, {
+    method: options.method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(options.body),
+    tenantScoped: options.tenantScoped,
+    signal: options.signal,
+  });
+}
+
+export async function apiDelete(
+  path: string,
+  options: ApiDeleteOptions = {},
+): Promise<void> {
+  await apiFetch(path, {
+    method: "DELETE",
+    tenantScoped: options.tenantScoped,
+    signal: options.signal,
+  });
 }

@@ -51,7 +51,6 @@ export function useUpsertUnitForm({
   initial,
   onSaved,
 }: UseUpsertUnitFormParams) {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<UnitFormValues>({
@@ -78,7 +77,6 @@ export function useUpsertUnitForm({
         queryKey: unitsQueryKeys.trees(),
       });
       onSaved(created, { close: vars.close });
-      setSuccessMessage("Единица успешно создана");
     },
     onError: (err) => setError(err.message),
   });
@@ -97,14 +95,12 @@ export function useUpsertUnitForm({
         queryKey: unitsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
-      setSuccessMessage("Единица успешно обновлена");
     },
     onError: (err) => setError(err.message),
   });
 
   const onSubmit = (close: boolean, values: UnitFormValues) => {
     setError(null);
-    setSuccessMessage(null);
     if (mode === "edit") updateMutation.mutate({ values, close });
     else createMutation.mutate({ values, close });
   };
@@ -114,6 +110,5 @@ export function useUpsertUnitForm({
     error,
     pending: createMutation.isPending || updateMutation.isPending,
     onSubmit,
-    successMessage,
   };
 }

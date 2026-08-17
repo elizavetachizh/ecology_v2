@@ -1,19 +1,26 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { WasteCatalogForm } from "../../../../features/waste/upsert-waste";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { WasteInstructionUnitsSection } from "../../../../features/waste/bind-waste-instruction-unit";
+import { useTenant } from "../../../../entities/tenant";
 import { getWaste, wastesQueryKeys } from "../../../../entities/waste/wastes";
 import {
   Alert,
   AlertDescription,
   Button,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 
 export function EditWastePage() {
   const { wasteId } = useParams({ from: "/directories/wastes/$wasteId" });
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const search = useSearch({ from: "/directories/wastes/$wasteId" });
+  const navigate = useNavigate({ from: "/directories/wastes/$wasteId" });
   const { activeTenantId } = useTenant();
 
   const wasteQuery = useQuery({
@@ -46,21 +53,33 @@ export function EditWastePage() {
         "Чтобы открыть отход, выберите организацию в верхней панели."
       }
     >
-      <WasteCatalogForm
-        mode="edit"
-        initial={wasteQuery.data}
-        wasteId={wasteId}
-        onSaved={(_waste, { close }) => {
-          if (close) {
-            void navigate({ to: "/directories/wastes" });
-            return;
-          }
-          void queryClient.invalidateQueries({
-            queryKey: wastesQueryKeys.detail(activeTenantId ?? "none", wasteId),
-          });
-        }}
-        onCancel={() => void navigate({ to: "/directories/wastes" })}
-      />
+      <div className="space-y-6">
+        <WasteCatalogForm
+          mode="edit"
+          initial={wasteQuery.data}
+          wasteId={wasteId}
+          onSaved={(_waste, { close }) => {
+            toast.success("Отход успешно обновлён");
+            if (close) void navigate({ to: "/directories/wastes" });
+          }}
+          onCancel={() => void navigate({ to: "/directories/wastes" })}
+        />
+
+        <WasteInstructionUnitsSection
+          tenantId={activeTenantId}
+          wasteId={wasteId}
+          instructionId={search.instructionId}
+          onInstructionChange={(nextInstructionId) => {
+            void navigate({
+              search: (prev) => ({
+                ...prev,
+                instructionId: nextInstructionId,
+              }),
+              replace: true,
+            });
+          }}
+        />
+      </div>
     </TenantRequiredGate>
   );
 }

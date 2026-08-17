@@ -25,4 +25,7 @@ export {
 } from "./model/instructions.types";
 export { useInstructionsOptions } from "./model/use-instructions-query";
 export { useInstructionsListQuery } from "./model/use-instructions-list-query";
+export { useActiveInstructionId } from "./model/use-active-instruction-id";
 export { InstructionStatusBadge } from "./ui/InstructionStatusBadge";
+export { InstructionTabLabel } from "./ui/InstructionTabLabel";
+export { InstructionTabs } from "./ui/InstructionTabs";

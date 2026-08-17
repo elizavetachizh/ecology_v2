@@ -36,6 +36,7 @@ function wastesColumns(
         <Link
           to="/directories/wastes/$wasteId"
           params={{ wasteId: row.original.id }}
+          search={{ instructionId: undefined }}
           className="font-medium hover:underline"
         >
           {row.original.waste_classifier.name}
@@ -79,6 +80,7 @@ function wastesColumns(
             <Link
               to="/directories/wastes/$wasteId"
               params={{ wasteId: row.original.id }}
+              search={{ instructionId: undefined }}
             >
               <Pencil />
               Изменить

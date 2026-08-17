@@ -1,4 +1,4 @@
-import { apiJson } from "../../../../shared/api/api-client";
+import { apiSendJson } from "../../../../shared/api/api-client";
 import type {
   UnitInstructionWaste,
   UnitInstructionWasteCreate,
@@ -11,10 +11,9 @@ export function createUnitInstructionWaste(
   body: UnitInstructionWasteCreate,
   signal?: AbortSignal,
 ): Promise<UnitInstructionWaste> {
-  return apiJson<UnitInstructionWaste>(uiwCollectionPath(scope), {
+  return apiSendJson<UnitInstructionWaste>(uiwCollectionPath(scope), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body,
     tenantScoped: true,
     signal,
   });

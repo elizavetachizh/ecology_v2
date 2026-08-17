@@ -26,3 +26,20 @@ export type WasteInstructionUnitCreate = {
   waste_source_ids?: string[];
   transport_unit?: string;
 };
+
+export type WasteInstructionUnitUpdate = Partial<WasteInstructionUnitCreate>;
+export type WasteInstructionUnitListResponse = {
+  total: number;
+  limit: number;
+  offset: number;
+  items: WasteInstructionUnit[];
+};
+export type GetWasteInstructionUnitsParams = {
+  limit: number;
+  offset: number;
+};
+export type WasteInstructionUnitScope = {
+  wasteId: string;
+  instructionId: string;
+};
+export const DEFAULT_WIU_LIST_LIMIT = 50;

@@ -1,4 +1,4 @@
-import { apiJson } from "../../../../shared/api/api-client";
+import { apiSendJson } from "../../../../shared/api/api-client";
 import type { Operation, OperationUpdate } from "../model/operations.types";
 
 export function updateOperation(
@@ -6,11 +6,10 @@ export function updateOperation(
   body: OperationUpdate,
   signal?: AbortSignal,
 ): Promise<Operation> {
-  return apiJson<Operation>(`/operations/${operationId}`, {
+  return apiSendJson<Operation>(`/api/v1/operations/${operationId}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    body,
     tenantScoped: true,
-    body: JSON.stringify(body),
     signal,
   });
 }

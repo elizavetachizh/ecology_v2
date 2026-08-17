@@ -3,11 +3,17 @@ import type { UnitBrief } from "../../units";
 import type { WasteSourceBrief } from "../../waste-sources";
 import type { WasteBrief } from "../../wastes";
 
-export const OperationType = {
-  formed: "formed",
-  used: "used",
+export const OPERATION_TYPE_LABEL = {
+  formed: "Образовано",
+  used: "Использовано",
 } as const;
-export type OperationType = (typeof OperationType)[keyof typeof OperationType];
+
+export type OperationType = keyof typeof OPERATION_TYPE_LABEL;
+
+export const OperationTypeValues = Object.keys(OPERATION_TYPE_LABEL) as [
+  OperationType,
+  ...OperationType[],
+];
 
 export type Balance = {
   id: string;
@@ -15,11 +21,17 @@ export type Balance = {
   date: string;
   unit: UnitBrief;
   waste: WasteBrief;
-  amount: number;
+  amount: string;
 };
 
 export type BalanceBrief = Pick<Balance, "id" | "date" | "amount"> & {
   operation_id: string;
+};
+
+export type BalanceCurrent = {
+  unit_id: string;
+  waste_id: string;
+  amount: string;
 };
 
 export type Operation = {
@@ -33,7 +45,7 @@ export type Operation = {
   waste: WasteBrief;
   waste_source_id: string | null;
   waste_source: WasteSourceBrief | null;
-  amount: number;
+  amount: string;
   balance: BalanceBrief;
   created_at: string;
   updated_at: string;
@@ -54,12 +66,27 @@ export type OperationCreate = Pick<
 export type OperationUpdate = Partial<OperationCreate>;
 
 export type GetOperationsParams = {
-  unit_id: string;
-  waste_id: string;
-  date_from: string;
-  date_to: string;
+  unit_id?: string;
+  waste_id?: string;
+  operation_type?: OperationType;
+  date_from?: string;
+  date_to?: string;
   limit: number;
   offset: number;
+};
+
+export type GetBalancesParams = {
+  unit_id?: string;
+  waste_id?: string;
+  date_from?: string;
+  date_to?: string;
+  limit: number;
+  offset: number;
+};
+
+export type GetCurrentBalanceParams = {
+  unit_id: string;
+  waste_id: string;
 };
 
 export type OperationListResponse = {
@@ -68,3 +95,12 @@ export type OperationListResponse = {
   offset: number;
   items: Operation[];
 };
+
+export type BalanceListResponse = {
+  total: number;
+  limit: number;
+  offset: number;
+  items: Balance[];
+};
+
+export const DEFAULT_OPERATIONS_LIST_LIMIT = 50;

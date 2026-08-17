@@ -1,8 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "../../../shared/ui";
-import {
-  DIRECTORY_CARDS,
-} from "../../../shared/config/directories";
+import { DIRECTORY_CARDS } from "../../../shared/config/directories";
 
 export function DirectoriesHubPage() {
   return (
@@ -12,8 +10,8 @@ export function DirectoriesHubPage() {
           Справочники
         </h1>
         <p className="text-sm text-muted-foreground">
-          Начните с инструкции, затем заполните структуру и остальные
-          справочники.
+          Начните с инструкции, затем заполните структуру организации и
+          остальные справочники.
         </p>
       </div>
 
@@ -27,12 +25,11 @@ export function DirectoriesHubPage() {
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-semibold text-foreground">{card.title}</h2>
               </div>
-              <p className="text-sm text-muted-foreground">{card.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {card.description}
+              </p>
             </div>
             <div className="mt-auto flex items-center justify-between gap-2">
-              <span className="text-sm text-muted-foreground">
-                Записей: {card.count}
-              </span>
               <Button asChild size="sm">
                 <Link to={card.to}>Открыть</Link>
               </Button>

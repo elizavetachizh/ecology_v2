@@ -19,7 +19,7 @@ import {
 } from "../../../shared/auth/keycloak";
 import { refreshAccessToken } from "../../../shared/auth/token-refresh";
 import { Button } from "../../../shared/ui";
-import { AuthContext } from "./auth-context";
+import { AuthContext } from "../../../shared/auth/auth-context";
 
 type AuthProviderProps = {
   children: ReactNode;

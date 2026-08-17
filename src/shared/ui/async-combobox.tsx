@@ -5,6 +5,7 @@ import { cn } from "../lib/cn";
 
 export type AsyncComboboxOption = {
   value: string;
+  /** Строка для поиска, a11y и кэша выбранного значения */
   label: string;
   disabled?: boolean;
   keywords?: string[];
@@ -24,6 +25,13 @@ export type AsyncComboboxProps = {
   search: string;
   setSearch: (value: string) => void;
   selectedLabel?: string;
+  /** Кастомный рендер пункта списка. По умолчанию — `option.label`. */
+  renderOption?: (
+    option: AsyncComboboxOption,
+    state: { selected: boolean },
+  ) => React.ReactNode;
+  /** Кастомный рендер выбранного значения на триггере. По умолчанию — `label`. */
+  renderValue?: (option: { value: string; label: string }) => React.ReactNode;
 };
 
 export function AsyncCombobox({
@@ -40,6 +48,8 @@ export function AsyncCombobox({
   contentClassName,
   "aria-label": ariaLabel,
   selectedLabel,
+  renderOption,
+  renderValue,
 }: AsyncComboboxProps) {
   const [open, setOpen] = React.useState(false);
   /** Label выбранного value после сброса поиска (пишется только в handlers). */
@@ -108,9 +118,15 @@ export function AsyncCombobox({
             {selectedOption ? (
               <span
                 key={selectedOption.value}
-                className="max-w-80 truncate rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+                className="inline-flex max-w-full items-center gap-1.5 rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
               >
-                {selectedOption.label}
+                {renderValue ? (
+                  renderValue(selectedOption)
+                ) : (
+                  <span className="min-w-0 truncate">
+                    {selectedOption.label}
+                  </span>
+                )}
               </span>
             ) : (
               <span className="truncate text-muted-foreground">
@@ -192,10 +208,18 @@ export function AsyncCombobox({
                       selected && "bg-accent text-accent-foreground",
                     )}
                   >
-                    <span className="min-w-0 flex-1 truncate">
-                      {option.label}
+                    <span className="flex min-w-0 flex-1 items-center gap-2">
+                      {renderOption ? (
+                        renderOption(option, { selected })
+                      ) : (
+                        <span className="min-w-0 flex-1 truncate">
+                          {option.label}
+                        </span>
+                      )}
                     </span>
-                    {selected && <Check aria-hidden className="size-3" />}
+                    {selected ? (
+                      <Check aria-hidden className="size-3 shrink-0" />
+                    ) : null}
                   </button>
                 );
               })

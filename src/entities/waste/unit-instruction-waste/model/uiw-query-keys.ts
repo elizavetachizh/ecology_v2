@@ -18,3 +18,4 @@ export const uiwQueryKeys = {
     bindingId: string,
   ) => [...uiwQueryKeys.details(), tenantId, scope, bindingId] as const,
 };
+ 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_UNITS_LIST_LIMIT,
   useUnitsListQuery,
@@ -8,6 +8,7 @@ import {
 } from "../../../../../../entities/waste/units";
 import type { StructureSearch } from "../../../../../../app/router/search-params";
 import type { ExpandedState } from "../../../../../../shared/ui";
+import { collectExpandableIds } from "./collect-expandable-ids";
 import { mergeExpanded } from "./merge-expanded";
 
 function toTreeRows(items: Unit[]): UnitTree[] {
@@ -66,6 +67,12 @@ export function useUnitsPageData({
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
     mergeExpanded({}, [search.expandId, search.focusId]),
   );
+
+  // Hierarchical search: matches ∪ ancestors. Раскрываем предков, иначе hit не виден.
+  useEffect(() => {
+    if (pod9Only || !search.q) return;
+    setExpanded(mergeExpanded({}, collectExpandableIds(treeQuery.tree)));
+  }, [pod9Only, search.q, treeQuery.tree]);
 
   return {
     mode: pod9Only ? ("flat" as const) : ("tree" as const),

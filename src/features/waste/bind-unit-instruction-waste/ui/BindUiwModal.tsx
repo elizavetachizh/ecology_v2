@@ -53,11 +53,38 @@ export function BindUiwModal({
   onOpenChange,
   onSaved,
 }: BindUiwModalProps) {
+  return (
+    <Modal open={open} onOpenChange={onOpenChange}>
+      {/* Remount on open → fresh defaultValues / error без useEffect reset. */}
+      {open ? (
+        <BindUiwModalForm
+          key={`${mode}-${initial?.id ?? "new"}`}
+          mode={mode}
+          tenantId={tenantId}
+          scope={scope}
+          initial={initial}
+          onOpenChange={onOpenChange}
+          onSaved={onSaved}
+        />
+      ) : null}
+    </Modal>
+  );
+}
+
+type BindUiwModalFormProps = Omit<BindUiwModalProps, "open">;
+
+function BindUiwModalForm({
+  mode,
+  tenantId,
+  scope,
+  initial,
+  onOpenChange,
+  onSaved,
+}: BindUiwModalFormProps) {
   const { form, error, pending, onSubmit } = useBindUiwForm({
     mode,
     scope,
     initial,
-    open,
     onSaved,
   });
 
@@ -67,10 +94,10 @@ export function BindUiwModal({
     formState: { errors },
   } = form;
 
-  const wastes = useWastesOptions({ tenantId, enabled: open });
+  const wastes = useWastesOptions({ tenantId, enabled: true });
   const sources = useWasteSourcesOptions({
     tenantId,
-    enabled: open,
+    enabled: true,
     limit: 50,
   });
 
@@ -85,152 +112,148 @@ export function BindUiwModal({
       : null);
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent className="max-w-lg">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <ModalHeader>
-            <ModalTitle>
-              {mode === "create"
-                ? "Привязать отход"
-                : "Изменить привязку отхода"}
-            </ModalTitle>
-            <ModalDescription>
-              Выберите существующий отход из справочника организации. Новый
-              отход создаётся только в справочнике отходов.
-            </ModalDescription>
-          </ModalHeader>
+    <ModalContent className="max-w-lg">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <ModalHeader>
+          <ModalTitle>
+            {mode === "create" ? "Привязать отход" : "Изменить привязку отхода"}
+          </ModalTitle>
+          <ModalDescription>
+            Выберите существующий отход из справочника организации. Новый отход
+            создаётся только в справочнике отходов.
+          </ModalDescription>
+        </ModalHeader>
 
-          <div className="grid gap-4 py-2">
-            {error ? (
-              <Alert variant="error">
-                <AlertTitle>Не удалось сохранить</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : null}
+        <div className="grid gap-4 py-2">
+          {error ? (
+            <Alert variant="error">
+              <AlertTitle>Не удалось сохранить</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-            <Field>
-              <FieldLabel htmlFor="waste_id" required>
-                Отход
-              </FieldLabel>
-              <Controller
-                name="waste_id"
-                control={control}
-                render={({ field }) => (
-                  <AsyncCombobox
-                    options={wastes.options.map((waste) => ({
-                      value: waste.id,
-                      label: wasteLabel(waste),
-                    }))}
-                    value={field.value}
-                    selectedLabel={
-                      selectedWaste
-                        ? `${selectedWaste.waste_classifier.code} — ${selectedWaste.waste_classifier.name}`
-                        : undefined
-                    }
-                    onValueChange={(id) => field.onChange(id ?? "")}
-                    placeholder="Выберите отход из справочника"
-                    searchPlaceholder="Поиск по коду или названию"
-                    emptyMessage={
-                      wastes.loading
-                        ? "Загрузка…"
-                        : "Начните вводить код или название"
-                    }
-                    search={wastes.search}
-                    setSearch={wastes.setSearch}
-                    className="w-full"
-                    contentClassName="w-full"
-                    aria-label="Отход"
-                  />
-                )}
-              />
-              <FieldDescription>
-                Нет нужного отхода?{" "}
-                <Link
-                  to="/directories/wastes/new"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Создать в справочнике
-                </Link>
-              </FieldDescription>
-              <FieldError>{errors.waste_id?.message}</FieldError>
-            </Field>
+          <Field>
+            <FieldLabel htmlFor="waste_id" required>
+              Отход
+            </FieldLabel>
+            <Controller
+              name="waste_id"
+              control={control}
+              render={({ field }) => (
+                <AsyncCombobox
+                  options={wastes.options.map((waste) => ({
+                    value: waste.id,
+                    label: wasteLabel(waste),
+                  }))}
+                  value={field.value}
+                  selectedLabel={
+                    selectedWaste
+                      ? `${selectedWaste.waste_classifier.code} — ${selectedWaste.waste_classifier.name}`
+                      : undefined
+                  }
+                  onValueChange={(id) => field.onChange(id ?? "")}
+                  placeholder="Выберите отход из справочника"
+                  searchPlaceholder="Поиск по коду или названию"
+                  emptyMessage={
+                    wastes.loading
+                      ? "Загрузка…"
+                      : "Начните вводить код или название"
+                  }
+                  search={wastes.search}
+                  setSearch={wastes.setSearch}
+                  className="w-full"
+                  contentClassName="w-full"
+                  aria-label="Отход"
+                />
+              )}
+            />
+            <FieldDescription>
+              Нет нужного отхода?{" "}
+              <Link
+                to="/directories/wastes/new"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Создать в справочнике
+              </Link>
+            </FieldDescription>
+            <FieldError>{errors.waste_id?.message}</FieldError>
+          </Field>
 
-            <Field>
-              <FieldLabel htmlFor="waste_source_ids">
-                Источники образования
-              </FieldLabel>
-              <Controller
-                name="waste_source_ids"
-                control={control}
-                render={({ field }) => (
-                  <MultipleCombobox
-                    options={sources.options.map((source) => ({
-                      value: source.id,
-                      label: source.name,
-                    }))}
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    search={sources.search}
-                    setSearch={sources.setSearch}
-                    placeholder="Необязательно — выберите источники"
-                    searchPlaceholder="Поиск источника"
-                    emptyMessage={
-                      sources.loading ? "Загрузка…" : "Источники не найдены"
-                    }
-                    aria-label="Источники образования"
-                  />
-                )}
-              />
-              <FieldDescription>
-                Можно выбрать несколько. Нет нужного источника?{" "}
-                <Link
-                  to="/directories/waste-sources"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Создать в справочнике
-                </Link>
-              </FieldDescription>
-              <FieldError>{errors.waste_source_ids?.message}</FieldError>
-            </Field>
+          <Field>
+            <FieldLabel htmlFor="waste_source_ids">
+              Источники образования
+            </FieldLabel>
+            <Controller
+              name="waste_source_ids"
+              control={control}
+              render={({ field }) => (
+                <MultipleCombobox
+                  options={sources.options.map((source) => ({
+                    value: source.id,
+                    label: source.name,
+                  }))}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  search={sources.search}
+                  setSearch={sources.setSearch}
+                  placeholder="Необязательно — выберите источники"
+                  searchPlaceholder="Поиск источника"
+                  emptyMessage={
+                    sources.loading ? "Загрузка…" : "Источники не найдены"
+                  }
+                  aria-label="Источники образования"
+                />
+              )}
+            />
+            <FieldDescription>
+              Можно выбрать несколько. Нет нужного источника?{" "}
+              <Link
+                to="/directories/waste-sources"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Создать в справочнике
+              </Link>
+            </FieldDescription>
+            <FieldError>{errors.waste_source_ids?.message}</FieldError>
+          </Field>
 
-            <Field>
-              <FieldLabel htmlFor="transport_unit" required>
-                Транспортная единица
-              </FieldLabel>
-              <Input
-                id="transport_unit"
-                inputMode="decimal"
-                placeholder="0"
-                aria-invalid={Boolean(errors.transport_unit)}
-                {...register("transport_unit")}
-              />
-              <FieldDescription>
-                Число от 0 до 999999.999999, до 6 знаков после запятой. По
-                умолчанию 0.
-              </FieldDescription>
-              <FieldError>{errors.transport_unit?.message}</FieldError>
-            </Field>
-          </div>
+          <Field>
+            <FieldLabel htmlFor="transport_unit" required>
+              Транспортная единица
+            </FieldLabel>
+            <Input
+              id="transport_unit"
+              inputMode="decimal"
+              placeholder="0"
+              aria-invalid={Boolean(errors.transport_unit)}
+              {...register("transport_unit")}
+            />
+            <FieldDescription>
+              Число от 0 до 999999.999999, до 6 знаков после запятой. По
+              умолчанию 0.
+            </FieldDescription>
+            <FieldError>{errors.transport_unit?.message}</FieldError>
+          </Field>
+        </div>
 
-          <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={pending}
-              onClick={() => onOpenChange(false)}
-            >
-              Отмена
-            </Button>
-            <Button type="submit" disabled={pending}>
-              {pending
-                ? "Сохранение…"
-                : mode === "create"
-                  ? "Привязать"
-                  : "Сохранить"}
-            </Button>
-          </ModalFooter>
-        </form>
-      </ModalContent>
-    </Modal>
+        <ModalFooter>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={() => onOpenChange(false)}
+          >
+            Отмена
+          </Button>
+          <Button type="submit" disabled={pending}>
+            {pending
+              ? "Сохранение…"
+              : mode === "create"
+                ? "Привязать"
+                : "Сохранить"}
+          </Button>
+        </ModalFooter>
+      </form>
+    </ModalContent>
   );
 }

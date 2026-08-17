@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
-import type { Tenant } from "../../../entities/tenant";
-import type { CurrentUser } from "../../../entities/user";
+import type { CurrentUser } from "../../user";
+import type { Tenant } from "./tenant.types";
 
 export type TenantContextValue = {
   user: CurrentUser;

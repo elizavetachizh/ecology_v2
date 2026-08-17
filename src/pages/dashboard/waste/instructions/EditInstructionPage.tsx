@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { InstructionForm } from "../../../../features/waste/upsert-instruction";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useQuery } from "@tanstack/react-query";
+import { useTenant } from "../../../../entities/tenant";
 import {
   getInstruction,
   instructionsQueryKeys,
@@ -11,14 +11,16 @@ import {
   AlertDescription,
   Button,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 
 export function EditInstructionPage() {
   const { instructionId } = useParams({
     from: "/directories/instructions/$instructionId",
   });
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate({
+    from: "/directories/instructions/$instructionId",
+  });
   const { activeTenantId } = useTenant();
 
   const instructionQuery = useQuery({
@@ -60,14 +62,8 @@ export function EditInstructionPage() {
         initial={instructionQuery.data}
         showNextStepCta
         onSaved={(_i, { close }) => {
+          toast.success("Инструкция успешно обновлена");
           if (close) void navigate({ to: "/directories/instructions" });
-          else
-            void queryClient.invalidateQueries({
-              queryKey: instructionsQueryKeys.detail(
-                activeTenantId ?? "none",
-                instructionId,
-              ),
-            });
         }}
         onCancel={() => void navigate({ to: "/directories/instructions" })}
       />

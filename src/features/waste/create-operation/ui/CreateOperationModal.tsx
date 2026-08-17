@@ -1,9 +1,31 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import { Controller } from "react-hook-form";
+import { Link } from "@tanstack/react-router";
+import { useTenant } from "../../../../entities/tenant";
+import {
+  OPERATION_TYPE_LABEL,
+  OperationTypeValues,
+  useCurrentBalanceQuery,
+  type Operation,
+} from "../../../../entities/waste/operations";
+import { useUnitsOptions, type Unit } from "../../../../entities/waste/units";
+import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
+import {
+  HAZARD_CLASS_LABEL,
+  UOM_LABEL,
+  useWastesOptions,
+  type Waste,
+} from "../../../../entities/waste/wastes";
 import {
   Alert,
   AlertDescription,
+  AlertTitle,
   AsyncCombobox,
   Button,
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
   Input,
   Modal,
   ModalContent,
@@ -13,146 +35,143 @@ import {
   ModalTitle,
   Select,
 } from "../../../../shared/ui";
-import {
-  CREATE_OPERATION_STEPS,
-  OPERATION_TYPES,
-  createEmptyOperationForm,
-  type CreateOperationForm,
-} from "../model/mocks";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
-import { useUnitsOptions } from "../../../../entities/waste/units";
-import { useWastesListQuery } from "../../../../entities/waste/wastes";
+import { useUpsertOperationForm } from "../model/use-upsert-operation-form";
+
+const UPSERT_OPERATION_STEPS = [
+  { id: 1, title: "Структурная единица" },
+  { id: 2, title: "Отход" },
+  { id: 3, title: "Данные операции" },
+] as const;
 
 type CreateOperationModalProps = {
   open: boolean;
+  mode: "create" | "edit";
+  initial?: Operation | null;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: (data: CreateOperationForm) => void;
+  onSaved: (operation: Operation) => void;
 };
 
-function FieldLabel({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: ReactNode;
-}) {
-  return (
-    <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
-      {children}
-    </label>
-  );
+function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
+  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
+}
+
+function wasteLabel(waste: Pick<Waste, "waste_classifier">) {
+  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
 }
 
 export function CreateOperationModal({
   open,
+  mode,
+  initial,
   onOpenChange,
-  onSubmit,
+  onSaved,
 }: CreateOperationModalProps) {
-  const { activeTenantId } = useTenant();
-
-  const { options, loading, search, setSearch } = useUnitsOptions({
-    tenantId: activeTenantId,
-    limit: 20,
-  });
-
-  const { items: wastes } = useWastesListQuery({
-    tenantId: activeTenantId,
-    params: {
-      search: "",
-      sort: "name",
-      order: "asc",
-      limit: 20,
-      offset: 0,
-    },
-  });
-
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<CreateOperationForm>(
-    createEmptyOperationForm,
+  return (
+    <Modal open={open} onOpenChange={onOpenChange}>
+      {open ? (
+        <CreateOperationModalForm
+          key={`${mode}-${initial?.id ?? "new"}`}
+          mode={mode}
+          initial={initial}
+          onOpenChange={onOpenChange}
+          onSaved={onSaved}
+        />
+      ) : null}
+    </Modal>
   );
-  const [error, setError] = useState<string | null>(null);
+}
 
-  const selectedWaste = wastes.find((item) => item.id === form.wasteId);
+type CreateOperationModalFormProps = Omit<CreateOperationModalProps, "open">;
 
-  const reset = () => {
-    setStep(1);
-    setForm(createEmptyOperationForm());
-    setError(null);
-  };
+function CreateOperationModalForm({
+  mode,
+  initial,
+  onOpenChange,
+  onSaved,
+}: CreateOperationModalFormProps) {
+  const { activeTenantId } = useTenant();
+  const [step, setStep] = useState(1);
+  const { form, error, pending, onSubmit } = useUpsertOperationForm({
+    mode,
+    initial,
+    onSaved,
+  });
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) reset();
-    onOpenChange(nextOpen);
-  };
+  const {
+    control,
+    register,
+    watch,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = form;
 
-  const updateField = <K extends keyof CreateOperationForm>(
-    key: K,
-    value: CreateOperationForm[K],
-  ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setError(null);
-  };
+  const unitId = watch("unit_id");
+  const wasteId = watch("waste_id");
+  const wasteSourceId = watch("waste_source_id");
+  const operationType = watch("operation_type");
 
-  const validateStep = (currentStep: number): boolean => {
-    if (currentStep === 1 && !form.unitId) {
-      setError("Выберите структурную единицу");
-      return false;
-    }
+  const units = useUnitsOptions({
+    tenantId: activeTenantId,
+    enabled: true,
+  });
+  const wastes = useWastesOptions({ tenantId: activeTenantId, enabled: true });
+  const sources = useWasteSourcesOptions({
+    tenantId: activeTenantId,
+    enabled: operationType === "formed",
+  });
 
-    if (currentStep === 2 && (!form.wasteId || !selectedWaste)) {
-      setError("Выберите отход");
-      return false;
-    }
+  const selectedUnit =
+    units.options.find((item) => item.id === unitId) ??
+    (initial?.unit_id === unitId ? initial.unit : null);
 
-    if (currentStep === 3) {
-      if (!form.date) {
-        setError("Укажите дату операции");
-        return false;
-      }
-      if (!form.operationTypeId) {
-        setError("Выберите тип операции");
-        return false;
-      }
-      const quantity = Number(form.quantity);
-      if (!form.quantity || Number.isNaN(quantity) || quantity <= 0) {
-        setError("Количество должно быть больше 0");
-        return false;
-      }
-    }
+  const selectedWaste =
+    wastes.options.find((item) => item.id === wasteId) ??
+    (initial?.waste_id === wasteId ? initial.waste : null);
 
-    setError(null);
-    return true;
-  };
+  const selectedSource =
+    sources.options.find((item) => item.id === wasteSourceId) ??
+    (initial?.waste_source_id === wasteSourceId
+      ? initial.waste_source
+      : null);
 
-  const goNext = () => {
-    if (!validateStep(step)) return;
-    setStep((prev) => Math.min(prev + 1, CREATE_OPERATION_STEPS.length));
+  const goNext = async () => {
+    const fields = step === 1 ? (["unit_id"] as const) : (["waste_id"] as const);
+    const valid = await trigger(fields);
+    if (valid) setStep((prev) => prev + 1);
   };
 
   const goBack = () => {
-    setError(null);
+    form.clearErrors();
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = () => {
-    if (!validateStep(3)) return;
-    onSubmit?.(form);
-    handleOpenChange(false);
-  };
+  const lastStep = step >= UPSERT_OPERATION_STEPS.length;
 
   return (
-    <Modal open={open} onOpenChange={handleOpenChange}>
-      <ModalContent className="max-w-xl">
+    <ModalContent className="max-w-xl">
+      <form
+        onSubmit={
+          lastStep
+            ? form.handleSubmit(onSubmit)
+            : (event) => {
+                event.preventDefault();
+                void goNext();
+              }
+        }
+      >
         <ModalHeader>
-          <ModalTitle>Создание операции</ModalTitle>
+          <ModalTitle>
+            {mode === "create" ? "Создание операции" : "Изменение операции"}
+          </ModalTitle>
           <ModalDescription>
-            Шаг {step} из {CREATE_OPERATION_STEPS.length}:{" "}
-            {CREATE_OPERATION_STEPS[step - 1]?.title}
+            Шаг {step} из {UPSERT_OPERATION_STEPS.length}:{" "}
+            {UPSERT_OPERATION_STEPS[step - 1]?.title}
           </ModalDescription>
         </ModalHeader>
 
         <div className="flex gap-2">
-          {CREATE_OPERATION_STEPS.map((item) => (
+          {UPSERT_OPERATION_STEPS.map((item) => (
             <div
               key={item.id}
               className={`h-1.5 flex-1 rounded-full ${
@@ -162,163 +181,308 @@ export function CreateOperationModal({
           ))}
         </div>
 
-        {error ? (
-          <Alert variant="error">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        {step === 1 ? (
-          <div className="space-y-4">
-            <Alert variant="info">
-              <AlertDescription>
-                Выберите структурную единицу из иерархии организации.
-              </AlertDescription>
+        <div className="grid gap-4 py-2">
+          {error ? (
+            <Alert variant="error">
+              <AlertTitle>Не удалось сохранить</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
+          ) : null}
 
-            <div className="space-y-2">
-              <FieldLabel htmlFor="structure-unit">
+          <CurrentBalanceHint
+            tenantId={activeTenantId}
+            unitId={unitId}
+            wasteId={wasteId}
+            uomLabel={selectedWaste ? UOM_LABEL[selectedWaste.uom] : undefined}
+          />
+
+          {step === 1 ? (
+            <Field>
+              <FieldLabel htmlFor="unit_id" required>
                 Структурная единица
               </FieldLabel>
-              <AsyncCombobox
-                options={options.map((unit) => ({
-                  value: unit.id,
-                  label: unit.short_name
-                    ? `${unit.name} (${unit.short_name})`
-                    : unit.name,
-                }))}
-                value={form.unitId}
-                onValueChange={(id) => updateField("unitId", id ?? "")}
-                placeholder={"Выберите структурную единицу…"}
-                searchPlaceholder="Поиск по названию или краткому"
-                emptyMessage={
-                  loading
-                    ? "Загрузка…"
-                    : "Ничего не найдено. Создайте структурную единицу в справочнике или уточните поиск."
-                }
-                className="w-full"
-                contentClassName="w-full"
-                search={search}
-                setSearch={setSearch}
-                aria-label="Структурная единица"
+              <Controller
+                name="unit_id"
+                control={control}
+                render={({ field }) => (
+                  <AsyncCombobox
+                    options={units.options.map((unit) => ({
+                      value: unit.id,
+                      label: unitLabel(unit),
+                    }))}
+                    value={field.value}
+                    selectedLabel={
+                      selectedUnit ? unitLabel(selectedUnit) : undefined
+                    }
+                    onValueChange={(id) => field.onChange(id)}
+                    placeholder="Выберите структурную единицу…"
+                    searchPlaceholder="Поиск по названию или краткому"
+                    emptyMessage={
+                      units.loading
+                        ? "Загрузка…"
+                        : "Ничего не найдено. Создайте структурную единицу в справочнике или уточните поиск."
+                    }
+                    search={units.search}
+                    setSearch={units.setSearch}
+                    className="w-full"
+                    contentClassName="w-full"
+                    aria-label="Структурная единица"
+                    disabled={pending}
+                  />
+                )}
               />
-            </div>
-          </div>
-        ) : null}
+              <FieldError>{errors.unit_id?.message}</FieldError>
+            </Field>
+          ) : null}
 
-        {step === 2 ? (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <FieldLabel htmlFor="waste">Отход</FieldLabel>
-              <Select
-                id="waste"
-                className="w-full"
-                value={form.wasteId}
-                onChange={(event) => updateField("wasteId", event.target.value)}
-              >
-                <option value="">Выберите отход</option>
-                {wastes.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.waste_classifier?.name
-                      ? `${item.waste_classifier?.name}`
-                      : item.waste_classifier?.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          {step === 2 ? (
+            <>
+              <Field>
+                <FieldLabel htmlFor="waste_id" required>
+                  Отход
+                </FieldLabel>
+                <Controller
+                  name="waste_id"
+                  control={control}
+                  render={({ field }) => (
+                    <AsyncCombobox
+                      options={wastes.options.map((waste) => ({
+                        value: waste.id,
+                        label: wasteLabel(waste),
+                      }))}
+                      value={field.value}
+                      selectedLabel={
+                        selectedWaste ? wasteLabel(selectedWaste) : undefined
+                      }
+                      onValueChange={(id) => field.onChange(id)}
+                      placeholder="Выберите отход из справочника"
+                      searchPlaceholder="Поиск по коду или названию"
+                      emptyMessage={
+                        wastes.loading
+                          ? "Загрузка…"
+                          : "Начните вводить код или название"
+                      }
+                      search={wastes.search}
+                      setSearch={wastes.setSearch}
+                      className="w-full"
+                      contentClassName="w-full"
+                      aria-label="Отход"
+                      disabled={pending}
+                    />
+                  )}
+                />
+                <FieldDescription>
+                  Нет нужного отхода?{" "}
+                  <Link
+                    to="/directories/wastes/new"
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Создать в справочнике
+                  </Link>
+                </FieldDescription>
+                <FieldError>{errors.waste_id?.message}</FieldError>
+              </Field>
 
-            {selectedWaste ? (
-              <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">
-                    Класс опасности:{" "}
-                  </span>
-                  {selectedWaste.hazard_class}
+              {selectedWaste ? (
+                <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">
+                      Класс опасности:{" "}
+                    </span>
+                    {HAZARD_CLASS_LABEL[selectedWaste.hazard_class]}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Ед. изм.: </span>
+                    {UOM_LABEL[selectedWaste.uom]}
+                  </div>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Ед. изм.: </span>
-                  {selectedWaste.uom}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+              ) : null}
+            </>
+          ) : null}
 
-        {step === 3 ? (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <FieldLabel htmlFor="operation-date">Дата операции</FieldLabel>
-              <Input
-                id="operation-date"
-                type="date"
-                value={form.date}
-                onChange={(event) => updateField("date", event.target.value)}
-              />
-            </div>
+          {step === 3 ? (
+            <>
+              <Field>
+                <FieldLabel htmlFor="operation-date" required>
+                  Дата операции
+                </FieldLabel>
+                <Input
+                  id="operation-date"
+                  type="date"
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.date)}
+                  {...register("date")}
+                />
+                <FieldError>{errors.date?.message}</FieldError>
+              </Field>
 
-            <div className="space-y-2">
-              <FieldLabel htmlFor="operation-type">Тип операции</FieldLabel>
-              <Select
-                id="operation-type"
-                className="w-full"
-                value={form.operationTypeId}
-                onChange={(event) =>
-                  updateField("operationTypeId", event.target.value)
-                }
-              >
-                <option value="">Выберите тип</option>
-                {OPERATION_TYPES.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
+              <Field>
+                <FieldLabel htmlFor="operation-type" required>
+                  Тип операции
+                </FieldLabel>
+                <Select
+                  id="operation-type"
+                  className="w-full"
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.operation_type)}
+                  {...register("operation_type", {
+                    onChange: (event) => {
+                      if (event.target.value === "used") {
+                        setValue("waste_source_id", "");
+                      }
+                    },
+                  })}
+                >
+                  <option value="">Выберите тип</option>
+                  {OperationTypeValues.map((type) => (
+                    <option key={type} value={type}>
+                      {OPERATION_TYPE_LABEL[type]}
+                    </option>
+                  ))}
+                </Select>
+                <FieldError>{errors.operation_type?.message}</FieldError>
+              </Field>
 
-            <div className="space-y-2">
-              <FieldLabel htmlFor="quantity">
-                Количество
-                {selectedWaste ? ` (${selectedWaste.uom})` : ""}
-              </FieldLabel>
-              <Input
-                id="quantity"
-                type="number"
-                min="0"
-                step="any"
-                placeholder="0"
-                value={form.quantity}
-                onChange={(event) =>
-                  updateField("quantity", event.target.value)
-                }
-              />
-            </div>
-          </div>
-        ) : null}
+              <Field>
+                <FieldLabel htmlFor="amount" required>
+                  Количество
+                  {selectedWaste ? ` (${UOM_LABEL[selectedWaste.uom]})` : ""}
+                </FieldLabel>
+                <Input
+                  id="amount"
+                  inputMode="decimal"
+                  placeholder="0"
+                  disabled={pending}
+                  aria-invalid={Boolean(errors.amount)}
+                  {...register("amount")}
+                />
+                <FieldDescription>
+                  Число больше 0, до 6 знаков после запятой.
+                </FieldDescription>
+                <FieldError>{errors.amount?.message}</FieldError>
+              </Field>
+
+              {operationType === "formed" ? (
+                <Field>
+                  <FieldLabel htmlFor="waste_source_id" required>
+                    Источник образования
+                  </FieldLabel>
+                  <Controller
+                    name="waste_source_id"
+                    control={control}
+                    render={({ field }) => (
+                      <AsyncCombobox
+                        options={sources.options.map((source) => ({
+                          value: source.id,
+                          label: source.name,
+                        }))}
+                        value={field.value}
+                        selectedLabel={selectedSource?.name}
+                        onValueChange={(id) => field.onChange(id)}
+                        placeholder="Выберите источник образования"
+                        searchPlaceholder="Поиск источника"
+                        emptyMessage={
+                          sources.loading
+                            ? "Загрузка…"
+                            : "Источники не найдены"
+                        }
+                        search={sources.search}
+                        setSearch={sources.setSearch}
+                        className="w-full"
+                        contentClassName="w-full"
+                        aria-label="Источник образования"
+                        disabled={pending}
+                      />
+                    )}
+                  />
+                  <FieldDescription>
+                    Нет нужного источника?{" "}
+                    <Link
+                      to="/directories/waste-sources"
+                      className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      Создать в справочнике
+                    </Link>
+                  </FieldDescription>
+                  <FieldError>{errors.waste_source_id?.message}</FieldError>
+                </Field>
+              ) : null}
+            </>
+          ) : null}
+        </div>
 
         <ModalFooter>
           <Button
             type="button"
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            disabled={pending}
+            onClick={() => onOpenChange(false)}
           >
             Отмена
           </Button>
           {step > 1 ? (
-            <Button type="button" variant="secondary" onClick={goBack}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={goBack}
+            >
               Назад
             </Button>
           ) : null}
-          {step < CREATE_OPERATION_STEPS.length ? (
-            <Button type="button" onClick={goNext}>
-              Далее
+          {lastStep ? (
+            <Button type="submit" disabled={pending}>
+              {pending
+                ? "Сохранение…"
+                : mode === "create"
+                  ? "Создать операцию"
+                  : "Сохранить"}
             </Button>
           ) : (
-            <Button type="button" onClick={handleSubmit}>
-              Создать операцию
+            <Button type="submit" disabled={pending}>
+              Далее
             </Button>
           )}
         </ModalFooter>
-      </ModalContent>
-    </Modal>
+      </form>
+    </ModalContent>
+  );
+}
+
+function CurrentBalanceHint({
+  tenantId,
+  unitId,
+  wasteId,
+  uomLabel,
+}: {
+  tenantId: string | null;
+  unitId: string;
+  wasteId: string;
+  uomLabel?: string;
+}) {
+  const enabled = Boolean(unitId && wasteId);
+  const { balance, loading, error } = useCurrentBalanceQuery({
+    tenantId,
+    unitId,
+    wasteId,
+    enabled,
+  });
+
+  if (!enabled) return null;
+
+  const text = loading
+    ? "Загрузка текущего остатка…"
+    : error
+      ? "Не удалось загрузить текущий остаток"
+      : balance
+        ? `Текущий остаток: ${balance.amount}${uomLabel ? ` ${uomLabel}` : ""}`
+        : null;
+
+  if (!text) return null;
+
+  return (
+    <Alert variant="info">
+      <AlertDescription>{text}</AlertDescription>
+    </Alert>
   );
 }

@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { InstructionForm } from "../../../../features/waste/upsert-instruction";
-import { TenantRequiredGate } from "../../../../shared/ui";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
+import { TenantRequiredGate, toast } from "../../../../shared/ui";
 
 export function CreateInstructionPage() {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export function CreateInstructionPage() {
         mode="create"
         showNextStepCta
         onSaved={(instruction, { close }) => {
+          toast.success("Инструкция успешно создана");
           if (close) {
             void navigate({ to: "/directories/instructions" });
             return;

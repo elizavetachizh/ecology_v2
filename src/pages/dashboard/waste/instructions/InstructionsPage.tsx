@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
 import {
   Alert,
   AlertDescription,
@@ -14,6 +14,7 @@ import {
   PageContextBar,
   Select,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -39,6 +40,7 @@ export function InstructionsPage() {
   const { activeTenantId } = useTenant();
   const navigate = useNavigate({ from: "/directories/instructions" });
   const search = useSearch({ from: "/directories/instructions" });
+
   const [deletingInstruction, setDeletingInstruction] =
     useState<Instruction | null>(null);
   const columns = useMemo(
@@ -89,7 +91,9 @@ export function InstructionsPage() {
         queryKey: instructionsQueryKeys.lists(),
       });
       setDeletingInstruction(null);
+      toast.success("Инструкция успешно удалена");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const patchSearch = (patch: {

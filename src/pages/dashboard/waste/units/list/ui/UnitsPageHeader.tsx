@@ -11,7 +11,7 @@ export function UnitsPageHeader({ onCreateRoot }: UnitsPageHeaderProps) {
     <PageContextBar
       sticky={false}
       title="Структура организации"
-      description="Иерархия структурных единиц: подразделения, цеха, площадки. Дочерние узлы создаются в контексте родителя."
+      description="Иерархия структурных единиц: подразделения, цеха, площадки, журналы ПОД-9."
       actions={
         <>
           <Button type="button" size="sm" onClick={onCreateRoot}>

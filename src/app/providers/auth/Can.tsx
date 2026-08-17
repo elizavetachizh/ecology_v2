@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { can } from "../../../shared/auth/permissions";
-import { useAuth } from "./auth-context";
+import { useAuth } from "../../../shared/auth/auth-context";
 
 type CanProps = {
   permission: string;

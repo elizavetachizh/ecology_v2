@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { TenantRequiredGate } from "../../../../shared/ui";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { TenantRequiredGate, toast } from "../../../../shared/ui";
+import { useTenant } from "../../../../entities/tenant";
 import { UnitForm } from "../../../../features/waste/upsert-unit";
 import { UnitInstructionWastesCreateHint } from "../../../../features/waste/bind-unit-instruction-waste";
 
@@ -25,6 +25,11 @@ export function CreateUnitPage() {
           defaultParentId={parentId || undefined}
           defaultIsPod9={Boolean(isPod9)}
           onSaved={(unit, { close }) => {
+            toast.success(
+              unit.is_pod9
+                ? "Журнал ПОД-9 успешно создан"
+                : "Единица успешно создана",
+            );
             // После создания ПОД-9 всегда открываем карточку с привязками отходов.
             if (unit.is_pod9) {
               void navigate({

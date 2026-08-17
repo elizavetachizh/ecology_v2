@@ -1,5 +1,5 @@
 import { Bell, LogOut, PanelLeft } from "lucide-react";
-import { useTenant } from "../providers/tenant/tenant-context";
+import { useTenant } from "../../entities/tenant";
 import { useLogout } from "../../features/auth/logout";
 import { Button } from "../../shared/ui";
 import { Select } from "../../shared/ui";

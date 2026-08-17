@@ -6,8 +6,11 @@ import {
   DEFAULT_STALE_TIME_MS,
   queryClient,
 } from "../../../../shared/lib/query-client";
-
-const MAX_ANCESTOR_DEPTH = 32;
+import {
+  findCachedAncestorChain,
+  MAX_ANCESTOR_DEPTH,
+  seedUnitDetails,
+} from "./find-unit-ancestor-chain";
 
 type UseUnitAncestorChainArgs = {
   tenantId: string | null;
@@ -17,8 +20,9 @@ type UseUnitAncestorChainArgs = {
 };
 
 /**
- * Цепочка предков от корня до unit (walk по parent_id).
- * Кладёт родителей в detail-кэш — клик по крошке открывает уже тёплый запрос.
+ * Цепочка предков от корня до unit.
+ * Сначала дерево из RQ-кэша (после страницы структуры — без сети),
+ * иначе walk по parent_id через detail.
  */
 export function useUnitAncestorChain({
   tenantId,
@@ -34,6 +38,12 @@ export function useUnitAncestorChain({
     ] as const,
     queryFn: async ({ signal }) => {
       if (!unit || !tenantId) return [] as Unit[];
+
+      const cached = findCachedAncestorChain(queryClient, tenantId, unit);
+      if (cached) {
+        seedUnitDetails(queryClient, tenantId, cached);
+        return cached;
+      }
 
       const chain: Unit[] = [unit];
       let parentId = unit.parent_id;

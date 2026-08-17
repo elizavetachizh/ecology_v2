@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
 import {
   DEFAULT_WASTE_SOURCES_LIST_LIMIT,
   deleteWasteSource,
@@ -25,6 +25,7 @@ import {
   ListSearchField,
   PageContextBar,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 import { wasteSourcesColumns } from "./waste-sources-columns";
 import {
@@ -80,7 +81,9 @@ export function WasteSourcesPage() {
         queryKey: wasteSourcesQueryKeys.lists(),
       });
       setDeleting(null);
+      toast.success("Источник успешно удалён");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const patchSearch = (patch: {
@@ -181,6 +184,11 @@ export function WasteSourcesPage() {
             }
           }}
           onSaved={() => {
+            toast.success(
+              modalMode === "edit"
+                ? "Источник успешно обновлён"
+                : "Источник успешно создан",
+            );
             setModalMode(null);
             setEditing(null);
           }}

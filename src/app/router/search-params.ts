@@ -2,6 +2,7 @@ import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
+import type { OperationType } from "../../entities/waste/operations";
 import type { UnitSortField } from "../../entities/waste/units";
 import type { WasteSourceSortField } from "../../entities/waste/waste-sources";
 import type {
@@ -34,6 +35,17 @@ export type WastesSearch = ListSearchParams<WasteSortField> & {
 };
 
 export type WasteSourcesSearch = ListSearchParams<WasteSourceSortField>;
+
+/** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */
+export type OperationsSearch = {
+  unit_id?: string;
+  waste_id?: string;
+  operation_type?: OperationType;
+  date_from?: string;
+  date_to?: string;
+  limit?: number;
+  offset?: number;
+};
 
 /**
  * Структура: дерево по умолчанию; при is_pod9=true — плоский список журналов ПОД-9
@@ -84,4 +96,13 @@ export function parseSearchBoolean(value: unknown): boolean | undefined {
   if (value === true || value === "true") return true;
   if (value === false || value === "false") return false;
   return undefined;
+}
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Дата в URL: строго YYYY-MM-DD, иначе фильтр сброшен (иначе 422 на API). */
+export function parseSearchIsoDate(value: unknown): string | undefined {
+  return typeof value === "string" && ISO_DATE_RE.test(value)
+    ? value
+    : undefined;
 }

@@ -21,3 +21,4 @@ export {
 export { wasteSourcesQueryKeys } from "./model/waste-sources-query-keys";
 export { useWasteSourcesListQuery } from "./model/use-waste-sources-list-query";
 export { useWasteSourcesOptions } from "./model/use-waste-sources-query";
+export { WasteSourcesCell } from "./ui/WasteSourcesCell";

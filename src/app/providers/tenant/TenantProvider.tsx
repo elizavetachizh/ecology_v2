@@ -6,7 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getTenants, type Tenant } from "../../../entities/tenant";
+import {
+  getTenants,
+  TenantContext,
+  type Tenant,
+} from "../../../entities/tenant";
 import { getCurrentUser } from "../../../entities/user";
 import { setTenantIdResolver } from "../../../shared/api/api-client";
 import {
@@ -15,7 +19,6 @@ import {
   writeActiveTenantId,
 } from "../../../shared/auth/active-tenant-storage";
 import { Button } from "../../../shared/ui";
-import { TenantContext } from "./tenant-context";
 import { DEFAULT_STALE_TIME_MS } from "../../../shared/lib/query-client";
 
 type TenantProviderProps = {
@@ -34,6 +37,17 @@ function isKnownTenant(flatTenants: Tenant[], tenantId: string | null) {
   return Boolean(
     tenantId && flatTenants.some((tenant) => tenant.id === tenantId),
   );
+}
+
+function resolveActiveTenantId(
+  flatTenants: Tenant[],
+  selectedId: string | null,
+  storedId: string | null,
+): string | null {
+  if (isKnownTenant(flatTenants, selectedId)) return selectedId;
+  if (isKnownTenant(flatTenants, storedId)) return storedId;
+  if (flatTenants.length === 1) return flatTenants[0]!.id;
+  return null;
 }
 
 export function TenantProvider({
@@ -60,33 +74,20 @@ export function TenantProvider({
     [tenantsQuery.data],
   );
   const realm = userQuery.data?.realm ?? null;
+  const storedId = realm ? readActiveTenantId(realm) : null;
+  const resolvedTenantId = resolveActiveTenantId(
+    flatTenants,
+    activeTenantId,
+    storedId,
+  );
 
-  const resolvedTenantId = isKnownTenant(flatTenants, activeTenantId)
-    ? activeTenantId
-    : flatTenants.length === 1
-      ? flatTenants[0]!.id
-      : null;
-
-  // Hydrate из sessionStorage после /me + /tenants (realm уже известен).
+  // Стереть из storage id, которого больше нет в списке. Без setState.
   useEffect(() => {
     if (!realm || tenantsQuery.data === undefined) return;
-
-    if (isKnownTenant(flatTenants, activeTenantId)) return;
-
-    const storedId = readActiveTenantId(realm);
-    if (isKnownTenant(flatTenants, storedId)) {
-      setActiveTenantId(storedId);
-      return;
-    }
-
-    if (storedId) {
+    if (storedId && !isKnownTenant(flatTenants, storedId)) {
       clearActiveTenantId(realm);
     }
-
-    if (flatTenants.length === 1) {
-      setActiveTenantId(flatTenants[0]!.id);
-    }
-  }, [realm, tenantsQuery.data, flatTenants, activeTenantId]);
+  }, [realm, tenantsQuery.data, flatTenants, storedId]);
 
   // Persist валидный resolved id (включая auto-select единственного tenant).
   useEffect(() => {
@@ -121,6 +122,25 @@ export function TenantProvider({
     [flatTenants, onTenantChange, queryClient, realm, resolvedTenantId],
   );
 
+  const value = useMemo(() => {
+    if (!userQuery.data || !tenantsQuery.data) return null;
+    return {
+      user: userQuery.data,
+      tenants: tenantsQuery.data,
+      flatTenants,
+      activeTenantId: resolvedTenantId,
+      activeTenant:
+        flatTenants.find((tenant) => tenant.id === resolvedTenantId) ?? null,
+      selectTenant,
+    };
+  }, [
+    userQuery.data,
+    tenantsQuery.data,
+    flatTenants,
+    resolvedTenantId,
+    selectTenant,
+  ]);
+
   if (userQuery.isPending || tenantsQuery.isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -132,7 +152,7 @@ export function TenantProvider({
   }
 
   const queryError = userQuery.error ?? tenantsQuery.error;
-  if (queryError || !userQuery.data || !tenantsQuery.data) {
+  if (queryError || !value) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
         <div className="space-y-4 rounded-lg border bg-card p-6">
@@ -154,17 +174,6 @@ export function TenantProvider({
       </div>
     );
   }
-
-  const activeTenant =
-    flatTenants.find((tenant) => tenant.id === resolvedTenantId) ?? null;
-  const value = {
-    user: userQuery.data,
-    tenants: tenantsQuery.data,
-    flatTenants,
-    activeTenantId: resolvedTenantId,
-    activeTenant,
-    selectTenant,
-  };
 
   return (
     <TenantContext.Provider value={value}>{children}</TenantContext.Provider>

@@ -5,7 +5,7 @@ import {
   AlertTitle,
   TenantRequiredGate,
 } from "../../../../shared/ui";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
 import { useDeleteUnit } from "./list/model/use-delete-unit";
 import { useUnitsPageData } from "./list/model/use-units-page-data";
 import { useUnitsPageSearch } from "./list/model/use-units-page-search";
@@ -85,6 +85,7 @@ export function UnitsPage() {
           onExpandedChange={setExpanded}
           pagination={pagination}
           onOffsetChange={(offset) => patchSearch({ offset })}
+          searchQuery={search.q}
         />
         <DeleteUnitDialog
           unit={deleteUnit.deletingUnit}

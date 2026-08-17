@@ -15,7 +15,6 @@ type UnitFormHeaderProps = {
   unitName?: string | null;
   eyebrow?: ReactNode;
   actions?: ReactNode;
-  successMessage?: string | null;
   error?: string | null;
 };
 
@@ -26,7 +25,6 @@ export function UnitFormHeader({
   unitName,
   eyebrow = "Справочники / Структурные единицы",
   actions,
-  successMessage,
   error,
 }: UnitFormHeaderProps) {
   const { title, description } = getUnitFormHeaderCopy({
@@ -38,13 +36,6 @@ export function UnitFormHeader({
 
   return (
     <>
-      {successMessage ? (
-        <Alert variant="success">
-          <AlertTitle>Сохранено</AlertTitle>
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      ) : null}
-
       <PageContextBar
         eyebrow={eyebrow}
         title={title}

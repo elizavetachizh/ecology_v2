@@ -17,7 +17,11 @@ export {
   type MultipleComboboxOption,
   type MultipleComboboxProps,
 } from "./multiple-combobox";
-export { AsyncCombobox, type AsyncComboboxProps } from "./async-combobox";
+export {
+  AsyncCombobox,
+  type AsyncComboboxProps,
+  type AsyncComboboxOption,
+} from "./async-combobox";
 export {
   Alert,
   AlertTitle,
@@ -73,6 +77,11 @@ export {
 } from "./field-label";
 export { Switch } from "./switch";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
+export { Toaster, toast } from "./toaster";
+export {
+  InstructionScopedBindingsSection,
+  type InstructionScopedBindingsSectionProps,
+} from "./instruction-scoped-bindings-section";
 export {
   Breadcrumb,
   BreadcrumbList,

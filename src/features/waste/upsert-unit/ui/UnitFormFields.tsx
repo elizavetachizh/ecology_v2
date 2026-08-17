@@ -21,7 +21,7 @@ export function UnitFormFields({
   eyebrow,
   actions,
 }: UnitFormFieldsProps) {
-  const { form, error, pending, onSubmit, successMessage } = useUpsertUnitForm({
+  const { form, error, pending, onSubmit } = useUpsertUnitForm({
     mode,
     unitId,
     defaultParentId,
@@ -68,7 +68,6 @@ export function UnitFormFields({
         unitName={initial?.name}
         eyebrow={eyebrow}
         actions={actions}
-        successMessage={successMessage}
         error={error}
       />
 

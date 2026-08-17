@@ -48,7 +48,7 @@ export function getUnits(
   });
 }
 
-/** Full tree for structure UI. */
+/** Hierarchical tree. Без search/filters — всё дерево; с ними — matches ∪ ancestors. */
 export function getUnitsTree(
   params: GetUnitsTreeParams = {},
   signal?: AbortSignal,

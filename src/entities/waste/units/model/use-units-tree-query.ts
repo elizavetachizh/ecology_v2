@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUnitsTree } from "../api/get-units";
-import type { GetUnitsTreeParams } from "./units.types";
+import type { GetUnitsTreeParams, UnitTree } from "./units.types";
 import { unitsQueryKeys } from "./unit-query-keys";
+
+const EMPTY_TREE: UnitTree[] = [];
 
 type UseUnitsTreeQueryArgs = {
   tenantId: string | null;
@@ -23,7 +25,7 @@ export function useUnitsTreeQuery({
   });
 
   return {
-    tree: query.data ?? [],
+    tree: query.data ?? EMPTY_TREE,
     loading: canFetch && query.isLoading,
     fetching: canFetch && query.isFetching,
     error: query.error,

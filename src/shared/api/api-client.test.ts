@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  apiDelete,
   apiFetch,
+  apiSendJson,
   setTenantIdResolver,
   setUnauthorizedHandler,
 } from "./api-client";
@@ -112,5 +114,48 @@ describe("api client", () => {
     });
     expect(onUnauthorized).toHaveBeenCalledTimes(2);
     expect(fetch).toHaveBeenCalled();
+  });
+
+  it("serializes JSON body and sets content-type for apiSendJson", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ id: "1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    setTenantIdResolver(() => "tenant-id");
+
+    await expect(
+      apiSendJson("/api/v1/mdm/wastes", {
+        method: "POST",
+        body: { name: "oil" },
+        tenantScoped: true,
+      }),
+    ).resolves.toEqual({ id: "1" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const init = fetchMock.mock.calls[0]![1];
+    const headers = new Headers(init?.headers);
+    expect(init?.method).toBe("POST");
+    expect(init?.body).toBe(JSON.stringify({ name: "oil" }));
+    expect(headers.get("Content-Type")).toBe("application/json");
+    expect(headers.get("X-Tenant-Id")).toBe("tenant-id");
+  });
+
+  it("sends DELETE without a body for apiDelete", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+    setTenantIdResolver(() => "tenant-id");
+
+    await apiDelete("/api/v1/mdm/wastes/1", { tenantScoped: true });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const init = fetchMock.mock.calls[0]![1];
+    const headers = new Headers(init?.headers);
+    expect(init?.method).toBe("DELETE");
+    expect(init?.body).toBeUndefined();
+    expect(headers.has("Content-Type")).toBe(false);
+    expect(headers.get("X-Tenant-Id")).toBe("tenant-id");
   });
 });

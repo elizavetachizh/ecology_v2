@@ -4,17 +4,18 @@ import {
   useParams,
   useSearch,
 } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { UnitForm } from "../../../../features/waste/upsert-unit";
 import { UnitInstructionWastesSection } from "../../../../features/waste/bind-unit-instruction-waste";
-import { useTenant } from "../../../../app/providers/tenant/tenant-context";
+import { useTenant } from "../../../../entities/tenant";
 import { getUnit, unitsQueryKeys } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
   Button,
   TenantRequiredGate,
+  toast,
 } from "../../../../shared/ui";
 import { UnitHierarchyBreadcrumb } from "./create/ui/UnitHierarchyBreadcrumb";
 
@@ -26,7 +27,6 @@ export function EditUnitPage() {
   const navigate = useNavigate({
     from: "/directories/units/$unitId",
   });
-  const queryClient = useQueryClient();
   const { activeTenantId } = useTenant();
   const unitQuery = useQuery({
     queryKey: unitsQueryKeys.detail(activeTenantId ?? "none", unitId),
@@ -84,17 +84,15 @@ export function EditUnitPage() {
             )
           }
           onSaved={(saved, { close }) => {
+            toast.success(
+              saved.is_pod9
+                ? "Журнал ПОД-9 успешно обновлён"
+                : "Единица успешно обновлена",
+            );
             if (close)
               void navigate({
                 to: "/directories/units",
                 search: { focusId: saved.id },
-              });
-            else
-              void queryClient.invalidateQueries({
-                queryKey: unitsQueryKeys.detail(
-                  activeTenantId ?? "none",
-                  unitId,
-                ),
               });
           }}
           onCancel={() => void navigate({ to: "/directories/units" })}

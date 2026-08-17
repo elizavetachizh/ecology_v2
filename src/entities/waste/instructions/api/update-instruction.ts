@@ -1,4 +1,4 @@
-import { apiJson } from "../../../../shared/api/api-client";
+import { apiSendJson } from "../../../../shared/api/api-client";
 import type {
   Instruction,
   InstructionUpdate,
@@ -9,12 +9,9 @@ export function updateInstruction(
   body: InstructionUpdate,
   signal?: AbortSignal,
 ) {
-  return apiJson<Instruction>(`/api/v1/mdm/instructions/${id}`, {
+  return apiSendJson<Instruction>(`/api/v1/mdm/instructions/${id}`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
+    body,
     tenantScoped: true,
     signal,
   });

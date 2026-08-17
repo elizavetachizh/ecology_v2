@@ -4,6 +4,7 @@ import { useDebounce } from "../../../../shared/hooks";
 import { getWasteSources } from "../api/get-waste-sources";
 import { wasteSourcesQueryKeys } from "./waste-sources-query-keys";
 import { DEFAULT_WASTE_SOURCES_OPTIONS_LIMIT } from "./waste-sources.types";
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client";
 
 type UseWasteSourcesOptionsArgs = {
   tenantId: string | null;
@@ -32,6 +33,7 @@ export function useWasteSourcesOptions({
     queryKey: wasteSourcesQueryKeys.list(tenantId ?? "none", listParams),
     queryFn: ({ signal }) => getWasteSources(listParams, signal),
     select: (data) => data.items,
+    staleTime: DEFAULT_STALE_TIME_MS,
     enabled: canFetch,
   });
 

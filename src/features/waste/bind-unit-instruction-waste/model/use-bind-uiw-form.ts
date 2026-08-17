@@ -1,15 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import {
   createUnitInstructionWaste,
   updateUnitInstructionWaste,
-  uiwQueryKeys,
   type UnitInstructionWaste,
   type UnitInstructionWasteScope,
 } from "../../../../entities/waste/unit-instruction-waste";
-import { queryClient } from "../../../../shared/lib/query-client";
+import { invalidateBindingQueries } from "../../../../shared/lib/invalidate-binding-queries";
 import {
   bindUiwFormDefaultValues,
   bindUiwFormSchema,
@@ -20,37 +19,34 @@ type UseBindUiwFormParams = {
   mode: "create" | "edit";
   scope: UnitInstructionWasteScope;
   initial?: UnitInstructionWaste | null;
-  open: boolean;
   onSaved: (binding: UnitInstructionWaste) => void;
 };
+
+function valuesFromInitial(
+  initial: UnitInstructionWaste,
+): BindUiwFormValues {
+  return {
+    waste_id: initial.waste_id,
+    waste_source_ids: initial.waste_source_ids,
+    transport_unit: initial.transport_unit,
+  };
+}
 
 export function useBindUiwForm({
   mode,
   scope,
   initial,
-  open,
   onSaved,
 }: UseBindUiwFormParams) {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<BindUiwFormValues>({
     resolver: zodResolver(bindUiwFormSchema),
-    defaultValues: bindUiwFormDefaultValues,
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    form.reset(
+    defaultValues:
       mode === "edit" && initial
-        ? {
-            waste_id: initial.waste_id,
-            waste_source_ids: initial.waste_source_ids,
-            transport_unit: initial.transport_unit,
-          }
+        ? valuesFromInitial(initial)
         : bindUiwFormDefaultValues,
-    );
-  }, [open, mode, initial, form]);
+  });
 
   const createMutation = useMutation({
     mutationFn: (values: BindUiwFormValues) =>
@@ -60,7 +56,7 @@ export function useBindUiwForm({
         transport_unit: values.transport_unit,
       }),
     onSuccess: (created) => {
-      void queryClient.invalidateQueries({ queryKey: uiwQueryKeys.lists() });
+      invalidateBindingQueries();
       onSaved(created);
     },
     onError: (err) => setError(err.message),
@@ -74,8 +70,7 @@ export function useBindUiwForm({
         transport_unit: values.transport_unit,
       }),
     onSuccess: (updated) => {
-      void queryClient.invalidateQueries({ queryKey: uiwQueryKeys.lists() });
-      void queryClient.invalidateQueries({ queryKey: uiwQueryKeys.details() });
+      invalidateBindingQueries();
       onSaved(updated);
     },
     onError: (err) => setError(err.message),

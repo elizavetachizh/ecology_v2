@@ -34,14 +34,12 @@ export function WasteCatalogForm({
   onSaved,
   onCancel,
 }: WasteCatalogFormProps) {
-  const { form, error, pending, onSubmit, successMessage } = useUpsertWasteForm(
-    {
-      mode,
-      wasteId,
-      initial,
-      onSaved,
-    },
-  );
+  const { form, error, pending, onSubmit } = useUpsertWasteForm({
+    mode,
+    wasteId,
+    initial,
+    onSaved,
+  });
 
   const {
     control,
@@ -54,12 +52,6 @@ export function WasteCatalogForm({
       onSubmit={form.handleSubmit((values) => onSubmit(false, values))}
       className="mx-auto max-w-4xl space-y-6"
     >
-      {successMessage && (
-        <Alert variant="success">
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
-
       <PageContextBar
         eyebrow="Справочники / Отходы"
         title={

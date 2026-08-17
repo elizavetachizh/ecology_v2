@@ -31,13 +31,12 @@ export function InstructionForm({
   onCancel,
   showNextStepCta: _showNextStepCta,
 }: InstructionFormProps) {
-  const { form, error, pending, onSubmit, successMessage } =
-    useUpsertInstructionForm({
-      mode,
-      instructionId,
-      initial,
-      onSaved,
-    });
+  const { form, error, pending, onSubmit } = useUpsertInstructionForm({
+    mode,
+    instructionId,
+    initial,
+    onSaved,
+  });
 
   const {
     register,
@@ -49,17 +48,17 @@ export function InstructionForm({
       className="mx-auto max-w-4xl space-y-6"
       onSubmit={form.handleSubmit((values) => onSubmit(false, values))}
     >
-      {successMessage && (
-        <Alert variant="success">
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
       <PageContextBar
         eyebrow="Справочники / Инструкции"
         title={mode === "create" ? "Новая инструкция" : "Инструкция"}
         description="После сохранения инструкция становится активной и может быть использована для создания отходов."
       />
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
+        {error ? (
+          <Alert variant="error" className="md:col-span-2">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
         <div className="grid gap-1.5">
           <FieldLabel htmlFor="name">Название</FieldLabel>
           <Input
@@ -115,10 +114,14 @@ export function InstructionForm({
             </span>
           )}
         </div>
-        {error && <Alert variant="error">...</Alert>}
+
         <div className="flex flex-wrap gap-2 pt-1 md:col-span-2">
           <Button type="submit" disabled={pending}>
-            Сохранить
+            {pending
+              ? "Сохранение…"
+              : mode === "create"
+                ? "Создать инструкцию"
+                : "Сохранить"}
           </Button>
           <Button
             type="button"
@@ -130,7 +133,12 @@ export function InstructionForm({
           >
             Сохранить и закрыть
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button
+            type="button"
+            disabled={pending}
+            variant="outline"
+            onClick={onCancel}
+          >
             Отмена
           </Button>
         </div>

@@ -25,6 +25,7 @@ type UnitsTableProps = {
   onExpandedChange: (expanded: ExpandedState) => void;
   pagination: UnitsTablePagination | null;
   onOffsetChange: (offset: number) => void;
+  searchQuery?: string;
 };
 
 export function UnitsTable({
@@ -39,8 +40,10 @@ export function UnitsTable({
   onExpandedChange,
   pagination,
   onOffsetChange,
+  searchQuery,
 }: UnitsTableProps) {
   const isFlat = mode === "flat";
+  const hasQuery = Boolean(searchQuery);
 
   return (
     <>
@@ -55,11 +58,19 @@ export function UnitsTable({
         manualSorting
         sorting={sorting}
         onSortingChange={onSortingChange}
-        emptyTitle={isFlat ? "Журналов ПОД-9 нет" : "Структура пуста"}
+        emptyTitle={
+          hasQuery
+            ? "Ничего не найдено"
+            : isFlat
+              ? "Журналов ПОД-9 нет"
+              : "Структура пуста"
+        }
         emptyDescription={
-          isFlat
-            ? "Создайте журнал ПОД-9 из дерева структуры у родительской единицы."
-            : "Добавьте структурную единицу."
+          hasQuery
+            ? "Попробуйте другой запрос — в дерево попадают совпадения и их предки."
+            : isFlat
+              ? "Создайте журнал ПОД-9 из дерева структуры у родительской единицы."
+              : "Добавьте структурную единицу."
         }
         getRowClassName={(row) => {
           if (focusId && row.original.id === focusId) {

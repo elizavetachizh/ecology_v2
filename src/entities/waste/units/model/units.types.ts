@@ -75,7 +75,11 @@ export type GetUnitsParams = {
   order?: UnitSortOrder;
 };
 
-/** Tree list (no pagination). */
+/**
+ * Hierarchical tree. Backend ignores limit/offset.
+ * search/filters: ответ = matches ∪ ancestors (потомков нерелевантных узлов нет).
+ * sort/order применяются внутри каждого уровня.
+ */
 export type GetUnitsTreeParams = {
   search?: string;
   region_id?: number;

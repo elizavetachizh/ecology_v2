@@ -11,7 +11,7 @@ import {
   type NavGroup,
 } from "../../shared/config/navigation";
 import { cn } from "../../shared/lib/cn";
-import { useTenant } from "../providers/tenant/tenant-context";
+import { useTenant } from "../../entities/tenant";
 import { useLogout } from "../../features/auth/logout";
 
 function isActivePath(pathname: string, to?: string) {

@@ -6,6 +6,7 @@ import {
   type Unit,
 } from "../../../../../../entities/waste/units";
 import { queryClient } from "../../../../../../shared/lib/query-client";
+import { toast } from "../../../../../../shared/ui";
 
 export function useDeleteUnit() {
   const [deletingUnit, setDeletingUnit] = useState<Unit | null>(null);
@@ -20,7 +21,9 @@ export function useDeleteUnit() {
         queryKey: unitsQueryKeys.trees(),
       });
       setDeletingUnit(null);
+      toast.success("Единица успешно удалена");
     },
+    onError: (err) => toast.error(err.message),
   });
 
   return {

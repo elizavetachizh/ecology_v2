@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getTenants } from "../../../entities/tenant";
+import { getTenants, useTenant } from "../../../entities/tenant";
 import { getCurrentUser } from "../../../entities/user";
 import {
   clearAllActiveTenantIds,
@@ -16,15 +16,19 @@ import {
 } from "../../../shared/auth/active-tenant-storage";
 import { clearSessionState } from "../../../shared/auth/cleanup-session";
 import { TenantProvider } from "./TenantProvider";
-import { useTenant } from "./tenant-context";
 
 vi.mock("../../../entities/user", () => ({
   getCurrentUser: vi.fn(),
 }));
 
-vi.mock("../../../entities/tenant", () => ({
-  getTenants: vi.fn(),
-}));
+vi.mock("../../../entities/tenant", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../entities/tenant")>();
+  return {
+    ...actual,
+    getTenants: vi.fn(),
+  };
+});
 
 const getCurrentUserMock = vi.mocked(getCurrentUser);
 const getTenantsMock = vi.mocked(getTenants);
