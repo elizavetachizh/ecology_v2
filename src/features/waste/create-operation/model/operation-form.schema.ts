@@ -23,8 +23,8 @@ export const operationFormSchema = z
     operation_type: z.enum(OperationTypeValues, {
       error: "Выберите тип операции",
     }),
-    unit_id: z.string().uuid("Выберите структурную единицу"),
-    waste_id: z.string().uuid("Выберите отход из справочника"),
+    unit_id: z.string().uuid("Выберите место учёта"),
+    waste_id: z.string().uuid("Выберите отход"),
     waste_source_id: z.string(),
     amount: amountSchema,
   })

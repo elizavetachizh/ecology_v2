@@ -1,7 +1,7 @@
 import { cn } from "../../../../shared/lib/cn";
 import {
   INSTRUCTION_STATUS_LABEL,
-  type Instruction,
+  type InstructionBrief,
   type InstructionStatus,
 } from "../model/instructions.types";
 
@@ -12,7 +12,7 @@ const STATUS_DOT_CLASS: Record<InstructionStatus, string> = {
 };
 
 type InstructionTabLabelProps = {
-  instruction: Instruction;
+  instruction: InstructionBrief;
   className?: string;
 };
 

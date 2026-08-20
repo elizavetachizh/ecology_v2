@@ -1,5 +1,7 @@
 # План: код-ревью и декомпозиция существующего фронта
 
+> **Частично устарело 2026-08-18.** Часть P0/P1 уже в коде (toast, StatusBadge, TenantRequiredGate, operations не mock). Архитектура: [`frontend-architecture.md`](./frontend-architecture.md).
+
 > Дата: 2026-08-12  
 > Фокус: **уже работающий** функционал (auth, tenants, MDM CRUD, classifiers, UIW) — не новые фичи.  
 > Цель: уменьшить копипасту в pages, выровнять FSD, закрыть мелкие баги качества без переписывания доменов.  

@@ -1,75 +1,39 @@
-# React + TypeScript + Vite
+# ПО Эколог — кабинет учёта отходов
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Закрытое SPA для эколога организации: справочники MDM, привязки отходов к местам учёта, журнал операций и остатки (остатки — API есть, экран в работе).
 
-Currently, two official plugins are available:
+Документация: [`docs/frontend-architecture.md`](docs/frontend-architecture.md), [`docs/ux-product.md`](docs/ux-product.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Стек
 
-## React Compiler
+Vite + React 19 + TypeScript, TanStack Router / Query / Table, React Hook Form + Zod, keycloak-js, Tailwind 4.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Запуск
 
-## Expanding the ESLint configuration
+Нужен backend `eco-wastes-backend` и Keycloak (client `eco-wastes-web`, PKCE).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cp .env.example .env   # если файла ещё нет
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Обязательные переменные: `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`, `VITE_KEYCLOAK_CLIENT_ID`, `VITE_APP_URL`, `VITE_API_BASE_URL`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm test          # vitest watch
+npm run test:run  # CI
+npm run build
 ```
+
+## Карта `src/`
+
+```text
+app/        shell, router, providers (auth, tenant)
+pages/      экраны
+features/   действия пользователя (upsert, bind, create-operation)
+entities/   API + типы + query hooks
+shared/     api-client, ui-kit, config
+```
+
+Импорты только вниз: `pages → features → entities → shared`.

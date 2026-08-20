@@ -1,6 +1,9 @@
 # План реализации по ADR (обновлённый)
 
-> Источник: `C:\Users\ChizhEM\eco-frontend-architecture.md` (актуальный ADR)  
+> **Устарело 2026-08-18.** Source of truth: [`frontend-architecture.md`](./frontend-architecture.md), UX: [`ux-product.md`](./ux-product.md).  
+> Операции, UIW/WIU и MDM в коде уже есть; этот файл — исторический план от 2026-08-11 (scope без operations).
+
+> Источник на момент написания: `C:\Users\ChizhEM\eco-frontend-architecture.md`  
 > Backend: `mdm_*`, `classifiers_*`, `keycloak`, `tenants`, `users_me`, **`mdm_unit_instruction_wastes`**  
 > Дата: 2026-08-11  
 > Связанные: [`plan-directories-review.md`](./plan-directories-review.md), [`plan-existing-improvements.md`](./plan-existing-improvements.md)

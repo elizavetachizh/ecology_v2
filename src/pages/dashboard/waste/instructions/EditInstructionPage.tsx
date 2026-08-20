@@ -1,5 +1,8 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { InstructionForm } from "../../../../features/waste/upsert-instruction";
+import {
+  InstructionForm,
+  instructionSavedToast,
+} from "../../../../features/waste/upsert-instruction";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -60,10 +63,11 @@ export function EditInstructionPage() {
         mode="edit"
         instructionId={instructionId}
         initial={instructionQuery.data}
-        showNextStepCta
-        onSaved={(_i, { close }) => {
-          toast.success("Инструкция успешно обновлена");
-          if (close) void navigate({ to: "/directories/instructions" });
+        onSaved={(_i, { next, intent }) => {
+          toast.success(instructionSavedToast(intent, false));
+          if (next === "list") {
+            void navigate({ to: "/directories/instructions" });
+          }
         }}
         onCancel={() => void navigate({ to: "/directories/instructions" })}
       />

@@ -1,5 +1,7 @@
 # Ревью справочников MDM + план доработки
 
+> **Не актуален 2026-08-18** (имя файла `_IRRELEVANT`). Смотреть [`frontend-architecture.md`](./frontend-architecture.md) и [`ux-product.md`](./ux-product.md).
+
 > Дата: 2026-08-11  
 > Контекст: после cutover instructions / units / wastes / waste-sources видны отклонения от ТЗ (ADR/wireframe), backend-контрактов и принятых правил разработки (FSD + эталон instructions).  
 > Связано: [`plan-existing-improvements.md`](./plan-existing-improvements.md), backend `mdm_*.md`, `mdm_waste_sources.md`.

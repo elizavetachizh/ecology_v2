@@ -1,5 +1,7 @@
 # План новой функциональности
 
+> **Устарело 2026-08-18.** Операции уже в API и UI. Актуальный backlog удобства: [`ux-product.md`](./ux-product.md). Архитектура: [`frontend-architecture.md`](./frontend-architecture.md).
+
 > То, чего **ещё нет** в продуктовом UI или нет готового backend-контракта в `eco-wastes-backend/docs`.  
 > Не дублирует доработки уже начатых слайсов — они в [`plan-existing-improvements.md`](./plan-existing-improvements.md).  
 > **Не изобретать велосипед:** те же FSD-слои, `apiFetch`/`apiJson`, TanStack Query, RHF+Zod, shared DataTable, паттерн `entities/*/api` как у instructions.

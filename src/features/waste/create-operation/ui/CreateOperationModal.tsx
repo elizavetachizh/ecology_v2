@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
@@ -8,19 +8,25 @@ import {
   useCurrentBalanceQuery,
   type Operation,
 } from "../../../../entities/waste/operations";
-import { useUnitsOptions, type Unit } from "../../../../entities/waste/units";
+import {
+  DEFAULT_UNITS_LIST_LIMIT,
+  useUnitsOptions,
+  type Unit,
+} from "../../../../entities/waste/units";
 import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
 import {
-  HAZARD_CLASS_LABEL,
-  UOM_LABEL,
-  useWastesOptions,
-  type Waste,
-} from "../../../../entities/waste/wastes";
+  DEFAULT_UIW_LIST_LIMIT,
+  DEFAULT_UNIT_INSTRUCTIONS_LIMIT,
+  useUnitInstructionWastesListQuery,
+  useUnitInstructionsListQuery,
+} from "../../../../entities/waste/unit-instruction-waste";
+import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   AsyncCombobox,
+  Badge,
   Button,
   Field,
   FieldDescription,
@@ -35,13 +41,29 @@ import {
   ModalTitle,
   Select,
 } from "../../../../shared/ui";
+import { pickPreferredInstructionId } from "../model/pick-preferred-instruction";
 import { useUpsertOperationForm } from "../model/use-upsert-operation-form";
+import { OperationInstructionPicker } from "./OperationInstructionPicker";
+import { OperationWastePicker } from "./OperationWastePicker";
 
 const UPSERT_OPERATION_STEPS = [
-  { id: 1, title: "Структурная единица" },
-  { id: 2, title: "Отход" },
-  { id: 3, title: "Данные операции" },
+  { id: 1, title: "Дата" },
+  { id: 2, title: "Место учёта" },
+  { id: 3, title: "Инструкция и отход" },
+  { id: 4, title: "Данные операции" },
 ] as const;
+
+const UNIT_INSTRUCTION_PARAMS = {
+  limit: DEFAULT_UNIT_INSTRUCTIONS_LIMIT,
+  offset: 0,
+  sort: "name" as const,
+  order: "asc" as const,
+};
+
+const UIW_LIST_PARAMS = {
+  limit: DEFAULT_UIW_LIST_LIMIT,
+  offset: 0,
+};
 
 type CreateOperationModalProps = {
   open: boolean;
@@ -55,8 +77,15 @@ function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
-function wasteLabel(waste: Pick<Waste, "waste_classifier">) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
+function renderPod9UnitOption(option: { value: string; label: string }) {
+  return (
+    <>
+      <span className="min-w-0 flex-1 truncate">{option.label}</span>
+      <Badge variant="info" className="shrink-0">
+        ПОД-9
+      </Badge>
+    </>
+  );
 }
 
 export function CreateOperationModal({
@@ -91,6 +120,7 @@ function CreateOperationModalForm({
 }: CreateOperationModalFormProps) {
   const { activeTenantId } = useTenant();
   const [step, setStep] = useState(1);
+  const [instructionId, setInstructionId] = useState<string | undefined>();
   const { form, error, pending, onSubmit } = useUpsertOperationForm({
     mode,
     initial,
@@ -114,11 +144,45 @@ function CreateOperationModalForm({
   const units = useUnitsOptions({
     tenantId: activeTenantId,
     enabled: true,
+    limit: DEFAULT_UNITS_LIST_LIMIT,
+    is_pod9: true,
   });
-  const wastes = useWastesOptions({ tenantId: activeTenantId, enabled: true });
+
+  const instructionsQuery = useUnitInstructionsListQuery({
+    tenantId: activeTenantId,
+    unitId,
+    params: UNIT_INSTRUCTION_PARAMS,
+    enabled: Boolean(unitId),
+  });
+
+  useEffect(() => {
+    if (instructionsQuery.loading) return;
+    const list = instructionsQuery.items;
+    if (instructionId && list.some((item) => item.id === instructionId)) {
+      return;
+    }
+    setInstructionId(pickPreferredInstructionId(list));
+  }, [instructionId, instructionsQuery.loading, instructionsQuery.items]);
+
+  const wastesQuery = useUnitInstructionWastesListQuery({
+    tenantId: activeTenantId,
+    scope: {
+      unitId,
+      instructionId: instructionId ?? "",
+    },
+    params: UIW_LIST_PARAMS,
+    enabled: Boolean(unitId && instructionId),
+  });
+
+  const selectedBinding = wastesQuery.items.find(
+    (item) => item.waste_id === wasteId,
+  );
+  const bindingSources = selectedBinding?.waste_sources ?? [];
+  const useBindingSources = bindingSources.length > 0;
+
   const sources = useWasteSourcesOptions({
     tenantId: activeTenantId,
-    enabled: operationType === "formed",
+    enabled: operationType === "formed" && !useBindingSources,
   });
 
   const selectedUnit =
@@ -126,17 +190,29 @@ function CreateOperationModalForm({
     (initial?.unit_id === unitId ? initial.unit : null);
 
   const selectedWaste =
-    wastes.options.find((item) => item.id === wasteId) ??
+    selectedBinding?.waste ??
     (initial?.waste_id === wasteId ? initial.waste : null);
 
+  const sourceOptions = useBindingSources ? bindingSources : sources.options;
   const selectedSource =
-    sources.options.find((item) => item.id === wasteSourceId) ??
+    sourceOptions.find((item) => item.id === wasteSourceId) ??
     (initial?.waste_source_id === wasteSourceId
       ? initial.waste_source
       : null);
 
+  const resetInstructionAndWaste = () => {
+    setInstructionId(undefined);
+    setValue("waste_id", "");
+    setValue("waste_source_id", "");
+  };
+
   const goNext = async () => {
-    const fields = step === 1 ? (["unit_id"] as const) : (["waste_id"] as const);
+    const fields =
+      step === 1
+        ? (["date"] as const)
+        : step === 2
+          ? (["unit_id"] as const)
+          : (["waste_id"] as const);
     const valid = await trigger(fields);
     if (valid) setStep((prev) => prev + 1);
   };
@@ -189,17 +265,26 @@ function CreateOperationModalForm({
             </Alert>
           ) : null}
 
-          <CurrentBalanceHint
-            tenantId={activeTenantId}
-            unitId={unitId}
-            wasteId={wasteId}
-            uomLabel={selectedWaste ? UOM_LABEL[selectedWaste.uom] : undefined}
-          />
-
           {step === 1 ? (
             <Field>
+              <FieldLabel htmlFor="operation-date" required>
+                Дата создания операции
+              </FieldLabel>
+              <Input
+                id="operation-date"
+                type="date"
+                disabled={pending}
+                aria-invalid={Boolean(errors.date)}
+                {...register("date")}
+              />
+              <FieldError>{errors.date?.message}</FieldError>
+            </Field>
+          ) : null}
+
+          {step === 2 ? (
+            <Field>
               <FieldLabel htmlFor="unit_id" required>
-                Структурная единица
+                Место учёта
               </FieldLabel>
               <Controller
                 name="unit_id"
@@ -214,107 +299,91 @@ function CreateOperationModalForm({
                     selectedLabel={
                       selectedUnit ? unitLabel(selectedUnit) : undefined
                     }
-                    onValueChange={(id) => field.onChange(id)}
-                    placeholder="Выберите структурную единицу…"
+                    renderOption={(option) => renderPod9UnitOption(option)}
+                    renderValue={(option) => renderPod9UnitOption(option)}
+                    onValueChange={(id) => {
+                      const next = id ?? "";
+                      if (next !== field.value) {
+                        resetInstructionAndWaste();
+                      }
+                      field.onChange(next);
+                    }}
+                    placeholder="Выберите место учёта…"
                     searchPlaceholder="Поиск по названию или краткому"
                     emptyMessage={
                       units.loading
                         ? "Загрузка…"
-                        : "Ничего не найдено. Создайте структурную единицу в справочнике или уточните поиск."
+                        : "Нет мест учёта. Добавьте место учёта в структуре организации."
                     }
                     search={units.search}
                     setSearch={units.setSearch}
                     className="w-full"
                     contentClassName="w-full"
-                    aria-label="Структурная единица"
+                    aria-label="Место учёта"
                     disabled={pending}
                   />
                 )}
               />
+              <FieldDescription>
+                Только узлы, на которых ведётся учёт отходов (ПОД-9). Нет нужного
+                места?{" "}
+                <Link
+                  to="/directories/units"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Открыть структуру
+                </Link>
+              </FieldDescription>
               <FieldError>{errors.unit_id?.message}</FieldError>
             </Field>
           ) : null}
 
-          {step === 2 ? (
+          {step === 3 ? (
             <>
-              <Field>
-                <FieldLabel htmlFor="waste_id" required>
-                  Отход
-                </FieldLabel>
-                <Controller
-                  name="waste_id"
-                  control={control}
-                  render={({ field }) => (
-                    <AsyncCombobox
-                      options={wastes.options.map((waste) => ({
-                        value: waste.id,
-                        label: wasteLabel(waste),
-                      }))}
-                      value={field.value}
-                      selectedLabel={
-                        selectedWaste ? wasteLabel(selectedWaste) : undefined
-                      }
-                      onValueChange={(id) => field.onChange(id)}
-                      placeholder="Выберите отход из справочника"
-                      searchPlaceholder="Поиск по коду или названию"
-                      emptyMessage={
-                        wastes.loading
-                          ? "Загрузка…"
-                          : "Начните вводить код или название"
-                      }
-                      search={wastes.search}
-                      setSearch={wastes.setSearch}
-                      className="w-full"
-                      contentClassName="w-full"
-                      aria-label="Отход"
-                      disabled={pending}
-                    />
-                  )}
+              <OperationInstructionPicker
+                key={unitId}
+                unitId={unitId}
+                instructions={instructionsQuery.items}
+                loading={instructionsQuery.loading}
+                error={instructionsQuery.error}
+                value={instructionId}
+                onChange={(nextId) => {
+                  if (nextId === instructionId) return;
+                  setInstructionId(nextId);
+                  setValue("waste_id", "");
+                  setValue("waste_source_id", "");
+                }}
+                disabled={pending}
+              />
+              {instructionId ? (
+                <OperationWastePicker
+                  key={instructionId}
+                  unitId={unitId}
+                  items={wastesQuery.items}
+                  total={wastesQuery.total}
+                  loading={wastesQuery.loading}
+                  error={wastesQuery.error}
+                  value={wasteId}
+                  selectedWaste={selectedWaste}
+                  onChange={(nextWasteId) => {
+                    setValue("waste_id", nextWasteId, { shouldValidate: true });
+                    setValue("waste_source_id", "");
+                  }}
+                  disabled={pending}
+                  errorMessage={errors.waste_id?.message}
                 />
-                <FieldDescription>
-                  Нет нужного отхода?{" "}
-                  <Link
-                    to="/directories/wastes/new"
-                    className="font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    Создать в справочнике
-                  </Link>
-                </FieldDescription>
-                <FieldError>{errors.waste_id?.message}</FieldError>
-              </Field>
-
-              {selectedWaste ? (
-                <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">
-                      Класс опасности:{" "}
-                    </span>
-                    {HAZARD_CLASS_LABEL[selectedWaste.hazard_class]}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Ед. изм.: </span>
-                    {UOM_LABEL[selectedWaste.uom]}
-                  </div>
-                </div>
               ) : null}
             </>
           ) : null}
 
-          {step === 3 ? (
+          {step === 4 ? (
             <>
-              <Field>
-                <FieldLabel htmlFor="operation-date" required>
-                  Дата операции
-                </FieldLabel>
-                <Input
-                  id="operation-date"
-                  type="date"
-                  disabled={pending}
-                  aria-invalid={Boolean(errors.date)}
-                  {...register("date")}
-                />
-                <FieldError>{errors.date?.message}</FieldError>
-              </Field>
+              <CurrentBalanceHint
+                tenantId={activeTenantId}
+                unitId={unitId}
+                wasteId={wasteId}
+                uomLabel={selectedWaste ? UOM_LABEL[selectedWaste.uom] : undefined}
+              />
 
               <Field>
                 <FieldLabel htmlFor="operation-type" required>
@@ -372,7 +441,7 @@ function CreateOperationModalForm({
                     control={control}
                     render={({ field }) => (
                       <AsyncCombobox
-                        options={sources.options.map((source) => ({
+                        options={sourceOptions.map((source) => ({
                           value: source.id,
                           label: source.name,
                         }))}
@@ -382,12 +451,16 @@ function CreateOperationModalForm({
                         placeholder="Выберите источник образования"
                         searchPlaceholder="Поиск источника"
                         emptyMessage={
-                          sources.loading
-                            ? "Загрузка…"
-                            : "Источники не найдены"
+                          useBindingSources
+                            ? "К этой привязке источники не указаны"
+                            : sources.loading
+                              ? "Загрузка…"
+                              : "Источники не найдены"
                         }
-                        search={sources.search}
-                        setSearch={sources.setSearch}
+                        search={useBindingSources ? "" : sources.search}
+                        setSearch={
+                          useBindingSources ? () => undefined : sources.setSearch
+                        }
                         className="w-full"
                         contentClassName="w-full"
                         aria-label="Источник образования"
@@ -396,13 +469,19 @@ function CreateOperationModalForm({
                     )}
                   />
                   <FieldDescription>
-                    Нет нужного источника?{" "}
-                    <Link
-                      to="/directories/waste-sources"
-                      className="font-medium text-primary underline-offset-4 hover:underline"
-                    >
-                      Создать в справочнике
-                    </Link>
+                    {useBindingSources
+                      ? "Источники из привязки отхода к этому месту учёта."
+                      : (
+                        <>
+                          Нет нужного источника?{" "}
+                          <Link
+                            to="/directories/waste-sources"
+                            className="font-medium text-primary underline-offset-4 hover:underline"
+                          >
+                            Создать в справочнике
+                          </Link>
+                        </>
+                      )}
                   </FieldDescription>
                   <FieldError>{errors.waste_source_id?.message}</FieldError>
                 </Field>

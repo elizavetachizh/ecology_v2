@@ -1,5 +1,9 @@
 import type { UserProfile } from "../../../user";
-import type { InstructionBrief } from "../../instructions";
+import type {
+  InstructionBrief,
+  InstructionSortField,
+  InstructionSortOrder,
+} from "../../instructions";
 import type { UnitBrief } from "../../units";
 import type { WasteSourceBrief } from "../../waste-sources";
 import type { WasteBrief } from "../../wastes";
@@ -43,6 +47,23 @@ export type GetUnitInstructionWastesParams = {
   limit: number;
   offset: number;
 };
+
+/** GET /mdm/units/{unit_id}/instructions — distinct instructions that already have UIW */
+export type GetUnitInstructionsParams = {
+  limit: number;
+  offset: number;
+  sort?: InstructionSortField;
+  order?: InstructionSortOrder;
+};
+
+export type UnitInstructionListResponse = {
+  total: number;
+  limit: number;
+  offset: number;
+  items: InstructionBrief[];
+};
+
+export const DEFAULT_UNIT_INSTRUCTIONS_LIMIT = 50;
 
 export type UnitInstructionWasteScope = {
   unitId: string;
