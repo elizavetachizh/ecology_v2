@@ -40,14 +40,7 @@ export type UnitCreate = {
   is_pod9?: boolean;
 };
 
-export type UnitUpdate = {
-  name?: string;
-  short_name?: string | null;
-  parent_id?: string | null;
-  region_id?: number | null;
-  district_id?: number | null;
-  is_pod9?: boolean;
-};
+export type UnitUpdate = Partial<UnitCreate>;
 
 export const UnitSortFields = [
   "name",

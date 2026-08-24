@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { OperationTypeValues } from "../../entities/waste/operations";
+import { PassportTransportTypeValues } from "../../entities/waste/passports";
+import { TtnStatusValues } from "../../entities/waste/ttns";
 import {
   parseSearchEnum,
   parseSearchIsoDate,
@@ -26,5 +28,25 @@ describe("operations search params", () => {
     expect(parseSearchEnum("export", OperationTypeValues)).toBeUndefined();
     expect(parseSearchQuery("unit-1")).toBe("unit-1");
     expect(parseSearchQuery("  ")).toBeUndefined();
+  });
+});
+
+describe("passports search params", () => {
+  it("parses transport_type enum", () => {
+    expect(parseSearchEnum("self", PassportTransportTypeValues)).toBe("self");
+    expect(
+      parseSearchEnum("transport_contract", PassportTransportTypeValues),
+    ).toBe("transport_contract");
+    expect(
+      parseSearchEnum("carrier", PassportTransportTypeValues),
+    ).toBeUndefined();
+  });
+});
+
+describe("ttns search params", () => {
+  it("parses status enum", () => {
+    expect(parseSearchEnum("active", TtnStatusValues)).toBe("active");
+    expect(parseSearchEnum("inactive", TtnStatusValues)).toBe("inactive");
+    expect(parseSearchEnum("draft", TtnStatusValues)).toBeUndefined();
   });
 });

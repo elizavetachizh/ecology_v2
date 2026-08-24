@@ -1,8 +1,20 @@
+import type { CounterpartySortField } from "../../entities/waste/counterparties";
+import type {
+  ContractSortField,
+  ContractStatus,
+  ContractType,
+} from "../../entities/waste/contracts";
 import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
 import type { OperationType } from "../../entities/waste/operations";
+import type {
+  PassportSortField,
+  PassportStatus,
+  PassportTransportType,
+} from "../../entities/waste/passports";
+import type { TtnSortField, TtnStatus } from "../../entities/waste/ttns";
 import type { UnitSortField } from "../../entities/waste/units";
 import type { WasteSourceSortField } from "../../entities/waste/waste-sources";
 import type {
@@ -36,6 +48,18 @@ export type WastesSearch = ListSearchParams<WasteSortField> & {
 
 export type WasteSourcesSearch = ListSearchParams<WasteSourceSortField>;
 
+export type CounterpartiesSearch = ListSearchParams<CounterpartySortField> & {
+  is_individual?: boolean;
+  /** false = только неактивные; omit = только активные (`is_active=true` на API). */
+  is_active?: boolean;
+};
+
+export type ContractsSearch = ListSearchParams<ContractSortField> & {
+  status?: ContractStatus;
+  contract_type?: ContractType;
+  counterparty_id?: string;
+};
+
 /** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */
 export type OperationsSearch = {
   unit_id?: string;
@@ -45,6 +69,31 @@ export type OperationsSearch = {
   date_to?: string;
   limit?: number;
   offset?: number;
+};
+
+export type PassportsSearch = ListSearchParams<PassportSortField> & {
+  status?: PassportStatus;
+  transport_type?: PassportTransportType;
+  unit_id?: string;
+  recycling_contract_id?: string;
+  date_from?: string;
+  date_to?: string;
+};
+
+export type TtnsSearch = ListSearchParams<TtnSortField> & {
+  status?: TtnStatus;
+  unit_id?: string;
+  recycling_contract_id?: string;
+  date_from?: string;
+  date_to?: string;
+};
+
+export type CreatePassportSearch = {
+  recycling_contract_id?: string;
+};
+
+export type CreateTtnSearch = {
+  recycling_contract_id?: string;
 };
 
 /**

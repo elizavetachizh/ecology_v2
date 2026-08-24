@@ -7,6 +7,12 @@ import type { AuthContextValue } from "../shared/auth/auth.types";
 import { AppLayout } from "./layout/AppLayout";
 import { HomePage } from "../pages/dashboard/HomePage";
 import { WasteOperationsPage } from "../pages/dashboard/waste/operations";
+import { PassportsPage } from "../pages/dashboard/waste/passports/PassportsPage";
+import { CreatePassportPage } from "../pages/dashboard/waste/passports/CreatePassportPage";
+import { EditPassportPage } from "../pages/dashboard/waste/passports/EditPassportPage";
+import { TtnsPage } from "../pages/dashboard/waste/ttns/TtnsPage";
+import { CreateTtnPage } from "../pages/dashboard/waste/ttns/CreateTtnPage";
+import { EditTtnPage } from "../pages/dashboard/waste/ttns/EditTtnPage";
 import { DirectoriesHubPage } from "../pages/dashboard/directories";
 import { UnitsPage } from "../pages/dashboard/waste/units/UnitsPage";
 import { EditUnitPage } from "../pages/dashboard/waste/units/EditUnitPage";
@@ -16,6 +22,10 @@ import { EditInstructionPage } from "../pages/dashboard/waste/instructions/EditI
 import { WastesDirectoryPage } from "../pages/dashboard/waste/wastes/WastesPage";
 import { EditWastePage } from "../pages/dashboard/waste/wastes/EditWastePage";
 import { WasteSourcesPage } from "../pages/dashboard/waste/waste-sources/WasteSourcesPage";
+import { CounterpartiesPage } from "../pages/dashboard/waste/counterparties/CounterpartiesPage";
+import { ContractsPage } from "../pages/dashboard/waste/contracts/ContractsPage";
+import { CreateContractPage } from "../pages/dashboard/waste/contracts/CreateContractPage";
+import { EditContractPage } from "../pages/dashboard/waste/contracts/EditContractPage";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
@@ -27,6 +37,18 @@ import {
   PhysicalStateValues,
   WasteSortFields,
 } from "../entities/waste/wastes";
+import { CounterpartySortFields } from "../entities/waste/counterparties";
+import {
+  ContractSortFields,
+  ContractStatusValues,
+  ContractTypeValues,
+} from "../entities/waste/contracts";
+import {
+  PassportSortFields,
+  PassportStatusValues,
+  PassportTransportTypeValues,
+} from "../entities/waste/passports";
+import { TtnSortFields, TtnStatusValues } from "../entities/waste/ttns";
 import { WasteSourceSortFields } from "../entities/waste/waste-sources";
 import {
   parseSearchBoolean,
@@ -38,8 +60,14 @@ import {
   parseSearchQuery,
   type InstructionsSearch,
   type OperationsSearch,
+  type PassportsSearch,
+  type CreatePassportSearch,
+  type CreateTtnSearch,
+  type TtnsSearch,
   type RouterContext,
   type StructureSearch,
+  type CounterpartiesSearch,
+  type ContractsSearch,
   type WasteSourcesSearch,
   type WastesSearch,
 } from "./router/search-params";
@@ -73,6 +101,76 @@ const wasteOperationsRoute = createRoute({
     offset: parseSearchOffset(search.offset),
   }),
   component: WasteOperationsPage,
+});
+
+const wastePassportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/passports",
+  validateSearch: (search: Record<string, unknown>): PassportsSearch => ({
+    q: parseSearchQuery(search.q),
+    status: parseSearchEnum(search.status, PassportStatusValues),
+    transport_type: parseSearchEnum(
+      search.transport_type,
+      PassportTransportTypeValues,
+    ),
+    unit_id: parseSearchQuery(search.unit_id),
+    recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
+    date_from: parseSearchIsoDate(search.date_from),
+    date_to: parseSearchIsoDate(search.date_to),
+    sort: parseSearchEnum(search.sort, PassportSortFields),
+    order: parseSearchOrder(search.order),
+    limit: parseSearchLimit(search.limit),
+    offset: parseSearchOffset(search.offset),
+  }),
+  component: PassportsPage,
+});
+
+const wasteCreatePassportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/passports/new",
+  validateSearch: (search: Record<string, unknown>): CreatePassportSearch => ({
+    recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
+  }),
+  component: CreatePassportPage,
+});
+
+const wasteEditPassportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/passports/$passportId",
+  component: EditPassportPage,
+});
+
+const wasteTtnsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/ttns",
+  validateSearch: (search: Record<string, unknown>): TtnsSearch => ({
+    q: parseSearchQuery(search.q),
+    status: parseSearchEnum(search.status, TtnStatusValues),
+    unit_id: parseSearchQuery(search.unit_id),
+    recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
+    date_from: parseSearchIsoDate(search.date_from),
+    date_to: parseSearchIsoDate(search.date_to),
+    sort: parseSearchEnum(search.sort, TtnSortFields),
+    order: parseSearchOrder(search.order),
+    limit: parseSearchLimit(search.limit),
+    offset: parseSearchOffset(search.offset),
+  }),
+  component: TtnsPage,
+});
+
+const wasteCreateTtnRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/ttns/new",
+  validateSearch: (search: Record<string, unknown>): CreateTtnSearch => ({
+    recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
+  }),
+  component: CreateTtnPage,
+});
+
+const wasteEditTtnRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/ttns/$ttnId",
+  component: EditTtnPage,
 });
 
 const directoriesRoute = createRoute({
@@ -183,6 +281,53 @@ const directoriesWasteSourcesRoute = createRoute({
   component: WasteSourcesPage,
 });
 
+const directoriesCounterpartiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/counterparties",
+  validateSearch: (search: Record<string, unknown>): CounterpartiesSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      is_individual: parseSearchBoolean(search.is_individual),
+      is_active: parseSearchBoolean(search.is_active),
+      sort: parseSearchEnum(search.sort, CounterpartySortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: CounterpartiesPage,
+});
+
+const directoriesContractsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/contracts",
+  validateSearch: (search: Record<string, unknown>): ContractsSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      status: parseSearchEnum(search.status, ContractStatusValues),
+      contract_type: parseSearchEnum(search.contract_type, ContractTypeValues),
+      counterparty_id: parseSearchQuery(search.counterparty_id),
+      sort: parseSearchEnum(search.sort, ContractSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: ContractsPage,
+});
+
+const directoriesCreateContractRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/contracts/new",
+  component: CreateContractPage,
+});
+
+const directoriesEditContractRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/contracts/$contractId",
+  component: EditContractPage,
+});
+
 const directoriesNormsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/norms",
@@ -246,6 +391,12 @@ const catchAllRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   wasteOperationsRoute,
+  wastePassportsRoute,
+  wasteCreatePassportRoute,
+  wasteEditPassportRoute,
+  wasteTtnsRoute,
+  wasteCreateTtnRoute,
+  wasteEditTtnRoute,
   directoriesRoute,
   directoriesStructureRoute,
   directoriesCreateUnitRoute,
@@ -254,6 +405,10 @@ const routeTree = rootRoute.addChildren([
   directoriesCreateWasteRoute,
   directoriesWasteEditRoute,
   directoriesWasteSourcesRoute,
+  directoriesCounterpartiesRoute,
+  directoriesContractsRoute,
+  directoriesCreateContractRoute,
+  directoriesEditContractRoute,
   directoriesLimitsRoute,
   directoriesNormsRoute,
   directoriesInstructionsRoute,

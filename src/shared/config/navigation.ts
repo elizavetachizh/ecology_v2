@@ -1,8 +1,10 @@
 import {
   BookOpen,
   ClipboardList,
+  FileText,
   Library,
   Trash2,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
 import { DIRECTORY_CARDS } from "./directories";
@@ -41,6 +43,18 @@ export const navigationGroups: NavGroup[] = [
     title: "Журнал операций",
     icon: ClipboardList,
     to: "/waste/operations",
+  },
+  {
+    id: "passports",
+    title: "Сопроводительные паспорта",
+    icon: FileText,
+    to: "/waste/passports",
+  },
+  {
+    id: "ttns",
+    title: "ТТН",
+    icon: Truck,
+    to: "/waste/ttns",
   },
   {
     id: "balances",

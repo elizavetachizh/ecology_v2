@@ -11,9 +11,7 @@ type WasteSourcesCellProps = {
 
 export function WasteSourcesCell({ sources }: WasteSourcesCellProps) {
   if (sources.length === 0) {
-    return (
-      <span className="text-xs text-muted-foreground">Не указаны</span>
-    );
+    return <span className="text-xs text-muted-foreground">Не указаны</span>;
   }
 
   return (

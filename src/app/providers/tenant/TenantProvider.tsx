@@ -112,9 +112,11 @@ export function TenantProvider({
         throw new Error("Realm пользователя ещё не загружен");
       }
 
-      // Wipe all MDM cache; keys are ["mdm", …]. api-client `tenantScoped` ≠ query.meta.
+      // Wipe tenant-scoped caches. api-client `tenantScoped` ≠ query.meta.
       await queryClient.cancelQueries({ queryKey: ["mdm"] });
       queryClient.removeQueries({ queryKey: ["mdm"] });
+      await queryClient.cancelQueries({ queryKey: ["operations"] });
+      queryClient.removeQueries({ queryKey: ["operations"] });
       await onTenantChange();
       writeActiveTenantId(realm, tenantId);
       setActiveTenantId(tenantId);

@@ -33,6 +33,19 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/waste-sources",
   },
   {
+    id: "counterparties",
+    title: "Контрагенты",
+    description: "Юрлица и физлица организации: УНП, адрес, активность",
+    to: "/directories/counterparties",
+  },
+  {
+    id: "contracts",
+    title: "Договоры",
+    description:
+      "Договоры утилизации и перевозки: контрагент, сроки, перечень отходов",
+    to: "/directories/contracts",
+  },
+  {
     id: "limits",
     title: "Лимиты накопления",
     description: "Лимиты по местам хранения",
