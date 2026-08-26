@@ -51,6 +51,8 @@ export type Ttn = {
   updated_by: UserProfile;
 };
 
+export type TtnBrief = Pick<Ttn, "id" | "number" | "date" | "status">;
+
 export type TtnCreate = {
   number: string;
   date: string;

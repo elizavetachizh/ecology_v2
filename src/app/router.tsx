@@ -70,10 +70,13 @@ import {
   type ContractsSearch,
   type WasteSourcesSearch,
   type WastesSearch,
+  type PersonsSearch,
 } from "./router/search-params";
 import { CreateUnitPage } from "../pages/dashboard/waste/units/CreateUnitPage";
 import { CreateWastePage } from "../pages/dashboard/waste/wastes/CreateWastePage";
 import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/CreateInstructionPage";
+import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
+import { PersonSortFields } from "../entities/waste/persons";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context }) => {
@@ -281,6 +284,21 @@ const directoriesWasteSourcesRoute = createRoute({
   component: WasteSourcesPage,
 });
 
+const directoriesPersonsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/persons",
+  validateSearch: (search: Record<string, unknown>): PersonsSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      sort: parseSearchEnum(search.sort, PersonSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: PersonsPage,
+});
+
 const directoriesCounterpartiesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/counterparties",
@@ -405,6 +423,7 @@ const routeTree = rootRoute.addChildren([
   directoriesCreateWasteRoute,
   directoriesWasteEditRoute,
   directoriesWasteSourcesRoute,
+  directoriesPersonsRoute,
   directoriesCounterpartiesRoute,
   directoriesContractsRoute,
   directoriesCreateContractRoute,

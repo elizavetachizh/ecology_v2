@@ -16,7 +16,7 @@ describe("deleteOperation", () => {
   it("deletes by id, tenant-scoped", async () => {
     await expect(deleteOperation("op-1")).resolves.toBeUndefined();
 
-    expect(apiDeleteMock).toHaveBeenCalledWith("/api/v1/operations/op-1", {
+    expect(apiDeleteMock).toHaveBeenCalledWith("/api/v1/operations/operations/op-1", {
       tenantScoped: true,
     });
   });

@@ -5,7 +5,7 @@ export function getOperation(
   operationId: string,
   signal?: AbortSignal,
 ): Promise<Operation> {
-  return apiJson<Operation>(`/api/v1/operations/${operationId}`, {
+  return apiJson<Operation>(`/api/v1/operations/operations/${operationId}`, {
     method: "GET",
     tenantScoped: true,
     signal,

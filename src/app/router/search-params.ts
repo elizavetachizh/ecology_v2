@@ -23,6 +23,7 @@ import type {
   WasteSortField,
 } from "../../entities/waste/wastes";
 import type { AuthContextValue } from "../../shared/auth/auth.types";
+import type { PersonSortField } from "../../entities/waste/persons";
 
 export type RouterContext = {
   auth: AuthContextValue;
@@ -47,6 +48,8 @@ export type WastesSearch = ListSearchParams<WasteSortField> & {
 };
 
 export type WasteSourcesSearch = ListSearchParams<WasteSourceSortField>;
+
+export type PersonsSearch = ListSearchParams<PersonSortField>;
 
 export type CounterpartiesSearch = ListSearchParams<CounterpartySortField> & {
   is_individual?: boolean;

@@ -13,6 +13,7 @@ export type {
   TtnSortOrder,
   TtnStatus,
   TtnUpdate,
+  TtnBrief,
 } from "./model/ttns.types";
 export {
   DEFAULT_TTNS_LIST_LIMIT,

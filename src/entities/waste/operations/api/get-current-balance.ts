@@ -13,7 +13,7 @@ export function getCurrentBalance(
     waste_id: params.waste_id,
   });
   return apiJson<BalanceCurrent>(
-    `/api/v1/operations/balances/current?${searchParams}`,
+    `/api/v1/operations/operations/balances/current?${searchParams}`,
     {
       signal,
       tenantScoped: true,

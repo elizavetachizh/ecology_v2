@@ -88,13 +88,15 @@ function operationsColumns(
     },
     {
       id: "balance",
-      accessorFn: (row) => row.balance.amount,
+      accessorFn: (row) => row.balance?.amount,
       enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Остаток после операции" />
       ),
       cell: ({ row }) =>
-        `${formatAmount(row.original.balance.amount)} ${UOM_LABEL[row.original.waste.uom]}`,
+        row.original.balance
+          ? `${formatAmount(row.original.balance.amount)} ${UOM_LABEL[row.original.waste.uom]}`
+          : "—",
     },
     {
       id: "actions",

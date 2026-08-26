@@ -13,16 +13,28 @@ export type {
   GetBalancesParams,
   GetCurrentBalanceParams,
   GetOperationsParams,
+  NeutralizationMethod,
   Operation,
   OperationCreate,
   OperationListResponse,
+  OperationStatus,
   OperationType,
   OperationUpdate,
+  TransferReceiptPurpose,
+  UsePurpose,
 } from "./model/operations.types";
 export {
   DEFAULT_OPERATIONS_LIST_LIMIT,
+  NEUTRALIZATION_METHOD_LABEL,
+  NeutralizationMethodValues,
+  OPERATION_STATUS_LABEL,
   OPERATION_TYPE_LABEL,
+  OperationStatusValues,
   OperationTypeValues,
+  TRANSFER_RECEIPT_PURPOSE_LABEL,
+  TransferReceiptPurposeValues,
+  USE_PURPOSE_LABEL,
+  UsePurposeValues,
 } from "./model/operations.types";
 export { operationsQueryKeys } from "./model/operations-query-keys";
 export { useCurrentBalanceQuery } from "./model/use-current-balance-query";

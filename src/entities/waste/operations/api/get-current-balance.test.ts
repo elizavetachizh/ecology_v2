@@ -20,20 +20,17 @@ describe("getCurrentBalance", () => {
     ).resolves.toEqual(currentBalanceFixture);
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations/balances/current?unit_id=unit-1&waste_id=waste-1",
+      "/api/v1/operations/operations/balances/current?unit_id=unit-1&waste_id=waste-1",
       { signal: undefined, tenantScoped: true },
     );
   });
 
   it("forwards abort signal", async () => {
     const signal = new AbortController().signal;
-    await getCurrentBalance(
-      { unit_id: "unit-1", waste_id: "waste-1" },
-      signal,
-    );
+    await getCurrentBalance({ unit_id: "unit-1", waste_id: "waste-1" }, signal);
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations/balances/current?unit_id=unit-1&waste_id=waste-1",
+      "/api/v1/operations/operations/balances/current?unit_id=unit-1&waste_id=waste-1",
       { signal, tenantScoped: true },
     );
   });

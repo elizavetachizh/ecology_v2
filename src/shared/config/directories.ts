@@ -57,4 +57,10 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     description: "Нормативы образования отходов",
     to: "/directories/norms",
   },
+  {
+    id: "persons",
+    title: "Ответственные",
+    description: "Ответственные за экологическое мониторинг",
+    to: "/directories/persons",
+  },
 ];

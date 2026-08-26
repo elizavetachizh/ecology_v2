@@ -1,7 +1,9 @@
+import type { Person } from "../../../../entities/waste/persons";
 import {
   Alert,
   AlertDescription,
   Button,
+  FormField,
   Input,
   Modal,
   ModalContent,
@@ -10,49 +12,53 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../shared/ui";
-import type { WasteSource } from "../../../../entities/waste/waste-sources";
-import { useUpsertWasteSourceForm } from "../model/use-upsert-waste-source-form";
+import { useUpsertPersonForm } from "../model/use-upsert-person-form";
 
-type WasteSourceFormModalProps = {
+type PersonFormModalProps = {
   open: boolean;
   mode: "create" | "edit";
-  initial?: WasteSource | null;
+  personId?: string;
+  initial?: Person | null;
+  onSaved: (person: Person, meta: { close: boolean }) => void;
   onOpenChange: (open: boolean) => void;
-  onSaved: (source: WasteSource) => void;
 };
 
-export function WasteSourceFormModal({
+export function PersonFormModal({
   open,
   mode,
+  personId,
   initial,
-  onOpenChange,
   onSaved,
-}: WasteSourceFormModalProps) {
+  onOpenChange,
+}: PersonFormModalProps) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       {open ? (
-        <WasteSourceForm
-          key={`${mode}-${initial?.id ?? "new"}`}
+        <PersonForm
+          key={`${mode}-${personId ?? initial?.id ?? "new"}`}
           mode={mode}
+          personId={personId}
           initial={initial}
-          onOpenChange={onOpenChange}
           onSaved={onSaved}
+          onOpenChange={onOpenChange}
         />
       ) : null}
     </Modal>
   );
 }
 
-type WasteSourceFormProps = Omit<WasteSourceFormModalProps, "open">;
+type PersonFormProps = Omit<PersonFormModalProps, "open">;
 
-function WasteSourceForm({
+function PersonForm({
   mode,
+  personId,
   initial,
-  onOpenChange,
   onSaved,
-}: WasteSourceFormProps) {
-  const { form, error, pending, onSubmit } = useUpsertWasteSourceForm({
+  onOpenChange,
+}: PersonFormProps) {
+  const { form, error, pending, onSubmit } = useUpsertPersonForm({
     mode,
+    personId,
     initial,
     onSaved,
   });
@@ -68,34 +74,31 @@ function WasteSourceForm({
         <ModalHeader>
           <ModalTitle>
             {mode === "create"
-              ? "Новый источник образования"
-              : "Изменить источник"}
+              ? "Новый ответственный"
+              : "Изменить ответственного"}
           </ModalTitle>
           <ModalDescription>
             {mode === "create"
-              ? "Источник появится в справочнике организации и будет доступен при привязке отходов."
-              : "Измените наименование источника образования."}
+              ? "Ответственный появится в справочнике организации."
+              : "Измените ФИО ответственного."}
           </ModalDescription>
         </ModalHeader>
         <div className="grid gap-3 py-2">
           {error ? (
-            <Alert variant="error">
+            <Alert variant="error" className="md:col-span-2">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : null}
-          <div className="grid gap-1.5">
-            <Input
-              {...register("name")}
-              placeholder="Например: Цех №3"
-              autoFocus
-              disabled={pending}
-            />
-            {errors.name ? (
-              <span className="text-xs text-destructive">
-                {errors.name.message}
-              </span>
-            ) : null}
-          </div>
+        </div>
+        <div className="grid gap-1.5">
+          <FormField
+            htmlFor="name"
+            label="ФИО"
+            required
+            error={errors.name?.message}
+          >
+            <Input {...register("name")} placeholder="Фамилия Имя Отчество" />
+          </FormField>
         </div>
         <ModalFooter>
           <Button

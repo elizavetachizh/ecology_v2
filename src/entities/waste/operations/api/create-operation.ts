@@ -5,7 +5,7 @@ export function createOperation(
   body: OperationCreate,
   signal?: AbortSignal,
 ): Promise<Operation> {
-  return apiSendJson<Operation>("/api/v1/operations", {
+  return apiSendJson<Operation>("/api/v1/operations/operations", {
     method: "POST",
     body,
     tenantScoped: true,

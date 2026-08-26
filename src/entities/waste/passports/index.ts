@@ -16,6 +16,7 @@ export type {
   PassportUpdate,
   PassportWaste,
   PassportWasteWrite,
+  PassportBrief,
 } from "./model/passports.types";
 export {
   DEFAULT_PASSPORTS_LIST_LIMIT,

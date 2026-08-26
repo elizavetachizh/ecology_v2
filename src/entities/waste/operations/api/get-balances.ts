@@ -17,7 +17,7 @@ export function getBalances(
   if (params.date_from) searchParams.set("date_from", params.date_from);
   if (params.date_to) searchParams.set("date_to", params.date_to);
   return apiJson<BalanceListResponse>(
-    `/api/v1/operations/balances?${searchParams}`,
+    `/api/v1/operations/operations/balances?${searchParams}`,
     {
       signal,
       tenantScoped: true,

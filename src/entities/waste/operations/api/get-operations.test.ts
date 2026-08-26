@@ -23,12 +23,12 @@ describe("getOperations", () => {
   });
 
   it("requests list with limit and offset, tenant-scoped", async () => {
-    await expect(
-      getOperations({ limit: 50, offset: 0 }),
-    ).resolves.toEqual(response);
+    await expect(getOperations({ limit: 50, offset: 0 })).resolves.toEqual(
+      response,
+    );
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations?limit=50&offset=0",
+      "/api/v1/operations/operations?limit=50&offset=0",
       { signal: undefined, tenantScoped: true },
     );
   });
@@ -45,7 +45,7 @@ describe("getOperations", () => {
     });
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations?limit=20&offset=10&unit_id=unit-1&waste_id=waste-1&operation_type=formed&date_from=2026-01-01&date_to=2026-03-31",
+      "/api/v1/operations/operations?limit=20&offset=10&unit_id=unit-1&waste_id=waste-1&operation_type=formed&date_from=2026-01-01&date_to=2026-03-31",
       { signal: undefined, tenantScoped: true },
     );
   });
@@ -61,7 +61,7 @@ describe("getOperations", () => {
     });
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations?limit=50&offset=0",
+      "/api/v1/operations/operations?limit=50&offset=0",
       { signal: undefined, tenantScoped: true },
     );
   });
@@ -71,7 +71,7 @@ describe("getOperations", () => {
     await getOperations({ limit: 50, offset: 0 }, signal);
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations?limit=50&offset=0",
+      "/api/v1/operations/operations?limit=50&offset=0",
       { signal, tenantScoped: true },
     );
   });

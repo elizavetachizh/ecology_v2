@@ -83,6 +83,8 @@ export type Passport = {
   updated_by: UserProfile;
 };
 
+export type PassportBrief = Pick<Passport, "id" | "number" | "date" | "status">;
+
 export type PassportWasteWrite = {
   waste_id: string;
 };

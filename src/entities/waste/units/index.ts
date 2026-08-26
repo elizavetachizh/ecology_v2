@@ -7,6 +7,11 @@ export { unitsQueryKeys } from "./model/unit-query-keys";
 export { useUnitsListQuery } from "./model/use-units-list-query";
 export { useUnitsTreeQuery } from "./model/use-units-tree-query";
 export { useUnitsOptions } from "./model/use-units-query";
+export {
+  flattenUnitTreePaths,
+  formatUnitPathLabel,
+} from "./model/flatten-unit-tree-paths";
+export type { UnitTreePath } from "./model/flatten-unit-tree-paths";
 export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
 export { UnitSelect } from "./ui/UnitSelect";
 export type {

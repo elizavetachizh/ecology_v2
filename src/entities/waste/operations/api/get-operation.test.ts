@@ -17,21 +17,27 @@ describe("getOperation", () => {
   it("requests detail by id, tenant-scoped", async () => {
     await expect(getOperation("op-1")).resolves.toEqual(operationFixture);
 
-    expect(apiJsonMock).toHaveBeenCalledWith("/api/v1/operations/op-1", {
-      method: "GET",
-      tenantScoped: true,
-      signal: undefined,
-    });
+    expect(apiJsonMock).toHaveBeenCalledWith(
+      "/api/v1/operations/operations/op-1",
+      {
+        method: "GET",
+        tenantScoped: true,
+        signal: undefined,
+      },
+    );
   });
 
   it("forwards abort signal", async () => {
     const signal = new AbortController().signal;
     await getOperation("op-1", signal);
 
-    expect(apiJsonMock).toHaveBeenCalledWith("/api/v1/operations/op-1", {
-      method: "GET",
-      tenantScoped: true,
-      signal,
-    });
+    expect(apiJsonMock).toHaveBeenCalledWith(
+      "/api/v1/operations/operations/op-1",
+      {
+        method: "GET",
+        tenantScoped: true,
+        signal,
+      },
+    );
   });
 });

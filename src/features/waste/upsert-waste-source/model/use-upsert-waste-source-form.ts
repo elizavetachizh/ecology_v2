@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -18,32 +18,28 @@ import {
 type UseUpsertWasteSourceFormParams = {
   mode: "create" | "edit";
   initial?: WasteSource | null;
-  open: boolean;
   onSaved: (source: WasteSource) => void;
 };
+
+function getWasteSourceFormValues(
+  mode: "create" | "edit",
+  initial?: WasteSource | null,
+): WasteSourceFormValues {
+  if (mode === "edit" && initial) return { name: initial.name };
+  return wasteSourceFormDefaultValues;
+}
 
 export function useUpsertWasteSourceForm({
   mode,
   initial,
-  open,
   onSaved,
 }: UseUpsertWasteSourceFormParams) {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<WasteSourceFormValues>({
     resolver: zodResolver(wasteSourceFormSchema),
-    defaultValues: wasteSourceFormDefaultValues,
+    defaultValues: getWasteSourceFormValues(mode, initial),
   });
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    form.reset(
-      mode === "edit" && initial
-        ? { name: initial.name }
-        : wasteSourceFormDefaultValues,
-    );
-  }, [open, mode, initial, form]);
 
   const createMutation = useMutation({
     mutationFn: (values: WasteSourceFormValues) =>

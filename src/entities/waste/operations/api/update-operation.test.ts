@@ -20,7 +20,7 @@ describe("updateOperation", () => {
       operationFixture,
     );
 
-    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations/op-1", {
+    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations/operations/op-1", {
       method: "PATCH",
       body,
       tenantScoped: true,
@@ -32,7 +32,7 @@ describe("updateOperation", () => {
     const signal = new AbortController().signal;
     await updateOperation("op-1", { date: "2026-03-02" }, signal);
 
-    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations/op-1", {
+    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations/operations/op-1", {
       method: "PATCH",
       body: { date: "2026-03-02" },
       tenantScoped: true,

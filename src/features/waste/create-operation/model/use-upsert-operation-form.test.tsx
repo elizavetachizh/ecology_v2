@@ -11,6 +11,7 @@ import { operationFixture } from "../../../../entities/waste/operations/model/op
 import { queryClient } from "../../../../shared/lib/query-client";
 import { useUpsertOperationForm } from "./use-upsert-operation-form";
 import type { OperationFormValues } from "./operation-form.schema";
+import { EMPTY_TYPE_SPECIFIC_VALUES } from "./operation-form.schema";
 
 vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
   const actual =
@@ -32,8 +33,25 @@ const formedValues: OperationFormValues = {
   operation_type: "formed",
   unit_id: "unit-1",
   waste_id: "waste-1",
-  waste_source_id: "ws-1",
   amount: "10.000000",
+  ...EMPTY_TYPE_SPECIFIC_VALUES,
+  waste_source_id: "ws-1",
+};
+
+const formedWriteBody = {
+  date: "2026-03-01",
+  operation_type: "formed" as const,
+  unit_id: "unit-1",
+  waste_id: "waste-1",
+  amount: "10.000000",
+  waste_source_id: "ws-1",
+  use_purpose: null,
+  neutralization_method: null,
+  unit_side_id: null,
+  transfer_receipt_purpose: null,
+  counterparty_id: null,
+  passport_id: null,
+  ttn_id: null,
 };
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -69,14 +87,7 @@ describe("useUpsertOperationForm", () => {
     await act(() => result.current.onSubmit(formedValues));
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(operationFixture));
-    expect(createOperationMock).toHaveBeenCalledWith({
-      date: "2026-03-01",
-      operation_type: "formed",
-      unit_id: "unit-1",
-      waste_id: "waste-1",
-      waste_source_id: "ws-1",
-      amount: "10.000000",
-    });
+    expect(createOperationMock).toHaveBeenCalledWith(formedWriteBody);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: operationsQueryKeys.lists(),
     });
@@ -105,17 +116,16 @@ describe("useUpsertOperationForm", () => {
         ...formedValues,
         operation_type: "used",
         waste_source_id: "",
+        use_purpose: "energy",
       }),
     );
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(operationFixture));
     expect(updateOperationMock).toHaveBeenCalledWith("op-1", {
-      date: "2026-03-01",
+      ...formedWriteBody,
       operation_type: "used",
-      unit_id: "unit-1",
-      waste_id: "waste-1",
       waste_source_id: null,
-      amount: "10.000000",
+      use_purpose: "energy",
     });
   });
 

@@ -6,10 +6,13 @@ export function updateOperation(
   body: OperationUpdate,
   signal?: AbortSignal,
 ): Promise<Operation> {
-  return apiSendJson<Operation>(`/api/v1/operations/${operationId}`, {
-    method: "PATCH",
-    body,
-    tenantScoped: true,
-    signal,
-  });
+  return apiSendJson<Operation>(
+    `/api/v1/operations/operations/${operationId}`,
+    {
+      method: "PATCH",
+      body,
+      tenantScoped: true,
+      signal,
+    },
+  );
 }

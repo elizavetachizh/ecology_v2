@@ -9,6 +9,16 @@ vi.mock("../../../../shared/api/api-client", () => ({
 
 const apiSendJsonMock = vi.mocked(apiSendJson);
 
+const unusedTypeFields = {
+  unit_side_id: null,
+  use_purpose: null,
+  neutralization_method: null,
+  transfer_receipt_purpose: null,
+  counterparty_id: null,
+  passport_id: null,
+  ttn_id: null,
+};
+
 describe("createOperation", () => {
   beforeEach(() => {
     apiSendJsonMock.mockResolvedValue(operationFixture);
@@ -22,15 +32,19 @@ describe("createOperation", () => {
       waste_id: "waste-1",
       waste_source_id: "ws-1",
       amount: "10.000000",
+      ...unusedTypeFields,
     };
     await expect(createOperation(body)).resolves.toEqual(operationFixture);
 
-    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations", {
-      method: "POST",
-      body,
-      tenantScoped: true,
-      signal: undefined,
-    });
+    expect(apiSendJsonMock).toHaveBeenCalledWith(
+      "/api/v1/operations/operations",
+      {
+        method: "POST",
+        body,
+        tenantScoped: true,
+        signal: undefined,
+      },
+    );
   });
 
   it("forwards abort signal", async () => {
@@ -42,14 +56,18 @@ describe("createOperation", () => {
       waste_id: "waste-1",
       waste_source_id: null,
       amount: "1.5",
+      ...unusedTypeFields,
     };
     await createOperation(body, signal);
 
-    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/operations", {
-      method: "POST",
-      body,
-      tenantScoped: true,
-      signal,
-    });
+    expect(apiSendJsonMock).toHaveBeenCalledWith(
+      "/api/v1/operations/operations",
+      {
+        method: "POST",
+        body,
+        tenantScoped: true,
+        signal,
+      },
+    );
   });
 });
