@@ -8,6 +8,7 @@ export { useUnitsListQuery } from "./model/use-units-list-query";
 export { useUnitsTreeQuery } from "./model/use-units-tree-query";
 export { useUnitsOptions } from "./model/use-units-query";
 export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
+export { UnitSelect } from "./ui/UnitSelect";
 export type {
   Unit,
   UnitBrief,

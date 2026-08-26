@@ -12,7 +12,9 @@ import {
   DataTablePagination,
   ListSearchField,
   PageContextBar,
-  Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
@@ -156,24 +158,25 @@ export function InstructionsPage() {
             placeholder="Поиск по названию или краткому"
             onSearch={(q) => patchSearch({ q: q || undefined })}
           />
-          <Select
-            aria-label="Статус"
-            className="w-44"
-            value={search.status ?? ""}
-            onChange={(e) => {
-              const value = e.target.value;
+          <Tabs
+            value={search.status ?? "all"}
+            onValueChange={(value) =>
               patchSearch({
-                status: value ? (value as InstructionStatus) : undefined,
-              });
-            }}
+                status:
+                  value === "all" ? undefined : (value as InstructionStatus),
+              })
+            }
+            className="gap-0"
           >
-            <option value="">Все статусы</option>
-            {InstructionStatusValues.map((status) => (
-              <option key={status} value={status}>
-                {INSTRUCTION_STATUS_LABEL[status]}
-              </option>
-            ))}
-          </Select>
+            <TabsList aria-label="Статус">
+              <TabsTrigger value="all">Все</TabsTrigger>
+              {InstructionStatusValues.map((status) => (
+                <TabsTrigger key={status} value={status}>
+                  {INSTRUCTION_STATUS_LABEL[status]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
 
         {!loading && instructions.length === 0 ? (

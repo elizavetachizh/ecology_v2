@@ -19,8 +19,12 @@ export function CreateInstructionPage() {
     >
       <InstructionForm
         mode="create"
-        onSaved={(instruction, { intent }) => {
-          toast.success(instructionSavedToast(intent, true));
+        onSaved={(instruction, { close }) => {
+          toast.success(instructionSavedToast(true));
+          if (close) {
+            void navigate({ to: "/directories/instructions" });
+            return;
+          }
           void navigate({
             to: "/directories/instructions/$instructionId",
             params: { instructionId: instruction.id },

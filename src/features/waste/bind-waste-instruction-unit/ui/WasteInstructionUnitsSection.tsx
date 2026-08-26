@@ -2,9 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import {
-  DEFAULT_INSTRUCTIONS_LIST_LIMIT,
-  InstructionTabs,
-  useInstructionsListQuery,
+  InstructionBindingsTabs,
+  useInstructionBindingsTabs,
 } from "../../../../entities/waste/instructions";
 import {
   DEFAULT_WIU_LIST_LIMIT,
@@ -44,21 +43,17 @@ export function WasteInstructionUnitsSection({
   const [editing, setEditing] = useState<WasteInstructionUnit | null>(null);
   const [detaching, setDetaching] = useState<WasteInstructionUnit | null>(null);
 
-  const instructionsQuery = useInstructionsListQuery({
-    tenantId,
-    params: {
-      sort: "name",
-      order: "asc",
-      limit: DEFAULT_INSTRUCTIONS_LIST_LIMIT,
-      offset: 0,
-    },
-  });
+  const handleInstructionChange = (nextId: string | undefined) => {
+    setOffset(0);
+    onInstructionChange(nextId);
+  };
 
-  const instructions = instructionsQuery.items;
-  const activeInstructionId =
-    instructionId && instructions.some((item) => item.id === instructionId)
-      ? instructionId
-      : instructions[0]?.id;
+  const { activeInstructionId, instructions, loading, error } =
+    useInstructionBindingsTabs({
+      tenantId,
+      instructionId,
+      onInstructionChange: handleInstructionChange,
+    });
 
   const scope = {
     wasteId,
@@ -91,30 +86,25 @@ export function WasteInstructionUnitsSection({
 
   const columns = wiuColumns(setEditing, setModalMode, setDetaching);
 
-  const instructionsSlot = instructionsQuery.loading ? (
-    <p className="text-sm text-muted-foreground">Загрузка инструкций…</p>
-  ) : instructions.length === 0 ? (
-    <Alert variant="info">
-      <AlertTitle>Нет инструкций</AlertTitle>
-      <AlertDescription>
-        Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
-        отходов.{" "}
-        <Link
-          to="/directories/instructions/new"
-          className="font-medium underline-offset-4 hover:underline"
-        >
-          Создать инструкцию
-        </Link>
-      </AlertDescription>
-    </Alert>
-  ) : (
-    <InstructionTabs
+  const instructionsSlot = (
+    <InstructionBindingsTabs
+      loading={loading}
+      error={error}
       instructions={instructions}
       value={activeInstructionId ?? ""}
-      onValueChange={(nextId) => {
-        setOffset(0);
-        onInstructionChange(nextId || undefined);
-      }}
+      onValueChange={handleInstructionChange}
+      emptyDescription={
+        <>
+          Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
+          журналов ПОД-9.{" "}
+          <Link
+            to="/directories/instructions/new"
+            className="font-medium underline-offset-4 hover:underline"
+          >
+            Создать инструкцию
+          </Link>
+        </>
+      }
     />
   );
 
@@ -163,7 +153,7 @@ export function WasteInstructionUnitsSection({
             <AlertTitle>Выберите инструкцию</AlertTitle>
             <AlertDescription>
               Откройте вкладку инструкции, чтобы увидеть и редактировать
-              привязки отходов.
+              привязки журналов ПОД-9.
             </AlertDescription>
           </Alert>
         ) : null
@@ -184,7 +174,11 @@ export function WasteInstructionUnitsSection({
               }
             }}
             onSaved={() => {
-              toast.success("Привязка журналов ПОД-9 успешно создана");
+              toast.success(
+                modalMode === "create"
+                  ? "Привязка журналов ПОД-9 успешно создана"
+                  : "Привязка журналов ПОД-9 успешно обновлена",
+              );
               setModalMode(null);
               setEditing(null);
             }}
@@ -197,12 +191,12 @@ export function WasteInstructionUnitsSection({
           onOpenChange={(open) => {
             if (!open) setDetaching(null);
           }}
-          title="Отвязать подразделение?"
+          title="Отвязать журнал ПОД-9?"
           confirmLabel="Отвязать"
           description={
             <>
-              Привязка «{detaching?.unit.name ?? "—"}» будет удалена для этой
-              инструкции. Карточка единицы в структуре останется.
+              Привязка «{detaching?.unit.name ?? "—"}» будет удалена для этого
+              отхода по текущей инструкции.
             </>
           }
           onConfirm={() => {

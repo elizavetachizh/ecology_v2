@@ -1,18 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { WasteSourcesCell } from "../../../../entities/waste/waste-sources/ui/WasteSourcesCell";
 import {
   DataTableRowAction,
   DataTableRowActions,
   type ColumnDef,
 } from "../../../../shared/ui";
 import { Pencil, Unlink } from "lucide-react";
-import type { WasteInstructionUnit } from "../../../../entities/waste/waste-instruction-units";
+import { WasteSourcesCell } from "../../../../entities/waste/waste-sources";
+import type { UnitInstructionWaste } from "../../../../entities/waste/unit-instruction-waste";
+import { UOM_LABEL } from "../../../../entities/waste/wastes";
 
 function uiwColumns(
-  setEditing: (waste: WasteInstructionUnit) => void,
+  setEditing: (waste: UnitInstructionWaste) => void,
   setModalMode: (mode: "edit" | "create") => void,
-  setDetaching: (waste: WasteInstructionUnit) => void,
-): ColumnDef<WasteInstructionUnit>[] {
+  setDetaching: (waste: UnitInstructionWaste) => void,
+): ColumnDef<UnitInstructionWaste>[] {
   return [
     {
       id: "waste",
@@ -24,7 +25,7 @@ function uiwColumns(
           search={{ instructionId: undefined }}
           className="font-medium hover:underline"
         >
-          {`${row.original.waste.waste_classifier.code} -  ${row.original.waste.waste_classifier.name}`}
+          {`${row.original.waste.waste_classifier.code} - ${row.original.waste.waste_classifier.name}`}
         </Link>
       ),
     },
@@ -38,7 +39,8 @@ function uiwColumns(
     {
       id: "transport_unit",
       header: "Тр. ед.",
-      cell: ({ row }) => row.original.transport_unit,
+      cell: ({ row }) =>
+        `${row.original.transport_unit} ${UOM_LABEL[row.original.waste.uom]}`,
     },
     {
       id: "actions",
@@ -57,7 +59,7 @@ function uiwColumns(
             Изменить
           </DataTableRowAction>
           <DataTableRowAction
-            label="Отвязать подразделение"
+            label="Отвязать отход"
             onClick={() => setDetaching(row.original)}
           >
             <Unlink className="text-destructive" />

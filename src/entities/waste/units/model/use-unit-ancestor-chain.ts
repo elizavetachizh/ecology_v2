@@ -9,7 +9,6 @@ import {
 import {
   findCachedAncestorChain,
   MAX_ANCESTOR_DEPTH,
-  seedUnitDetails,
 } from "./find-unit-ancestor-chain";
 
 type UseUnitAncestorChainArgs = {
@@ -32,18 +31,15 @@ export function useUnitAncestorChain({
   const canFetch = Boolean(tenantId && unit && enabled);
 
   const query = useQuery({
-    queryKey: [
-      ...unitsQueryKeys.detail(tenantId ?? "none", unit?.id ?? "none"),
-      "ancestors",
-    ] as const,
+    queryKey: unitsQueryKeys.ancestors(
+      tenantId ?? "none",
+      unit?.id ?? "none",
+    ),
     queryFn: async ({ signal }) => {
       if (!unit || !tenantId) return [] as Unit[];
 
       const cached = findCachedAncestorChain(queryClient, tenantId, unit);
-      if (cached) {
-        seedUnitDetails(queryClient, tenantId, cached);
-        return cached;
-      }
+      if (cached) return cached;
 
       const chain: Unit[] = [unit];
       let parentId = unit.parent_id;

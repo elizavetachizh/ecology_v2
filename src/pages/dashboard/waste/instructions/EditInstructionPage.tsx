@@ -63,9 +63,9 @@ export function EditInstructionPage() {
         mode="edit"
         instructionId={instructionId}
         initial={instructionQuery.data}
-        onSaved={(_i, { next, intent }) => {
-          toast.success(instructionSavedToast(intent, false));
-          if (next === "list") {
+        onSaved={(_instruction, { close }) => {
+          toast.success(instructionSavedToast(false));
+          if (close) {
             void navigate({ to: "/directories/instructions" });
           }
         }}

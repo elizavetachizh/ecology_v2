@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DEFAULT_UNITS_LIST_LIMIT,
   useUnitsListQuery,
@@ -8,8 +8,7 @@ import {
 } from "../../../../../../entities/waste/units";
 import type { StructureSearch } from "../../../../../../app/router/search-params";
 import type { ExpandedState } from "../../../../../../shared/ui";
-import { collectExpandableIds } from "./collect-expandable-ids";
-import { mergeExpanded } from "./merge-expanded";
+import { collapsedFromExpanded, expandedFromCollapsed } from "./merge-expanded";
 
 function toTreeRows(items: Unit[]): UnitTree[] {
   return items.map((item) => ({ ...item, children: [] }));
@@ -64,15 +63,16 @@ export function useUnitsPageData({
     [pod9Only, listQuery.items, treeQuery.tree],
   );
 
-  const [expanded, setExpanded] = useState<ExpandedState>(() =>
-    mergeExpanded({}, [search.expandId, search.focusId]),
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  const expanded = useMemo(
+    () => expandedFromCollapsed(pod9Only ? [] : treeQuery.tree, collapsed),
+    [pod9Only, treeQuery.tree, collapsed],
   );
 
-  // Hierarchical search: matches ∪ ancestors. Раскрываем предков, иначе hit не виден.
-  useEffect(() => {
-    if (pod9Only || !search.q) return;
-    setExpanded(mergeExpanded({}, collectExpandableIds(treeQuery.tree)));
-  }, [pod9Only, search.q, treeQuery.tree]);
+  const setExpanded = (next: ExpandedState) => {
+    setCollapsed(collapsedFromExpanded(treeQuery.tree, next));
+  };
 
   return {
     mode: pod9Only ? ("flat" as const) : ("tree" as const),

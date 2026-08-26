@@ -1,8 +1,17 @@
 import { z } from "zod";
-import {
-  PassportStatusValues,
-  PassportTransportTypeValues,
-} from "../../../../entities/waste/passports";
+import { PassportTransportTypeValues } from "../../../../entities/waste/passports";
+
+export const PASSPORT_WASTE_PRODUCER_TYPE_LABEL = {
+  self: "Самостоятельно",
+  counterparty: "Контрагент",
+} as const;
+
+export type PassportWasteProducerType =
+  keyof typeof PASSPORT_WASTE_PRODUCER_TYPE_LABEL;
+
+export const PassportWasteProducerTypeValues = Object.keys(
+  PASSPORT_WASTE_PRODUCER_TYPE_LABEL,
+) as [PassportWasteProducerType, ...PassportWasteProducerType[]];
 
 const isoDate = z
   .string()
@@ -19,7 +28,6 @@ export const passportFormSchema = z
       .max(255, "Не более 255 символов"),
     date: isoDate.min(1, "Укажите дату вывоза"),
     unit_id: z.string().uuid("Выберите структурную единицу"),
-    status: z.enum(PassportStatusValues),
     recycling_contract_id: z.string().uuid("Выберите договор утилизации"),
     waste_ids: z
       .array(z.string().uuid())
@@ -28,6 +36,9 @@ export const passportFormSchema = z
       error: "Выберите, кто перевозит",
     }),
     transport_contract_id: optionalUuid,
+    waste_producer_type: z.enum(PassportWasteProducerTypeValues, {
+      error: "Выберите производителя отходов",
+    }),
     waste_producer_id: optionalUuid,
   })
   .superRefine((values, ctx) => {
@@ -37,6 +48,16 @@ export const passportFormSchema = z
           code: "custom",
           path: ["transport_contract_id"],
           message: "Выберите договор перевозки",
+        });
+      }
+    }
+
+    if (values.waste_producer_type === "counterparty") {
+      if (!values.waste_producer_id) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["waste_producer_id"],
+          message: "Выберите контрагента",
         });
       }
     }
@@ -68,10 +89,10 @@ export const passportFormDefaultValues: PassportFormValues = {
   number: "",
   date: todayIsoDate(),
   unit_id: "",
-  status: "active",
   recycling_contract_id: "",
   waste_ids: [],
   transport_type: "self",
   transport_contract_id: "",
+  waste_producer_type: "self",
   waste_producer_id: "",
 };

@@ -7,11 +7,16 @@ import {
   DEFAULT_PASSPORTS_LIST_LIMIT,
   deletePassport,
   passportsQueryKeys,
+  updatePassport,
   usePassportsListQuery,
   type Passport,
   type PassportSortField,
+  type PassportStatus,
 } from "../../../../entities/waste/passports";
-import { passportDeleteErrorMessage } from "../../../../features/waste/upsert-passport";
+import {
+  passportDeleteErrorMessage,
+  passportWriteErrorMessage,
+} from "../../../../features/waste/upsert-passport";
 import { formatDate } from "../../../../shared/lib/format-date";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
@@ -42,7 +47,33 @@ export function PassportsPage() {
   const search = useSearch({ from: "/waste/passports" });
 
   const [deleting, setDeleting] = useState<Passport | null>(null);
-  const columns = useMemo(() => passportsColumns(setDeleting), []);
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: PassportStatus }) =>
+      updatePassport(id, { status }),
+    onSuccess: (updated) => {
+      void queryClient.invalidateQueries({
+        queryKey: passportsQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: passportsQueryKeys.details(),
+      });
+      toast.success(
+        updated.status === "inactive"
+          ? "Паспорт помечен как недействующий"
+          : "Паспорт помечен как действующий",
+      );
+    },
+    onError: (err) => toast.error(passportWriteErrorMessage(err)),
+  });
+
+  const columns = useMemo(
+    () =>
+      passportsColumns(setDeleting, (passport, status) => {
+        statusMutation.mutate({ id: passport.id, status });
+      }),
+    [statusMutation],
+  );
 
   const listParams = useMemo(
     () => ({

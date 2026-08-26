@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  instructionActivateSchema,
-  instructionFormSchema,
-} from "./instruction-form.schema";
+import { instructionFormSchema } from "./instruction-form.schema";
 
-const draft = {
+const named = {
   name: "Инструкция",
   short_name: "",
   start_date: "",
@@ -12,23 +9,11 @@ const draft = {
 };
 
 describe("instructionFormSchema", () => {
-  it("accepts a nameless-dates draft", () => {
-    expect(instructionFormSchema.safeParse(draft).success).toBe(true);
-  });
-
-  it("rejects inverted date range", () => {
+  it("defaults-shaped active without dates fails", () => {
     const parsed = instructionFormSchema.safeParse({
-      ...draft,
-      start_date: "2026-12-31",
-      end_date: "2026-01-01",
+      ...named,
+      status: "active",
     });
-    expect(parsed.success).toBe(false);
-  });
-});
-
-describe("instructionActivateSchema", () => {
-  it("requires both dates", () => {
-    const parsed = instructionActivateSchema.safeParse(draft);
     expect(parsed.success).toBe(false);
     if (parsed.success) return;
     const paths = parsed.error.issues.map((issue) => issue.path[0]);
@@ -36,24 +21,45 @@ describe("instructionActivateSchema", () => {
     expect(paths).toContain("end_date");
   });
 
-  it("accepts a full period", () => {
+  it("accepts active with a full period", () => {
     expect(
-      instructionActivateSchema.safeParse({
-        ...draft,
+      instructionFormSchema.safeParse({
+        ...named,
         start_date: "2026-01-01",
         end_date: "2026-12-31",
+        status: "active",
       }).success,
     ).toBe(true);
   });
-});
 
-describe("instructionActivateSchema messages", () => {
-  it("uses action copy, not generic required", () => {
-    const parsed = instructionActivateSchema.safeParse(draft);
+  it("accepts a draft without dates", () => {
+    expect(
+      instructionFormSchema.safeParse({
+        ...named,
+        status: "draft",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects inverted date range", () => {
+    const parsed = instructionFormSchema.safeParse({
+      ...named,
+      start_date: "2026-12-31",
+      end_date: "2026-01-01",
+      status: "draft",
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("uses status copy when active dates are missing", () => {
+    const parsed = instructionFormSchema.safeParse({
+      ...named,
+      status: "active",
+    });
     expect(parsed.success).toBe(false);
     if (parsed.success) return;
-    expect(parsed.error.issues.some((issue) => /ввести в действие/i.test(issue.message))).toBe(
-      true,
-    );
+    expect(
+      parsed.error.issues.some((issue) => issue.message.includes("Действует")),
+    ).toBe(true);
   });
 });

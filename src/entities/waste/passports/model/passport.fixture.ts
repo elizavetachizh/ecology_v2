@@ -15,14 +15,21 @@ export const passportFixture: Passport = {
   number: "СП-001",
   date: "2026-03-15",
   unit_id: "33333333-3333-4333-8333-333333333333",
-  unit: { id: "33333333-3333-4333-8333-333333333333", name: "Цех №1", short_name: "Ц1" },
+  unit: {
+    id: "33333333-3333-4333-8333-333333333333",
+    name: "Цех №1",
+    short_name: "Ц1",
+  },
   recycling_contract_id: "44444444-4444-4444-8444-444444444444",
   recycling_contract: {
     id: "44444444-4444-4444-8444-444444444444",
     number: "Д-П-01",
     contract_type: "recycling",
     status: "active",
-    counterparty: { id: "88888888-8888-4888-8888-888888888888", name: "Ромашка" },
+    counterparty: {
+      id: "88888888-8888-4888-8888-888888888888",
+      name: "Ромашка",
+    },
   },
   transport_type: "self",
   transport_contract_id: null,
@@ -54,7 +61,3 @@ export const passportFixture: Passport = {
   created_by: profile,
   updated_by: profile,
 };
-
-export function makePassport(overrides: Partial<Passport> = {}): Passport {
-  return { ...passportFixture, ...overrides };
-}

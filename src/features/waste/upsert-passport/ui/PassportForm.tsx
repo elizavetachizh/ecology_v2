@@ -2,35 +2,35 @@ import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
+  ContractSelect,
   contractsQueryKeys,
   getContract,
 } from "../../../../entities/waste/contracts";
+import { CounterpartySelect } from "../../../../entities/waste/counterparties";
 import {
-  PASSPORT_STATUS_LABEL,
   PASSPORT_TRANSPORT_TYPE_LABEL,
-  PassportStatusValues,
+  PassportStatusBadge,
   PassportTransportTypeValues,
   type Passport,
 } from "../../../../entities/waste/passports";
 import { useTenant } from "../../../../entities/tenant";
+import { UnitSelect } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
   Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
+  FormField,
   Input,
   PageContextBar,
-  Select,
 } from "../../../../shared/ui";
+import {
+  PASSPORT_WASTE_PRODUCER_TYPE_LABEL,
+  PassportWasteProducerTypeValues,
+} from "../model/passport-form.schema";
 import { syncPassportWastes } from "../model/keep-wastes-allowed";
 import { useUpsertPassportForm } from "../model/use-upsert-passport-form";
-import { PassportContractSelect } from "./PassportContractSelect";
-import { PassportCounterpartySelect } from "./PassportCounterpartySelect";
-import { PassportUnitSelect } from "./PassportUnitSelect";
 import { PassportWastesSelect } from "./PassportWastesSelect";
 
 const UUID_RE =
@@ -75,6 +75,7 @@ export function PassportForm({
 
   const recyclingContractId = watch("recycling_contract_id");
   const transportType = watch("transport_type");
+  const wasteProducerType = watch("waste_producer_type");
   const wasteIds = watch("waste_ids");
 
   const recyclingQuery = useQuery({
@@ -94,9 +95,13 @@ export function PassportForm({
 
   return (
     <form
-      onSubmit={form.handleSubmit((values) =>
-        onSubmit({ ...values, waste_ids: kept }),
-      )}
+      onSubmit={form.handleSubmit((values) => {
+        if (kept.length < 1) {
+          setValue("waste_ids", [], { shouldValidate: true });
+          return;
+        }
+        onSubmit({ ...values, waste_ids: kept });
+      })}
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
@@ -106,6 +111,7 @@ export function PassportForm({
             ? "Новый сопроводительный паспорт"
             : `Паспорт ${initial?.number ?? ""}`
         }
+        actions={<PassportStatusBadge status={initial?.status ?? "active"} />}
       />
 
       <Alert variant="info">
@@ -128,10 +134,12 @@ export function PassportForm({
         <h2 className="text-sm font-semibold text-foreground md:col-span-2">
           Реквизиты
         </h2>
-        <Field>
-          <FieldLabel htmlFor="number" required>
-            Регистрационный номер СП
-          </FieldLabel>
+        <FormField
+          htmlFor="number"
+          label="Регистрационный номер СП"
+          required
+          error={errors.number?.message}
+        >
           <Input
             id="number"
             {...register("number")}
@@ -139,12 +147,13 @@ export function PassportForm({
             disabled={pending}
             aria-invalid={Boolean(errors.number)}
           />
-          <FieldError>{errors.number?.message}</FieldError>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="date" required>
-            Дата вывоза
-          </FieldLabel>
+        </FormField>
+        <FormField
+          htmlFor="date"
+          label="Дата вывоза"
+          required
+          error={errors.date?.message}
+        >
           <Input
             id="date"
             type="date"
@@ -152,17 +161,19 @@ export function PassportForm({
             disabled={pending}
             aria-invalid={Boolean(errors.date)}
           />
-          <FieldError>{errors.date?.message}</FieldError>
-        </Field>
-        <Field className="md:col-span-2">
-          <FieldLabel htmlFor="unit_id" required>
-            Структурная единица
-          </FieldLabel>
+        </FormField>
+        <FormField
+          htmlFor="unit_id"
+          label="Структурная единица"
+          required
+          className="md:col-span-2"
+          error={errors.unit_id?.message}
+        >
           <Controller
             name="unit_id"
             control={control}
             render={({ field }) => (
-              <PassportUnitSelect
+              <UnitSelect
                 tenantId={activeTenantId}
                 value={field.value}
                 disabled={pending}
@@ -170,35 +181,35 @@ export function PassportForm({
               />
             )}
           />
-          <FieldError>{errors.unit_id?.message}</FieldError>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="status" required>
-            Статус
-          </FieldLabel>
-          <Select id="status" disabled={pending} {...register("status")}>
-            {PassportStatusValues.map((value) => (
-              <option key={value} value={value}>
-                {PASSPORT_STATUS_LABEL[value]}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        </FormField>
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold text-foreground">
           Договор утилизации и отходы
         </h2>
-        <Field>
-          <FieldLabel htmlFor="recycling_contract_id" required>
-            Договор утилизации
-          </FieldLabel>
+        <FormField
+          htmlFor="recycling_contract_id"
+          label="Договор утилизации"
+          required
+          error={errors.recycling_contract_id?.message}
+          description={
+            <>
+              Только действующие договоры типа «Утилизация». Нет договора?{" "}
+              <Link
+                to="/directories/contracts/new"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Создать в справочнике
+              </Link>
+            </>
+          }
+        >
           <Controller
             name="recycling_contract_id"
             control={control}
             render={({ field }) => (
-              <PassportContractSelect
+              <ContractSelect
                 tenantId={activeTenantId}
                 value={field.value}
                 contractType="recycling"
@@ -207,17 +218,7 @@ export function PassportForm({
               />
             )}
           />
-          <FieldDescription>
-            Только действующие договоры типа «Утилизация». Нет договора?{" "}
-            <Link
-              to="/directories/contracts/new"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Создать в справочнике
-            </Link>
-          </FieldDescription>
-          <FieldError>{errors.recycling_contract_id?.message}</FieldError>
-        </Field>
+        </FormField>
 
         {wasteConflict ? (
           <Alert variant="warning">
@@ -249,41 +250,55 @@ export function PassportForm({
           Перевозчик отхода
         </h2>
         <Field>
-          <FieldLabel htmlFor="transport_type" required>
+          <p
+            id="transport-type-label"
+            className="text-sm font-medium leading-none text-foreground"
+          >
             Способ перевозки
-          </FieldLabel>
-          <Select
-            id="transport_type"
-            disabled={pending}
-            {...register("transport_type", {
-              onChange: (event) => {
-                if (event.target.value !== "transport_contract") {
-                  setValue("transport_contract_id", "");
-                }
-              },
-            })}
+            <span className="ml-0.5 text-destructive" aria-hidden>
+              *
+            </span>
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby="transport-type-label"
+            className="flex flex-wrap gap-x-6 gap-y-2"
           >
             {PassportTransportTypeValues.map((value) => (
-              <option key={value} value={value}>
+              <label
+                key={value}
+                className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
+              >
+                <input
+                  type="radio"
+                  value={value}
+                  disabled={pending}
+                  className="size-4 accent-primary disabled:cursor-not-allowed"
+                  {...register("transport_type", {
+                    onChange: (event) => {
+                      if (event.target.value !== "transport_contract") {
+                        setValue("transport_contract_id", "");
+                      }
+                    },
+                  })}
+                />
                 {PASSPORT_TRANSPORT_TYPE_LABEL[value]}
-              </option>
+              </label>
             ))}
-          </Select>
-          <FieldDescription>
-            «Самостоятельно» и «по договору утилизации» не требуют договора
-            перевозки — поле скрыто.
-          </FieldDescription>
+          </div>
         </Field>
         {transportType === "transport_contract" ? (
-          <Field>
-            <FieldLabel htmlFor="transport_contract_id" required>
-              Договор перевозки
-            </FieldLabel>
+          <FormField
+            htmlFor="transport_contract_id"
+            label="Договор перевозки"
+            required
+            error={errors.transport_contract_id?.message}
+          >
             <Controller
               name="transport_contract_id"
               control={control}
               render={({ field }) => (
-                <PassportContractSelect
+                <ContractSelect
                   tenantId={activeTenantId}
                   value={field.value}
                   contractType="transport"
@@ -292,11 +307,7 @@ export function PassportForm({
                 />
               )}
             />
-            <FieldDescription>
-              Нужен только если выбран способ «по договору перевозки».
-            </FieldDescription>
-            <FieldError>{errors.transport_contract_id?.message}</FieldError>
-          </Field>
+          </FormField>
         ) : (
           <p className="text-sm text-muted-foreground">
             {transportType === "recycling_contract"
@@ -311,27 +322,70 @@ export function PassportForm({
           Производитель отходов
         </h2>
         <Field>
-          <FieldLabel htmlFor="waste_producer_id">
-            Контрагент-производитель
-          </FieldLabel>
-          <Controller
-            name="waste_producer_id"
-            control={control}
-            render={({ field }) => (
-              <PassportCounterpartySelect
-                tenantId={activeTenantId}
-                value={field.value}
-                disabled={pending}
-                onChange={field.onChange}
-              />
-            )}
-          />
-          <FieldDescription>
-            Необязательно. Выбирается, в случае если производителем отхода
-            является контрагент.
-          </FieldDescription>
-          <FieldError>{errors.waste_producer_id?.message}</FieldError>
+          <p
+            id="waste-producer-type-label"
+            className="text-sm font-medium leading-none text-foreground"
+          >
+            Производитель
+            <span className="ml-0.5 text-destructive" aria-hidden>
+              *
+            </span>
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby="waste-producer-type-label"
+            className="flex flex-wrap gap-x-6 gap-y-2"
+          >
+            {PassportWasteProducerTypeValues.map((value) => (
+              <label
+                key={value}
+                className="flex cursor-pointer items-center gap-2 text-sm text-foreground"
+              >
+                <input
+                  type="radio"
+                  value={value}
+                  disabled={pending}
+                  className="size-4 accent-primary disabled:cursor-not-allowed"
+                  {...register("waste_producer_type", {
+                    onChange: (event) => {
+                      if (event.target.value !== "counterparty") {
+                        setValue("waste_producer_id", "");
+                      }
+                    },
+                  })}
+                />
+                {PASSPORT_WASTE_PRODUCER_TYPE_LABEL[value]}
+              </label>
+            ))}
+          </div>
         </Field>
+        {wasteProducerType === "counterparty" ? (
+          <FormField
+            htmlFor="waste_producer_id"
+            label="Контрагент"
+            required
+            error={errors.waste_producer_id?.message}
+          >
+            <Controller
+              name="waste_producer_id"
+              control={control}
+              render={({ field }) => (
+                <CounterpartySelect
+                  tenantId={activeTenantId}
+                  value={field.value}
+                  disabled={pending}
+                  placeholder="Выберите контрагента"
+                  aria-label="Контрагент-производитель"
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </FormField>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Производитель — сама организация.
+          </p>
+        )}
       </section>
 
       <div className="flex flex-wrap gap-2">

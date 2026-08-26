@@ -19,11 +19,24 @@ export const CONTRACT_STATUS_LABEL = {
   inactive: "Не действует",
 } as const;
 
+export const CONTRACT_ALL_STATUS_LABEL = {
+  all: "Все",
+  active: "Действующие",
+  inactive: "Закрытые",
+} as const;
+
 export type ContractStatus = keyof typeof CONTRACT_STATUS_LABEL;
+
+export type ContractAllStatus = keyof typeof CONTRACT_ALL_STATUS_LABEL;
 
 export const ContractStatusValues = Object.keys(CONTRACT_STATUS_LABEL) as [
   ContractStatus,
   ...ContractStatus[],
+];
+
+export const ContractAllStatusValues = Object.keys(CONTRACT_ALL_STATUS_LABEL) as [
+  ContractAllStatus,
+  ...ContractAllStatus[],
 ];
 
 export const CONTRACT_STATUS_BADGE_VARIANT: Record<

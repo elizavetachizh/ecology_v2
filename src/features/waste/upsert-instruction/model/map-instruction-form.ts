@@ -1,34 +1,29 @@
-import type { InstructionFormValues } from "./instruction-form.schema";
 import type {
+  Instruction,
   InstructionCreate,
-  InstructionUpdate,
 } from "../../../../entities/waste/instructions";
+import type { InstructionFormValues } from "./instruction-form.schema";
 
-function identityFields(values: InstructionFormValues) {
+export function toInstructionFormValues(
+  instruction: Instruction,
+): InstructionFormValues {
   return {
-    name: values.name.trim(),
-    short_name: values.short_name.trim() || undefined,
-    start_date: values.start_date || null,
-    end_date: values.end_date || null,
+    name: instruction.name,
+    short_name: instruction.short_name ?? "",
+    start_date: instruction.start_date ?? "",
+    end_date: instruction.end_date ?? "",
+    status: instruction.status,
   };
 }
 
-/** Create/update без смены статуса (черновик на create). */
 export function toInstructionWriteBody(
   values: InstructionFormValues,
 ): InstructionCreate {
-  return identityFields(values);
-}
-
-export function toInstructionActivateBody(
-  values: InstructionFormValues,
-): InstructionCreate {
   return {
-    ...identityFields(values),
-    status: "active",
+    name: values.name.trim(),
+    short_name: values.short_name.trim() || null,
+    start_date: values.start_date || null,
+    end_date: values.end_date || null,
+    status: values.status,
   };
-}
-
-export function toInstructionDeactivateBody(): InstructionUpdate {
-  return { status: "inactive" };
 }

@@ -34,12 +34,13 @@ export function EditUnitPage() {
     enabled: Boolean(activeTenantId),
   });
 
-  if (unitQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Загрузка…</p>;
-  }
+  const unit = unitQuery.data;
 
-  if (unitQuery.isError || !unitQuery.data) {
-    return (
+  let content;
+  if (unitQuery.isLoading) {
+    content = <p className="text-sm text-muted-foreground">Загрузка…</p>;
+  } else if (unitQuery.isError || !unit) {
+    content = (
       <div className="space-y-4">
         <Alert variant="error">
           <AlertDescription>Структурная единица не найдена.</AlertDescription>
@@ -49,17 +50,8 @@ export function EditUnitPage() {
         </Button>
       </div>
     );
-  }
-
-  const unit = unitQuery.data;
-
-  return (
-    <TenantRequiredGate
-      tenantId={activeTenantId}
-      description={
-        "Чтобы открыть структурную единицу, выберите организацию в верхней панели."
-      }
-    >
+  } else {
+    content = (
       <div className="space-y-6">
         <UnitForm
           key={unitId}
@@ -69,19 +61,6 @@ export function EditUnitPage() {
           initial={unit}
           eyebrow={
             <UnitHierarchyBreadcrumb tenantId={activeTenantId} unit={unit} />
-          }
-          actions={
-            unit.is_pod9 ? undefined : (
-              <Button asChild size="sm">
-                <Link
-                  to="/directories/units/new"
-                  search={{ parentId: unitId, isPod9: true }}
-                >
-                  <Plus className="size-3.5" />
-                  Создать журнал ПОД-9
-                </Link>
-              </Button>
-            )
           }
           onSaved={(saved, { close }) => {
             toast.success(
@@ -136,6 +115,17 @@ export function EditUnitPage() {
           </section>
         )}
       </div>
+    );
+  }
+
+  return (
+    <TenantRequiredGate
+      tenantId={activeTenantId}
+      description={
+        "Чтобы открыть структурную единицу, выберите организацию в верхней панели."
+      }
+    >
+      {content}
     </TenantRequiredGate>
   );
 }

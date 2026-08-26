@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   useWastesOptions,
   type WasteBrief,
@@ -11,7 +10,10 @@ import {
   FieldError,
   Input,
 } from "../../../../shared/ui";
-import type { ContractFormValues } from "../model/contract-form.schema";
+import {
+  emptyContractWasteRow,
+  type ContractFormValues,
+} from "../model/contract-form.schema";
 
 type ContractWastesEditorProps = {
   form: UseFormReturn<ContractFormValues>;
@@ -28,125 +30,190 @@ export function ContractWastesEditor({
   tenantId,
   pending,
 }: ContractWastesEditorProps) {
-  const { control, register, formState } = form;
+  const { control, register, setValue, watch, formState } = form;
   const { fields, append, remove } = useFieldArray({
     control,
     name: "wastes",
   });
-  const [pendingWasteId, setPendingWasteId] = useState("");
+  const wastesValue = watch("wastes");
   const wastes = useWastesOptions({
     tenantId,
     enabled: Boolean(tenantId),
     limit: 50,
   });
 
-  const selectedIds = new Set(fields.map((item) => item.waste_id));
-  const addable = wastes.options.filter((item) => !selectedIds.has(item.id));
-  const pendingWaste = addable.find((item) => item.id === pendingWasteId);
+  const filledIndexes = fields
+    .map((_, index) => index)
+    .filter((index) => Boolean(wastesValue[index]?.waste_id));
+  const emptyIndexes = fields
+    .map((_, index) => index)
+    .filter((index) => !wastesValue[index]?.waste_id);
 
-  const addWaste = () => {
-    if (!pendingWaste) return;
-    append({
-      waste_id: pendingWaste.id,
-      cost_per_unit: "",
-      label: wasteLabel(pendingWaste),
+  const selectedIds = new Set(
+    wastesValue.filter((item) => item.waste_id).map((item) => item.waste_id),
+  );
+
+  const setRowWaste = (index: number, wasteId: string) => {
+    const selected = wastes.options.find((item) => item.id === wasteId);
+    setValue(`wastes.${index}.waste_id`, wasteId, { shouldDirty: true });
+    setValue(`wastes.${index}.label`, selected ? wasteLabel(selected) : "", {
+      shouldDirty: true,
     });
-    setPendingWasteId("");
-    wastes.setSearch("");
+    const otherEmpty = emptyIndexes.some((emptyIndex) => emptyIndex !== index);
+    if (wasteId && !otherEmpty) {
+      append({ ...emptyContractWasteRow });
+    }
+  };
+
+  const removeRow = (index: number) => {
+    if (fields.length === 1) {
+      setValue("wastes.0.waste_id", "", { shouldDirty: true });
+      setValue("wastes.0.label", "", { shouldDirty: true });
+      setValue("wastes.0.cost_per_unit", "", { shouldDirty: true });
+      return;
+    }
+    remove(index);
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-end gap-2">
-        <div className="min-w-64 flex-1">
-          <AsyncCombobox
-            options={addable.map((item) => ({
-              value: item.id,
-              label: wasteLabel(item),
-            }))}
-            value={pendingWasteId}
-            selectedLabel={pendingWaste ? wasteLabel(pendingWaste) : undefined}
-            onValueChange={setPendingWasteId}
-            placeholder="Добавить отход из справочника"
-            searchPlaceholder="Поиск по коду или названию"
-            emptyMessage={wastes.loading ? "Загрузка…" : "Ничего не найдено"}
-            search={wastes.search}
-            setSearch={wastes.setSearch}
-            disabled={pending}
-            className="w-full"
-            contentClassName="w-full"
-            aria-label="Отход для перечня"
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={pending || !pendingWasteId}
-          onClick={addWaste}
-        >
-          Добавить в перечень
-        </Button>
-      </div>
-
-      {fields.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Перечень пуст. Для сопроводительного паспорта в договоре утилизации
-          нужен хотя бы один отход.
-        </p>
-      ) : (
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 font-medium">Отход</th>
-                <th className="w-48 px-3 py-2 font-medium">
-                  Стоимость за единицу
-                </th>
-                <th className="w-12 px-3 py-2" />
+    <div className="overflow-hidden rounded-lg border border-border">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/40 text-left text-muted-foreground">
+          <tr>
+            <th className="px-3 py-2 font-medium">Отход</th>
+            <th className="w-48 px-3 py-2 font-medium">Стоимость за единицу</th>
+            <th className="w-12 px-3 py-2" />
+          </tr>
+        </thead>
+        <tbody>
+          {filledIndexes.map((index) => {
+            const item = fields[index];
+            const row = wastesValue[index];
+            return (
+              <tr key={item.id} className="border-t border-border">
+                <td className="px-3 py-2">{row.label}</td>
+                <td className="px-3 py-2">
+                  <input
+                    type="hidden"
+                    {...register(`wastes.${index}.waste_id`)}
+                  />
+                  <input type="hidden" {...register(`wastes.${index}.label`)} />
+                  <Input
+                    {...register(`wastes.${index}.cost_per_unit`)}
+                    inputMode="decimal"
+                    placeholder="необязательно"
+                    disabled={pending}
+                    aria-label={`Стоимость за единицу, ${row.label}`}
+                  />
+                  <FieldError>
+                    {formState.errors.wastes?.[index]?.cost_per_unit?.message}
+                  </FieldError>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={pending}
+                    aria-label={`Убрать ${row.label}`}
+                    onClick={() => removeRow(index)}
+                  >
+                    <Trash2 className="size-4 text-destructive" />
+                  </Button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {fields.map((item, index) => (
-                <tr key={item.id} className="border-t border-border">
-                  <td className="px-3 py-2">{item.label}</td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="hidden"
-                      {...register(`wastes.${index}.waste_id`)}
-                    />
-                    <input
-                      type="hidden"
-                      {...register(`wastes.${index}.label`)}
-                    />
-                    <Input
-                      {...register(`wastes.${index}.cost_per_unit`)}
-                      inputMode="decimal"
-                      placeholder="необязательно"
-                      disabled={pending}
-                      aria-label={`Стоимость за единицу, ${item.label}`}
-                    />
-                    <FieldError>
-                      {formState.errors.wastes?.[index]?.cost_per_unit?.message}
-                    </FieldError>
-                  </td>
-                  <td className="px-3 py-2 text-right">
+            );
+          })}
+          {emptyIndexes.map((index) => {
+            const item = fields[index];
+            const row = wastesValue[index];
+            const addable = wastes.options.filter(
+              (option) =>
+                !selectedIds.has(option.id) || option.id === row.waste_id,
+            );
+            const selected = addable.find(
+              (option) => option.id === row.waste_id,
+            );
+
+            return (
+              <tr key={item.id} className="border-t border-border">
+                <td className="min-w-64 px-3 py-2">
+                  <input
+                    type="hidden"
+                    {...register(`wastes.${index}.waste_id`)}
+                  />
+                  <input type="hidden" {...register(`wastes.${index}.label`)} />
+                  <AsyncCombobox
+                    options={addable.map((option) => ({
+                      value: option.id,
+                      label: wasteLabel(option),
+                    }))}
+                    value={row.waste_id}
+                    selectedLabel={selected ? wasteLabel(selected) : undefined}
+                    onValueChange={(wasteId) => setRowWaste(index, wasteId)}
+                    placeholder="Выберите отход"
+                    searchPlaceholder="Поиск по коду или названию"
+                    emptyMessage={
+                      wastes.loading ? "Загрузка…" : "Ничего не найдено"
+                    }
+                    search={wastes.search}
+                    setSearch={wastes.setSearch}
+                    disabled={pending}
+                    className="w-full"
+                    contentClassName="w-full"
+                    aria-label="Отход для перечня"
+                  />
+                  <FieldError>
+                    {formState.errors.wastes?.[index]?.waste_id?.message}
+                  </FieldError>
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    {...register(`wastes.${index}.cost_per_unit`)}
+                    inputMode="decimal"
+                    placeholder="необязательно"
+                    disabled={pending}
+                    aria-label="Стоимость за единицу нового отхода"
+                  />
+                  <FieldError>
+                    {formState.errors.wastes?.[index]?.cost_per_unit?.message}
+                  </FieldError>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  {fields.length > 1 ? (
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       disabled={pending}
-                      aria-label={`Убрать ${item.label}`}
-                      onClick={() => remove(index)}
+                      aria-label="Убрать строку отхода"
+                      onClick={() => removeRow(index)}
                     >
                       <Trash2 className="size-4 text-destructive" />
                     </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  ) : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr className="border-t border-border bg-muted/30">
+            <td colSpan={3} className="p-0">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={pending}
+                onClick={() => append({ ...emptyContractWasteRow })}
+                className="h-10 w-full justify-start rounded-none px-3 font-normal"
+              >
+                <Plus className="size-4" />
+                Добавить отход
+              </Button>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
 }

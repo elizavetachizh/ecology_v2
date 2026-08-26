@@ -1,5 +1,5 @@
 import type { UserProfile } from "../../../user";
-import type { PersonBrief } from "../../persons/model/persons.types";
+import type { PersonBrief } from "../../persons";
 import type { UnitBrief } from "../../units";
 
 /** OrderBrief — вложен в as-of ответы. */

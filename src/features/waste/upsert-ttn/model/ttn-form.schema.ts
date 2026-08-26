@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TtnStatusValues } from "../../../../entities/waste/ttns";
 
 const isoDate = z
   .string()
@@ -16,7 +15,6 @@ export const ttnFormSchema = z.object({
   recycling_contract_id: z
     .string()
     .uuid("Выберите действующий договор утилизации"),
-  status: z.enum(TtnStatusValues),
 });
 
 export type TtnFormValues = z.infer<typeof ttnFormSchema>;
@@ -34,5 +32,4 @@ export const ttnFormDefaultValues: TtnFormValues = {
   date: todayIsoDate(),
   unit_id: "",
   recycling_contract_id: "",
-  status: "active",
 };

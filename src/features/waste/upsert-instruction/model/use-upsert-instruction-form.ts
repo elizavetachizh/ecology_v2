@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
   createInstruction,
   instructionsQueryKeys,
   updateInstruction,
   type Instruction,
 } from "../../../../entities/waste/instructions";
-import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
   instructionFormDefaultValues,
@@ -15,30 +15,16 @@ import {
   type InstructionFormValues,
 } from "./instruction-form.schema";
 import {
-  toInstructionActivateBody,
-  toInstructionDeactivateBody,
+  toInstructionFormValues,
   toInstructionWriteBody,
 } from "./map-instruction-form";
-import type {
-  InstructionSaveNext,
-  InstructionWriteIntent,
-} from "./instruction-save";
 
 type UseUpsertInstructionFormParams = {
   mode: "create" | "edit";
   instructionId?: string;
   initial?: Instruction | null;
-  onSaved: (
-    instruction: Instruction,
-    meta: { next: InstructionSaveNext; intent: InstructionWriteIntent },
-  ) => void;
+  onSaved: (instruction: Instruction, meta: { close: boolean }) => void;
 };
-
-function toBody(values: InstructionFormValues, intent: InstructionWriteIntent) {
-  if (intent === "deactivate") return toInstructionDeactivateBody();
-  if (intent === "activate") return toInstructionActivateBody(values);
-  return toInstructionWriteBody(values);
-}
 
 export function useUpsertInstructionForm({
   mode,
@@ -46,40 +32,30 @@ export function useUpsertInstructionForm({
   initial,
   onSaved,
 }: UseUpsertInstructionFormParams) {
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<InstructionFormValues>({
     resolver: zodResolver(instructionFormSchema),
     defaultValues: initial
-      ? {
-          name: initial.name,
-          short_name: initial.short_name ?? "",
-          start_date: initial.start_date ?? "",
-          end_date: initial.end_date ?? "",
-        }
+      ? toInstructionFormValues(initial)
       : instructionFormDefaultValues,
   });
-  const [error, setError] = useState<string | null>(null);
 
   const createMutation = useMutation({
-    mutationFn: (vars: {
-      values: InstructionFormValues;
-      next: InstructionSaveNext;
-      intent: InstructionWriteIntent;
-    }) => createInstruction(toBody(vars.values, vars.intent)),
+    mutationFn: (vars: { values: InstructionFormValues; close: boolean }) =>
+      createInstruction(toInstructionWriteBody(vars.values)),
     onSuccess: (created, vars) => {
       void queryClient.invalidateQueries({
         queryKey: instructionsQueryKeys.lists(),
       });
-      onSaved(created, { next: vars.next, intent: vars.intent });
+      onSaved(created, { close: vars.close });
     },
     onError: (err) => setError(err.message),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (vars: {
-      values: InstructionFormValues;
-      next: InstructionSaveNext;
-      intent: InstructionWriteIntent;
-    }) => updateInstruction(instructionId!, toBody(vars.values, vars.intent)),
+    mutationFn: (vars: { values: InstructionFormValues; close: boolean }) =>
+      updateInstruction(instructionId!, toInstructionWriteBody(vars.values)),
     onSuccess: (updated, vars) => {
       void queryClient.invalidateQueries({
         queryKey: instructionsQueryKeys.lists(),
@@ -87,20 +63,15 @@ export function useUpsertInstructionForm({
       void queryClient.invalidateQueries({
         queryKey: instructionsQueryKeys.details(),
       });
-      onSaved(updated, { next: vars.next, intent: vars.intent });
+      onSaved(updated, { close: vars.close });
     },
     onError: (err) => setError(err.message),
   });
 
-  const onSubmit = (
-    next: InstructionSaveNext,
-    values: InstructionFormValues,
-    intent: InstructionWriteIntent,
-  ) => {
+  const onSubmit = (close: boolean, values: InstructionFormValues) => {
     setError(null);
-    const vars = { values, next, intent };
-    if (mode === "edit") updateMutation.mutate(vars);
-    else createMutation.mutate(vars);
+    if (mode === "edit") updateMutation.mutate({ values, close });
+    else createMutation.mutate({ values, close });
   };
 
   return {

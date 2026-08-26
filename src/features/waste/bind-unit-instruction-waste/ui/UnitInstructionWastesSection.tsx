@@ -2,10 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import {
-  DEFAULT_INSTRUCTIONS_LIST_LIMIT,
-  InstructionTabs,
-  useActiveInstructionId,
-  useInstructionsListQuery,
+  InstructionBindingsTabs,
+  useInstructionBindingsTabs,
 } from "../../../../entities/waste/instructions";
 
 import {
@@ -46,22 +44,17 @@ export function UnitInstructionWastesSection({
   const [editing, setEditing] = useState<UnitInstructionWaste | null>(null);
   const [detaching, setDetaching] = useState<UnitInstructionWaste | null>(null);
 
-  const instructionsQuery = useInstructionsListQuery({
-    tenantId,
-    params: {
-      sort: "name",
-      order: "asc",
-      limit: DEFAULT_INSTRUCTIONS_LIST_LIMIT,
-      offset: 0,
-    },
-  });
+  const handleInstructionChange = (nextId: string | undefined) => {
+    setOffset(0);
+    onInstructionChange(nextId);
+  };
 
-  const instructions = instructionsQuery.items;
-  const activeInstructionId = useActiveInstructionId({
-    instructionId,
-    instructions,
-    onInstructionChange,
-  });
+  const { activeInstructionId, instructions, loading, error } =
+    useInstructionBindingsTabs({
+      tenantId,
+      instructionId,
+      onInstructionChange: handleInstructionChange,
+    });
 
   const scope = {
     unitId,
@@ -94,30 +87,25 @@ export function UnitInstructionWastesSection({
 
   const columns = uiwColumns(setEditing, setModalMode, setDetaching);
 
-  const instructionsSlot = instructionsQuery.loading ? (
-    <p className="text-sm text-muted-foreground">Загрузка инструкций…</p>
-  ) : instructions.length === 0 ? (
-    <Alert variant="info">
-      <AlertTitle>Нет инструкций</AlertTitle>
-      <AlertDescription>
-        Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
-        отходов.{" "}
-        <Link
-          to="/directories/instructions/new"
-          className="font-medium underline-offset-4 hover:underline"
-        >
-          Создать инструкцию
-        </Link>
-      </AlertDescription>
-    </Alert>
-  ) : (
-    <InstructionTabs
+  const instructionsSlot = (
+    <InstructionBindingsTabs
+      loading={loading}
+      error={error}
       instructions={instructions}
       value={activeInstructionId ?? ""}
-      onValueChange={(nextId) => {
-        setOffset(0);
-        onInstructionChange(nextId || undefined);
-      }}
+      onValueChange={handleInstructionChange}
+      emptyDescription={
+        <>
+          Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
+          отходов.{" "}
+          <Link
+            to="/directories/instructions/new"
+            className="font-medium underline-offset-4 hover:underline"
+          >
+            Создать инструкцию
+          </Link>
+        </>
+      }
     />
   );
 
@@ -184,7 +172,11 @@ export function UnitInstructionWastesSection({
               }
             }}
             onSaved={() => {
-              toast.success("Привязка отходов успешно создана");
+              toast.success(
+                modalMode === "create"
+                  ? "Привязка отходов успешно создана"
+                  : "Привязка отходов успешно обновлена",
+              );
               setModalMode(null);
               setEditing(null);
             }}

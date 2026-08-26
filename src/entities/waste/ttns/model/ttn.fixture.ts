@@ -37,7 +37,3 @@ export const ttnFixture: Ttn = {
   created_by: profile,
   updated_by: profile,
 };
-
-export function makeTtn(overrides: Partial<Ttn> = {}): Ttn {
-  return { ...ttnFixture, ...overrides };
-}

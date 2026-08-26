@@ -14,10 +14,7 @@ export function InstructionTabs({
   onValueChange,
 }: InstructionTabsProps) {
   return (
-    <Tabs
-      value={value}
-      onValueChange={(nextId) => onValueChange(nextId || "")}
-    >
+    <Tabs value={value} onValueChange={(nextId) => onValueChange(nextId || "")}>
       <TabsList
         aria-label="Инструкции"
         className="max-w-full justify-start overflow-x-auto"

@@ -5,18 +5,22 @@ import type {
 } from "../../../../entities/waste/ttns";
 import type { TtnFormValues } from "./ttn-form.schema";
 
-export function toTtnWriteBody(values: TtnFormValues): TtnCreate {
+function toTtnFields(values: TtnFormValues): Omit<TtnCreate, "status"> {
   return {
     number: values.number.trim(),
     date: values.date,
     unit_id: values.unit_id,
     recycling_contract_id: values.recycling_contract_id,
-    status: values.status,
   };
 }
 
+export function toTtnWriteBody(values: TtnFormValues): TtnCreate {
+  return { ...toTtnFields(values), status: "active" };
+}
+
+/** PATCH не трогает status: его нельзя сменить из формы. */
 export function toTtnUpdateBody(values: TtnFormValues): TtnUpdate {
-  return toTtnWriteBody(values);
+  return toTtnFields(values);
 }
 
 export function toTtnFormValues(ttn: Ttn): TtnFormValues {
@@ -25,6 +29,5 @@ export function toTtnFormValues(ttn: Ttn): TtnFormValues {
     date: ttn.date,
     unit_id: ttn.unit_id,
     recycling_contract_id: ttn.recycling_contract_id,
-    status: ttn.status,
   };
 }

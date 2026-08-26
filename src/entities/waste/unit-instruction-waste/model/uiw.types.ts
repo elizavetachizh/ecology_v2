@@ -17,10 +17,10 @@ export type UnitInstructionWaste = {
   instruction_id: string;
   instruction: InstructionBrief;
   waste_id: string;
-  waste_source_ids: string[];
-  transport_unit: string;
   waste: WasteBrief;
+  waste_source_ids: string[];
   waste_sources: WasteSourceBrief[];
+  transport_unit: string;
   created_at: string;
   updated_at: string;
   created_by: UserProfile;

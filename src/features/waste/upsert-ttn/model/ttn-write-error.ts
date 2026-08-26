@@ -8,7 +8,7 @@ export function ttnWriteErrorMessage(error: unknown): string {
     return "Нужен действующий договор утилизации.";
   }
   if (error instanceof ApiError && error.status === 422) {
-    return "Проверьте поля ТТН: номер, дата перевозки, статус.";
+    return "Проверьте поля ТТН: номер и дата перевозки.";
   }
   return error instanceof Error ? error.message : "Не удалось сохранить ТТН";
 }

@@ -45,7 +45,7 @@ export const contractFormSchema = z
     amount: optionalPositiveDecimal,
     wastes: z.array(
       z.object({
-        waste_id: z.string().uuid(),
+        waste_id: z.union([z.string().uuid(), z.literal("")]),
         cost_per_unit: optionalNonNegativeDecimal,
         label: z.string(),
       }),
@@ -61,6 +61,7 @@ export const contractFormSchema = z
     }
     const seen = new Set<string>();
     values.wastes.forEach((item, index) => {
+      if (!item.waste_id) return;
       if (seen.has(item.waste_id)) {
         ctx.addIssue({
           code: "custom",
@@ -83,6 +84,12 @@ export function todayIsoDate(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+export const emptyContractWasteRow: ContractFormWaste = {
+  waste_id: "",
+  cost_per_unit: "",
+  label: "",
+};
+
 export const contractFormDefaultValues: ContractFormValues = {
   number: "",
   start_date: todayIsoDate(),
@@ -91,5 +98,5 @@ export const contractFormDefaultValues: ContractFormValues = {
   status: "active",
   counterparty_id: "",
   amount: "",
-  wastes: [],
+  wastes: [{ ...emptyContractWasteRow }],
 };

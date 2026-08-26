@@ -1,17 +1,29 @@
 import type { UserProfile } from "../../../user";
-import type { ContractBrief } from "../../contracts/model/contracts.types";
-import type { UnitBrief } from "../../units/model/units.types";
+import type { ContractBrief } from "../../contracts";
+import type { UnitBrief } from "../../units";
 
 export const TTN_STATUS_LABEL = {
   active: "Действует",
   inactive: "Не действует",
 } as const;
 
+export const TTN_ALL_STATUS_LABEL = {
+  all: "Все",
+  active: "Действует",
+  inactive: "Не действует",
+} as const;
+
 export type TtnStatus = keyof typeof TTN_STATUS_LABEL;
+export type TtnAllStatus = keyof typeof TTN_ALL_STATUS_LABEL;
 
 export const TtnStatusValues = Object.keys(TTN_STATUS_LABEL) as [
   TtnStatus,
   ...TtnStatus[],
+];
+
+export const TtnAllStatusValues = Object.keys(TTN_ALL_STATUS_LABEL) as [
+  TtnAllStatus,
+  ...TtnAllStatus[],
 ];
 
 export const TTN_STATUS_BADGE_VARIANT: Record<

@@ -173,7 +173,7 @@ export function WasteCatalogForm({
           disabled={pending}
           onClick={onCancel}
         >
-          Отмена
+          Закрыть
         </Button>
       </div>
     </form>

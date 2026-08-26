@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  ChevronRight,
-  GalleryVerticalEnd,
-  LogOut,
-  X,
-} from "lucide-react";
+import { ChevronRight, GalleryVerticalEnd, LogOut, X } from "lucide-react";
 import {
   navigationGroups,
   type NavGroup,
@@ -79,10 +74,7 @@ function NavTreeItem({
       >
         <Icon className="size-4 shrink-0" />
         <span
-          className={cn(
-            "flex-1 truncate text-left",
-            collapsed && "md:hidden",
-          )}
+          className={cn("flex-1 truncate text-left", collapsed && "md:hidden")}
         >
           {item.title}
         </span>
@@ -167,7 +159,7 @@ function SidebarPanel({
           type="button"
           title={collapsed ? "Acme Inc" : undefined}
           className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
+            "flex w-full items-center gap-2 rounded-md px-2 text-left",
             collapsed && "md:justify-center md:px-0",
             "hover:bg-sidebar-accent",
             "outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -231,9 +223,7 @@ function SidebarPanel({
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-xs font-medium text-white">
             {initials}
           </span>
-          <span
-            className={cn("min-w-0 flex-1", collapsed && "md:hidden")}
-          >
+          <span className={cn("min-w-0 flex-1", collapsed && "md:hidden")}>
             <span className="block truncate text-sm font-medium leading-tight">
               {user.username}
             </span>

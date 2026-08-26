@@ -17,7 +17,10 @@ function FieldLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className={cn("text-sm font-medium leading-none text-foreground", className)}
+      className={cn(
+        "text-sm font-medium leading-none text-foreground",
+        className,
+      )}
     >
       {children}
       {required ? (
@@ -69,6 +72,38 @@ function Field({ children, className }: FieldProps) {
   return <div className={cn("grid gap-1.5", className)}>{children}</div>;
 }
 
+type FormFieldProps = {
+  htmlFor: string;
+  label: string;
+  required?: boolean;
+  error?: ReactNode;
+  description?: ReactNode;
+  className?: string;
+  children: ReactNode;
+};
+
+/** Label + control + optional description + error. Control остаётся children. */
+function FormField({
+  htmlFor,
+  label,
+  required,
+  error,
+  description,
+  className,
+  children,
+}: FormFieldProps) {
+  return (
+    <Field className={className}>
+      <FieldLabel htmlFor={htmlFor} required={required}>
+        {label}
+      </FieldLabel>
+      {children}
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      <FieldError>{error}</FieldError>
+    </Field>
+  );
+}
+
 type FormSectionProps = {
   title: string;
   description?: string;
@@ -105,5 +140,6 @@ export {
   FieldLabel,
   FieldDescription,
   FieldError,
+  FormField,
   FormSection,
 };

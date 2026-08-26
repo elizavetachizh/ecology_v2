@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   findCachedAncestorChain,
   findPathInTrees,
-  seedUnitDetails,
   toUnit,
 } from "./find-unit-ancestor-chain";
 import { unitsQueryKeys } from "./unit-query-keys";
@@ -21,8 +20,20 @@ function stubUnit(id: string, parentId: string | null, name = id): Unit {
     district: null,
     created_at: "",
     updated_at: "",
-    created_by: { id: "u", username: "u", email: null, first_name: null, last_name: null },
-    updated_by: { id: "u", username: "u", email: null, first_name: null, last_name: null },
+    created_by: {
+      id: "u",
+      username: "u",
+      email: null,
+      first_name: null,
+      last_name: null,
+    },
+    updated_by: {
+      id: "u",
+      username: "u",
+      email: null,
+      first_name: null,
+      last_name: null,
+    },
   };
 }
 
@@ -69,19 +80,6 @@ describe("findCachedAncestorChain", () => {
     const path = findCachedAncestorChain(queryClient, "t1", live);
     expect(path?.map((item) => item.id)).toEqual(["root", "mid", "leaf"]);
     expect(path?.at(-1)?.name).toBe("Leaf renamed");
-  });
-});
-
-describe("seedUnitDetails", () => {
-  it("does not overwrite an existing detail", () => {
-    const queryClient = new QueryClient();
-    const existing = stubUnit("root", null, "cached");
-    queryClient.setQueryData(unitsQueryKeys.detail("t1", "root"), existing);
-
-    seedUnitDetails(queryClient, "t1", [stubUnit("root", null, "from-tree")]);
-    expect(
-      queryClient.getQueryData<Unit>(unitsQueryKeys.detail("t1", "root"))?.name,
-    ).toBe("cached");
   });
 });
 

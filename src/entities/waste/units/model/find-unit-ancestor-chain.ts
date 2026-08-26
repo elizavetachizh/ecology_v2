@@ -48,16 +48,3 @@ export function findCachedAncestorChain(
 
   return null;
 }
-
-export function seedUnitDetails(
-  queryClient: QueryClient,
-  tenantId: string,
-  units: Unit[],
-) {
-  for (const item of units) {
-    const key = unitsQueryKeys.detail(tenantId, item.id);
-    if (!queryClient.getQueryData(key)) {
-      queryClient.setQueryData(key, item);
-    }
-  }
-}

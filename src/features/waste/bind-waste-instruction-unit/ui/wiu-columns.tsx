@@ -4,9 +4,9 @@ import type { WasteInstructionUnit } from "../../../../entities/waste/waste-inst
 import {
   DataTableRowAction,
   DataTableRowActions,
-  Badge,
   type ColumnDef,
 } from "../../../../shared/ui";
+import { WasteSourcesCell } from "../../../../entities/waste/waste-sources";
 function wiuColumns(
   setEditing: (waste: WasteInstructionUnit) => void,
   setModalMode: (mode: "edit" | "create") => void,
@@ -32,23 +32,9 @@ function wiuColumns(
     {
       id: "sources",
       header: "Источники",
-      cell: ({ row }) => {
-        const sources = row.original.waste_sources;
-        if (sources.length === 0) {
-          return (
-            <span className="text-xs text-muted-foreground">Не указаны</span>
-          );
-        }
-        return (
-          <div className="flex max-w-xs flex-wrap gap-1">
-            {sources.map((source) => (
-              <Badge key={source.id} variant="secondary">
-                {source.name}
-              </Badge>
-            ))}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <WasteSourcesCell sources={row.original.waste_sources} />
+      ),
     },
     {
       id: "transport_unit",
@@ -72,7 +58,7 @@ function wiuColumns(
             Изменить
           </DataTableRowAction>
           <DataTableRowAction
-            label="Отвязать подразделение"
+            label="Отвязать журнал ПОД-9"
             onClick={() => setDetaching(row.original)}
           >
             <Unlink className="text-destructive" />

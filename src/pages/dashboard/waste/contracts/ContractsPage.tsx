@@ -4,23 +4,18 @@ import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
-  CONTRACT_STATUS_LABEL,
-  CONTRACT_TYPE_LABEL,
-  ContractStatusValues,
-  ContractTypeValues,
   DEFAULT_CONTRACTS_LIST_LIMIT,
   contractsQueryKeys,
   deleteContract,
+  updateContract,
   useContractsListQuery,
   type Contract,
   type ContractSortField,
-  type ContractSortOrder,
   type ContractStatus,
-  type ContractType,
 } from "../../../../entities/waste/contracts";
 import {
-  ContractCounterpartySelect,
   contractDeleteErrorMessage,
+  contractWriteErrorMessage,
 } from "../../../../features/waste/upsert-contract";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
@@ -31,9 +26,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
-  ListSearchField,
   PageContextBar,
-  Select,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
@@ -42,6 +35,10 @@ import {
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { contractsColumns } from "./contracts-columns";
+import {
+  ContractsFilters,
+  type ContractsFiltersValue,
+} from "./ui/contracts-filters";
 
 export function ContractsPage() {
   const { activeTenantId } = useTenant();
@@ -49,7 +46,33 @@ export function ContractsPage() {
   const search = useSearch({ from: "/directories/contracts" });
 
   const [deleting, setDeleting] = useState<Contract | null>(null);
-  const columns = useMemo(() => contractsColumns(setDeleting), []);
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ContractStatus }) =>
+      updateContract(id, { status }),
+    onSuccess: (updated) => {
+      void queryClient.invalidateQueries({
+        queryKey: contractsQueryKeys.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: contractsQueryKeys.details(),
+      });
+      toast.success(
+        updated.status === "inactive"
+          ? "Договор помечен как закрытый"
+          : "Договор помечен как действующий",
+      );
+    },
+    onError: (err) => toast.error(contractWriteErrorMessage(err)),
+  });
+
+  const columns = useMemo(
+    () =>
+      contractsColumns(setDeleting, (contract, status) => {
+        statusMutation.mutate({ id: contract.id, status });
+      }),
+    [statusMutation],
+  );
 
   const listParams = useMemo(
     () => ({
@@ -90,15 +113,13 @@ export function ContractsPage() {
     onError: (err) => toast.error(contractDeleteErrorMessage(err)),
   });
 
-  const patchSearch = (patch: {
-    q?: string | undefined;
-    status?: ContractStatus | undefined;
-    contract_type?: ContractType | undefined;
-    counterparty_id?: string | undefined;
-    sort?: ContractSortField | undefined;
-    order?: ContractSortOrder | undefined;
-    offset?: number;
-  }) => {
+  const patchSearch = (
+    patch: ContractsFiltersValue & {
+      sort?: ContractSortField | undefined;
+      order?: "asc" | "desc" | undefined;
+      offset?: number;
+    },
+  ) => {
     void navigate({
       search: (prev) => {
         const next = { ...prev, ...patch };
@@ -148,61 +169,16 @@ export function ContractsPage() {
           }
         />
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ListSearchField
-            value={search.q ?? ""}
-            placeholder="Поиск по номеру"
-            onSearch={(q) => patchSearch({ q: q || undefined })}
-          />
-          <Select
-            aria-label="Тип договора"
-            className="w-44"
-            value={search.contract_type ?? ""}
-            onChange={(event) =>
-              patchSearch({
-                contract_type: (event.target.value || undefined) as
-                  | ContractType
-                  | undefined,
-              })
-            }
-          >
-            <option value="">Все типы</option>
-            {ContractTypeValues.map((type) => (
-              <option key={type} value={type}>
-                {CONTRACT_TYPE_LABEL[type]}
-              </option>
-            ))}
-          </Select>
-          <Select
-            aria-label="Статус договора"
-            className="w-44"
-            value={search.status ?? ""}
-            onChange={(event) =>
-              patchSearch({
-                status: (event.target.value || undefined) as
-                  | ContractStatus
-                  | undefined,
-              })
-            }
-          >
-            <option value="">Все статусы</option>
-            {ContractStatusValues.map((status) => (
-              <option key={status} value={status}>
-                {CONTRACT_STATUS_LABEL[status]}
-              </option>
-            ))}
-          </Select>
-          <div className="w-64">
-            <ContractCounterpartySelect
-              tenantId={activeTenantId}
-              value={search.counterparty_id ?? ""}
-              placeholder="Все контрагенты"
-              onChange={(id) =>
-                patchSearch({ counterparty_id: id || undefined })
-              }
-            />
-          </div>
-        </div>
+        <ContractsFilters
+          tenantId={activeTenantId}
+          values={{
+            q: search.q,
+            status: search.status,
+            contract_type: search.contract_type,
+            counterparty_id: search.counterparty_id,
+          }}
+          onChange={patchSearch}
+        />
 
         <DataTable
           columns={columns}
@@ -219,7 +195,7 @@ export function ContractsPage() {
             });
           }}
           emptyTitle="Договоров пока нет"
-          emptyDescription="Создайте договор утилизации с перечнем отходов — он понадобится для сопроводительного паспорта."
+          emptyDescription="Создайте свой первый договор."
         />
         <DataTablePagination
           total={total}

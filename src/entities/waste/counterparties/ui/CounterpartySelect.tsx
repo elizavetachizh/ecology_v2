@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  counterpartiesQueryKeys,
-  getCounterparty,
-  useCounterpartiesOptions,
-  type Counterparty,
-} from "../../../../entities/waste/counterparties";
 import { AsyncCombobox } from "../../../../shared/ui";
+import { getCounterparty } from "../api/get-counterparty";
+import { counterpartiesQueryKeys } from "../model/counterparties-query-keys";
+import type { Counterparty } from "../model/counterparties.types";
+import { useCounterpartiesOptions } from "../model/use-counterparties-query";
 
-type PassportCounterpartySelectProps = {
+type CounterpartySelectProps = {
   tenantId: string | null;
   value: string;
   disabled?: boolean;
   placeholder?: string;
+  "aria-label"?: string;
   onChange: (id: string) => void;
 };
 
@@ -19,14 +18,15 @@ function counterpartyLabel(item: Pick<Counterparty, "name" | "unp">) {
   return item.unp ? `${item.name} (${item.unp})` : item.name;
 }
 
-export function PassportCounterpartySelect({
+export function CounterpartySelect({
   tenantId,
   value,
   disabled,
-  placeholder = "Необязательно — только активные",
+  placeholder = "Выберите контрагента",
+  "aria-label": ariaLabel = "Контрагент",
   onChange,
-}: PassportCounterpartySelectProps) {
-  const counterparties = useCounterpartiesOptions({
+}: CounterpartySelectProps) {
+  const { options, loading, search, setSearch } = useCounterpartiesOptions({
     tenantId,
     enabled: Boolean(tenantId),
   });
@@ -41,12 +41,12 @@ export function PassportCounterpartySelect({
   });
 
   const selected =
-    counterparties.options.find((item) => item.id === value) ??
+    options.find((item) => item.id === value) ??
     (selectedQuery.data?.id === value ? selectedQuery.data : null);
 
   return (
     <AsyncCombobox
-      options={counterparties.options.map((item) => ({
+      options={options.map((item) => ({
         value: item.id,
         label: counterpartyLabel(item),
       }))}
@@ -55,15 +55,13 @@ export function PassportCounterpartySelect({
       onValueChange={onChange}
       placeholder={placeholder}
       searchPlaceholder="Поиск по УНП или наименованию"
-      emptyMessage={
-        counterparties.loading ? "Загрузка…" : "Ничего не найдено"
-      }
-      search={counterparties.search}
-      setSearch={counterparties.setSearch}
+      emptyMessage={loading ? "Загрузка…" : "Ничего не найдено"}
+      search={search}
+      setSearch={setSearch}
       disabled={disabled}
       className="w-full"
       contentClassName="w-full"
-      aria-label="Производитель отходов"
+      aria-label={ariaLabel}
     />
   );
 }

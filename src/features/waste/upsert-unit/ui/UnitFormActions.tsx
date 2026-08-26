@@ -16,11 +16,7 @@ export function UnitFormActions({
   return (
     <div className="flex flex-wrap gap-2">
       <Button type="submit" disabled={pending}>
-        {pending
-          ? "Сохранение…"
-          : mode === "create"
-            ? "Создать единицу"
-            : "Сохранить изменения"}
+        {pending ? "Сохранение…" : mode === "create" ? "Создать" : "Сохранить"}
       </Button>
       <Button
         type="button"

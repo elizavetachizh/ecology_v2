@@ -1,8 +1,4 @@
-import type {
-  Control,
-  FieldErrors,
-  UseFormRegister,
-} from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { Unit } from "../../../../entities/waste/units";
 import {
@@ -65,14 +61,14 @@ export function UnitIdentityFields({
           {...register("short_name")}
         />
         <FieldDescription id="short-name-hint">
-          Короткий код для таблиц и выбора в формах (до 255 символов).
+          Короткий код для таблиц и выбора в формах.
         </FieldDescription>
         <FieldError>{errors.short_name?.message}</FieldError>
       </Field>
 
       <Field className="md:col-span-2">
         <FieldLabel htmlFor="parent_id" required={isPod9}>
-          Родительская единица
+          Родитель
         </FieldLabel>
         <Controller
           name="parent_id"

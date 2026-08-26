@@ -2,29 +2,24 @@ import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import {
-  CONTRACT_STATUS_LABEL,
   CONTRACT_TYPE_LABEL,
-  ContractStatusValues,
   ContractTypeValues,
   type Contract,
 } from "../../../../entities/waste/contracts";
 import { useTenant } from "../../../../entities/tenant";
+import { CounterpartySelect } from "../../../../entities/waste/counterparties";
 import { CounterpartyFormModal } from "../../upsert-counterparty";
 import {
   Alert,
   AlertDescription,
+  Badge,
   Button,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
+  FormField,
   Input,
   PageContextBar,
   Select,
 } from "../../../../shared/ui";
 import { useUpsertContractForm } from "../model/use-upsert-contract-form";
-import { ContractCounterpartySelect } from "./ContractCounterpartySelect";
-import { ContractFormHint } from "./ContractFormHint";
 import { ContractNextStepCta } from "./ContractNextStepCta";
 import { ContractWastesEditor } from "./ContractWastesEditor";
 
@@ -74,9 +69,15 @@ export function ContractForm({
             ? "Новый договор"
             : `Договор ${initial?.number ?? ""}`
         }
+        actions={
+          mode === "edit" &&
+          (initial?.status === "active" ? (
+            <Badge variant="success">Действует</Badge>
+          ) : initial?.status === "inactive" ? (
+            <Badge variant="destructive">Не действует</Badge>
+          ) : null)
+        }
       />
-
-      <ContractFormHint contractType={contractType} />
 
       {error ? (
         <Alert variant="error">
@@ -85,10 +86,14 @@ export function ContractForm({
       ) : null}
 
       <div className="grid items-start gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="contract_type" required>
-            Тип договора
-          </FieldLabel>
+        <FormField
+          htmlFor="contract_type"
+          label="Тип договора"
+          required
+          className="md:col-span-2"
+          error={errors.contract_type?.message}
+          description="Утилизация - для дальнейшего создания сопроводительных паспортов/ТТН. Перевозка - для вывоза отходов сторонней организацией (не нами и не контрагентом по договору с типом 'утилизация')"
+        >
           <Select
             id="contract_type"
             disabled={pending}
@@ -100,66 +105,82 @@ export function ContractForm({
               </option>
             ))}
           </Select>
-          <FieldDescription>
-            Зафиксируйте тип сразу: от него зависят подписи и селекты в
-            сопроводительном паспорте.
-          </FieldDescription>
-          <FieldError>{errors.contract_type?.message}</FieldError>
-        </Field>
+        </FormField>
 
-        <Field>
-          <FieldLabel htmlFor="status" required>
-            Статус
-          </FieldLabel>
-          <Select id="status" disabled={pending} {...register("status")}>
-            {ContractStatusValues.map((value) => (
-              <option key={value} value={value}>
-                {CONTRACT_STATUS_LABEL[value]}
-              </option>
-            ))}
-          </Select>
-        </Field>
-
-        <Field className="md:col-span-2">
-          <FieldLabel htmlFor="counterparty_id" required>
-            Контрагент
-          </FieldLabel>
+        <FormField
+          htmlFor="counterparty_id"
+          label="Контрагент"
+          required
+          className="md:col-span-2"
+          error={errors.counterparty_id?.message}
+          description={
+            <>
+              Нет в списке нужного?{" "}
+              <button
+                type="button"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+                onClick={() => setCounterpartyModalOpen(true)}
+              >
+                Создать контрагента
+              </button>
+              {" · "}
+              <Link
+                to="/directories/counterparties"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Открыть справочник
+              </Link>
+            </>
+          }
+        >
           <Controller
             name="counterparty_id"
             control={control}
             render={({ field }) => (
-              <ContractCounterpartySelect
+              <CounterpartySelect
                 tenantId={activeTenantId}
                 value={field.value}
                 disabled={pending}
+                placeholder="Выберите активного контрагента"
                 onChange={field.onChange}
               />
             )}
           />
-          <FieldDescription>
-            В селекте только активные. Нет в списке?{" "}
-            <button
-              type="button"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-              onClick={() => setCounterpartyModalOpen(true)}
-            >
-              Создать контрагента
-            </button>
-            {" · "}
-            <Link
-              to="/directories/counterparties"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Открыть справочник
-            </Link>
-          </FieldDescription>
-          <FieldError>{errors.counterparty_id?.message}</FieldError>
-        </Field>
+        </FormField>
+        <FormField
+          htmlFor="start_date"
+          label="Дата заключения"
+          required
+          error={errors.start_date?.message}
+        >
+          <Input
+            id="start_date"
+            type="date"
+            {...register("start_date")}
+            disabled={pending}
+            aria-invalid={Boolean(errors.start_date)}
+          />
+        </FormField>
 
-        <Field>
-          <FieldLabel htmlFor="number" required>
-            Номер
-          </FieldLabel>
+        <FormField
+          htmlFor="end_date"
+          label="Дата окончания"
+          error={errors.end_date?.message}
+        >
+          <Input
+            id="end_date"
+            type="date"
+            {...register("end_date")}
+            disabled={pending}
+            aria-invalid={Boolean(errors.end_date)}
+          />
+        </FormField>
+        <FormField
+          htmlFor="number"
+          label="Номер договора"
+          required
+          error={errors.number?.message}
+        >
           <Input
             id="number"
             {...register("number")}
@@ -167,11 +188,14 @@ export function ContractForm({
             disabled={pending}
             aria-invalid={Boolean(errors.number)}
           />
-          <FieldError>{errors.number?.message}</FieldError>
-        </Field>
+        </FormField>
 
-        <Field>
-          <FieldLabel htmlFor="amount">Сумма / лимит</FieldLabel>
+        <FormField
+          htmlFor="amount"
+          label="Сумма вывоза отходов по договору"
+          className="md:col-span-2"
+          error={errors.amount?.message}
+        >
           <Input
             id="amount"
             {...register("amount")}
@@ -180,34 +204,7 @@ export function ContractForm({
             disabled={pending}
             aria-invalid={Boolean(errors.amount)}
           />
-          <FieldError>{errors.amount?.message}</FieldError>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="start_date" required>
-            Дата заключения
-          </FieldLabel>
-          <Input
-            id="start_date"
-            type="date"
-            {...register("start_date")}
-            disabled={pending}
-            aria-invalid={Boolean(errors.start_date)}
-          />
-          <FieldError>{errors.start_date?.message}</FieldError>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="end_date">Дата окончания</FieldLabel>
-          <Input
-            id="end_date"
-            type="date"
-            {...register("end_date")}
-            disabled={pending}
-            aria-invalid={Boolean(errors.end_date)}
-          />
-          <FieldError>{errors.end_date?.message}</FieldError>
-        </Field>
+        </FormField>
       </div>
 
       <section className="space-y-3 rounded-xl border border-border bg-card p-4">
@@ -232,8 +229,11 @@ export function ContractForm({
           {pending
             ? "Сохранение…"
             : mode === "create"
-              ? "Создать договор"
+              ? "Создать"
               : "Сохранить"}
+        </Button>
+        <Button type="button" variant="secondary" disabled={pending}>
+          Сохранить и закрыть
         </Button>
         <Button
           type="button"
@@ -241,7 +241,7 @@ export function ContractForm({
           disabled={pending}
           onClick={onCancel}
         >
-          Отмена
+          Закрыть
         </Button>
       </div>
 
@@ -250,7 +250,7 @@ export function ContractForm({
           contractId={contractId}
           contractType={contractType}
           status={status}
-          wasteCount={wastes.length}
+          wasteCount={wastes.filter((item) => item.waste_id).length}
         />
       ) : null}
 

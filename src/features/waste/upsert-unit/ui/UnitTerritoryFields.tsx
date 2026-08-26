@@ -30,16 +30,6 @@ export function UnitTerritoryFields({
 }: UnitTerritoryFieldsProps) {
   return (
     <>
-      <div className="space-y-1 md:col-span-2">
-        <h2 className="text-sm font-semibold text-foreground">
-          Территориальная принадлежность
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Необязательно. При выборе родителя подставляется автоматически; можно
-          изменить вручную.
-        </p>
-      </div>
-
       <Field>
         <FieldLabel htmlFor="region_id">Регион</FieldLabel>
         <Controller
@@ -57,7 +47,8 @@ export function UnitTerritoryFields({
           )}
         />
         <FieldDescription>
-          Выберите регион, чтобы открыть список районов.
+          Выберите регион, чтобы открыть список районов. При выборе родителя
+          подставляется автоматически; можно изменить вручную.
         </FieldDescription>
         <FieldError>{errors.region_id?.message}</FieldError>
       </Field>

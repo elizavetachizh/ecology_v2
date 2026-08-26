@@ -3,7 +3,10 @@ import type {
   ContractCreate,
   ContractUpdate,
 } from "../../../../entities/waste/contracts";
-import type { ContractFormValues } from "./contract-form.schema";
+import {
+  emptyContractWasteRow,
+  type ContractFormValues,
+} from "./contract-form.schema";
 
 function emptyToNull(value: string): string | null {
   return value.trim() || null;
@@ -20,10 +23,12 @@ export function toContractWriteBody(
     status: values.status,
     counterparty_id: values.counterparty_id,
     amount: emptyToNull(values.amount),
-    wastes: values.wastes.map((item) => ({
-      waste_id: item.waste_id,
-      cost_per_unit: emptyToNull(item.cost_per_unit),
-    })),
+    wastes: values.wastes
+      .filter((item) => item.waste_id)
+      .map((item) => ({
+        waste_id: item.waste_id,
+        cost_per_unit: emptyToNull(item.cost_per_unit),
+      })),
   };
 }
 
@@ -43,10 +48,13 @@ export function toContractFormValues(contract: Contract): ContractFormValues {
     status: contract.status,
     counterparty_id: contract.counterparty_id,
     amount: contract.amount ?? "",
-    wastes: contract.wastes.map((item) => ({
-      waste_id: item.waste_id,
-      cost_per_unit: item.cost_per_unit ?? "",
-      label: `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`,
-    })),
+    wastes: [
+      ...contract.wastes.map((item) => ({
+        waste_id: item.waste_id,
+        cost_per_unit: item.cost_per_unit ?? "",
+        label: `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`,
+      })),
+      { ...emptyContractWasteRow },
+    ],
   };
 }

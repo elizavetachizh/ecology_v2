@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
   PASSPORT_TRANSPORT_TYPE_LABEL,
   PassportStatusBadge,
   type Passport,
+  type PassportStatus,
 } from "../../../../entities/waste/passports";
 import {
   Badge,
@@ -16,6 +17,7 @@ import { formatDate } from "../../../../shared/lib/format-date";
 
 function passportsColumns(
   setDeleting: (passport: Passport) => void,
+  onStatusChange: (passport: Passport, status: PassportStatus) => void,
 ): ColumnDef<Passport>[] {
   return [
     {
@@ -91,6 +93,23 @@ function passportsColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
+          {row.original.status === "active" ? (
+            <DataTableRowAction
+              label="Пометить как недействующий"
+              onClick={() => onStatusChange(row.original, "inactive")}
+            >
+              <Check />
+              Пометить как недействующий
+            </DataTableRowAction>
+          ) : (
+            <DataTableRowAction
+              label="Пометить как действующий"
+              onClick={() => onStatusChange(row.original, "active")}
+            >
+              <Undo2 />
+              Пометить как действующий
+            </DataTableRowAction>
+          )}
           <DataTableRowAction asChild label="Изменить паспорт">
             <Link
               to="/waste/passports/$passportId"

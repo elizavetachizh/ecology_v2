@@ -6,48 +6,41 @@ import {
   AlertTitle,
   Button,
 } from "../../../../shared/ui";
-import { InstructionNextStepCta } from "./InstructionNextStepCta";
 
 type InstructionFormHintProps = {
   mode: "create" | "edit";
   status: InstructionStatus;
 };
 
-export function InstructionFormHint({ mode, status }: InstructionFormHintProps) {
-  if (mode === "create") {
+export function InstructionFormHint({
+  mode,
+  status,
+}: InstructionFormHintProps) {
+  if (status === "active") {
+    if (mode === "edit") return null;
     return (
-      <Alert variant="info" className="md:col-span-2">
-        <AlertTitle>Сохраняется как черновик</AlertTitle>
+      <Alert variant="info">
+        <AlertTitle>Документ сразу действует</AlertTitle>
         <AlertDescription>
-          Нажмите «Создать». На следующей карточке можно указать период и ввести
-          инструкцию в действие, затем перейти к структуре организации.
+          Укажите дату начала и окончания. Без периода статус «Действует»
+          сохранить нельзя.
         </AlertDescription>
       </Alert>
     );
   }
 
-  if (status === "active") {
-    return (
-      <div className="md:col-span-2">
-        <InstructionNextStepCta />
-      </div>
-    );
-  }
-
   return (
-    <Alert variant="info" className="md:col-span-2">
+    <Alert variant="info">
       <AlertTitle>
-        {status === "inactive" ? "Сейчас не действует" : "Это черновик"}
+        {status === "inactive" ? "Сейчас не действует" : "Черновик"}
       </AlertTitle>
       <AlertDescription>
-        <p>
-          Укажите дату начала и окончания, затем нажмите «Ввести в действие».
-          После этого можно заполнять{" "}
-          <Button asChild variant="link" className="h-auto p-0 text-sm">
-            <Link to="/directories/units">структуру организации</Link>
-          </Button>
-          .
-        </p>
+        Даты можно указать позже. Когда документ готов, смените статус на
+        «Действует» и заполните период, затем перейдите к{" "}
+        <Button asChild variant="link" className="h-auto p-0 text-sm">
+          <Link to="/directories/units">структуре организации</Link>
+        </Button>
+        .
       </AlertDescription>
     </Alert>
   );

@@ -11,4 +11,6 @@ export const unitsQueryKeys = {
   details: () => [...unitsQueryKeys.all, "detail"] as const,
   detail: (tenantId: string, id: string) =>
     [...unitsQueryKeys.details(), tenantId, id] as const,
+  ancestors: (tenantId: string, unitId: string) =>
+    [...unitsQueryKeys.detail(tenantId, unitId), "ancestors"] as const,
 };

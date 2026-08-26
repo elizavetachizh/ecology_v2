@@ -3,7 +3,7 @@ import { passportsColumns } from "./passports-columns";
 
 describe("passportsColumns", () => {
   it("exposes passport fields and row actions", () => {
-    const columns = passportsColumns(vi.fn());
+    const columns = passportsColumns(vi.fn(), vi.fn());
     expect(columns.map((column) => column.id)).toEqual([
       "number",
       "date",

@@ -1,15 +1,27 @@
+import type { UnitTree } from "../../../../../../entities/waste/units";
 import type { ExpandedState } from "../../../../../../shared/ui";
+import { collectExpandableIds } from "./collect-expandable-ids";
 
-export function mergeExpanded(
-  prev: ExpandedState,
-  ids: Array<string | null | undefined>,
-): ExpandedState {
-  if (prev === true) return prev;
-  const next: Record<string, boolean> = {
-    ...(prev as Record<string, boolean>),
-  };
-  for (const id of ids) {
-    if (id) next[id] = true;
+/** Все узлы с детьми раскрыты, кроме id, которые пользователь свернул. */
+export function expandedFromCollapsed(
+  tree: UnitTree[],
+  collapsed: Record<string, boolean>,
+): Record<string, boolean> {
+  const expanded: Record<string, boolean> = {};
+  for (const id of collectExpandableIds(tree)) {
+    if (!collapsed[id]) expanded[id] = true;
   }
-  return next;
+  return expanded;
+}
+
+export function collapsedFromExpanded(
+  tree: UnitTree[],
+  expanded: ExpandedState,
+): Record<string, boolean> {
+  if (expanded === true) return {};
+  const collapsed: Record<string, boolean> = {};
+  for (const id of collectExpandableIds(tree)) {
+    if (!expanded[id]) collapsed[id] = true;
+  }
+  return collapsed;
 }

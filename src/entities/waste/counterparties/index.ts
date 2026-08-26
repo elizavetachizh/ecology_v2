@@ -22,3 +22,4 @@ export {
 export { counterpartiesQueryKeys } from "./model/counterparties-query-keys";
 export { useCounterpartiesListQuery } from "./model/use-counterparties-list-query";
 export { useCounterpartiesOptions } from "./model/use-counterparties-query";
+export { CounterpartySelect } from "./ui/CounterpartySelect";

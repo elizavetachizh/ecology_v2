@@ -1,8 +1,9 @@
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import {
+  UOM_LABEL,
   useWastesOptions,
-  type Waste,
+  type WasteBrief,
 } from "../../../../entities/waste/wastes";
 import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
 import type {
@@ -14,6 +15,7 @@ import {
   AlertDescription,
   AlertTitle,
   AsyncCombobox,
+  Badge,
   Button,
   Field,
   FieldDescription,
@@ -40,8 +42,8 @@ type BindUiwModalProps = {
   onSaved: (binding: UnitInstructionWaste) => void;
 };
 
-function wasteLabel(waste: Waste) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
+function wasteLabel(waste: WasteBrief) {
+  return `${waste.waste_classifier.code} - ${waste.waste_classifier.name}`;
 }
 
 export function BindUiwModal({
@@ -108,9 +110,9 @@ function BindUiwModalForm({
       ? ({
           id: initial.waste.id,
           waste_classifier: initial.waste.waste_classifier,
-        } as Waste)
+        } as WasteBrief)
       : null);
-
+  console.log(selectedWaste);
   return (
     <ModalContent className="max-w-lg">
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -148,7 +150,7 @@ function BindUiwModalForm({
                   value={field.value}
                   selectedLabel={
                     selectedWaste
-                      ? `${selectedWaste.waste_classifier.code} — ${selectedWaste.waste_classifier.name}`
+                      ? `${selectedWaste.waste_classifier.code} - ${selectedWaste.waste_classifier.name}`
                       : undefined
                   }
                   onValueChange={(id) => field.onChange(id ?? "")}
@@ -221,13 +223,18 @@ function BindUiwModalForm({
             <FieldLabel htmlFor="transport_unit" required>
               Транспортная единица
             </FieldLabel>
-            <Input
-              id="transport_unit"
-              inputMode="decimal"
-              placeholder="0"
-              aria-invalid={Boolean(errors.transport_unit)}
-              {...register("transport_unit")}
-            />
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                <Input
+                  id="transport_unit"
+                  inputMode="decimal"
+                  placeholder="0"
+                  aria-invalid={Boolean(errors.transport_unit)}
+                  {...register("transport_unit")}
+                />
+              </div>
+              {selectedWaste && <Badge>{UOM_LABEL[selectedWaste.uom]}</Badge>}
+            </div>
             <FieldDescription>
               Число от 0 до 999999.999999, до 6 знаков после запятой. По
               умолчанию 0.

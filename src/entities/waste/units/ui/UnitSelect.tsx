@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getUnit,
-  unitsQueryKeys,
-  useUnitsOptions,
-  type Unit,
-} from "../../../../entities/waste/units";
 import { AsyncCombobox } from "../../../../shared/ui";
+import { getUnit } from "../api/get-unit";
+import { unitsQueryKeys } from "../model/unit-query-keys";
+import type { Unit } from "../model/units.types";
+import { useUnitsOptions } from "../model/use-units-query";
 
-type PassportUnitSelectProps = {
+type UnitSelectProps = {
   tenantId: string | null;
   value: string;
   disabled?: boolean;
   placeholder?: string;
+  "aria-label"?: string;
   onChange: (id: string) => void;
 };
 
@@ -19,13 +18,14 @@ function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
-export function PassportUnitSelect({
+export function UnitSelect({
   tenantId,
   value,
   disabled,
   placeholder = "Выберите структурную единицу",
+  "aria-label": ariaLabel = "Структурная единица",
   onChange,
-}: PassportUnitSelectProps) {
+}: UnitSelectProps) {
   const units = useUnitsOptions({
     tenantId,
     enabled: Boolean(tenantId),
@@ -58,7 +58,7 @@ export function PassportUnitSelect({
       disabled={disabled}
       className="w-full"
       contentClassName="w-full"
-      aria-label="Структурная единица"
+      aria-label={ariaLabel}
     />
   );
 }

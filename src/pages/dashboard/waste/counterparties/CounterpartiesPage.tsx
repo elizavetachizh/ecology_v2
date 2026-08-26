@@ -54,7 +54,7 @@ export function CounterpartiesPage() {
     () => ({
       search: search.q || undefined,
       is_individual: search.is_individual,
-      is_active: showInactive ? false : true,
+      is_active: !showInactive,
       sort: search.sort ?? ("name" as const),
       order: search.order ?? ("asc" as const),
       limit: search.limit ?? DEFAULT_COUNTERPARTIES_LIST_LIMIT,
@@ -132,7 +132,7 @@ export function CounterpartiesPage() {
         <PageContextBar
           sticky={false}
           title="Контрагенты"
-          description="Юрлица и физлица организации. УНП можно не указывать; неактивные скрыты в селектах по умолчанию."
+          description="Юрлица и физлица организации."
           actions={
             <>
               <Button

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -20,7 +20,6 @@ import { counterpartyWriteErrorMessage } from "./counterparty-write-error";
 type UseUpsertCounterpartyFormParams = {
   mode: "create" | "edit";
   initial?: Counterparty | null;
-  open: boolean;
   onSaved: (counterparty: Counterparty) => void;
 };
 
@@ -40,25 +39,17 @@ export function toCounterpartyFormValues(
 export function useUpsertCounterpartyForm({
   mode,
   initial,
-  open,
   onSaved,
 }: UseUpsertCounterpartyFormParams) {
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CounterpartyFormValues>({
     resolver: zodResolver(counterpartyFormSchema),
-    defaultValues: counterpartyFormDefaultValues,
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    form.reset(
+    defaultValues:
       mode === "edit" && initial
         ? toCounterpartyFormValues(initial)
         : counterpartyFormDefaultValues,
-    );
-  }, [open, mode, initial, form]);
+  });
 
   const createMutation = useMutation({
     mutationFn: (values: CounterpartyFormValues) =>

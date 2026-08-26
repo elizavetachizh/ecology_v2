@@ -28,7 +28,7 @@ export function ContractNextStepCta({
       <div className="space-y-1">
         <h2 className="text-sm font-semibold text-foreground">Следующий шаг</h2>
         <p className="text-sm text-muted-foreground">
-          Договор переработки готов. Создайте сопроводительный паспорт и/или ТТН
+          Договор утилизации готов. Создайте сопроводительный паспорт и/или ТТН
           — это отдельные документы.
         </p>
       </div>

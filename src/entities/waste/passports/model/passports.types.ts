@@ -1,8 +1,8 @@
 import type { UserProfile } from "../../../user";
-import type { CounterpartyBrief } from "../../counterparties/model/counterparties.types";
-import type { ContractBrief } from "../../contracts/model/contracts.types";
-import type { UnitBrief } from "../../units/model/units.types";
-import type { WasteBrief } from "../../wastes/model/wastes.types";
+import type { WasteBrief } from "../../wastes";
+import type { UnitBrief } from "../../units";
+import type { ContractBrief } from "../../contracts";
+import type { CounterpartyBrief } from "../../counterparties";
 
 export const PASSPORT_TRANSPORT_TYPE_LABEL = {
   self: "Самостоятельно",
@@ -21,12 +21,23 @@ export const PASSPORT_STATUS_LABEL = {
   inactive: "Не действует",
 } as const;
 
+export const PASSPORT_ALL_STATUS_LABEL = {
+  all: "Все",
+  active: "Действующие",
+  inactive: "Закрытые",
+} as const;
+
 export type PassportStatus = keyof typeof PASSPORT_STATUS_LABEL;
+export type PassportAllStatus = keyof typeof PASSPORT_ALL_STATUS_LABEL;
 
 export const PassportStatusValues = Object.keys(PASSPORT_STATUS_LABEL) as [
   PassportStatus,
   ...PassportStatus[],
 ];
+
+export const PassportAllStatusValues = Object.keys(
+  PASSPORT_ALL_STATUS_LABEL,
+) as [PassportAllStatus, ...PassportAllStatus[]];
 
 export const PASSPORT_STATUS_BADGE_VARIANT: Record<
   PassportStatus,

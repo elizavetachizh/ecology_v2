@@ -21,9 +21,7 @@ export function InstructionTabLabel({
   instruction,
   className,
 }: InstructionTabLabelProps) {
-  const name = instruction.short_name
-    ? `${instruction.name} (${instruction.short_name})`
-    : instruction.name;
+  const name = instruction.short_name ?? instruction.name;
   const statusLabel = INSTRUCTION_STATUS_LABEL[instruction.status];
 
   return (

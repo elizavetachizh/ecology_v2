@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "../../../../shared/ui";
 
-/** Следующий шаг онбординга после создания инструкции. */
+/** Следующий шаг онбординга после действующей инструкции. */
 export function InstructionNextStepCta() {
   return (
-    <section className="mx-auto max-w-4xl space-y-3 rounded-xl border border-border bg-card p-4">
+    <section className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div className="space-y-1">
         <h2 className="text-sm font-semibold text-foreground">Следующий шаг</h2>
         <p className="text-sm text-muted-foreground">

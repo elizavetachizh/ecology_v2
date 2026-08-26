@@ -5,11 +5,11 @@ const valid = {
   number: "СП-001",
   date: "2026-03-15",
   unit_id: "550e8400-e29b-41d4-a716-446655440000",
-  status: "active" as const,
   recycling_contract_id: "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
   waste_ids: ["7ba7b810-9dad-41d1-80b4-00c04fd430c8"],
   transport_type: "self" as const,
   transport_contract_id: "",
+  waste_producer_type: "self" as const,
   waste_producer_id: "",
 };
 
@@ -49,5 +49,24 @@ describe("passportFormSchema", () => {
       waste_ids: [wasteId, wasteId],
     });
     expect(parsed.success).toBe(false);
+  });
+
+  it("requires counterparty when waste producer is counterparty", () => {
+    const parsed = passportFormSchema.safeParse({
+      ...valid,
+      waste_producer_type: "counterparty",
+      waste_producer_id: "",
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("accepts counterparty producer with an id", () => {
+    expect(
+      passportFormSchema.safeParse({
+        ...valid,
+        waste_producer_type: "counterparty",
+        waste_producer_id: "8ba7b810-9dad-41d1-80b4-00c04fd430c8",
+      }).success,
+    ).toBe(true);
   });
 });

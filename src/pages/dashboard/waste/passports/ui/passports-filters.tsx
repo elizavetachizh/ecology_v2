@@ -1,16 +1,21 @@
 import {
-  PASSPORT_STATUS_LABEL,
+  PASSPORT_ALL_STATUS_LABEL,
   PASSPORT_TRANSPORT_TYPE_LABEL,
-  PassportStatusValues,
+  PassportAllStatusValues,
   PassportTransportTypeValues,
   type PassportStatus,
   type PassportTransportType,
 } from "../../../../../entities/waste/passports";
+import { ContractSelect } from "../../../../../entities/waste/contracts";
+import { UnitSelect } from "../../../../../entities/waste/units";
 import {
-  PassportContractSelect,
-  PassportUnitSelect,
-} from "../../../../../features/waste/upsert-passport";
-import { Input, ListSearchField, Select } from "../../../../../shared/ui";
+  Input,
+  ListSearchField,
+  Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "../../../../../shared/ui";
 
 export type PassportsFiltersValue = {
   q?: string;
@@ -34,93 +39,94 @@ export function PassportsFilters({
   onChange,
 }: PassportsFiltersProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <ListSearchField
-        value={values.q ?? ""}
-        placeholder="Поиск по номеру"
-        onSearch={(q) => onChange({ q: q || undefined })}
-      />
-      <div className="w-64">
-        <PassportUnitSelect
-          tenantId={tenantId}
-          value={values.unit_id ?? ""}
-          placeholder="Все структурные единицы"
-          onChange={(id) => onChange({ unit_id: id || undefined })}
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <ListSearchField
+          value={values.q ?? ""}
+          placeholder="Поиск по номеру"
+          onSearch={(q) => onChange({ q: q || undefined })}
         />
-      </div>
-      <div className="w-72">
-        <PassportContractSelect
-          tenantId={tenantId}
-          value={values.recycling_contract_id ?? ""}
-          contractType="recycling"
-          placeholder="Все договоры утилизации"
-          onChange={(id) =>
-            onChange({ recycling_contract_id: id || undefined })
+        <div className="w-64">
+          <UnitSelect
+            tenantId={tenantId}
+            value={values.unit_id ?? ""}
+            placeholder="Все структурные единицы"
+            onChange={(id) => onChange({ unit_id: id || undefined })}
+          />
+        </div>
+        <div className="w-72">
+          <ContractSelect
+            tenantId={tenantId}
+            value={values.recycling_contract_id ?? ""}
+            contractType="recycling"
+            placeholder="Все договоры утилизации"
+            onChange={(id) =>
+              onChange({ recycling_contract_id: id || undefined })
+            }
+          />
+        </div>
+        <Select
+          aria-label="Фильтр по способу перевозки"
+          className="w-56"
+          value={values.transport_type ?? ""}
+          onChange={(event) =>
+            onChange({
+              transport_type: (event.target.value || undefined) as
+                | PassportTransportType
+                | undefined,
+            })
           }
-        />
+        >
+          <option value="">Все способы перевозки</option>
+          {PassportTransportTypeValues.map((type) => (
+            <option key={type} value={type}>
+              {PASSPORT_TRANSPORT_TYPE_LABEL[type]}
+            </option>
+          ))}
+        </Select>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-muted-foreground">с</span>
+          <Input
+            type="date"
+            aria-label="Дата с"
+            className="w-36"
+            value={values.date_from ?? ""}
+            onChange={(event) =>
+              onChange({ date_from: event.target.value || undefined })
+            }
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-muted-foreground">по</span>
+          <Input
+            type="date"
+            aria-label="Дата по"
+            className="w-36"
+            value={values.date_to ?? ""}
+            onChange={(event) =>
+              onChange({ date_to: event.target.value || undefined })
+            }
+          />
+        </div>
       </div>
-      <Select
-        aria-label="Фильтр по способу перевозки"
-        className="w-56"
-        value={values.transport_type ?? ""}
-        onChange={(event) =>
+      <Tabs
+        value={values.status ?? "all"}
+        onValueChange={(value) =>
           onChange({
-            transport_type: (event.target.value || undefined) as
-              | PassportTransportType
-              | undefined,
+            status: value === "all" ? undefined : (value as PassportStatus),
           })
         }
+        className="gap-0"
       >
-        <option value="">Все способы перевозки</option>
-        {PassportTransportTypeValues.map((type) => (
-          <option key={type} value={type}>
-            {PASSPORT_TRANSPORT_TYPE_LABEL[type]}
-          </option>
-        ))}
-      </Select>
-      <Select
-        aria-label="Фильтр по статусу"
-        className="w-44"
-        value={values.status ?? ""}
-        onChange={(event) =>
-          onChange({
-            status: (event.target.value || undefined) as
-              | PassportStatus
-              | undefined,
-          })
-        }
-      >
-        <option value="">Все статусы</option>
-        {PassportStatusValues.map((status) => (
-          <option key={status} value={status}>
-            {PASSPORT_STATUS_LABEL[status]}
-          </option>
-        ))}
-      </Select>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">с</span>
-        <Input
-          type="date"
-          aria-label="Дата с"
-          className="w-36"
-          value={values.date_from ?? ""}
-          onChange={(event) =>
-            onChange({ date_from: event.target.value || undefined })
-          }
-        />
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">по</span>
-        <Input
-          type="date"
-          aria-label="Дата по"
-          className="w-36"
-          value={values.date_to ?? ""}
-          onChange={(event) =>
-            onChange({ date_to: event.target.value || undefined })
-          }
-        />
-      </div>
-    </div>
+        <TabsList aria-label="Статус паспорта">
+          {PassportAllStatusValues.map((status) => (
+            <TabsTrigger key={status} value={status}>
+              {PASSPORT_ALL_STATUS_LABEL[status]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </>
   );
 }

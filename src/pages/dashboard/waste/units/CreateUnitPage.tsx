@@ -1,8 +1,17 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { TenantRequiredGate, toast } from "../../../../shared/ui";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  TenantRequiredGate,
+  toast,
+} from "../../../../shared/ui";
 import { useTenant } from "../../../../entities/tenant";
+import { getUnit, unitsQueryKeys } from "../../../../entities/waste/units";
 import { UnitForm } from "../../../../features/waste/upsert-unit";
 import { UnitInstructionWastesCreateHint } from "../../../../features/waste/bind-unit-instruction-waste";
+import { UnitHierarchyBreadcrumb } from "./create/ui/UnitHierarchyBreadcrumb";
 
 export function CreateUnitPage() {
   const navigate = useNavigate();
@@ -10,20 +19,51 @@ export function CreateUnitPage() {
   const { parentId, isPod9 } = useSearch({
     from: "/directories/units/new",
   });
+  const hasParent = Boolean(parentId);
 
-  return (
-    <TenantRequiredGate
-      tenantId={activeTenantId}
-      description={
-        "Создание структурной единицы доступно после выбора организации в верхней панели."
-      }
-    >
+  const parentQuery = useQuery({
+    queryKey: unitsQueryKeys.detail(
+      activeTenantId ?? "none",
+      parentId || "none",
+    ),
+    queryFn: ({ signal }) => getUnit(parentId, signal),
+    enabled: Boolean(activeTenantId && parentId),
+  });
+
+  const parent = parentQuery.data;
+  const currentLabel = isPod9
+    ? "Новая единица ПОД-9"
+    : "Новая структурная единица";
+
+  let content;
+  if (hasParent && parentQuery.isLoading) {
+    content = <p className="text-sm text-muted-foreground">Загрузка…</p>;
+  } else if (hasParent && (parentQuery.isError || !parentQuery.data)) {
+    content = (
+      <div className="space-y-4">
+        <Alert variant="error">
+          <AlertDescription>Структурная единица не найдена.</AlertDescription>
+        </Alert>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/directories/units">К структурам</Link>
+        </Button>
+      </div>
+    );
+  } else {
+    content = (
       <div className="space-y-6">
         <UnitForm
           mode="create"
           activeTenantId={activeTenantId}
           defaultParentId={parentId || undefined}
           defaultIsPod9={Boolean(isPod9)}
+          eyebrow={
+            <UnitHierarchyBreadcrumb
+              tenantId={activeTenantId}
+              unit={parent}
+              currentLabel={currentLabel}
+            />
+          }
           onSaved={(unit, { close }) => {
             toast.success(
               unit.is_pod9
@@ -62,6 +102,17 @@ export function CreateUnitPage() {
 
         {isPod9 ? <UnitInstructionWastesCreateHint /> : null}
       </div>
+    );
+  }
+
+  return (
+    <TenantRequiredGate
+      tenantId={activeTenantId}
+      description={
+        "Создание структурной единицы доступно после выбора организации в верхней панели."
+      }
+    >
+      {content}
     </TenantRequiredGate>
   );
 }

@@ -11,6 +11,7 @@ export type {
   PassportSortField,
   PassportSortOrder,
   PassportStatus,
+  PassportAllStatus,
   PassportTransportType,
   PassportUpdate,
   PassportWaste,
@@ -23,7 +24,9 @@ export {
   PASSPORT_TRANSPORT_TYPE_LABEL,
   PassportSortFields,
   PassportStatusValues,
+  PassportAllStatusValues,
   PassportTransportTypeValues,
+  PASSPORT_ALL_STATUS_LABEL,
 } from "./model/passports.types";
 export { passportsQueryKeys } from "./model/passports-query-keys";
 export { usePassportsListQuery } from "./model/use-passports-list-query";

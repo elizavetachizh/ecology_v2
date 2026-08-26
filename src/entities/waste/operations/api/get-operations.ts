@@ -19,7 +19,7 @@ export function getOperations(
   if (params.date_from) searchParams.set("date_from", params.date_from);
   if (params.date_to) searchParams.set("date_to", params.date_to);
   return apiJson<OperationListResponse>(
-    `/api/v1/operations?${searchParams}`,
+    `/api/v1/operations/operations?${searchParams}`,
     {
       signal,
       tenantScoped: true,

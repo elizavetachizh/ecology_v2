@@ -25,6 +25,15 @@ describe("contractFormSchema", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("accepts empty draft waste rows", () => {
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        wastes: [{ waste_id: "", cost_per_unit: "", label: "" }],
+      }).success,
+    ).toBe(true);
+  });
+
   it("rejects duplicate wastes", () => {
     const wasteId = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
     const parsed = contractFormSchema.safeParse({

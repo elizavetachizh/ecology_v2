@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
   CONTRACT_TYPE_LABEL,
   ContractStatusBadge,
   type Contract,
+  type ContractStatus,
 } from "../../../../entities/waste/contracts";
 import {
   Badge,
@@ -16,6 +17,7 @@ import { formatDate } from "../../../../shared/lib/format-date";
 
 function contractsColumns(
   setDeleting: (contract: Contract) => void,
+  onStatusChange: (contract: Contract, status: ContractStatus) => void,
 ): ColumnDef<Contract>[] {
   return [
     {
@@ -80,7 +82,7 @@ function contractsColumns(
         <div className="flex max-w-xs flex-wrap gap-1">
           {row.original.wastes.map((waste) => (
             <Badge key={waste.id} variant="secondary">
-              {waste.waste.waste_classifier.name}
+              {`${waste.waste.waste_classifier.code} — ${waste.waste.waste_classifier.name}`}
             </Badge>
           ))}
         </div>
@@ -92,7 +94,24 @@ function contractsColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
-          <DataTableRowAction asChild label="Открыть договор">
+          {row.original.status === "active" ? (
+            <DataTableRowAction
+              label="Пометить как закрытый"
+              onClick={() => onStatusChange(row.original, "inactive")}
+            >
+              <Check />
+              Пометить как закрытый
+            </DataTableRowAction>
+          ) : (
+            <DataTableRowAction
+              label="Пометить как действующий"
+              onClick={() => onStatusChange(row.original, "active")}
+            >
+              <Undo2 />
+              Пометить как действующий
+            </DataTableRowAction>
+          )}
+          <DataTableRowAction asChild label="Изменить договор">
             <Link
               to="/directories/contracts/$contractId"
               params={{ contractId: row.original.id }}
