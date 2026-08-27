@@ -23,13 +23,13 @@ describe("getCounterparties", () => {
   });
 
   it("requests list with limit and offset, tenant-scoped", async () => {
-    await expect(
-      getCounterparties({ limit: 50, offset: 0 }),
-    ).resolves.toEqual(response);
+    await expect(getCounterparties({ limit: 50, offset: 0 })).resolves.toEqual(
+      response,
+    );
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/counterparties?limit=50&offset=0",
-      { signal: undefined, tenantScoped: true },
+      { method: "GET", signal: undefined, tenantScoped: true },
     );
   });
 
@@ -46,7 +46,7 @@ describe("getCounterparties", () => {
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/counterparties?limit=20&offset=10&search=%D1%80%D0%BE%D0%BC%D0%B0%D1%88%D0%BA%D0%B0&is_individual=false&is_active=true&sort=unp&order=desc",
-      { signal: undefined, tenantScoped: true },
+      { method: "GET", signal: undefined, tenantScoped: true },
     );
   });
 
@@ -59,7 +59,7 @@ describe("getCounterparties", () => {
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/counterparties?limit=50&offset=0",
-      { signal: undefined, tenantScoped: true },
+      { method: "GET", signal: undefined, tenantScoped: true },
     );
   });
 
@@ -69,7 +69,7 @@ describe("getCounterparties", () => {
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/counterparties?limit=50&offset=0",
-      { signal, tenantScoped: true },
+      { method: "GET", signal, tenantScoped: true },
     );
   });
 });

@@ -4,7 +4,7 @@ import { makeInstruction } from "../model/instruction.fixture";
 import { InstructionTabLabel } from "./InstructionTabLabel";
 
 describe("InstructionTabLabel", () => {
-  it("shows name with short_name and status tooltip", () => {
+  it("shows short_name and status tooltip", () => {
     const { container } = render(
       <InstructionTabLabel
         instruction={makeInstruction({
@@ -15,10 +15,10 @@ describe("InstructionTabLabel", () => {
       />,
     );
 
+    expect(screen.getByText("ИООС-1")).toBeInTheDocument();
     expect(
-      screen.getByText("Инструкция по утилизации (ИООС-1)"),
+      screen.getByText("Действует", { selector: ".sr-only" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Действует", { selector: ".sr-only" })).toBeInTheDocument();
     expect(container.firstChild).toHaveAttribute("title", "Действует");
   });
 
@@ -34,6 +34,8 @@ describe("InstructionTabLabel", () => {
     );
 
     expect(screen.getByText("Без краткого")).toBeInTheDocument();
-    expect(screen.getByText("Черновик", { selector: ".sr-only" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Черновик", { selector: ".sr-only" }),
+    ).toBeInTheDocument();
   });
 });
