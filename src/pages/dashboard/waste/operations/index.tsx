@@ -4,9 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useTenant } from "../../../../entities/tenant";
 import {
+  approveOperation,
   DEFAULT_OPERATIONS_LIST_LIMIT,
   deleteOperation,
   operationsQueryKeys,
+  rejectOperation,
   useOperationsListQuery,
   type Operation,
 } from "../../../../entities/waste/operations";
@@ -54,8 +56,19 @@ export function WasteOperationsPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<Operation | null>(null);
   const [deleting, setDeleting] = useState<Operation | null>(null);
+  const [approving, setApproving] = useState<Operation | null>(null);
+  const [rejecting, setRejecting] = useState<Operation | null>(null);
   const columns = useMemo(
-    () => operationsColumns(setDeleting, setModalMode, setEditing),
+    () =>
+      operationsColumns({
+        onEdit: (operation) => {
+          setEditing(operation);
+          setModalMode("edit");
+        },
+        onDelete: setDeleting,
+        onApprove: setApproving,
+        onReject: setRejecting,
+      }),
     [],
   );
 
@@ -90,6 +103,26 @@ export function WasteOperationsPage() {
       invalidateOperationQueries();
       setDeleting(null);
       toast.success("Операция успешно удалена");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => approveOperation(id),
+    onSuccess: () => {
+      invalidateOperationQueries();
+      setApproving(null);
+      toast.success("Операция подтверждена, остатки учтены");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => rejectOperation(id),
+    onSuccess: () => {
+      invalidateOperationQueries();
+      setRejecting(null);
+      toast.success("Операция отклонена");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -183,6 +216,47 @@ export function WasteOperationsPage() {
             );
             setModalMode(null);
             setEditing(null);
+          }}
+        />
+
+        <ConfirmDialog
+          open={approving !== null}
+          confirmDisabled={approveMutation.isPending}
+          confirmVariant="default"
+          onOpenChange={(open) => {
+            if (!open) setApproving(null);
+          }}
+          title="Подтвердить операцию?"
+          confirmLabel="Подтвердить"
+          description={
+            <>
+              Поступление от {formatDate(approving?.date ?? null)} по «
+              {approving?.waste.waste_classifier.name ?? "—"}» будет
+              подтверждено. Остатки изменятся на обеих сторонах пары.
+            </>
+          }
+          onConfirm={() => {
+            if (approving) void approveMutation.mutateAsync(approving.id);
+          }}
+        />
+
+        <ConfirmDialog
+          open={rejecting !== null}
+          confirmDisabled={rejectMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) setRejecting(null);
+          }}
+          title="Отклонить операцию?"
+          confirmLabel="Отклонить"
+          description={
+            <>
+              Пара операций от {formatDate(rejecting?.date ?? null)} по «
+              {rejecting?.waste.waste_classifier.name ?? "—"}» будет отклонена.
+              Остатки не изменятся.
+            </>
+          }
+          onConfirm={() => {
+            if (rejecting) void rejectMutation.mutateAsync(rejecting.id);
           }}
         />
 

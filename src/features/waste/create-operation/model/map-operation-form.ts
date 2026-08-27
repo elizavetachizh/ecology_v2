@@ -1,9 +1,6 @@
 import type {
-  NeutralizationMethod,
   Operation,
   OperationCreate,
-  TransferReceiptPurpose,
-  UsePurpose,
 } from "../../../../entities/waste/operations";
 import {
   createEmptyOperationFormValues,
@@ -40,6 +37,9 @@ export function toOperationWriteBody(
   values: OperationFormValues,
 ): OperationCreate {
   const type = values.operation_type;
+  if (type === "") {
+    throw new Error("Выберите тип операции");
+  }
 
   return {
     date: values.date,
@@ -48,15 +48,18 @@ export function toOperationWriteBody(
     waste_id: values.waste_id,
     amount: values.amount,
     waste_source_id: type === "formed" ? values.waste_source_id : null,
-    use_purpose: type === "used" ? (values.use_purpose as UsePurpose) : null,
+    use_purpose:
+      type === "used" && values.use_purpose !== "" ? values.use_purpose : null,
     neutralization_method:
-      type === "neutralized"
-        ? (values.neutralization_method as NeutralizationMethod)
+      type === "neutralized" && values.neutralization_method !== ""
+        ? values.neutralization_method
         : null,
     unit_side_id: isInternalTransferType(type) ? values.unit_side_id : null,
-    transfer_receipt_purpose: needsTransferReceiptPurpose(type)
-      ? (values.transfer_receipt_purpose as TransferReceiptPurpose)
-      : null,
+    transfer_receipt_purpose:
+      needsTransferReceiptPurpose(type) &&
+      values.transfer_receipt_purpose !== ""
+        ? values.transfer_receipt_purpose
+        : null,
     counterparty_id: type === "received_out" ? values.counterparty_id : null,
     passport_id:
       type === "transferred_out" && values.document_kind === "passport"

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  pickInstructionIdOwningWaste,
   pickPreferredInstructionId,
   resolveInstructionId,
 } from "./pick-preferred-instruction";
@@ -26,6 +27,42 @@ describe("pickPreferredInstructionId", () => {
 
   it("returns undefined for an empty list", () => {
     expect(pickPreferredInstructionId([])).toBeUndefined();
+  });
+});
+
+describe("pickInstructionIdOwningWaste", () => {
+  const instructions = [
+    { id: "draft", status: "draft" },
+    { id: "active-other", status: "active" },
+    { id: "active-owner", status: "active" },
+  ];
+
+  it("returns the active instruction that binds the waste", () => {
+    const wastes = new Map([
+      ["draft", [{ waste_id: "waste-1" }]],
+      ["active-other", [{ waste_id: "waste-2" }]],
+      ["active-owner", [{ waste_id: "waste-1" }]],
+    ]);
+    expect(pickInstructionIdOwningWaste(instructions, "waste-1", wastes)).toBe(
+      "active-owner",
+    );
+  });
+
+  it("falls back to a non-active owner when no active match exists", () => {
+    const wastes = new Map([
+      ["draft", [{ waste_id: "waste-1" }]],
+      ["active-other", [{ waste_id: "waste-2" }]],
+    ]);
+    expect(pickInstructionIdOwningWaste(instructions, "waste-1", wastes)).toBe(
+      "draft",
+    );
+  });
+
+  it("returns undefined when no instruction binds the waste", () => {
+    const wastes = new Map([["active-other", [{ waste_id: "waste-2" }]]]);
+    expect(
+      pickInstructionIdOwningWaste(instructions, "waste-1", wastes),
+    ).toBeUndefined();
   });
 });
 

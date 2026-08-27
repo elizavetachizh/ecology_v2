@@ -5,6 +5,7 @@ import type {
   GetUnitInstructionWastesParams,
   UnitInstructionWasteScope,
 } from "./uiw.types";
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client";
 
 type UseUnitInstructionWastesListQueryArgs = {
   tenantId: string | null;
@@ -29,6 +30,7 @@ export function useUnitInstructionWastesListQuery({
     queryKey: uiwQueryKeys.list(tenantId ?? "none", scope, params),
     queryFn: ({ signal }) => getUnitInstructionWastes(scope, params, signal),
     enabled: canFetch,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   return {

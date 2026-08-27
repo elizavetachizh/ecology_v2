@@ -32,6 +32,16 @@ export const OPERATION_STATUS_LABEL = {
   declined: "Отклонено",
 } as const;
 
+export const OPERATION_STATUS_BADGE_VARIANT: Record<
+  keyof typeof OPERATION_STATUS_LABEL,
+  "success" | "warning" | "info" | "destructive"
+> = {
+  confirmed: "success",
+  pending: "warning",
+  confirmation_required: "info",
+  declined: "destructive",
+};
+
 export const NEUTRALIZATION_METHOD_LABEL = {
   thermal: "Термический способ",
   physicochemical: "Физико-химический способ",

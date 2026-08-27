@@ -18,6 +18,7 @@ export type ConfirmDialogProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   confirmDisabled?: boolean;
+  confirmVariant?: "default" | "destructive";
   onConfirm: () => void;
 };
 
@@ -29,6 +30,7 @@ export function ConfirmDialog({
   confirmLabel = "Удалить",
   cancelLabel = "Отмена",
   confirmDisabled = false,
+  confirmVariant = "destructive",
   onConfirm,
 }: ConfirmDialogProps) {
   const handleConfirm = () => {
@@ -58,7 +60,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             type="button"
-            variant="destructive"
+            variant={confirmVariant}
             disabled={confirmDisabled}
             onClick={handleConfirm}
           >

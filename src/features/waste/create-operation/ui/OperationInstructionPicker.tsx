@@ -52,7 +52,9 @@ export function OperationInstructionPicker({
   }, [value, instructions.length]);
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Загрузка инструкций…</p>;
+    return (
+      <p className="text-sm text-muted-foreground">Загрузка инструкций…</p>
+    );
   }
 
   if (error) {
@@ -93,7 +95,10 @@ export function OperationInstructionPicker({
           id="operation-instruction"
           className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2"
         >
-          <InstructionTabLabel instruction={selected} className="min-w-0 flex-1" />
+          <InstructionTabLabel
+            instruction={selected}
+            className="min-w-0 flex-1"
+          />
           <InstructionStatusBadge status={selected.status} />
           {canSwitch ? (
             <Button
@@ -140,7 +145,10 @@ export function OperationInstructionPicker({
                   disabled && "opacity-50",
                 )}
               >
-                <InstructionTabLabel instruction={item} className="min-w-0 flex-1" />
+                <InstructionTabLabel
+                  instruction={item}
+                  className="min-w-0 flex-1"
+                />
                 <InstructionStatusBadge status={item.status} />
               </button>
             );

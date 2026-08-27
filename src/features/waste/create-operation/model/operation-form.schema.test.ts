@@ -30,13 +30,33 @@ const base = {
 };
 
 describe("operationFormSchema", () => {
-  it("accepts formed with waste source", () => {
+  it("rejects empty operation_type", () => {
+    const result = operationFormSchema.safeParse({
+      ...base,
+      operation_type: "",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.path).toEqual(["operation_type"]);
+    }
+  });
+
+  it("accepts formed with waste source and empty enum fields", () => {
     const values = {
       ...base,
       operation_type: "formed" as const,
       waste_source_id: SOURCE_ID,
     };
     expect(operationFormSchema.parse(values)).toEqual(values);
+  });
+
+  it("rejects use_purpose outside the enum", () => {
+    const result = operationFormSchema.safeParse({
+      ...base,
+      operation_type: "used",
+      use_purpose: "not-a-purpose",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("requires waste_source_id for formed", () => {

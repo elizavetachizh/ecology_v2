@@ -30,27 +30,21 @@ function requireUuid(
   }
 }
 
-function requireEnum(
-  ctx: z.RefinementCtx,
-  path: string,
-  value: string,
-  allowed: readonly string[],
-  message: string,
-) {
-  if (!allowed.includes(value)) {
-    ctx.addIssue({ code: "custom", path: [path], message });
-  }
-}
-
 export const OperationDocumentKindValues = ["passport", "ttn"] as const;
 export type OperationDocumentKind =
   (typeof OperationDocumentKindValues)[number];
 
-export function isInternalTransferType(type: OperationType) {
+function emptyOrEnum<T extends readonly [string, ...string[]]>(values: T) {
+  return z.union([z.literal(""), z.enum(values)]);
+}
+
+export function isInternalTransferType(
+  type: OperationType | "",
+): type is "received_in" | "transferred_in" {
   return type === "received_in" || type === "transferred_in";
 }
 
-export function needsTransferReceiptPurpose(type: OperationType) {
+export function needsTransferReceiptPurpose(type: OperationType | "") {
   return (
     isInternalTransferType(type) ||
     type === "received_out" ||
@@ -64,27 +58,31 @@ export const operationFormSchema = z
       .string()
       .min(1, "Укажите дату операции")
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД"),
-    operation_type: z.enum(OperationTypeValues, {
-      error: "Выберите тип операции",
-    }),
+    operation_type: emptyOrEnum(OperationTypeValues),
     unit_id: z.string().uuid("Выберите место учёта"),
     waste_id: z.string().uuid("Выберите отход"),
     amount: amountSchema,
     waste_source_id: z.string(),
-    use_purpose: z.string(),
-    neutralization_method: z.string(),
+    use_purpose: emptyOrEnum(UsePurposeValues),
+    neutralization_method: emptyOrEnum(NeutralizationMethodValues),
     unit_side_id: z.string(),
-    transfer_receipt_purpose: z.string(),
+    transfer_receipt_purpose: emptyOrEnum(TransferReceiptPurposeValues),
     counterparty_id: z.string(),
-    document_kind: z.union([
-      z.literal(""),
-      z.enum(OperationDocumentKindValues),
-    ]),
+    document_kind: emptyOrEnum(OperationDocumentKindValues),
     passport_id: z.string(),
     ttn_id: z.string(),
   })
   .superRefine((values, ctx) => {
     const type = values.operation_type;
+
+    if (type === "") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["operation_type"],
+        message: "Выберите тип операции",
+      });
+      return;
+    }
 
     if (type === "formed") {
       requireUuid(
@@ -95,24 +93,20 @@ export const operationFormSchema = z
       );
     }
 
-    if (type === "used") {
-      requireEnum(
-        ctx,
-        "use_purpose",
-        values.use_purpose,
-        UsePurposeValues,
-        "Выберите цель использования",
-      );
+    if (type === "used" && values.use_purpose === "") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["use_purpose"],
+        message: "Выберите цель использования",
+      });
     }
 
-    if (type === "neutralized") {
-      requireEnum(
-        ctx,
-        "neutralization_method",
-        values.neutralization_method,
-        NeutralizationMethodValues,
-        "Выберите способ обезвреживания",
-      );
+    if (type === "neutralized" && values.neutralization_method === "") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["neutralization_method"],
+        message: "Выберите способ обезвреживания",
+      });
     }
 
     if (isInternalTransferType(type)) {
@@ -134,14 +128,15 @@ export const operationFormSchema = z
       }
     }
 
-    if (needsTransferReceiptPurpose(type)) {
-      requireEnum(
-        ctx,
-        "transfer_receipt_purpose",
-        values.transfer_receipt_purpose,
-        TransferReceiptPurposeValues,
-        "Выберите цель передачи или поступления",
-      );
+    if (
+      needsTransferReceiptPurpose(type) &&
+      values.transfer_receipt_purpose === ""
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["transfer_receipt_purpose"],
+        message: "Выберите цель передачи или поступления",
+      });
     }
 
     if (type === "received_out") {
@@ -175,14 +170,25 @@ export const operationFormSchema = z
 
 export type OperationFormValues = z.infer<typeof operationFormSchema>;
 
-export const EMPTY_TYPE_SPECIFIC_VALUES = {
+export const EMPTY_TYPE_SPECIFIC_VALUES: Pick<
+  OperationFormValues,
+  | "waste_source_id"
+  | "use_purpose"
+  | "neutralization_method"
+  | "unit_side_id"
+  | "transfer_receipt_purpose"
+  | "counterparty_id"
+  | "document_kind"
+  | "passport_id"
+  | "ttn_id"
+> = {
   waste_source_id: "",
   use_purpose: "",
   neutralization_method: "",
   unit_side_id: "",
   transfer_receipt_purpose: "",
   counterparty_id: "",
-  document_kind: "" as OperationFormValues["document_kind"],
+  document_kind: "",
   passport_id: "",
   ttn_id: "",
 };
@@ -198,7 +204,7 @@ export function todayIsoDate(): string {
 export function createEmptyOperationFormValues(): OperationFormValues {
   return {
     date: todayIsoDate(),
-    operation_type: "" as OperationFormValues["operation_type"],
+    operation_type: "",
     unit_id: "",
     waste_id: "",
     amount: "",

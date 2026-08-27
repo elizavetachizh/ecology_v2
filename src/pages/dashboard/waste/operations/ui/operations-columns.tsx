@@ -1,6 +1,9 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2, X } from "lucide-react";
 import {
+  canMutateOperation,
+  canReviewOperation,
   OPERATION_TYPE_LABEL,
+  OperationStatusBadge,
   type Operation,
 } from "../../../../../entities/waste/operations";
 import { UOM_LABEL } from "../../../../../entities/waste/wastes";
@@ -18,11 +21,19 @@ function formatAmount(value: string): string {
   return n.toLocaleString("ru-RU", { maximumFractionDigits: 6 });
 }
 
-function operationsColumns(
-  setDeleting: (operation: Operation) => void,
-  setModalMode: (mode: "edit" | "create") => void,
-  setEditing: (operation: Operation) => void,
-): ColumnDef<Operation>[] {
+type OperationsColumnActions = {
+  onEdit: (operation: Operation) => void;
+  onDelete: (operation: Operation) => void;
+  onApprove: (operation: Operation) => void;
+  onReject: (operation: Operation) => void;
+};
+
+function operationsColumns({
+  onEdit,
+  onDelete,
+  onApprove,
+  onReject,
+}: OperationsColumnActions): ColumnDef<Operation>[] {
   return [
     {
       id: "date",
@@ -68,6 +79,15 @@ function operationsColumns(
       cell: ({ row }) => OPERATION_TYPE_LABEL[row.original.operation_type],
     },
     {
+      id: "status",
+      accessorKey: "status",
+      enableSorting: false,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Статус" />
+      ),
+      cell: ({ row }) => <OperationStatusBadge status={row.original.status} />,
+    },
+    {
       id: "amount",
       accessorKey: "amount",
       enableSorting: false,
@@ -102,27 +122,53 @@ function operationsColumns(
       id: "actions",
       header: () => <div className="text-right">Действия</div>,
       enableSorting: false,
-      cell: ({ row }) => (
-        <DataTableRowActions>
-          <DataTableRowAction
-            label="Изменить операцию"
-            onClick={() => {
-              setEditing(row.original);
-              setModalMode("edit");
-            }}
-          >
-            <Pencil />
-            Изменить
-          </DataTableRowAction>
-          <DataTableRowAction
-            label="Удалить операцию"
-            onClick={() => setDeleting(row.original)}
-          >
-            <Trash2 className="text-destructive" />
-            Удалить
-          </DataTableRowAction>
-        </DataTableRowActions>
-      ),
+      cell: ({ row }) => {
+        const operation = row.original;
+        const canReview = canReviewOperation(operation.status);
+        const canMutate = canMutateOperation(operation.status);
+        if (!canReview && !canMutate) return null;
+
+        return (
+          <DataTableRowActions>
+            {canReview ? (
+              <>
+                <DataTableRowAction
+                  label="Подтвердить операцию"
+                  onClick={() => onApprove(operation)}
+                >
+                  <Check />
+                  Подтвердить
+                </DataTableRowAction>
+                <DataTableRowAction
+                  label="Отклонить операцию"
+                  onClick={() => onReject(operation)}
+                >
+                  <X />
+                  Отклонить
+                </DataTableRowAction>
+              </>
+            ) : null}
+            {canMutate ? (
+              <>
+                <DataTableRowAction
+                  label="Изменить операцию"
+                  onClick={() => onEdit(operation)}
+                >
+                  <Pencil />
+                  Изменить
+                </DataTableRowAction>
+                <DataTableRowAction
+                  label="Удалить операцию"
+                  onClick={() => onDelete(operation)}
+                >
+                  <Trash2 className="text-destructive" />
+                  Удалить
+                </DataTableRowAction>
+              </>
+            ) : null}
+          </DataTableRowActions>
+        );
+      },
     },
   ];
 }

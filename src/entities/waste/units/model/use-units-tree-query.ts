@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUnitsTree } from "../api/get-units";
 import type { GetUnitsTreeParams, UnitTree } from "./units.types";
 import { unitsQueryKeys } from "./unit-query-keys";
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client";
 
 const EMPTY_TREE: UnitTree[] = [];
 
@@ -22,6 +23,7 @@ export function useUnitsTreeQuery({
     queryKey: unitsQueryKeys.tree(tenantId ?? "none", params),
     queryFn: ({ signal }) => getUnitsTree(params, signal),
     enabled: canFetch,
+    staleTime: DEFAULT_STALE_TIME_MS,
   });
 
   return {

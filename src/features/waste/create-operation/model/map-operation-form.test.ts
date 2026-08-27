@@ -61,6 +61,10 @@ describe("map-operation-form", () => {
     expect(body.counterparty_id).toBeNull();
   });
 
+  it("starts create form with empty operation_type", () => {
+    expect(getOperationFormValues("create").operation_type).toBe("");
+  });
+
   it("prefills edit values including document_kind from passport", () => {
     expect(getOperationFormValues("edit", operationFixture)).toEqual({
       date: "2026-03-01",
