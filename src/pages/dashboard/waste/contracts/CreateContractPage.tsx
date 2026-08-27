@@ -13,6 +13,7 @@ export function CreateContractPage() {
       description="Создание договора доступно после выбора организации в верхней панели."
     >
       <ContractForm
+        tenantId={activeTenantId}
         mode="create"
         onSaved={(contract) => {
           toast.success("Договор успешно создан");

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 import {
@@ -38,18 +38,7 @@ export function OperationInstructionPicker({
 }: OperationInstructionPickerProps) {
   const selected = instructions.find((item) => item.id === value);
   const canSwitch = instructions.length > 1;
-  const userOpenedRef = useRef(false);
   const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    if (!value && instructions.length > 0) {
-      setExpanded(true);
-      return;
-    }
-    if (value && !userOpenedRef.current) {
-      setExpanded(false);
-    }
-  }, [value, instructions.length]);
 
   if (loading) {
     return (
@@ -85,12 +74,10 @@ export function OperationInstructionPicker({
     );
   }
 
-  const showList = expanded || !selected;
-
   return (
     <Field>
       <FieldLabel htmlFor="operation-instruction">Инструкция</FieldLabel>
-      {selected && !showList ? (
+      {selected && !expanded ? (
         <div
           id="operation-instruction"
           className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2"
@@ -106,10 +93,7 @@ export function OperationInstructionPicker({
               variant="ghost"
               size="sm"
               disabled={disabled}
-              onClick={() => {
-                userOpenedRef.current = true;
-                setExpanded(true);
-              }}
+              onClick={() => setExpanded(true)}
             >
               Другая
               <ChevronDown />
@@ -133,7 +117,6 @@ export function OperationInstructionPicker({
                 aria-checked={checked}
                 disabled={disabled}
                 onClick={() => {
-                  userOpenedRef.current = false;
                   onChange(item.id);
                   setExpanded(false);
                 }}

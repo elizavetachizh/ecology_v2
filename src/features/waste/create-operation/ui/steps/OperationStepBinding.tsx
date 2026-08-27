@@ -118,6 +118,8 @@ export function OperationStepBinding({
         <OperationWastePicker
           key={instructionId}
           unitId={unitId}
+          instructionId={instructionId}
+          tenantId={activeTenantId}
           items={wastesQuery.items}
           total={wastesQuery.total}
           loading={wastesQuery.loading}

@@ -1,11 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import type { InstructionStatus } from "../../../../entities/waste/instructions";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-} from "../../../../shared/ui";
+import { Alert, AlertDescription, AlertTitle } from "../../../../shared/ui";
 
 type InstructionFormHintProps = {
   mode: "create" | "edit";
@@ -22,8 +16,7 @@ export function InstructionFormHint({
       <Alert variant="info">
         <AlertTitle>Документ сразу действует</AlertTitle>
         <AlertDescription>
-          Укажите дату начала и окончания. Без периода статус «Действует»
-          сохранить нельзя.
+          Укажите название, дату начала и окончания.
         </AlertDescription>
       </Alert>
     );
@@ -35,12 +28,9 @@ export function InstructionFormHint({
         {status === "inactive" ? "Сейчас не действует" : "Черновик"}
       </AlertTitle>
       <AlertDescription>
-        Даты можно указать позже. Когда документ готов, смените статус на
-        «Действует» и заполните период, затем перейдите к{" "}
-        <Button asChild variant="link" className="h-auto p-0 text-sm">
-          <Link to="/directories/units">структуре организации</Link>
-        </Button>
-        .
+        Черновик указывается в случае если инструкция находится на согласовании.
+        Когда документ готов, смените статус на «Действует» и заполните период,
+        затем перейдите к структуре организации.
       </AlertDescription>
     </Alert>
   );

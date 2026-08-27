@@ -29,12 +29,14 @@ type ContractFormProps = {
   initial?: Contract | null;
   onSaved: (contract: Contract) => void;
   onCancel: () => void;
+  tenantId: string | null;
 };
 
 export function ContractForm({
   mode,
   contractId,
   initial,
+  tenantId,
   onSaved,
   onCancel,
 }: ContractFormProps) {
@@ -126,6 +128,9 @@ export function ContractForm({
               {" · "}
               <Link
                 to="/directories/counterparties"
+                search={tenantId ? { tenant: tenantId } : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Открыть справочник

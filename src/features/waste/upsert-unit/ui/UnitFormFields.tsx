@@ -71,7 +71,7 @@ export function UnitFormFields({
         error={error}
       />
 
-      <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
+      <div className="grid gap-4 items-start rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         <UnitIdentityFields
           control={control}
           register={register}

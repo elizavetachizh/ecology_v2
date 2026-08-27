@@ -121,7 +121,7 @@ function BindWiuModalForm({
 
   return (
     <ModalContent className="max-w-lg">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="min-w-0" onSubmit={form.handleSubmit(onSubmit)}>
         <ModalHeader>
           <ModalTitle>
             {mode === "create"
@@ -134,7 +134,7 @@ function BindWiuModalForm({
           </ModalDescription>
         </ModalHeader>
 
-        <div className="grid gap-4 py-2">
+        <div className="grid min-w-0 gap-4 py-2">
           {error ? (
             <Alert variant="error">
               <AlertTitle>Не удалось сохранить</AlertTitle>
@@ -172,7 +172,6 @@ function BindWiuModalForm({
                   search={units.search}
                   setSearch={units.setSearch}
                   className="w-full"
-                  contentClassName="w-full"
                   aria-label="Структурная единица ПОД-9"
                 />
               )}
@@ -181,6 +180,9 @@ function BindWiuModalForm({
               Нет нужного журнала?{" "}
               <Link
                 to="/directories/units"
+                search={tenantId ? { tenant: tenantId } : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Открыть структуру
@@ -219,6 +221,9 @@ function BindWiuModalForm({
               Можно выбрать несколько. Нет нужного источника?{" "}
               <Link
                 to="/directories/waste-sources"
+                search={tenantId ? { tenant: tenantId } : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Создать в справочнике

@@ -20,6 +20,7 @@ import {
 } from "../../../../shared/ui";
 
 type OperationUnitPickerProps = {
+  tenantId: string | null;
   tree: UnitTree[];
   loading: boolean;
   error: Error | null;
@@ -50,6 +51,7 @@ function renderPod9UnitOption(option: { value: string; label: string }) {
 }
 
 export function OperationUnitPicker({
+  tenantId,
   tree,
   loading,
   error,
@@ -134,10 +136,12 @@ export function OperationUnitPicker({
       <FieldDescription>
         {description ?? (
           <>
-            Только узлы, на которых ведётся учёт отходов (ПОД-9). Путь
-            показывает всю иерархию до журнала. Нет нужного места?{" "}
+            Нет нужного места учёта?{" "}
             <Link
               to="/directories/units"
+              search={tenantId ? { tenant: tenantId } : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Открыть структуру

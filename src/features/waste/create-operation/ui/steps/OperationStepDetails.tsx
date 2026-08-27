@@ -103,7 +103,7 @@ export function OperationStepDetails({
       </Field>
 
       <OperationTypeFields
-        pending={pending}
+        pending={pending} tenantId={activeTenantId}
         initial={initial}
         bindingSources={selectedBinding?.waste_sources ?? []}
       />

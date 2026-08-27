@@ -16,7 +16,11 @@ import {
   wastesQueryKeys,
   type Waste,
 } from "../../../../../entities/waste/wastes";
-import { AsyncCombobox, Input, Select } from "../../../../../shared/ui";
+import {
+  AsyncCombobox,
+  DateFilterInput,
+  Select,
+} from "../../../../../shared/ui";
 
 export type OperationsFiltersValue = {
   unit_id?: string;
@@ -55,7 +59,10 @@ export function OperationsFilters({
   });
 
   const selectedUnitQuery = useQuery({
-    queryKey: unitsQueryKeys.detail(tenantId ?? "none", values.unit_id ?? "none"),
+    queryKey: unitsQueryKeys.detail(
+      tenantId ?? "none",
+      values.unit_id ?? "none",
+    ),
     queryFn: ({ signal }) => getUnit(values.unit_id!, signal),
     enabled: Boolean(tenantId && values.unit_id),
   });
@@ -134,24 +141,18 @@ export function OperationsFilters({
       </Select>
       <div className="flex items-center gap-1.5">
         <span className="text-sm text-muted-foreground">с</span>
-        <Input
-          type="date"
+        <DateFilterInput
           aria-label="Дата с"
-          className="w-36"
-          value={values.date_from ?? ""}
-          onChange={(e) =>
-            onChange({ date_from: e.target.value || undefined })
-          }
+          value={values.date_from}
+          onValueChange={(date_from) => onChange({ date_from })}
         />
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-sm text-muted-foreground">по</span>
-        <Input
-          type="date"
+        <DateFilterInput
           aria-label="Дата по"
-          className="w-36"
-          value={values.date_to ?? ""}
-          onChange={(e) => onChange({ date_to: e.target.value || undefined })}
+          value={values.date_to}
+          onValueChange={(date_to) => onChange({ date_to })}
         />
       </div>
     </div>

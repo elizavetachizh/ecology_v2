@@ -20,10 +20,12 @@ type FormedFieldsProps = {
   pending: boolean;
   bindingSources: WasteSourceBrief[];
   initial?: Operation | null;
+  tenantId: string | null;
 };
 
 export function FormedFields({
   pending,
+  tenantId,
   bindingSources,
   initial,
 }: FormedFieldsProps) {
@@ -107,6 +109,9 @@ export function FormedFields({
             Источники из привязки отхода к этому месту учёта. Нет нужного?{" "}
             <Link
               to="/directories/waste-sources"
+              search={tenantId ? { tenant: tenantId } : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Открыть справочник

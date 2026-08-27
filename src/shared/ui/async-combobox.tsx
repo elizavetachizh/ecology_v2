@@ -107,18 +107,18 @@ export function AsyncCombobox({
           disabled={disabled}
           data-slot="async-combobox-trigger"
           className={cn(
-            "flex min-h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm shadow-sm",
+            "flex min-h-9 min-w-0 w-full items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm shadow-sm",
             "outline-none transition-colors",
             "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
         >
-          <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
             {selectedOption ? (
               <span
                 key={selectedOption.value}
-                className="inline-flex max-w-full items-center gap-1.5 rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
+                className="flex min-w-0 max-w-full items-center gap-1.5 overflow-hidden rounded bg-secondary px-1.5 py-0.5 text-xs text-secondary-foreground"
               >
                 {renderValue ? (
                   renderValue(selectedOption)
@@ -202,7 +202,7 @@ export function AsyncCombobox({
                     disabled={option.disabled}
                     onClick={() => toggleOption(option)}
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none",
+                      "flex w-full min-w-0 items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none",
                       "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
                       "disabled:pointer-events-none disabled:opacity-50",
                       selected && "bg-accent text-accent-foreground",

@@ -69,7 +69,9 @@ type FieldProps = {
 };
 
 function Field({ children, className }: FieldProps) {
-  return <div className={cn("grid gap-1.5", className)}>{children}</div>;
+  return (
+    <div className={cn("grid min-w-0 gap-1.5", className)}>{children}</div>
+  );
 }
 
 type FormFieldProps = {

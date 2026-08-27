@@ -1,5 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+  retainSearchParams,
+  RouterProvider,
+} from "@tanstack/react-router";
+import {
   cleanup,
   fireEvent,
   render,
@@ -15,6 +22,7 @@ import {
   writeActiveTenantId,
 } from "../../../shared/auth/active-tenant-storage";
 import { clearSessionState } from "../../../shared/auth/cleanup-session";
+import { parseRootSearch } from "../../router/search-params";
 import { TenantProvider } from "./TenantProvider";
 
 vi.mock("../../../entities/user", () => ({
@@ -79,17 +87,29 @@ function Consumer() {
   );
 }
 
-function renderProvider(onTenantChange = vi.fn()) {
+async function renderProvider(initialUrl = "/") {
+  const rootRoute = createRootRoute({
+    validateSearch: parseRootSearch,
+    search: {
+      middlewares: [retainSearchParams(["tenant"])],
+    },
+    component: () => (
+      <TenantProvider>
+        <Consumer />
+      </TenantProvider>
+    ),
+  });
+  const history = createMemoryHistory({ initialEntries: [initialUrl] });
+  const router = createRouter({ routeTree: rootRoute, history });
+  await router.load();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return {
-    onTenantChange,
+    router,
     ...render(
       <QueryClientProvider client={queryClient}>
-        <TenantProvider onTenantChange={onTenantChange}>
-          <Consumer />
-        </TenantProvider>
+        <RouterProvider router={router} />
       </QueryClientProvider>,
     ),
   };
@@ -97,6 +117,7 @@ function renderProvider(onTenantChange = vi.fn()) {
 
 describe("TenantProvider", () => {
   beforeEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     getCurrentUserMock.mockReset();
     getTenantsMock.mockReset();
@@ -106,24 +127,29 @@ describe("TenantProvider", () => {
 
   afterEach(() => {
     cleanup();
+    localStorage.clear();
     sessionStorage.clear();
   });
 
-  it("loads profile and tenants and switches active tenant", async () => {
-    const { onTenantChange } = renderProvider();
+  it("loads profile and tenants and switches active tenant in URL and storage", async () => {
+    const { router } = await renderProvider();
 
     expect(await screen.findByText("testuser")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByTestId("active-tenant")).toHaveTextContent("none");
 
     fireEvent.click(screen.getByText("select-1"));
-    await waitFor(() => expect(onTenantChange).toHaveBeenCalledOnce());
-    expect(screen.getByTestId("active-tenant")).toHaveTextContent("tenant-1");
+    await waitFor(() => {
+      expect(screen.getByTestId("active-tenant")).toHaveTextContent("tenant-1");
+    });
     expect(readActiveTenantId("tenant-01")).toBe("tenant-1");
+    await waitFor(() => {
+      expect(router.state.location.search.tenant).toBe("tenant-1");
+    });
   });
 
   it("keeps active tenant null when storage is empty and there are 2+ tenants", async () => {
-    renderProvider();
+    await renderProvider();
 
     expect(await screen.findByTestId("active-tenant")).toHaveTextContent(
       "none",
@@ -131,18 +157,33 @@ describe("TenantProvider", () => {
     expect(readActiveTenantId("tenant-01")).toBeNull();
   });
 
-  it("restores valid tenant id from sessionStorage without click", async () => {
+  it("prefers tenant from URL over stored last-used", async () => {
     writeActiveTenantId("tenant-01", "tenant-2");
-    renderProvider();
+    await renderProvider("/?tenant=tenant-1");
+
+    expect(await screen.findByTestId("active-tenant")).toHaveTextContent(
+      "tenant-1",
+    );
+    await waitFor(() => {
+      expect(readActiveTenantId("tenant-01")).toBe("tenant-1");
+    });
+  });
+
+  it("restores valid tenant id from localStorage and writes it to the URL", async () => {
+    writeActiveTenantId("tenant-01", "tenant-2");
+    const { router } = await renderProvider("/");
 
     expect(await screen.findByTestId("active-tenant")).toHaveTextContent(
       "tenant-2",
     );
+    await waitFor(() => {
+      expect(router.state.location.search.tenant).toBe("tenant-2");
+    });
   });
 
   it("clears stale stored id and stays without active tenant", async () => {
     writeActiveTenantId("tenant-01", "tenant-missing");
-    renderProvider();
+    await renderProvider();
 
     expect(await screen.findByTestId("active-tenant")).toHaveTextContent(
       "none",
@@ -152,15 +193,16 @@ describe("TenantProvider", () => {
     });
   });
 
-  it("auto-selects the only tenant and persists it", async () => {
+  it("auto-selects the only tenant and persists it to storage and URL", async () => {
     getTenantsMock.mockResolvedValue([twoTenants[0]!]);
-    renderProvider();
+    const { router } = await renderProvider();
 
     expect(await screen.findByTestId("active-tenant")).toHaveTextContent(
       "tenant-1",
     );
     await waitFor(() => {
       expect(readActiveTenantId("tenant-01")).toBe("tenant-1");
+      expect(router.state.location.search.tenant).toBe("tenant-1");
     });
   });
 

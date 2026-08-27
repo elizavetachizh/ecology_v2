@@ -80,7 +80,7 @@ export function MultipleCombobox({
           disabled={disabled}
           data-slot="multiple-combobox-trigger"
           className={cn(
-            "flex min-h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm shadow-sm",
+            "flex min-h-9 min-w-0 w-full items-center justify-between gap-2 overflow-hidden rounded-md border border-input bg-background px-3 py-1.5 text-left text-sm shadow-sm",
             "outline-none transition-colors",
             "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40",
             "disabled:cursor-not-allowed disabled:opacity-50",

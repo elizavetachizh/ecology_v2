@@ -33,6 +33,7 @@ export function OperationStepUnit({
       control={control}
       render={({ field }) => (
         <OperationUnitPicker
+          tenantId={activeTenantId}
           tree={units.tree}
           loading={units.loading}
           error={units.error}

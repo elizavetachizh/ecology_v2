@@ -1,5 +1,9 @@
 export { Button, buttonVariants, type ButtonProps } from "./button";
 export { Input, type InputProps } from "./input";
+export {
+  DateFilterInput,
+  type DateFilterInputProps,
+} from "./date-filter-input";
 export { Select, type SelectProps } from "./select";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 export { PageContextBar, type PageContextBarProps } from "./page-context-bar";

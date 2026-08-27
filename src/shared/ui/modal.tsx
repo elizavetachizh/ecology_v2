@@ -59,12 +59,12 @@ function ModalContent({
       <DialogPrimitive.Content
         data-slot="modal-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4",
+          "fixed top-1/2 left-1/2 z-50 grid w-full min-w-0 max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4",
           "rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg",
           "duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          "max-h-[min(90vh,720px)] overflow-y-auto",
+          "max-h-[min(90vh,720px)] overflow-x-hidden overflow-y-auto",
           className,
         )}
         {...props}

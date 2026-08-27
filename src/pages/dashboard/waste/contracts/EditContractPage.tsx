@@ -52,6 +52,7 @@ export function EditContractPage() {
       description="Чтобы открыть договор, выберите организацию в верхней панели."
     >
       <ContractForm
+        tenantId={activeTenantId}
         mode="edit"
         contractId={contractId}
         initial={contractQuery.data}

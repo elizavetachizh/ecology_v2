@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Check } from "lucide-react";
 import type { UnitInstructionWaste } from "../../../../entities/waste/unit-instruction-waste";
 import {
   HAZARD_CLASS_LABEL,
@@ -20,6 +21,8 @@ import {
 
 type OperationWastePickerProps = {
   unitId: string;
+  instructionId: string;
+  tenantId?: string | null;
   items: UnitInstructionWaste[];
   total: number;
   loading: boolean;
@@ -35,8 +38,36 @@ function wasteLabel(waste: Pick<WasteBrief, "waste_classifier">) {
   return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
 }
 
+function UnitCardLink({
+  unitId,
+  instructionId,
+  tenantId,
+}: {
+  unitId: string;
+  instructionId: string;
+  tenantId?: string | null;
+}) {
+  return (
+    <Link
+      to="/directories/units/$unitId"
+      params={{ unitId }}
+      search={{
+        instructionId,
+        ...(tenantId ? { tenant: tenantId } : {}),
+      }}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium text-primary underline-offset-4 hover:underline"
+    >
+      Открыть место учёта
+    </Link>
+  );
+}
+
 export function OperationWastePicker({
   unitId,
+  instructionId,
+  tenantId,
   items,
   total,
   loading,
@@ -54,9 +85,9 @@ export function OperationWastePicker({
     if (!query) return items;
     return items.filter((item) => {
       const classifier = item.waste.waste_classifier;
-      return `${classifier.code} ${classifier.name}`.toLowerCase().includes(
-        query,
-      );
+      return `${classifier.code} ${classifier.name}`
+        .toLowerCase()
+        .includes(query);
     });
   }, [items, query]);
 
@@ -79,14 +110,11 @@ export function OperationWastePicker({
         <AlertTitle>Нет привязанных отходов</AlertTitle>
         <AlertDescription>
           Привяжите отходы к этой инструкции на карточке места учёта.{" "}
-          <Link
-            to="/directories/units/$unitId"
-            params={{ unitId }}
-            search={{ instructionId: undefined }}
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Открыть место учёта
-          </Link>
+          <UnitCardLink
+            unitId={unitId}
+            instructionId={instructionId}
+            tenantId={tenantId}
+          />
         </AlertDescription>
       </Alert>
     );
@@ -114,7 +142,7 @@ export function OperationWastePicker({
         id="operation-wastes"
         role="radiogroup"
         aria-label="Отход"
-        className="grid max-h-64 gap-1.5 overflow-y-auto"
+        className="grid max-h-96 gap-1.5 overflow-y-auto"
       >
         {filtered.map((item) => {
           const checked = item.waste_id === value;
@@ -127,18 +155,26 @@ export function OperationWastePicker({
               disabled={disabled}
               onClick={() => onChange(item.waste_id)}
               className={cn(
-                "flex w-full flex-col gap-0.5 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+                "flex w-full items-start gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
                 checked
                   ? "border-primary bg-primary/5"
                   : "border-border hover:bg-accent",
                 disabled && "opacity-50",
               )}
             >
-              <span className="font-medium">{wasteLabel(item.waste)}</span>
-              <span className="text-xs text-muted-foreground">
-                {HAZARD_CLASS_LABEL[item.waste.hazard_class]} ·{" "}
-                {UOM_LABEL[item.waste.uom]}
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="font-medium">{wasteLabel(item.waste)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {HAZARD_CLASS_LABEL[item.waste.hazard_class]} ·{" "}
+                  {UOM_LABEL[item.waste.uom]}
+                </span>
               </span>
+              {checked ? (
+                <Check
+                  className="mt-0.5 size-4 shrink-0 text-primary"
+                  aria-hidden
+                />
+              ) : null}
             </button>
           );
         })}
@@ -146,6 +182,14 @@ export function OperationWastePicker({
       {filtered.length === 0 ? (
         <FieldDescription>Ничего не найдено. Уточните фильтр.</FieldDescription>
       ) : null}
+      <FieldDescription>
+        Нет нужного отхода? Проверьте привязки на карточке места учёта.{" "}
+        <UnitCardLink
+          unitId={unitId}
+          instructionId={instructionId}
+          tenantId={tenantId}
+        />
+      </FieldDescription>
       {total > items.length ? (
         <FieldDescription>
           Показаны первые {items.length} из {total}.
@@ -155,7 +199,8 @@ export function OperationWastePicker({
         <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
           <div className="font-medium">{wasteLabel(preview)}</div>
           <div className="text-muted-foreground">
-            {HAZARD_CLASS_LABEL[preview.hazard_class]} · {UOM_LABEL[preview.uom]}
+            {HAZARD_CLASS_LABEL[preview.hazard_class]} ·{" "}
+            {UOM_LABEL[preview.uom]}
           </div>
         </div>
       ) : null}

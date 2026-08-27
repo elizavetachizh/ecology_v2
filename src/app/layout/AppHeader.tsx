@@ -1,8 +1,8 @@
 import { Bell, LogOut, PanelLeft } from "lucide-react";
 import { useTenant } from "../../entities/tenant";
+import { TenantSwitcher } from "../../features/select-tenant";
 import { useLogout } from "../../features/auth/logout";
 import { Button } from "../../shared/ui";
-import { Select } from "../../shared/ui";
 
 type AppHeaderProps = {
   sidebarCollapsed: boolean;
@@ -15,7 +15,7 @@ export default function AppHeader({
   onToggleSidebar,
   onOpenMobileSidebar,
 }: AppHeaderProps) {
-  const { user, flatTenants, activeTenantId, selectTenant } = useTenant();
+  const { user } = useTenant();
   const { logout, isLoggingOut } = useLogout();
   const initials = user.username.slice(0, 2).toUpperCase();
 
@@ -45,24 +45,7 @@ export default function AppHeader({
       </Button>
 
       <div className="flex min-w-0 items-center gap-2">
-        <Select
-          aria-label="Активная организация"
-          value={activeTenantId ?? ""}
-          onChange={(event) => void selectTenant(event.target.value)}
-          disabled={flatTenants.length === 0}
-          className="max-w-[12rem] sm:max-w-xs"
-        >
-          <option value="" disabled>
-            {flatTenants.length === 0
-              ? "Нет доступных организаций"
-              : "Выберите организацию"}
-          </option>
-          {flatTenants.map((tenant) => (
-            <option key={tenant.id} value={tenant.id}>
-              {tenant.short || tenant.name}
-            </option>
-          ))}
-        </Select>
+        <TenantSwitcher />
 
         <Button
           type="button"
@@ -75,17 +58,17 @@ export default function AppHeader({
 
         <div className="flex items-center">
           <div className="flex h-auto gap-2 px-2 py-1.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-medium text-primary-foreground">
-            {initials}
-          </span>
-          <span className="hidden min-w-0 text-left sm:block">
-            <span className="block truncate text-sm font-medium leading-tight text-foreground">
-              {user.username}
+            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-medium text-primary-foreground">
+              {initials}
             </span>
-            <span className="block truncate text-xs font-normal text-muted-foreground">
-              {user.email ?? user.realm}
+            <span className="hidden min-w-0 text-left sm:block">
+              <span className="block truncate text-sm font-medium leading-tight text-foreground">
+                {user.username}
+              </span>
+              <span className="block truncate text-xs font-normal text-muted-foreground">
+                {user.email ?? user.realm}
+              </span>
             </span>
-          </span>
           </div>
           <Button
             type="button"

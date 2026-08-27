@@ -19,12 +19,14 @@ import { TransferredOutFields } from "./TransferredOutFields";
 
 type OperationTypeFieldsProps = {
   pending: boolean;
+  tenantId: string | null;
   initial?: Operation | null;
   bindingSources: WasteSourceBrief[];
 };
 
 export function OperationTypeFields({
   pending,
+  tenantId,
   initial,
   bindingSources,
 }: OperationTypeFieldsProps) {
@@ -38,6 +40,7 @@ export function OperationTypeFields({
         pending={pending}
         bindingSources={bindingSources}
         initial={initial}
+        tenantId={tenantId}
       />
     );
   }
@@ -73,7 +76,7 @@ export function OperationTypeFields({
   }
 
   if (operationType === "received_out") {
-    return <ReceivedOutFields pending={pending} />;
+    return <ReceivedOutFields pending={pending} tenantId={tenantId} />;
   }
 
   if (operationType === "transferred_out") {

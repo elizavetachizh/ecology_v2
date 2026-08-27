@@ -2,11 +2,21 @@ import { describe, expect, it } from "vitest";
 import { OperationTypeValues } from "../../entities/waste/operations";
 import { PassportTransportTypeValues } from "../../entities/waste/passports";
 import { TtnStatusValues } from "../../entities/waste/ttns";
+import { PermitStatusValues } from "../../entities/waste/permits";
 import {
+  parseRootSearch,
   parseSearchEnum,
   parseSearchIsoDate,
   parseSearchQuery,
 } from "./search-params";
+
+describe("parseRootSearch", () => {
+  it("parses tenant from search", () => {
+    expect(parseRootSearch({ tenant: "org-1" })).toEqual({ tenant: "org-1" });
+    expect(parseRootSearch({ tenant: "  " })).toEqual({ tenant: undefined });
+    expect(parseRootSearch({})).toEqual({ tenant: undefined });
+  });
+});
 
 describe("parseSearchIsoDate", () => {
   it("accepts YYYY-MM-DD", () => {
@@ -48,5 +58,13 @@ describe("ttns search params", () => {
     expect(parseSearchEnum("active", TtnStatusValues)).toBe("active");
     expect(parseSearchEnum("inactive", TtnStatusValues)).toBe("inactive");
     expect(parseSearchEnum("draft", TtnStatusValues)).toBeUndefined();
+  });
+});
+
+describe("permits search params", () => {
+  it("parses status enum", () => {
+    expect(parseSearchEnum("active", PermitStatusValues)).toBe("active");
+    expect(parseSearchEnum("inactive", PermitStatusValues)).toBe("inactive");
+    expect(parseSearchEnum("draft", PermitStatusValues)).toBeUndefined();
   });
 });

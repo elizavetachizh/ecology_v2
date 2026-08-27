@@ -127,7 +127,7 @@ export function DataTable<TData, TValue = unknown>({
         className,
       )}
     >
-      <Table>
+      <Table className="table-fixed">
         <TableHeader className="bg-muted/40">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -166,7 +166,10 @@ export function DataTable<TData, TValue = unknown>({
                 onClick={() => onRowClick?.(row)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    style={{ width: cell.column.getSize() }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

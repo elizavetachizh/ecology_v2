@@ -41,6 +41,7 @@ export function InternalTransferFields({
         control={control}
         render={({ field }) => (
           <OperationUnitPicker
+            tenantId={activeTenantId}
             tree={units.tree}
             loading={units.loading}
             error={units.error}

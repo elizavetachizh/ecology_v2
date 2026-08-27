@@ -4,49 +4,83 @@ export function activeTenantStorageKey(realm: string): string {
   return `${STORAGE_KEY_PREFIX}${realm}`;
 }
 
-export function readActiveTenantId(realm: string): string | null {
-  if (!realm || typeof sessionStorage === "undefined") return null;
+function readKey(storage: Storage, key: string): string | null {
   try {
-    const value = sessionStorage.getItem(activeTenantStorageKey(realm));
+    const value = storage.getItem(key);
     return value && value.trim() ? value : null;
   } catch {
     return null;
   }
 }
 
-export function writeActiveTenantId(realm: string, tenantId: string): void {
-  if (!realm || !tenantId || typeof sessionStorage === "undefined") return;
+function writeKey(storage: Storage, key: string, value: string): void {
   try {
-    sessionStorage.setItem(activeTenantStorageKey(realm), tenantId);
+    storage.setItem(key, value);
   } catch {
-    // Quota / private mode — выбор останется только в памяти до следующего reload.
+    // Quota / private mode — выбор останется в URL этой вкладки.
   }
 }
 
-export function clearActiveTenantId(realm: string): void {
-  if (!realm || typeof sessionStorage === "undefined") return;
+function removeKey(storage: Storage, key: string): void {
   try {
-    sessionStorage.removeItem(activeTenantStorageKey(realm));
+    storage.removeItem(key);
   } catch {
     // ignore
   }
 }
 
-/** Очистка всех сохранённых org при logout (все realm на этом origin). */
-export function clearAllActiveTenantIds(): void {
-  if (typeof sessionStorage === "undefined") return;
+function clearPrefixedKeys(storage: Storage): void {
   try {
     const keysToRemove: string[] = [];
-    for (let i = 0; i < sessionStorage.length; i += 1) {
-      const key = sessionStorage.key(i);
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
       if (key?.startsWith(STORAGE_KEY_PREFIX)) {
         keysToRemove.push(key);
       }
     }
     for (const key of keysToRemove) {
-      sessionStorage.removeItem(key);
+      storage.removeItem(key);
     }
   } catch {
     // ignore
   }
+}
+
+function hasStorage(name: "localStorage" | "sessionStorage"): boolean {
+  return typeof globalThis[name] !== "undefined";
+}
+
+export function readActiveTenantId(realm: string): string | null {
+  if (!realm) return null;
+  const key = activeTenantStorageKey(realm);
+  if (hasStorage("localStorage")) {
+    const fromLocal = readKey(localStorage, key);
+    if (fromLocal) return fromLocal;
+  }
+  if (!hasStorage("sessionStorage")) return null;
+  const fromSession = readKey(sessionStorage, key);
+  if (!fromSession) return null;
+  if (hasStorage("localStorage")) {
+    writeKey(localStorage, key, fromSession);
+    removeKey(sessionStorage, key);
+  }
+  return fromSession;
+}
+
+export function writeActiveTenantId(realm: string, tenantId: string): void {
+  if (!realm || !tenantId || !hasStorage("localStorage")) return;
+  writeKey(localStorage, activeTenantStorageKey(realm), tenantId);
+}
+
+export function clearActiveTenantId(realm: string): void {
+  if (!realm) return;
+  const key = activeTenantStorageKey(realm);
+  if (hasStorage("localStorage")) removeKey(localStorage, key);
+  if (hasStorage("sessionStorage")) removeKey(sessionStorage, key);
+}
+
+/** Очистка всех сохранённых org при logout (все realm на этом origin). */
+export function clearAllActiveTenantIds(): void {
+  if (hasStorage("localStorage")) clearPrefixedKeys(localStorage);
+  if (hasStorage("sessionStorage")) clearPrefixedKeys(sessionStorage);
 }

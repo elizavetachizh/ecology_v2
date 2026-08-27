@@ -5,7 +5,7 @@ import { OperationStatusBadge } from "./OperationStatusBadge";
 describe("OperationStatusBadge", () => {
   it.each([
     ["confirmed", "Подтверждено"],
-    ["pending", "Ожидает обработки"],
+    ["pending", "Ожидает подтверждения"],
     ["confirmation_required", "Требует подтверждения"],
     ["declined", "Отклонено"],
   ] as const)("renders label for %s", (status, label) => {

@@ -2,6 +2,7 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  retainSearchParams,
 } from "@tanstack/react-router";
 import type { AuthContextValue } from "../shared/auth/auth.types";
 import { AppLayout } from "./layout/AppLayout";
@@ -26,6 +27,9 @@ import { CounterpartiesPage } from "../pages/dashboard/waste/counterparties/Coun
 import { ContractsPage } from "../pages/dashboard/waste/contracts/ContractsPage";
 import { CreateContractPage } from "../pages/dashboard/waste/contracts/CreateContractPage";
 import { EditContractPage } from "../pages/dashboard/waste/contracts/EditContractPage";
+import { PermitsPage } from "../pages/dashboard/waste/permits/PermitsPage";
+import { CreatePermitPage } from "../pages/dashboard/waste/permits/CreatePermitPage";
+import { EditPermitPage } from "../pages/dashboard/waste/permits/EditPermitPage";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
@@ -44,6 +48,10 @@ import {
   ContractTypeValues,
 } from "../entities/waste/contracts";
 import {
+  PermitSortFields,
+  PermitStatusValues,
+} from "../entities/waste/permits";
+import {
   PassportSortFields,
   PassportStatusValues,
   PassportTransportTypeValues,
@@ -58,6 +66,7 @@ import {
   parseSearchOffset,
   parseSearchOrder,
   parseSearchQuery,
+  parseRootSearch,
   type InstructionsSearch,
   type OperationsSearch,
   type PassportsSearch,
@@ -68,6 +77,7 @@ import {
   type StructureSearch,
   type CounterpartiesSearch,
   type ContractsSearch,
+  type PermitsSearch,
   type WasteSourcesSearch,
   type WastesSearch,
   type PersonsSearch,
@@ -79,6 +89,10 @@ import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
 import { PersonSortFields } from "../entities/waste/persons";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
+  validateSearch: parseRootSearch,
+  search: {
+    middlewares: [retainSearchParams(["tenant"])],
+  },
   beforeLoad: async ({ context }) => {
     if (!context.auth.authenticated) await context.auth.login();
   },
@@ -346,6 +360,35 @@ const directoriesEditContractRoute = createRoute({
   component: EditContractPage,
 });
 
+const directoriesPermitsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/permits",
+  validateSearch: (search: Record<string, unknown>): PermitsSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      status: parseSearchEnum(search.status, PermitStatusValues),
+      unit_id: parseSearchQuery(search.unit_id),
+      sort: parseSearchEnum(search.sort, PermitSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: PermitsPage,
+});
+
+const directoriesCreatePermitRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/permits/new",
+  component: CreatePermitPage,
+});
+
+const directoriesEditPermitRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/directories/permits/$permitId",
+  component: EditPermitPage,
+});
+
 const directoriesNormsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/directories/norms",
@@ -428,6 +471,9 @@ const routeTree = rootRoute.addChildren([
   directoriesContractsRoute,
   directoriesCreateContractRoute,
   directoriesEditContractRoute,
+  directoriesPermitsRoute,
+  directoriesCreatePermitRoute,
+  directoriesEditPermitRoute,
   directoriesLimitsRoute,
   directoriesNormsRoute,
   directoriesInstructionsRoute,

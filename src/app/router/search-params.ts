@@ -5,6 +5,10 @@ import type {
   ContractType,
 } from "../../entities/waste/contracts";
 import type {
+  PermitSortField,
+  PermitStatus,
+} from "../../entities/waste/permits";
+import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
@@ -28,6 +32,17 @@ import type { PersonSortField } from "../../entities/waste/persons";
 export type RouterContext = {
   auth: AuthContextValue;
 };
+
+/** Root search: активная организация. Retain на всех переходах. */
+export type RootSearch = {
+  tenant?: string;
+};
+
+export function parseRootSearch(search: Record<string, unknown>): RootSearch {
+  return {
+    tenant: parseSearchQuery(search.tenant),
+  };
+}
 
 /** Общий кусок list-URL: q / sort / order / limit / offset */
 export type ListSearchParams<TSort extends string> = {
@@ -61,6 +76,11 @@ export type ContractsSearch = ListSearchParams<ContractSortField> & {
   status?: ContractStatus;
   contract_type?: ContractType;
   counterparty_id?: string;
+};
+
+export type PermitsSearch = ListSearchParams<PermitSortField> & {
+  status?: PermitStatus;
+  unit_id?: string;
 };
 
 /** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */

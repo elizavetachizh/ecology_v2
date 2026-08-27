@@ -9,6 +9,7 @@ import {
 
 describe("active-tenant-storage", () => {
   beforeEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
   });
 
@@ -18,7 +19,7 @@ describe("active-tenant-storage", () => {
 
     expect(readActiveTenantId("mingas")).toBe("tenant-a");
     expect(readActiveTenantId("other")).toBe("tenant-b");
-    expect(sessionStorage.getItem(activeTenantStorageKey("mingas"))).toBe(
+    expect(localStorage.getItem(activeTenantStorageKey("mingas"))).toBe(
       "tenant-a",
     );
   });
@@ -35,17 +36,27 @@ describe("active-tenant-storage", () => {
   it("clearAllActiveTenantIds removes only eco.activeTenantId.* keys", () => {
     writeActiveTenantId("mingas", "tenant-a");
     writeActiveTenantId("other", "tenant-b");
-    sessionStorage.setItem("unrelated", "keep");
+    localStorage.setItem("unrelated", "keep");
 
     clearAllActiveTenantIds();
 
     expect(readActiveTenantId("mingas")).toBeNull();
     expect(readActiveTenantId("other")).toBeNull();
-    expect(sessionStorage.getItem("unrelated")).toBe("keep");
+    expect(localStorage.getItem("unrelated")).toBe("keep");
   });
 
   it("treats blank stored value as missing", () => {
-    sessionStorage.setItem(activeTenantStorageKey("mingas"), "  ");
+    localStorage.setItem(activeTenantStorageKey("mingas"), "  ");
     expect(readActiveTenantId("mingas")).toBeNull();
+  });
+
+  it("migrates a sessionStorage value into localStorage once", () => {
+    sessionStorage.setItem(activeTenantStorageKey("mingas"), "tenant-a");
+
+    expect(readActiveTenantId("mingas")).toBe("tenant-a");
+    expect(localStorage.getItem(activeTenantStorageKey("mingas"))).toBe(
+      "tenant-a",
+    );
+    expect(sessionStorage.getItem(activeTenantStorageKey("mingas"))).toBeNull();
   });
 });

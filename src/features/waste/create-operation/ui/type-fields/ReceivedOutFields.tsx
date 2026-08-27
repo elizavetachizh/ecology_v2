@@ -13,9 +13,13 @@ import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
 
 type ReceivedOutFieldsProps = {
   pending: boolean;
+  tenantId: string | null;
 };
 
-export function ReceivedOutFields({ pending }: ReceivedOutFieldsProps) {
+export function ReceivedOutFields({
+  pending,
+  tenantId,
+}: ReceivedOutFieldsProps) {
   const { activeTenantId } = useTenant();
   const {
     control,
@@ -45,6 +49,9 @@ export function ReceivedOutFields({ pending }: ReceivedOutFieldsProps) {
           Нет нужного контрагента?{" "}
           <Link
             to="/directories/counterparties"
+            search={tenantId ? { tenant: tenantId } : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
             className="font-medium text-primary underline-offset-4 hover:underline"
           >
             Открыть справочник

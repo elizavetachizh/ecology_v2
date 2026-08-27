@@ -198,6 +198,9 @@ export function PassportForm({
               Только действующие договоры типа «Утилизация». Нет договора?{" "}
               <Link
                 to="/directories/contracts/new"
+                search={activeTenantId ? { tenant: activeTenantId } : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Создать в справочнике

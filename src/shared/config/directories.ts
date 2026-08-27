@@ -46,6 +46,13 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: "/directories/contracts",
   },
   {
+    id: "permits",
+    title: "Разрешения",
+    description:
+      "Разрешения на захоронение отходов: номер, подразделение, сроки, лимиты",
+    to: "/directories/permits",
+  },
+  {
     id: "limits",
     title: "Лимиты накопления",
     description: "Лимиты по местам хранения",

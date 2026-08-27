@@ -1,10 +1,5 @@
 import { useFormContext } from "react-hook-form";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-  Select,
-} from "../../../../../shared/ui";
+import { FormField, Select } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 
 type EnumFieldName = Extract<
@@ -35,10 +30,12 @@ export function EnumSelectField<T extends string>({
   } = useFormContext<OperationFormValues>();
 
   return (
-    <Field>
-      <FieldLabel htmlFor={name} required>
-        {label}
-      </FieldLabel>
+    <FormField
+      htmlFor={name}
+      label={label}
+      required
+      error={errors[name]?.message}
+    >
       <Select
         id={name}
         className="w-full"
@@ -53,7 +50,6 @@ export function EnumSelectField<T extends string>({
           </option>
         ))}
       </Select>
-      <FieldError>{errors[name]?.message}</FieldError>
-    </Field>
+    </FormField>
   );
 }

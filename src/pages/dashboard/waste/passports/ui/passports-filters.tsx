@@ -9,7 +9,7 @@ import {
 import { ContractSelect } from "../../../../../entities/waste/contracts";
 import { UnitSelect } from "../../../../../entities/waste/units";
 import {
-  Input,
+  DateFilterInput,
   ListSearchField,
   Select,
   Tabs,
@@ -87,26 +87,18 @@ export function PassportsFilters({
 
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-muted-foreground">с</span>
-          <Input
-            type="date"
+          <DateFilterInput
             aria-label="Дата с"
-            className="w-36"
-            value={values.date_from ?? ""}
-            onChange={(event) =>
-              onChange({ date_from: event.target.value || undefined })
-            }
+            value={values.date_from}
+            onValueChange={(date_from) => onChange({ date_from })}
           />
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-sm text-muted-foreground">по</span>
-          <Input
-            type="date"
+          <DateFilterInput
             aria-label="Дата по"
-            className="w-36"
-            value={values.date_to ?? ""}
-            onChange={(event) =>
-              onChange({ date_to: event.target.value || undefined })
-            }
+            value={values.date_to}
+            onValueChange={(date_to) => onChange({ date_to })}
           />
         </div>
       </div>

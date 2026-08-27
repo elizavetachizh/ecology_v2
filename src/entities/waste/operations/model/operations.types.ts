@@ -27,7 +27,7 @@ export const USE_PURPOSE_LABEL = {
 
 export const OPERATION_STATUS_LABEL = {
   confirmed: "Подтверждено",
-  pending: "Ожидает обработки",
+  pending: "Ожидает подтверждения",
   confirmation_required: "Требует подтверждения",
   declined: "Отклонено",
 } as const;

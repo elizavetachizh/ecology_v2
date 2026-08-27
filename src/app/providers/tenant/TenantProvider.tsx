@@ -1,15 +1,18 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
 import {
+  flattenTenants,
   getTenants,
+  isKnownTenant,
+  resolveActiveTenantId,
   TenantContext,
-  type Tenant,
 } from "../../../entities/tenant";
 import { getCurrentUser } from "../../../entities/user";
 import { setTenantIdResolver } from "../../../shared/api/api-client";
@@ -23,39 +26,31 @@ import { DEFAULT_STALE_TIME_MS } from "../../../shared/lib/query-client";
 
 type TenantProviderProps = {
   children: ReactNode;
-  onTenantChange: () => void | Promise<void>;
 };
 
-function flattenTenants(tenants: Tenant[]): Tenant[] {
-  return tenants.flatMap((tenant) => [
-    tenant,
-    ...flattenTenants(tenant.children ?? []),
-  ]);
+async function wipeTenantScopedQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  await queryClient.cancelQueries({ queryKey: ["mdm"] });
+  queryClient.removeQueries({ queryKey: ["mdm"] });
+  await queryClient.cancelQueries({ queryKey: ["operations"] });
+  queryClient.removeQueries({ queryKey: ["operations"] });
 }
 
-function isKnownTenant(flatTenants: Tenant[], tenantId: string | null) {
-  return Boolean(
-    tenantId && flatTenants.some((tenant) => tenant.id === tenantId),
-  );
+function withTenantSearch<T extends { tenant?: string }>(
+  prev: T,
+  tenant: string | undefined,
+): T {
+  return { ...prev, tenant };
 }
 
-function resolveActiveTenantId(
-  flatTenants: Tenant[],
-  selectedId: string | null,
-  storedId: string | null,
-): string | null {
-  if (isKnownTenant(flatTenants, selectedId)) return selectedId;
-  if (isKnownTenant(flatTenants, storedId)) return storedId;
-  if (flatTenants.length === 1) return flatTenants[0]!.id;
-  return null;
-}
-
-export function TenantProvider({
-  children,
-  onTenantChange,
-}: TenantProviderProps) {
+export function TenantProvider({ children }: TenantProviderProps) {
   const queryClient = useQueryClient();
-  const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const tenantFromUrl = useSearch({
+    from: "__root__",
+    select: (search) => search.tenant ?? null,
+  });
   const userQuery = useQuery({
     queryKey: ["auth", "me"],
     queryFn: ({ signal }) => getCurrentUser(signal),
@@ -77,30 +72,38 @@ export function TenantProvider({
   const storedId = realm ? readActiveTenantId(realm) : null;
   const resolvedTenantId = resolveActiveTenantId(
     flatTenants,
-    activeTenantId,
+    tenantFromUrl,
     storedId,
   );
 
-  // Стереть из storage id, которого больше нет в списке. Без setState.
-  useEffect(() => {
-    if (!realm || tenantsQuery.data === undefined) return;
-    if (storedId && !isKnownTenant(flatTenants, storedId)) {
-      clearActiveTenantId(realm);
-    }
-  }, [realm, tenantsQuery.data, flatTenants, storedId]);
-
-  // Persist валидный resolved id (включая auto-select единственного tenant).
-  useEffect(() => {
-    if (!realm) return;
-    if (resolvedTenantId) {
-      writeActiveTenantId(realm, resolvedTenantId);
-    }
-  }, [realm, resolvedTenantId]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTenantIdResolver(() => resolvedTenantId);
     return () => setTenantIdResolver(() => null);
   }, [resolvedTenantId]);
+
+  useEffect(() => {
+    if (!realm || tenantsQuery.data === undefined) return;
+
+    if (resolvedTenantId) {
+      writeActiveTenantId(realm, resolvedTenantId);
+    } else if (storedId) {
+      clearActiveTenantId(realm);
+    }
+
+    if (tenantFromUrl === resolvedTenantId) return;
+    void navigate({
+      to: ".",
+      search: (prev) => withTenantSearch(prev, resolvedTenantId ?? undefined),
+      replace: true,
+    });
+  }, [
+    navigate,
+    realm,
+    resolvedTenantId,
+    storedId,
+    tenantFromUrl,
+    tenantsQuery.data,
+  ]);
 
   const selectTenant = useCallback(
     async (tenantId: string) => {
@@ -112,16 +115,16 @@ export function TenantProvider({
         throw new Error("Realm пользователя ещё не загружен");
       }
 
-      // Wipe tenant-scoped caches. api-client `tenantScoped` ≠ query.meta.
-      await queryClient.cancelQueries({ queryKey: ["mdm"] });
-      queryClient.removeQueries({ queryKey: ["mdm"] });
-      await queryClient.cancelQueries({ queryKey: ["operations"] });
-      queryClient.removeQueries({ queryKey: ["operations"] });
-      await onTenantChange();
+      setTenantIdResolver(() => tenantId);
       writeActiveTenantId(realm, tenantId);
-      setActiveTenantId(tenantId);
+      await wipeTenantScopedQueries(queryClient);
+      await navigate({
+        to: ".",
+        search: (prev) => withTenantSearch(prev, tenantId),
+        replace: true,
+      });
     },
-    [flatTenants, onTenantChange, queryClient, realm, resolvedTenantId],
+    [flatTenants, navigate, queryClient, realm, resolvedTenantId],
   );
 
   const value = useMemo(() => {

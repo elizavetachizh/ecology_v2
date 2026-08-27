@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "@tanstack/react-router";
+import { TenantProvider } from "../providers/tenant/TenantProvider";
+import { Toaster } from "../../shared/ui";
 import AppHeader from "./AppHeader";
 import AppSidebar from "./AppSidebar";
 
 export function AppLayout() {
+  return (
+    <>
+      <TenantProvider>
+        <AppShell />
+      </TenantProvider>
+      <Toaster />
+    </>
+  );
+}
+
+function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
