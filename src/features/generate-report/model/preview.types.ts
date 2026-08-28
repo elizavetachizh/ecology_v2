@@ -10,17 +10,12 @@ export type ReportPreviewSheet = {
   rows: ReportPreviewCell[][];
 };
 
-export type ReportPreview = {
+export type GeneratedReportFile = {
   fileName: string;
   contentType: string;
   blob: Blob;
-  sheets: ReportPreviewSheet[];
 };
 
-export type Pod9ReportPreviewParams = {
-  company: string;
-  department: string;
-  wastes: string;
-  startDate: string;
-  endDate: string;
+export type ReportPreview = GeneratedReportFile & {
+  sheets: ReportPreviewSheet[];
 };

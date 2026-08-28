@@ -1,2 +1,2 @@
-export { Pod9ReportPreviewButton } from "./ui/Pod9ReportPreviewButton";
-export type { Pod9ReportPreviewParams } from "./model/preview.types";
+export { Pod9ReportForm } from "./ui/Pod9ReportForm";
+export type { Pod9ReportParams } from "./model/pod9-params";
