@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "./types";
 import { DataTable } from "./DataTable";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { DataTableExpandCell } from "./DataTableExpandCell";
@@ -90,9 +90,7 @@ describe("DataTable", () => {
     expect(names).toEqual(["Бета", "Альфа"]);
 
     fireEvent.click(screen.getByRole("button", { name: /Название/ }));
-    expect(onSortingChange).toHaveBeenCalledWith([
-      { id: "name", desc: false },
-    ]);
+    expect(onSortingChange).toHaveBeenCalledWith([{ id: "name", desc: false }]);
   });
 
   it("sorts rows on the client when manualSorting is off", () => {
@@ -144,7 +142,9 @@ describe("DataTable", () => {
         accessorKey: "name",
         header: "Название",
         cell: ({ row }) => (
-          <DataTableExpandCell row={row}>{row.original.name}</DataTableExpandCell>
+          <DataTableExpandCell row={row}>
+            {row.original.name}
+          </DataTableExpandCell>
         ),
       },
     ];

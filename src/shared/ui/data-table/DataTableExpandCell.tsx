@@ -1,17 +1,25 @@
 import type { ReactNode } from "react";
-import type { Row } from "@tanstack/react-table";
+import { Subscribe } from "@tanstack/react-table";
 import { ChevronRight } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { Button } from "../button";
+import type { Row, RowData } from "./types";
 
-type DataTableExpandCellProps<TData> = {
+type DataTableExpandCellProps<TData extends RowData> = {
   row: Row<TData>;
   children: ReactNode;
   className?: string;
 };
 
+function isRowExpanded(
+  expanded: true | Record<string, boolean>,
+  rowId: string,
+) {
+  return expanded === true ? true : Boolean(expanded[rowId]);
+}
+
 /** Ячейка с отступом уровня и кнопкой expand/collapse для tree-таблицы */
-export function DataTableExpandCell<TData>({
+export function DataTableExpandCell<TData extends RowData>({
   row,
   children,
   className,
@@ -24,25 +32,32 @@ export function DataTableExpandCell<TData>({
       style={{ paddingLeft: `${row.depth * 1.25}rem` }}
     >
       {canExpand ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-7 shrink-0"
-          aria-label={row.getIsExpanded() ? "Свернуть" : "Развернуть"}
-          aria-expanded={row.getIsExpanded()}
-          onClick={(event) => {
-            event.stopPropagation();
-            row.getToggleExpandedHandler()();
-          }}
+        <Subscribe
+          source={row.table.atoms.expanded}
+          selector={(expanded) => isRowExpanded(expanded, row.id)}
         >
-          <ChevronRight
-            className={cn(
-              "size-4 transition-transform",
-              row.getIsExpanded() && "rotate-90",
-            )}
-          />
-        </Button>
+          {(expanded) => (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 shrink-0"
+              aria-label={expanded ? "Свернуть" : "Развернуть"}
+              aria-expanded={expanded}
+              onClick={(event) => {
+                event.stopPropagation();
+                row.getToggleExpandedHandler()();
+              }}
+            >
+              <ChevronRight
+                className={cn(
+                  "size-4 transition-transform",
+                  expanded && "rotate-90",
+                )}
+              />
+            </Button>
+          )}
+        </Subscribe>
       ) : (
         <span className="inline-flex size-7 shrink-0" aria-hidden />
       )}

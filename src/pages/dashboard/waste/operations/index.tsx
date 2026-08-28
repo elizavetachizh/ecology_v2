@@ -53,8 +53,7 @@ export function WasteOperationsPage() {
   const navigate = useNavigate({ from: "/waste/operations" });
   const search = useSearch({ from: "/waste/operations" });
 
-  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editing, setEditing] = useState<Operation | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [deleting, setDeleting] = useState<Operation | null>(null);
   const [approving, setApproving] = useState<Operation | null>(null);
   const [rejecting, setRejecting] = useState<Operation | null>(null);
@@ -62,14 +61,16 @@ export function WasteOperationsPage() {
     () =>
       operationsColumns({
         onEdit: (operation) => {
-          setEditing(operation);
-          setModalMode("edit");
+          void navigate({
+            to: "/waste/operations/$operationId",
+            params: { operationId: operation.id },
+          });
         },
         onDelete: setDeleting,
         onApprove: setApproving,
         onReject: setRejecting,
       }),
-    [],
+    [navigate],
   );
 
   const listParams = useMemo(
@@ -162,14 +163,7 @@ export function WasteOperationsPage() {
           title="Журнал операций"
           description="Здесь вы можете просматривать и управлять операциями по отходам."
           actions={
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                setEditing(null);
-                setModalMode("create");
-              }}
-            >
+            <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
               <Plus className="size-3.5" />
               Создать операцию
             </Button>
@@ -189,6 +183,12 @@ export function WasteOperationsPage() {
           getRowId={(row) => row.id}
           emptyTitle="Пока нет операций"
           emptyDescription="Создайте первую операцию, чтобы начать учет отходов."
+          onRowClick={(row) => {
+            void navigate({
+              to: "/waste/operations/$operationId",
+              params: { operationId: row.original.id },
+            });
+          }}
         />
         <DataTablePagination
           total={total}
@@ -199,23 +199,11 @@ export function WasteOperationsPage() {
         />
 
         <CreateOperationModal
-          open={modalMode !== null}
-          mode={modalMode === "edit" ? "edit" : "create"}
-          initial={editing}
-          onOpenChange={(open) => {
-            if (!open) {
-              setModalMode(null);
-              setEditing(null);
-            }
-          }}
+          open={createOpen}
+          onOpenChange={setCreateOpen}
           onSaved={() => {
-            toast.success(
-              modalMode === "edit"
-                ? "Операция успешно обновлена"
-                : "Операция успешно создана",
-            );
-            setModalMode(null);
-            setEditing(null);
+            toast.success("Операция успешно создана");
+            setCreateOpen(false);
           }}
         />
 

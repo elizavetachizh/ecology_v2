@@ -17,20 +17,20 @@
 
 ### В scope (есть API и живой UI)
 
-| Домен | Backend | UI |
-|-------|---------|----|
-| Auth Keycloak + `/me` | `keycloak.md` | login-required, PKCE, memory tokens |
-| Tenants + `X-Tenant-Id` | `tenants.md` | header select, persist per realm |
-| Instructions | `mdm_instructions.md` | список + create/edit |
-| Units (иерархия, `is_pod9`) | `mdm_units.md` | дерево / flat ПОД-9 + карточка |
-| MDM Wastes | `mdm_wastes.md` | каталог + карточка |
-| Waste sources | `mdm_waste_sources.md` | CRUD table + modal |
-| UIW bindings (unit → wastes) | `mdm_unit_instruction_wastes.md` | секция на карточке unit `is_pod9` |
-| WIU bindings (waste → units) | `mdm_waste_instruction_units.md` | секция на карточке waste |
-| Classifier wastes (select) | `classifiers_wastes.md` | combobox, **без** admin CRUD page |
-| Regions / districts | `classifiers_regions.md` | каскад в форме unit |
-| Operations | `operations.md` | журнал + мастер create/edit |
-| Current balance | `GET /operations/balances/current` | подсказка в мастере операции |
+| Домен                        | Backend                            | UI                                  |
+| ---------------------------- | ---------------------------------- | ----------------------------------- |
+| Auth Keycloak + `/me`        | `keycloak.md`                      | login-required, PKCE, memory tokens |
+| Tenants + `X-Tenant-Id`      | `tenants.md`                       | header select, persist per realm    |
+| Instructions                 | `mdm_instructions.md`              | список + create/edit                |
+| Units (иерархия, `is_pod9`)  | `mdm_units.md`                     | дерево / flat ПОД-9 + карточка      |
+| MDM Wastes                   | `mdm_wastes.md`                    | каталог + карточка                  |
+| Waste sources                | `mdm_waste_sources.md`             | CRUD table + modal                  |
+| UIW bindings (unit → wastes) | `mdm_unit_instruction_wastes.md`   | секция на карточке unit `is_pod9`   |
+| WIU bindings (waste → units) | `mdm_waste_instruction_units.md`   | секция на карточке waste            |
+| Classifier wastes (select)   | `classifiers_wastes.md`            | combobox, **без** admin CRUD page   |
+| Regions / districts          | `classifiers_regions.md`           | каскад в форме unit                 |
+| Operations                   | `operations.md`                    | журнал + мастер create/edit         |
+| Current balance              | `GET /operations/balances/current` | подсказка в мастере операции        |
 
 ### Вне текущего продуктового UI (API нет или UI-заглушка)
 
@@ -84,15 +84,15 @@ app → pages → widgets → features → entities → shared
 
 ### Фактические отклонения от канона FSD (долг, не блокеры)
 
-| Канон ADR | Сейчас |
-|-----------|--------|
-| `entities/classifiers/*` | `entities/waste/*-classifier` |
-| `entities/waste/mdm-waste` | `entities/waste/wastes` |
-| `features/select-tenant` | логика в `TenantProvider` + `AppHeader` |
-| `app/layouts/` | `app/layout/` |
-| routes `/waste/*` | MDM на `/directories/*`; операции на `/waste/operations` |
-| Zustand для tenant/sidebar | React Context |
-| `widgets/` | нет |
+| Канон ADR                  | Сейчас                                                   |
+| -------------------------- | -------------------------------------------------------- |
+| `entities/classifiers/*`   | `entities/waste/*-classifier`                            |
+| `entities/waste/mdm-waste` | `entities/waste/wastes`                                  |
+| `features/select-tenant`   | логика в `TenantProvider` + `AppHeader`                  |
+| `app/layouts/`             | `app/layout/`                                            |
+| routes `/waste/*`          | MDM на `/directories/*`; операции на `/waste/operations` |
+| Zustand для tenant/sidebar | React Context                                            |
+| `widgets/`                 | нет                                                      |
 
 Новые слайсы класть по канону; массовый rename — отдельным PR, не смешивать с фичами.
 
@@ -100,18 +100,18 @@ app → pages → widgets → features → entities → shared
 
 ## 4. Стек
 
-| Слой | Решение | Комментарий |
-|------|---------|-------------|
-| Bundler | Vite + React 19 + TypeScript | SPA, без Next.js |
-| Router | TanStack Router | search params = фильтры |
-| Server state | TanStack Query | query keys с `tenantId` |
-| Forms | React Hook Form + Zod | |
-| Auth | `keycloak-js` | public client `eco-wastes-web`, PKCE S256 |
-| UI | Tailwind 4 + Radix + локальный kit в `shared/ui` | shadcn-стиль, не npm-shadcn CLI |
-| Tables | TanStack Table | virtualization нет |
-| Toasts | свой store + `Toaster` | не sonner |
-| Excel preview | `xlsx` (SheetJS) | только harness ПОД-9 |
-| Tests | Vitest + Testing Library | |
+| Слой          | Решение                                          | Комментарий                                   |
+| ------------- | ------------------------------------------------ | --------------------------------------------- |
+| Bundler       | Vite + React 19 + TypeScript                     | SPA, без Next.js                              |
+| Router        | TanStack Router                                  | search params = фильтры                       |
+| Server state  | TanStack Query                                   | query keys с `tenantId`                       |
+| Forms         | React Hook Form + Zod                            |                                               |
+| Auth          | `keycloak-js`                                    | public client `eco-wastes-web`, PKCE S256     |
+| UI            | Tailwind 4 + Radix + локальный kit в `shared/ui` | shadcn-стиль, не npm-shadcn CLI               |
+| Tables        | TanStack Table v9                                | features только в `DataTable`; пагинация своя |
+| Toasts        | свой store + `Toaster`                           | не sonner                                     |
+| Excel preview | `xlsx` (SheetJS)                                 | только harness ПОД-9                          |
+| Tests         | Vitest + Testing Library                         |                                               |
 
 **Не используем и не добавлять «на вырост»:** Redux, Zustand (пока Context хватает), Next.js, decimal.js (строки decimal как на API).
 
@@ -171,16 +171,16 @@ Import rule: `pages → widgets → features → entities → shared`.
 
 Подробности Keycloak: `D:\eco-wastes-backend\docs\keycloak.md`.
 
-| Тема | Факт в коде |
-|------|-------------|
-| Client | `eco-wastes-web`, public + PKCE S256 |
-| Init | `login-required` |
-| Tokens | memory |
-| Refresh | `updateToken(30)` перед запросом |
-| Roles | `realm_access.roles`; `<Can>` есть, **почти не используется** |
-| Logout | `keycloak.logout` + очистка session/cache |
-| Realm (dev) | `VITE_KEYCLOAK_REALM` |
-| Realm (prod) | `VITE_KEYCLOAK_REALM_HOST_MAP` host/path → realm |
+| Тема         | Факт в коде                                                   |
+| ------------ | ------------------------------------------------------------- |
+| Client       | `eco-wastes-web`, public + PKCE S256                          |
+| Init         | `login-required`                                              |
+| Tokens       | memory                                                        |
+| Refresh      | `updateToken(30)` перед запросом                              |
+| Roles        | `realm_access.roles`; `<Can>` есть, **почти не используется** |
+| Logout       | `keycloak.logout` + очистка session/cache                     |
+| Realm (dev)  | `VITE_KEYCLOAK_REALM`                                         |
+| Realm (prod) | `VITE_KEYCLOAK_REALM_HOST_MAP` host/path → realm              |
 
 ### Boot
 
@@ -194,13 +194,13 @@ Import rule: `pages → widgets → features → entities → shared`.
 
 ### Заголовки
 
-| Группа | Bearer | `X-Tenant-Id` |
-|--------|--------|---------------|
-| `/api/v1/health` | нет | нет |
-| `/api/v1/me`, `/tenants` | да | нет |
-| `/api/v1/classifiers/**` | да | нет |
-| `/api/v1/mdm/**` | да | да |
-| `/api/v1/operations/**` | да | да |
+| Группа                   | Bearer | `X-Tenant-Id` |
+| ------------------------ | ------ | ------------- |
+| `/api/v1/health`         | нет    | нет           |
+| `/api/v1/me`, `/tenants` | да     | нет           |
+| `/api/v1/classifiers/**` | да     | нет           |
+| `/api/v1/mdm/**`         | да     | да            |
+| `/api/v1/operations/**`  | да     | да            |
 
 `apiFetch`:
 
@@ -258,10 +258,10 @@ UI-соглашение продукта: `is_pod9 === true` → «место у
 
 Unique `(unit_id, instruction_id, waste_id)`.
 
-| Вход | Path | Create body |
-|------|------|-------------|
-| С карточки unit | `/mdm/units/{u}/instructions/{i}/wastes` | `waste_id` |
-| С карточки waste | `/mdm/wastes/{w}/instructions/{i}/units` | `unit_id` |
+| Вход             | Path                                     | Create body |
+| ---------------- | ---------------------------------------- | ----------- |
+| С карточки unit  | `/mdm/units/{u}/instructions/{i}/wastes` | `waste_id`  |
+| С карточки waste | `/mdm/wastes/{w}/instructions/{i}/units` | `unit_id`   |
 
 Общие поля: `waste_source_ids[]` (PATCH = полная замена), `transport_unit` decimal string `0…999999.999999`.
 
@@ -271,12 +271,12 @@ Unique `(unit_id, instruction_id, waste_id)`.
 
 Base: `/api/v1/operations`. Tenant-scoped.
 
-| Поле | Правило |
-|------|---------|
-| `operation_type` | `formed` (+остаток) \| `used` (−остаток) |
-| `unit_id`, `waste_id`, `date`, `amount > 0` | required |
-| `waste_source_id` | required для `formed`, **null** для `used` |
-| `balance` | снимок после операции, read-only |
+| Поле                                        | Правило                                    |
+| ------------------------------------------- | ------------------------------------------ |
+| `operation_type`                            | `formed` (+остаток) \| `used` (−остаток)   |
+| `unit_id`, `waste_id`, `date`, `amount > 0` | required                                   |
+| `waste_source_id`                           | required для `formed`, **null** для `used` |
+| `balance`                                   | снимок после операции, read-only           |
 
 `used` при нехватке остатка → 400. Backdate / PATCH / DELETE → полный пересчёт цепочки `(tenant, unit, waste)`.
 
@@ -320,13 +320,13 @@ $                                      404
 
 ## 9. Состояние
 
-| Состояние | Инструмент |
-|-----------|------------|
-| Server lists/cards | TanStack Query |
-| Forms | RHF + Zod |
-| Filters / pagination / tabs | URL search params |
+| Состояние                       | Инструмент                      |
+| ------------------------------- | ------------------------------- |
+| Server lists/cards              | TanStack Query                  |
+| Forms                           | RHF + Zod                       |
+| Filters / pagination / tabs     | URL search params               |
 | Active tenant, sidebar collapse | Context / local component state |
-| Toasts | `shared/ui/toast-store` |
+| Toasts                          | `shared/ui/toast-store`         |
 
 Query keys (идея):
 
@@ -344,14 +344,14 @@ Query keys (идея):
 
 ## 10. Ошибки HTTP → UI
 
-| HTTP | UI |
-|------|----|
-| 400 | tenant header / geo / нехватка остатка (`used`) |
-| 401 | refresh / login |
-| 403 | нет доступа / чужой realm |
-| 404 | toast + возврат к списку |
-| 409 | duplicate binding / classifier code |
-| 422 | field errors из `detail` |
+| HTTP | UI                                              |
+| ---- | ----------------------------------------------- |
+| 400  | tenant header / geo / нехватка остатка (`used`) |
+| 401  | refresh / login                                 |
+| 403  | нет доступа / чужой realm                       |
+| 404  | toast + возврат к списку                        |
+| 409  | duplicate binding / classifier code             |
+| 422  | field errors из `detail`                        |
 
 ---
 

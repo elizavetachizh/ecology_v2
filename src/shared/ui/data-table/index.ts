@@ -13,8 +13,10 @@ export {
   type DataTableRowActionsProps,
 } from "./DataTableRowActions";
 export type {
+  Column,
   ColumnDef,
   ExpandedState,
   Row,
+  RowData,
   SortingState,
-} from "@tanstack/react-table";
+} from "./types";

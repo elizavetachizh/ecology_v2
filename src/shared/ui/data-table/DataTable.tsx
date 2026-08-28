@@ -1,16 +1,5 @@
 import { useState } from "react";
-import {
-  flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type ExpandedState,
-  type OnChangeFn,
-  type Row,
-  type SortingState,
-} from "@tanstack/react-table";
+import { flexRender, useTable, type OnChangeFn } from "@tanstack/react-table";
 import { cn } from "../../lib/cn";
 import {
   Table,
@@ -21,9 +10,17 @@ import {
   TableRow,
 } from "../table";
 import { DataTableEmpty } from "./DataTableEmpty";
+import { dataTableFeatures, type DataTableFeatures } from "./features";
+import type {
+  ColumnDef,
+  ExpandedState,
+  Row,
+  RowData,
+  SortingState,
+} from "./types";
 
 /**
- * DataTable (TanStack Table)
+ * DataTable (TanStack Table v9)
  *
  * Server lists: `manualSorting` + controlled `sorting` / `onSortingChange`
  * (URL `sort`/`order` → API). Client-only tables: omit manualSorting.
@@ -31,8 +28,8 @@ import { DataTableEmpty } from "./DataTableEmpty";
  * header: ({ column }) => <DataTableColumnHeader column={column} title="…" />
  * id колонки должен совпадать с API sort field.
  */
-export type DataTableProps<TData, TValue = unknown> = {
-  columns: ColumnDef<TData, TValue>[];
+export type DataTableProps<TData extends RowData> = {
+  columns: ColumnDef<TData>[];
   data: TData[];
   /** Обязателен для selection / expand / cache (ADR) */
   getRowId: (row: TData, index: number) => string;
@@ -61,7 +58,7 @@ export type DataTableProps<TData, TValue = unknown> = {
   getRowClassName?: (row: Row<TData>) => string | undefined;
 };
 
-export function DataTable<TData, TValue = unknown>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   getRowId,
@@ -78,7 +75,7 @@ export function DataTable<TData, TValue = unknown>({
   emptyDescription,
   onRowClick,
   getRowClassName,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const [sortingInternal, setSortingInternal] = useState<SortingState>([]);
   const [expandedInternal, setExpandedInternal] =
     useState<ExpandedState>(initialExpanded);
@@ -95,26 +92,24 @@ export function DataTable<TData, TValue = unknown>({
   const isExpandedControlled = expandedProp !== undefined;
   const expanded = isExpandedControlled ? expandedProp : expandedInternal;
 
-  const handleExpandedChange = (
-    updater: ExpandedState | ((old: ExpandedState) => ExpandedState),
-  ) => {
+  const handleExpandedChange: OnChangeFn<ExpandedState> = (updater) => {
     const next = typeof updater === "function" ? updater(expanded) : updater;
     if (!isExpandedControlled) setExpandedInternal(next);
     onExpandedChange?.(next);
   };
 
-  const table = useReactTable({
+  const table = useTable<DataTableFeatures, TData>({
+    features: dataTableFeatures,
     data,
     columns,
-    getRowId: (row, index) => getRowId(row, index),
-    getSubRows,
+    getRowId,
+    getSubRows: getSubRows
+      ? (originalRow) => getSubRows(originalRow)
+      : undefined,
     state: { sorting, expanded },
     onSortingChange: handleSortingChange,
     onExpandedChange: handleExpandedChange,
     manualSorting,
-    getCoreRowModel: getCoreRowModel(),
-    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
-    getExpandedRowModel: getExpandedRowModel(),
   });
 
   const columnCount = table.getAllLeafColumns().length || columns.length;
@@ -158,14 +153,13 @@ export function DataTable<TData, TValue = unknown>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={row.getIsSelected() ? "selected" : undefined}
                 className={cn(
                   onRowClick && "cursor-pointer",
                   getRowClassName?.(row),
                 )}
                 onClick={() => onRowClick?.(row)}
               >
-                {row.getVisibleCells().map((cell) => (
+                {row.getAllCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     style={{ width: cell.column.getSize() }}

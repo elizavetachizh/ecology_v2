@@ -8,6 +8,7 @@ import type { AuthContextValue } from "../shared/auth/auth.types";
 import { AppLayout } from "./layout/AppLayout";
 import { HomePage } from "../pages/dashboard/HomePage";
 import { WasteOperationsPage } from "../pages/dashboard/waste/operations";
+import { EditOperationPage } from "../pages/dashboard/waste/operations/EditOperationPage";
 import { PassportsPage } from "../pages/dashboard/waste/passports/PassportsPage";
 import { CreatePassportPage } from "../pages/dashboard/waste/passports/CreatePassportPage";
 import { EditPassportPage } from "../pages/dashboard/waste/passports/EditPassportPage";
@@ -118,6 +119,12 @@ const wasteOperationsRoute = createRoute({
     offset: parseSearchOffset(search.offset),
   }),
   component: WasteOperationsPage,
+});
+
+const wasteEditOperationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/waste/operations/$operationId",
+  component: EditOperationPage,
 });
 
 const wastePassportsRoute = createRoute({
@@ -452,6 +459,7 @@ const catchAllRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   wasteOperationsRoute,
+  wasteEditOperationRoute,
   wastePassportsRoute,
   wasteCreatePassportRoute,
   wasteEditPassportRoute,

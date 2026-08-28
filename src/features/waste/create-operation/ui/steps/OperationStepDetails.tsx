@@ -70,6 +70,7 @@ export function OperationStepDetails({
         unitId={unitId}
         wasteId={wasteId}
         uomLabel={selectedWaste ? UOM_LABEL[selectedWaste.uom] : undefined}
+        transportUnit={selectedBinding?.transport_unit}
       />
 
       <Field>

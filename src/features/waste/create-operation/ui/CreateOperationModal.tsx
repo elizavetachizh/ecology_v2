@@ -26,16 +26,12 @@ import { OperationStepUnit } from "./steps/OperationStepUnit";
 
 type CreateOperationModalProps = {
   open: boolean;
-  mode: "create" | "edit";
-  initial?: Operation | null;
   onOpenChange: (open: boolean) => void;
   onSaved: (operation: Operation) => void;
 };
 
 export function CreateOperationModal({
   open,
-  mode,
-  initial,
   onOpenChange,
   onSaved,
 }: CreateOperationModalProps) {
@@ -43,9 +39,6 @@ export function CreateOperationModal({
     <Modal open={open} onOpenChange={onOpenChange}>
       {open ? (
         <CreateOperationModalForm
-          key={`${mode}-${initial?.id ?? "new"}`}
-          mode={mode}
-          initial={initial}
           onOpenChange={onOpenChange}
           onSaved={onSaved}
         />
@@ -57,8 +50,6 @@ export function CreateOperationModal({
 type CreateOperationModalFormProps = Omit<CreateOperationModalProps, "open">;
 
 function CreateOperationModalForm({
-  mode,
-  initial,
   onOpenChange,
   onSaved,
 }: CreateOperationModalFormProps) {
@@ -67,8 +58,7 @@ function CreateOperationModalForm({
     string | undefined
   >();
   const { form, error, pending, onSubmit } = useUpsertOperationForm({
-    mode,
-    initial,
+    mode: "create",
     onSaved,
   });
   const lastStep = step >= UPSERT_OPERATION_STEPS.length;
@@ -99,9 +89,7 @@ function CreateOperationModalForm({
           }
         >
           <ModalHeader>
-            <ModalTitle>
-              {mode === "create" ? "Создание операции" : "Изменение операции"}
-            </ModalTitle>
+            <ModalTitle>Создание операции</ModalTitle>
             <ModalDescription>
               Шаг {step} из {UPSERT_OPERATION_STEPS.length}:{" "}
               {UPSERT_OPERATION_STEPS[step - 1]?.title}
@@ -131,7 +119,6 @@ function CreateOperationModalForm({
             {step === 2 ? (
               <OperationStepUnit
                 pending={pending}
-                initial={initial}
                 onUnitChange={() => {
                   setSelectedInstructionId(undefined);
                   resetAfterUnitChange(form.setValue);
@@ -140,9 +127,8 @@ function CreateOperationModalForm({
             ) : null}
             {step === 3 ? (
               <OperationStepBinding
-                mode={mode}
+                mode="create"
                 pending={pending}
-                initial={initial}
                 selectedInstructionId={selectedInstructionId}
                 onInstructionIdChange={setSelectedInstructionId}
               />
@@ -150,7 +136,6 @@ function CreateOperationModalForm({
             {step === 4 ? (
               <OperationStepDetails
                 pending={pending}
-                initial={initial}
                 instructionId={selectedInstructionId}
               />
             ) : null}
@@ -177,11 +162,7 @@ function CreateOperationModalForm({
             ) : null}
             {lastStep ? (
               <Button type="submit" disabled={pending}>
-                {pending
-                  ? "Сохранение…"
-                  : mode === "create"
-                    ? "Создать операцию"
-                    : "Сохранить"}
+                {pending ? "Сохранение…" : "Создать операцию"}
               </Button>
             ) : (
               <Button type="submit" disabled={pending}>
