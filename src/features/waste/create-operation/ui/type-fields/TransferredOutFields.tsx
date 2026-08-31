@@ -1,7 +1,6 @@
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import { useTenant } from "../../../../../entities/tenant";
-import type { Operation } from "../../../../../entities/waste/operations";
 import {
   Field,
   FieldDescription,
@@ -14,6 +13,7 @@ import {
 } from "../../model/operation-form.schema";
 import { DocumentCombobox } from "../DocumentCombobox";
 import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
+import { routes } from "../../../../../shared/config/routes";
 
 const DOCUMENT_KIND_LABEL = {
   passport: "Сопроводительный паспорт",
@@ -22,12 +22,10 @@ const DOCUMENT_KIND_LABEL = {
 
 type TransferredOutFieldsProps = {
   pending: boolean;
-  initial?: Operation | null;
 };
 
 export function TransferredOutFields({
   pending,
-  initial,
 }: TransferredOutFieldsProps) {
   const { activeTenantId } = useTenant();
   const {
@@ -111,9 +109,6 @@ export function TransferredOutFields({
                 unitId={unitId}
                 wasteId={wasteId}
                 value={field.value}
-                fallbackDocument={
-                  initial?.passport_id === field.value ? initial.passport : null
-                }
                 disabled={pending}
                 onChange={field.onChange}
               />
@@ -123,7 +118,7 @@ export function TransferredOutFields({
             Действующий паспорт с этим отходом на выбранном месте учёта. Нет
             нужного?{" "}
             <Link
-              to="/waste/passports/new"
+              to={routes.waste.passports.new}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Создать сопроводительный паспорт
@@ -146,9 +141,6 @@ export function TransferredOutFields({
                 tenantId={activeTenantId}
                 unitId={unitId}
                 value={field.value}
-                fallbackDocument={
-                  initial?.ttn_id === field.value ? initial.ttn : null
-                }
                 disabled={pending}
                 onChange={field.onChange}
               />
@@ -158,7 +150,7 @@ export function TransferredOutFields({
             Действующая ТТН на этом месте учёта. Состав отходов договора
             проверяет сервер. Нет нужной?{" "}
             <Link
-              to="/waste/ttns/new"
+              to={routes.waste.ttns.new}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Создать ТТН

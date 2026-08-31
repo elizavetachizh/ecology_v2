@@ -16,6 +16,7 @@ import {
   FieldError,
   FieldLabel,
 } from "../../../shared/ui";
+import { routes } from "../../../shared/config/routes";
 
 type Pod9UnitFieldProps = {
   tree: UnitTree[];
@@ -114,7 +115,7 @@ export function Pod9UnitField({
       <FieldDescription>
         Отчёт строится по месту учёта (флаг ПОД-9). Нет нужного?{" "}
         <Link
-          to="/directories/units"
+          to={routes.directories.units.list}
           search={{ is_pod9: true }}
           target="_blank"
           rel="noopener noreferrer"

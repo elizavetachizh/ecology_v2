@@ -158,7 +158,7 @@ src/
     api/api-client.ts
     auth/
     ui/                 DataTable, Modal, ConfirmDialog, AsyncCombobox, …
-    config/             navigation, directories, env
+    config/             navigation, directories, routes, env
     lib/
 ```
 
@@ -289,6 +289,8 @@ Base: `/api/v1/operations`. Tenant-scoped.
 
 ## 8. Routing (факт)
 
+Пути — `src/shared/config/routes.ts`. Ключ домена (`routes.directories.standards`) стабилен и совпадает с entity/API; URL-сегмент задаётся один раз в `directoryPath("standards")`. `createRoute`, `Link`, `navigate`, `useSearch({ from })` импортируют каталог.
+
 ```text
 /                                      HomePage (заглушка)
 /directories                           хаб справочников
@@ -303,7 +305,7 @@ Base: `/api/v1/operations`. Tenant-scoped.
 /directories/wastes/$wasteId?instructionId=
 /directories/waste-sources
 /directories/limits                    stub
-/directories/norms                     stub
+/directories/standards                     stub
 /waste/operations                      журнал; фильтры в search
 /reports/pod-9                         harness
 /forbidden

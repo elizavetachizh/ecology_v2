@@ -4,9 +4,11 @@ import {
   AlertDescription,
   AlertTitle,
   Badge,
+  DirectoryBreadcrumb,
   PageContextBar,
 } from "../../../../shared/ui";
 import { getUnitFormHeaderCopy } from "../model/unit-form-header-copy";
+import { routes } from "../../../../shared/config/routes";
 
 type UnitFormHeaderProps = {
   mode: "create" | "edit";
@@ -23,7 +25,12 @@ export function UnitFormHeader({
   defaultIsPod9,
   isPod9,
   unitName,
-  eyebrow = "Справочники / Структурные единицы",
+  eyebrow = (
+    <DirectoryBreadcrumb
+      directoryLabel="Структура организации"
+      directoryTo={routes.directories.units.list}
+    />
+  ),
   actions,
   error,
 }: UnitFormHeaderProps) {

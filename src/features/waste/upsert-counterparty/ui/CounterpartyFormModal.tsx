@@ -30,11 +30,11 @@ function CounterpartyFormBody({
   const { form, error, pending, onSubmit } = useUpsertCounterpartyForm({
     mode,
     initial,
-    onSaved,
+    onSaved: (counterparty) => onSaved(counterparty),
   });
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit((values) => onSubmit(true, values))}>
       <ModalHeader>
         <ModalTitle>
           {mode === "create" ? "Новый контрагент" : "Изменить контрагента"}

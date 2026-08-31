@@ -4,7 +4,6 @@ import {
   NeutralizationMethodValues,
   USE_PURPOSE_LABEL,
   UsePurposeValues,
-  type Operation,
 } from "../../../../../entities/waste/operations";
 import type { WasteSourceBrief } from "../../../../../entities/waste/waste-sources";
 import {
@@ -20,14 +19,12 @@ import { TransferredOutFields } from "./TransferredOutFields";
 type OperationTypeFieldsProps = {
   pending: boolean;
   tenantId: string | null;
-  initial?: Operation | null;
   bindingSources: WasteSourceBrief[];
 };
 
 export function OperationTypeFields({
   pending,
   tenantId,
-  initial,
   bindingSources,
 }: OperationTypeFieldsProps) {
   const operationType = useWatch<OperationFormValues, "operation_type">({
@@ -39,7 +36,6 @@ export function OperationTypeFields({
       <FormedFields
         pending={pending}
         bindingSources={bindingSources}
-        initial={initial}
         tenantId={tenantId}
       />
     );
@@ -72,7 +68,7 @@ export function OperationTypeFields({
   }
 
   if (isInternalTransferType(operationType)) {
-    return <InternalTransferFields pending={pending} initial={initial} />;
+    return <InternalTransferFields pending={pending} />;
   }
 
   if (operationType === "received_out") {
@@ -80,7 +76,7 @@ export function OperationTypeFields({
   }
 
   if (operationType === "transferred_out") {
-    return <TransferredOutFields pending={pending} initial={initial} />;
+    return <TransferredOutFields pending={pending} />;
   }
 
   return null;

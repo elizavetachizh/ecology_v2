@@ -31,6 +31,7 @@ import {
   MultipleCombobox,
 } from "../../../../shared/ui";
 import { useBindUiwForm } from "../model/use-bind-uiw-form";
+import { routes } from "../../../../shared/config/routes";
 
 type BindUiwModalProps = {
   open: boolean;
@@ -171,7 +172,7 @@ function BindUiwModalForm({
             <FieldDescription>
               Нет нужного отхода?{" "}
               <Link
-                to="/directories/wastes/new"
+                to={routes.directories.wastes.new}
                 search={tenantId ? { tenant: tenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -212,7 +213,7 @@ function BindUiwModalForm({
             <FieldDescription>
               Можно выбрать несколько. Нет нужного источника?{" "}
               <Link
-                to="/directories/waste-sources"
+                to={routes.directories.wasteSources.list}
                 search={tenantId ? { tenant: tenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"

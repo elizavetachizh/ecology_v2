@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
@@ -24,6 +24,7 @@ import {
   DataTablePagination,
   ListSearchField,
   PageContextBar,
+  DirectoryBreadcrumb,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
@@ -32,11 +33,12 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { routes } from "../../../../shared/config/routes";
 
 export function WasteSourcesPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/waste-sources" });
-  const search = useSearch({ from: "/directories/waste-sources" });
+  const navigate = useNavigate({ from: routes.directories.wasteSources.list });
+  const search = useSearch({ from: routes.directories.wasteSources.list });
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<WasteSource | null>(null);
@@ -120,25 +122,26 @@ export function WasteSourcesPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Источники образования"
+              directoryTo={routes.directories.wasteSources.list}
+            />
+          }
           title="Источники образования"
           description="Справочник источников образования отходов организации."
           actions={
-            <>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => {
-                  setEditing(null);
-                  setModalMode("create");
-                }}
-              >
-                <Plus className="size-3.5" />
-                Добавить источник
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setEditing(null);
+                setModalMode("create");
+              }}
+            >
+              <Plus className="size-3.5" />
+              Добавить источник
+            </Button>
           }
         />
 

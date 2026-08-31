@@ -14,6 +14,7 @@ import {
   type ColumnDef,
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { routes } from "../../../../shared/config/routes";
 
 function contractsColumns(
   setDeleting: (contract: Contract) => void,
@@ -28,7 +29,7 @@ function contractsColumns(
       ),
       cell: ({ row }) => (
         <Link
-          to="/directories/contracts/$contractId"
+          to={routes.directories.contracts.detail}
           params={{ contractId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -81,8 +82,8 @@ function contractsColumns(
       cell: ({ row }) => (
         <div className="flex max-w-xs flex-wrap gap-1">
           {row.original.wastes.map((waste) => (
-            <Badge key={waste.id} variant="secondary">
-              {`${waste.waste.waste_classifier.code} — ${waste.waste.waste_classifier.name}`}
+            <Badge title={waste.waste.waste_classifier.name} key={waste.id} variant="secondary">
+              {waste.waste.waste_classifier.code}
             </Badge>
           ))}
         </div>
@@ -113,7 +114,7 @@ function contractsColumns(
           )}
           <DataTableRowAction asChild label="Изменить договор">
             <Link
-              to="/directories/contracts/$contractId"
+              to={routes.directories.contracts.detail}
               params={{ contractId: row.original.id }}
             >
               <Pencil />

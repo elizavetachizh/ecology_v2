@@ -11,21 +11,21 @@ import { UnitInstructionWastesSection } from "../../../../features/waste/bind-un
 import { useTenant } from "../../../../entities/tenant";
 import { getUnit, unitsQueryKeys } from "../../../../entities/waste/units";
 import {
-  Alert,
-  AlertDescription,
+  AlertDetailPageError,
   Button,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { UnitHierarchyBreadcrumb } from "./create/ui/UnitHierarchyBreadcrumb";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditUnitPage() {
   const { unitId } = useParams({
-    from: "/directories/units/$unitId",
+    from: routes.directories.units.detail,
   });
-  const search = useSearch({ from: "/directories/units/$unitId" });
+  const search = useSearch({ from: routes.directories.units.detail });
   const navigate = useNavigate({
-    from: "/directories/units/$unitId",
+    from: routes.directories.units.detail,
   });
   const { activeTenantId } = useTenant();
   const unitQuery = useQuery({
@@ -41,14 +41,11 @@ export function EditUnitPage() {
     content = <p className="text-sm text-muted-foreground">Загрузка…</p>;
   } else if (unitQuery.isError || !unit) {
     content = (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Структурная единица не найдена.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/units">К структурам</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.directories.units.list}
+        linkLabel="К структурам"
+        description="Структурная единица не найдена."
+      />
     );
   } else {
     content = (
@@ -70,11 +67,11 @@ export function EditUnitPage() {
             );
             if (close)
               void navigate({
-                to: "/directories/units",
+                to: routes.directories.units.list,
                 search: { focusId: saved.id },
               });
           }}
-          onCancel={() => void navigate({ to: "/directories/units" })}
+          onCancel={() => void navigate({ to: routes.directories.units.list })}
         />
 
         {unit.is_pod9 ? (
@@ -105,7 +102,7 @@ export function EditUnitPage() {
             </div>
             <Button asChild size="sm">
               <Link
-                to="/directories/units/new"
+                to={routes.directories.units.new}
                 search={{ parentId: unitId, isPod9: true }}
               >
                 <Plus className="size-3.5" />

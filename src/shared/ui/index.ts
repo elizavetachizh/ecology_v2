@@ -7,6 +7,12 @@ export {
 export { Select, type SelectProps } from "./select";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 export { PageContextBar, type PageContextBarProps } from "./page-context-bar";
+export { PageBreadcrumb, type PageBreadcrumbItem } from "./page-breadcrumb";
+export { DirectoryBreadcrumb } from "./directory-breadcrumb";
+export {
+  directoryBreadcrumbItems,
+  type DirectoryBreadcrumbProps,
+} from "./directory-breadcrumb-items";
 export {
   TenantRequiredGate,
   type TenantRequiredGateProps,
@@ -30,7 +36,7 @@ export {
   Alert,
   AlertTitle,
   AlertDescription,
-  alertVariants,
+  AlertDetailPageError,
   type AlertProps,
 } from "./alert";
 export {

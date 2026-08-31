@@ -9,6 +9,7 @@ import {
   sortingToSearch,
 } from "../../../../../../shared/lib/sorting";
 import type { SortingState } from "../../../../../../shared/ui";
+import { routes } from "../../../../../../shared/config/routes";
 
 export type UnitsPageSearchPatch = {
   q?: string | undefined;
@@ -20,8 +21,8 @@ export type UnitsPageSearchPatch = {
 };
 
 export function useUnitsPageSearch() {
-  const navigate = useNavigate({ from: "/directories/units" });
-  const search = useSearch({ from: "/directories/units" });
+  const navigate = useNavigate({ from: routes.directories.units.list });
+  const search = useSearch({ from: routes.directories.units.list });
   const pod9Only = search.is_pod9 === true;
 
   const sorting = useMemo(
@@ -63,7 +64,7 @@ export function useUnitsPageSearch() {
     options?: { isPod9?: boolean },
   ) => {
     void navigate({
-      to: "/directories/units/new",
+      to: routes.directories.units.new,
       search: {
         parentId: parentId ?? "",
         isPod9: options?.isPod9 ? true : undefined,

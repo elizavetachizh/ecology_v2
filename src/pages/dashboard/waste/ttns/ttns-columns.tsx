@@ -8,6 +8,7 @@ import {
   type ColumnDef,
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { routes } from "../../../../shared/config/routes";
 
 function ttnsColumns(setDeleting: (ttn: Ttn) => void): ColumnDef<Ttn>[] {
   return [
@@ -19,7 +20,7 @@ function ttnsColumns(setDeleting: (ttn: Ttn) => void): ColumnDef<Ttn>[] {
       ),
       cell: ({ row }) => (
         <Link
-          to="/waste/ttns/$ttnId"
+          to={routes.waste.ttns.detail}
           params={{ ttnId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -62,7 +63,7 @@ function ttnsColumns(setDeleting: (ttn: Ttn) => void): ColumnDef<Ttn>[] {
       cell: ({ row }) => (
         <DataTableRowActions>
           <DataTableRowAction asChild label="Изменить ТТН">
-            <Link to="/waste/ttns/$ttnId" params={{ ttnId: row.original.id }}>
+            <Link to={routes.waste.ttns.detail} params={{ ttnId: row.original.id }}>
               <Pencil />
               Изменить
             </Link>

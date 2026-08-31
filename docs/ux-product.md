@@ -290,7 +290,7 @@
 | `/directories/wastes*` | ок | не уводить из мастера операции |
 | `/directories/waste-sources` | ок | inline create из операции |
 | `/directories/limits` | stub | убрать из nav |
-| `/directories/norms` | stub | убрать из nav |
+| `/directories/standards` | stub | убрать из nav |
 | `/waste/operations` | ок | шаг проверки + фильтр мест учёта |
 | `/waste/balances` | 404 | экран на API **или** убрать пункт |
 | `/reports/pod-9` | harness | скрыть / flag |

@@ -5,13 +5,14 @@ import {
   navigationGroups,
   type NavGroup,
 } from "../../shared/config/navigation";
+import { routes } from "../../shared/config/routes";
 import { cn } from "../../shared/lib/cn";
 import { useTenant } from "../../entities/tenant";
 import { useLogout } from "../../features/auth/logout";
 
 function isActivePath(pathname: string, to?: string) {
   if (!to) return false;
-  if (to === "/") return pathname === "/";
+  if (to === routes.home) return pathname === routes.home;
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
@@ -41,7 +42,7 @@ function NavTreeItem({
   if (!hasChildren) {
     return (
       <Link
-        to={item.to ?? "/"}
+        to={item.to ?? routes.home}
         title={collapsed ? item.title : undefined}
         onClick={onNavigate}
         className={cn(

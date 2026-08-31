@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { Link } from "@tanstack/react-router";
 import {
   DataTableRowAction,
@@ -20,7 +21,7 @@ function uiwColumns(
       header: "Отход",
       cell: ({ row }) => (
         <Link
-          to="/directories/wastes/$wasteId"
+          to={routes.directories.wastes.detail}
           params={{ wasteId: row.original.waste_id }}
           search={{ instructionId: undefined }}
           className="font-medium hover:underline"

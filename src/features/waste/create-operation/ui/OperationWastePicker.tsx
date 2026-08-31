@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
@@ -49,7 +50,7 @@ function UnitCardLink({
 }) {
   return (
     <Link
-      to="/directories/units/$unitId"
+      to={routes.directories.units.detail}
       params={{ unitId }}
       search={{
         instructionId,

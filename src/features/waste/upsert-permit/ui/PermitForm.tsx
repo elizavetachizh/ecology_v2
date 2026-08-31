@@ -8,18 +8,20 @@ import {
   AlertDescription,
   Badge,
   Button,
+  DirectoryBreadcrumb,
   FormField,
   Input,
   PageContextBar,
 } from "../../../../shared/ui";
 import { useUpsertPermitForm } from "../model/use-upsert-permit-form";
 import { PermitBurialWastesEditor } from "./PermitBurialWastesEditor";
+import { routes } from "../../../../shared/config/routes";
 
 type PermitFormProps = {
   mode: "create" | "edit";
   permitId?: string;
   initial?: Permit | null;
-  onSaved: (permit: Permit) => void;
+  onSaved: (permit: Permit, meta: { close: boolean }) => void;
   onCancel: () => void;
 };
 
@@ -45,11 +47,21 @@ export function PermitForm({
 
   return (
     <form
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={form.handleSubmit((values) => onSubmit(false, values))}
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
-        eyebrow="Справочники / Разрешения"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="Разрешения"
+            directoryTo={routes.directories.permits.list}
+            current={
+              mode === "create"
+                ? "Новое разрешение"
+                : `Разрешение ${initial?.number ?? ""}`
+            }
+          />
+        }
         title={
           mode === "create"
             ? "Новое разрешение"
@@ -98,7 +110,7 @@ export function PermitForm({
             <>
               Нет нужного места учёта?{" "}
               <Link
-                to="/directories/units"
+                to={routes.directories.units.list}
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Открыть структуру
@@ -160,7 +172,7 @@ export function PermitForm({
             Пока API принимает только захоронение. Пустой перечень при
             сохранении очищает список (полная замена).{" "}
             <Link
-              to="/directories/wastes"
+              to={routes.directories.wastes.list}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Справочник отходов
@@ -181,6 +193,16 @@ export function PermitForm({
             : mode === "create"
               ? "Создать"
               : "Сохранить"}
+        </Button>{" "}
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={pending}
+          onClick={() =>
+            void form.handleSubmit((values) => onSubmit(true, values))()
+          }
+        >
+          Сохранить и закрыть
         </Button>
         <Button
           type="button"

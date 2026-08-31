@@ -10,6 +10,7 @@ import {
 } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
+import { routes } from "../../../../../shared/config/routes";
 
 type ReceivedOutFieldsProps = {
   pending: boolean;
@@ -48,7 +49,7 @@ export function ReceivedOutFields({
         <FieldDescription>
           Нет нужного контрагента?{" "}
           <Link
-            to="/directories/counterparties"
+            to={routes.directories.counterparties.list}
             search={tenantId ? { tenant: tenantId } : undefined}
             target="_blank"
             rel="noopener noreferrer"

@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import { operationsColumns } from "./operations-columns";
 
 const actions = {
-  onEdit: vi.fn(),
   onDelete: vi.fn(),
   onApprove: vi.fn(),
   onReject: vi.fn(),
@@ -20,6 +19,7 @@ describe("operationsColumns", () => {
       "amount",
       "waste_source",
       "balance",
+      "created_at",
       "actions",
     ]);
   });

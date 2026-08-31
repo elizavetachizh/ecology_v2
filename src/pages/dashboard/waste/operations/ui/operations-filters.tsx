@@ -88,6 +88,22 @@ export function OperationsFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm text-muted-foreground">с</span>
+        <DateFilterInput
+          aria-label="Дата с"
+          value={values.date_from}
+          onValueChange={(date_from) => onChange({ date_from })}
+        />
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm text-muted-foreground">по</span>
+        <DateFilterInput
+          aria-label="Дата по"
+          value={values.date_to}
+          onValueChange={(date_to) => onChange({ date_to })}
+        />
+      </div>
       <AsyncCombobox
         options={units.options.map((unit) => ({
           value: unit.id,
@@ -139,22 +155,6 @@ export function OperationsFilters({
           </option>
         ))}
       </Select>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">с</span>
-        <DateFilterInput
-          aria-label="Дата с"
-          value={values.date_from}
-          onValueChange={(date_from) => onChange({ date_from })}
-        />
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">по</span>
-        <DateFilterInput
-          aria-label="Дата по"
-          value={values.date_to}
-          onValueChange={(date_to) => onChange({ date_to })}
-        />
-      </div>
     </div>
   );
 }

@@ -25,12 +25,17 @@ import { WastesDirectoryPage } from "../pages/dashboard/waste/wastes/WastesPage"
 import { EditWastePage } from "../pages/dashboard/waste/wastes/EditWastePage";
 import { WasteSourcesPage } from "../pages/dashboard/waste/waste-sources/WasteSourcesPage";
 import { CounterpartiesPage } from "../pages/dashboard/waste/counterparties/CounterpartiesPage";
+import { CreateCounterpartyPage } from "../pages/dashboard/waste/counterparties/CreateCounterpartyPage";
+import { EditCounterpartyPage } from "../pages/dashboard/waste/counterparties/EditCounterpartyPage";
 import { ContractsPage } from "../pages/dashboard/waste/contracts/ContractsPage";
 import { CreateContractPage } from "../pages/dashboard/waste/contracts/CreateContractPage";
 import { EditContractPage } from "../pages/dashboard/waste/contracts/EditContractPage";
 import { PermitsPage } from "../pages/dashboard/waste/permits/PermitsPage";
 import { CreatePermitPage } from "../pages/dashboard/waste/permits/CreatePermitPage";
 import { EditPermitPage } from "../pages/dashboard/waste/permits/EditPermitPage";
+import { StandardsPage } from "../pages/dashboard/waste/standards/StandardsPage";
+import { CreateStandardPage } from "../pages/dashboard/waste/standards/CreateStandardPage";
+import { EditStandardPage } from "../pages/dashboard/waste/standards/EditStandardPage";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
@@ -52,6 +57,10 @@ import {
   PermitSortFields,
   PermitStatusValues,
 } from "../entities/waste/permits";
+import {
+  StandardSortFields,
+  StandardStatusValues,
+} from "../entities/waste/standards";
 import {
   PassportSortFields,
   PassportStatusValues,
@@ -79,6 +88,7 @@ import {
   type CounterpartiesSearch,
   type ContractsSearch,
   type PermitsSearch,
+  type StandardsSearch,
   type WasteSourcesSearch,
   type WastesSearch,
   type PersonsSearch,
@@ -88,6 +98,7 @@ import { CreateWastePage } from "../pages/dashboard/waste/wastes/CreateWastePage
 import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/CreateInstructionPage";
 import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
 import { PersonSortFields } from "../entities/waste/persons";
+import { routes } from "../shared/config/routes";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   validateSearch: parseRootSearch,
@@ -102,13 +113,13 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  path: routes.home,
   component: HomePage,
 });
 
 const wasteOperationsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/operations",
+  path: routes.waste.operations.list,
   validateSearch: (search: Record<string, unknown>): OperationsSearch => ({
     unit_id: parseSearchQuery(search.unit_id),
     waste_id: parseSearchQuery(search.waste_id),
@@ -123,13 +134,13 @@ const wasteOperationsRoute = createRoute({
 
 const wasteEditOperationRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/operations/$operationId",
+  path: routes.waste.operations.detail,
   component: EditOperationPage,
 });
 
 const wastePassportsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/passports",
+  path: routes.waste.passports.list,
   validateSearch: (search: Record<string, unknown>): PassportsSearch => ({
     q: parseSearchQuery(search.q),
     status: parseSearchEnum(search.status, PassportStatusValues),
@@ -151,7 +162,7 @@ const wastePassportsRoute = createRoute({
 
 const wasteCreatePassportRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/passports/new",
+  path: routes.waste.passports.new,
   validateSearch: (search: Record<string, unknown>): CreatePassportSearch => ({
     recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
   }),
@@ -160,13 +171,13 @@ const wasteCreatePassportRoute = createRoute({
 
 const wasteEditPassportRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/passports/$passportId",
+  path: routes.waste.passports.detail,
   component: EditPassportPage,
 });
 
 const wasteTtnsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/ttns",
+  path: routes.waste.ttns.list,
   validateSearch: (search: Record<string, unknown>): TtnsSearch => ({
     q: parseSearchQuery(search.q),
     status: parseSearchEnum(search.status, TtnStatusValues),
@@ -184,7 +195,7 @@ const wasteTtnsRoute = createRoute({
 
 const wasteCreateTtnRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/ttns/new",
+  path: routes.waste.ttns.new,
   validateSearch: (search: Record<string, unknown>): CreateTtnSearch => ({
     recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
   }),
@@ -193,19 +204,19 @@ const wasteCreateTtnRoute = createRoute({
 
 const wasteEditTtnRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/waste/ttns/$ttnId",
+  path: routes.waste.ttns.detail,
   component: EditTtnPage,
 });
 
 const directoriesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories",
+  path: routes.directories.index,
   component: DirectoriesHubPage,
 });
 
 const directoriesStructureRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/units",
+  path: routes.directories.units.list,
   validateSearch: (search: Record<string, unknown>): StructureSearch => ({
     focusId: typeof search.focusId === "string" ? search.focusId : undefined,
     expandId: typeof search.expandId === "string" ? search.expandId : undefined,
@@ -226,7 +237,7 @@ type CreateUnitSearch = {
 
 const directoriesCreateUnitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/units/new",
+  path: routes.directories.units.new,
   validateSearch: (search: Record<string, unknown>): CreateUnitSearch => ({
     parentId: typeof search.parentId === "string" ? search.parentId : "",
     isPod9: search.isPod9 === true || search.isPod9 === "true",
@@ -236,7 +247,7 @@ const directoriesCreateUnitRoute = createRoute({
 
 const directoriesEditUnitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/units/$unitId",
+  path: routes.directories.units.detail,
   validateSearch: (search: Record<string, unknown>) => ({
     instructionId:
       typeof search.instructionId === "string"
@@ -248,7 +259,7 @@ const directoriesEditUnitRoute = createRoute({
 
 const directoriesWastesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/wastes",
+  path: routes.directories.wastes.list,
   validateSearch: (search: Record<string, unknown>): WastesSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -268,13 +279,13 @@ const directoriesWastesRoute = createRoute({
 
 const directoriesCreateWasteRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/wastes/new",
+  path: routes.directories.wastes.new,
   component: CreateWastePage,
 });
 
 const directoriesWasteEditRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/wastes/$wasteId",
+  path: routes.directories.wastes.detail,
   validateSearch: (search: Record<string, unknown>) => ({
     instructionId:
       typeof search.instructionId === "string"
@@ -286,13 +297,18 @@ const directoriesWasteEditRoute = createRoute({
 
 const directoriesLimitsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/limits",
-  component: () => <DirectoryStubPage title="Лимиты накопления" />,
+  path: routes.directories.limits.list,
+  component: () => (
+    <DirectoryStubPage
+      title="Лимиты накопления"
+      directoryTo={routes.directories.limits.list}
+    />
+  ),
 });
 
 const directoriesWasteSourcesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/waste-sources",
+  path: routes.directories.wasteSources.list,
   validateSearch: (search: Record<string, unknown>): WasteSourcesSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -307,7 +323,7 @@ const directoriesWasteSourcesRoute = createRoute({
 
 const directoriesPersonsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/persons",
+  path: routes.directories.persons.list,
   validateSearch: (search: Record<string, unknown>): PersonsSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -322,7 +338,7 @@ const directoriesPersonsRoute = createRoute({
 
 const directoriesCounterpartiesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/counterparties",
+  path: routes.directories.counterparties.list,
   validateSearch: (search: Record<string, unknown>): CounterpartiesSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -337,9 +353,21 @@ const directoriesCounterpartiesRoute = createRoute({
   component: CounterpartiesPage,
 });
 
+const directoriesCreateCounterpartyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.counterparties.new,
+  component: CreateCounterpartyPage,
+});
+
+const directoriesEditCounterpartyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.counterparties.detail,
+  component: EditCounterpartyPage,
+});
+
 const directoriesContractsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/contracts",
+  path: routes.directories.contracts.list,
   validateSearch: (search: Record<string, unknown>): ContractsSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -357,19 +385,19 @@ const directoriesContractsRoute = createRoute({
 
 const directoriesCreateContractRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/contracts/new",
+  path: routes.directories.contracts.new,
   component: CreateContractPage,
 });
 
 const directoriesEditContractRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/contracts/$contractId",
+  path: routes.directories.contracts.detail,
   component: EditContractPage,
 });
 
 const directoriesPermitsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/permits",
+  path: routes.directories.permits.list,
   validateSearch: (search: Record<string, unknown>): PermitsSearch => {
     return {
       q: parseSearchQuery(search.q),
@@ -386,25 +414,47 @@ const directoriesPermitsRoute = createRoute({
 
 const directoriesCreatePermitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/permits/new",
+  path: routes.directories.permits.new,
   component: CreatePermitPage,
 });
 
 const directoriesEditPermitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/permits/$permitId",
+  path: routes.directories.permits.detail,
   component: EditPermitPage,
 });
 
-const directoriesNormsRoute = createRoute({
+const directoriesStandardsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/norms",
-  component: () => <DirectoryStubPage title="Нормативы" />,
+  path: routes.directories.standards.list,
+  validateSearch: (search: Record<string, unknown>): StandardsSearch => {
+    return {
+      status: parseSearchEnum(search.status, StandardStatusValues),
+      unit_id: parseSearchQuery(search.unit_id),
+      sort: parseSearchEnum(search.sort, StandardSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: StandardsPage,
+});
+
+const directoriesCreateStandardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.standards.new,
+  component: CreateStandardPage,
+});
+
+const directoriesEditStandardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.standards.detail,
+  component: EditStandardPage,
 });
 
 const directoriesInstructionsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/instructions",
+  path: routes.directories.instructions.list,
   validateSearch: (search: Record<string, unknown>): InstructionsSearch => {
     const statusRaw = search.status;
     const status =
@@ -428,25 +478,25 @@ const directoriesInstructionsRoute = createRoute({
 
 const directoriesCreateInstructionRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/instructions/new",
+  path: routes.directories.instructions.new,
   component: CreateInstructionPage,
 });
 
 const directoriesEditInstructionRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/directories/instructions/$instructionId",
+  path: routes.directories.instructions.detail,
   component: EditInstructionPage,
 });
 
 const pod9ReportRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/reports/pod-9",
+  path: routes.reports.pod9,
   component: Pod9ReportPage,
 });
 
 const forbiddenRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/forbidden",
+  path: routes.forbidden,
   component: ForbiddenPage,
 });
 
@@ -476,6 +526,8 @@ const routeTree = rootRoute.addChildren([
   directoriesWasteSourcesRoute,
   directoriesPersonsRoute,
   directoriesCounterpartiesRoute,
+  directoriesCreateCounterpartyRoute,
+  directoriesEditCounterpartyRoute,
   directoriesContractsRoute,
   directoriesCreateContractRoute,
   directoriesEditContractRoute,
@@ -483,7 +535,9 @@ const routeTree = rootRoute.addChildren([
   directoriesCreatePermitRoute,
   directoriesEditPermitRoute,
   directoriesLimitsRoute,
-  directoriesNormsRoute,
+  directoriesStandardsRoute,
+  directoriesCreateStandardRoute,
+  directoriesEditStandardRoute,
   directoriesInstructionsRoute,
   directoriesCreateInstructionRoute,
   directoriesEditInstructionRoute,

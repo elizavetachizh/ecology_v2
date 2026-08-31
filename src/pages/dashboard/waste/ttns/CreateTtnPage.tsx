@@ -2,11 +2,12 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
 import { TtnForm } from "../../../../features/waste/upsert-ttn";
 import { TenantRequiredGate, toast } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function CreateTtnPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-  const search = useSearch({ from: "/waste/ttns/new" });
+  const search = useSearch({ from: routes.waste.ttns.new });
 
   return (
     <TenantRequiredGate
@@ -19,12 +20,12 @@ export function CreateTtnPage() {
         onSaved={(ttn) => {
           toast.success("ТТН успешно создана");
           void navigate({
-            to: "/waste/ttns/$ttnId",
+            to: routes.waste.ttns.detail,
             params: { ttnId: ttn.id },
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: "/waste/ttns" })}
+        onCancel={() => void navigate({ to: routes.waste.ttns.list })}
       />
     </TenantRequiredGate>
   );

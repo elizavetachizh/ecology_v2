@@ -14,6 +14,7 @@ import {
   type ColumnDef,
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { routes } from "../../../../shared/config/routes";
 
 function formatAmount(value: string): string {
   const n = Number(value);
@@ -38,7 +39,7 @@ function permitsColumns(
       ),
       cell: ({ row }) => (
         <Link
-          to="/directories/permits/$permitId"
+          to={routes.directories.permits.detail}
           params={{ permitId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -115,7 +116,7 @@ function permitsColumns(
           )}
           <DataTableRowAction asChild label="Изменить разрешение">
             <Link
-              to="/directories/permits/$permitId"
+              to={routes.directories.permits.detail}
               params={{ permitId: row.original.id }}
             >
               <Pencil />

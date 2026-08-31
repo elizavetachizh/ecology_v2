@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
@@ -50,8 +51,8 @@ function invalidateOperationQueries() {
 
 export function WasteOperationsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/waste/operations" });
-  const search = useSearch({ from: "/waste/operations" });
+  const navigate = useNavigate({ from: routes.waste.operations.list });
+  const search = useSearch({ from: routes.waste.operations.list });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [deleting, setDeleting] = useState<Operation | null>(null);
@@ -60,17 +61,11 @@ export function WasteOperationsPage() {
   const columns = useMemo(
     () =>
       operationsColumns({
-        onEdit: (operation) => {
-          void navigate({
-            to: "/waste/operations/$operationId",
-            params: { operationId: operation.id },
-          });
-        },
         onDelete: setDeleting,
         onApprove: setApproving,
         onReject: setRejecting,
       }),
-    [navigate],
+    [],
   );
 
   const listParams = useMemo(
@@ -185,7 +180,7 @@ export function WasteOperationsPage() {
           emptyDescription="Создайте первую операцию, чтобы начать учет отходов."
           onRowClick={(row) => {
             void navigate({
-              to: "/waste/operations/$operationId",
+              to: routes.waste.operations.detail,
               params: { operationId: row.original.id },
             });
           }}

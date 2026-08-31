@@ -1,3 +1,5 @@
+import { routes } from "./routes";
+
 export type DirectoryCard = {
   id: string;
   title: string;
@@ -11,63 +13,64 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     title: "Инструкции",
     description: "Инструкции по экологическому мониторингу",
 
-    to: "/directories/instructions",
+    to: routes.directories.instructions.list,
   },
   {
     id: "units",
     title: "Структура организации",
     description: "Вложенные структурные единицы и журналы ПОД-9 в одном дереве",
-    to: "/directories/units",
+    to: routes.directories.units.list,
   },
   {
     id: "wastes",
     title: "Отходы",
     description:
       "Справочник отходов: сначала карточка, затем привязки к единицам и ПОД-9",
-    to: "/directories/wastes",
+    to: routes.directories.wastes.list,
   },
   {
     id: "waste-sources",
     title: "Источники образования",
     description: "Источники образования отходов предприятия",
-    to: "/directories/waste-sources",
+    to: routes.directories.wasteSources.list,
   },
   {
     id: "counterparties",
     title: "Контрагенты",
     description: "Юрлица и физлица организации: УНП, адрес, активность",
-    to: "/directories/counterparties",
+    to: routes.directories.counterparties.list,
   },
   {
     id: "contracts",
     title: "Договоры",
     description:
       "Договоры утилизации и перевозки: контрагент, сроки, перечень отходов",
-    to: "/directories/contracts",
+    to: routes.directories.contracts.list,
   },
   {
     id: "permits",
     title: "Разрешения",
     description:
       "Разрешения на захоронение отходов: номер, подразделение, сроки, лимиты",
-    to: "/directories/permits",
+    to: routes.directories.permits.list,
   },
   {
     id: "limits",
     title: "Лимиты накопления",
     description: "Лимиты по местам хранения",
-    to: "/directories/limits",
+    to: routes.directories.limits.list,
   },
   {
-    id: "norms",
+    id: "standards",
     title: "Нормативы",
-    description: "Нормативы образования отходов",
-    to: "/directories/norms",
+    description:
+      "Нормативы образования отходов: подразделение, дата начала, перечень отходов",
+    to: routes.directories.standards.list,
   },
   {
     id: "persons",
     title: "Ответственные",
     description: "Ответственные за экологическое мониторинг",
-    to: "/directories/persons",
+    to: routes.directories.persons.list,
   },
 ];

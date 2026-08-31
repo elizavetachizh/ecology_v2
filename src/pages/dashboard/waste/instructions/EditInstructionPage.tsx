@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
   InstructionForm,
   instructionSavedToast,
@@ -10,19 +10,18 @@ import {
   instructionsQueryKeys,
 } from "../../../../entities/waste/instructions";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditInstructionPage() {
   const { instructionId } = useParams({
-    from: "/directories/instructions/$instructionId",
+    from: routes.directories.instructions.detail,
   });
   const navigate = useNavigate({
-    from: "/directories/instructions/$instructionId",
+    from: routes.directories.instructions.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -41,14 +40,11 @@ export function EditInstructionPage() {
 
   if (instructionQuery.isError || !instructionQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Инструкция не найдена.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/instructions">К инструкциям</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.directories.instructions.list}
+        linkLabel="К инструкциям"
+        description="Инструкция не найдена."
+      />
     );
   }
 
@@ -66,10 +62,12 @@ export function EditInstructionPage() {
         onSaved={(_instruction, { close }) => {
           toast.success(instructionSavedToast(false));
           if (close) {
-            void navigate({ to: "/directories/instructions" });
+            void navigate({ to: routes.directories.instructions.list });
           }
         }}
-        onCancel={() => void navigate({ to: "/directories/instructions" })}
+        onCancel={() =>
+          void navigate({ to: routes.directories.instructions.list })
+        }
       />
     </TenantRequiredGate>
   );

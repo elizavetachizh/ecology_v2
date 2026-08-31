@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -7,19 +7,18 @@ import {
 } from "../../../../entities/waste/passports";
 import { PassportForm } from "../../../../features/waste/upsert-passport";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditPassportPage() {
   const { passportId } = useParams({
-    from: "/waste/passports/$passportId",
+    from: routes.waste.passports.detail,
   });
   const navigate = useNavigate({
-    from: "/waste/passports/$passportId",
+    from: routes.waste.passports.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -35,14 +34,11 @@ export function EditPassportPage() {
 
   if (passportQuery.isError || !passportQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Паспорт не найден.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/waste/passports">К паспортам</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.waste.passports.list}
+        linkLabel="К паспортам"
+        description="Паспорт не найден."
+      />
     );
   }
 
@@ -58,7 +54,7 @@ export function EditPassportPage() {
         onSaved={() => {
           toast.success("Паспорт успешно обновлён");
         }}
-        onCancel={() => void navigate({ to: "/waste/passports" })}
+        onCancel={() => void navigate({ to: routes.waste.passports.list })}
       />
     </TenantRequiredGate>
   );

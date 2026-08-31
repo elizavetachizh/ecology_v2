@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
 import { ContractForm } from "../../../../features/waste/upsert-contract";
 import { TenantRequiredGate, toast } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function CreateContractPage() {
   const navigate = useNavigate();
@@ -15,15 +16,21 @@ export function CreateContractPage() {
       <ContractForm
         tenantId={activeTenantId}
         mode="create"
-        onSaved={(contract) => {
+        onSaved={(contract, { close }) => {
           toast.success("Договор успешно создан");
+          if (close) {
+            void navigate({ to: routes.directories.contracts.list });
+            return;
+          }
           void navigate({
-            to: "/directories/contracts/$contractId",
+            to: routes.directories.contracts.detail,
             params: { contractId: contract.id },
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: "/directories/contracts" })}
+        onCancel={() =>
+          void navigate({ to: routes.directories.contracts.list })
+        }
       />
     </TenantRequiredGate>
   );

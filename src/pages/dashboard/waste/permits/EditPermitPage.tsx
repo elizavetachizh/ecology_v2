@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -7,19 +7,18 @@ import {
 } from "../../../../entities/waste/permits";
 import { PermitForm } from "../../../../features/waste/upsert-permit";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditPermitPage() {
   const { permitId } = useParams({
-    from: "/directories/permits/$permitId",
+    from: routes.directories.permits.detail,
   });
   const navigate = useNavigate({
-    from: "/directories/permits/$permitId",
+    from: routes.directories.permits.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -35,14 +34,11 @@ export function EditPermitPage() {
 
   if (permitQuery.isError || !permitQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Разрешение не найдено.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/permits">К разрешениям</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.directories.permits.list}
+        linkLabel="К разрешениям"
+        description="Разрешение не найдено."
+      />
     );
   }
 
@@ -55,10 +51,11 @@ export function EditPermitPage() {
         mode="edit"
         permitId={permitId}
         initial={permitQuery.data}
-        onSaved={() => {
+        onSaved={(_permit, { close }) => {
           toast.success("Разрешение успешно обновлено");
+          if (close) void navigate({ to: routes.directories.permits.list });
         }}
-        onCancel={() => void navigate({ to: "/directories/permits" })}
+        onCancel={() => void navigate({ to: routes.directories.permits.list })}
       />
     </TenantRequiredGate>
   );

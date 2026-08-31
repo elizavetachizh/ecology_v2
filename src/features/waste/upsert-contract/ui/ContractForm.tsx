@@ -14,6 +14,7 @@ import {
   AlertDescription,
   Badge,
   Button,
+  DirectoryBreadcrumb,
   FormField,
   Input,
   PageContextBar,
@@ -22,12 +23,13 @@ import {
 import { useUpsertContractForm } from "../model/use-upsert-contract-form";
 import { ContractNextStepCta } from "./ContractNextStepCta";
 import { ContractWastesEditor } from "./ContractWastesEditor";
+import { routes } from "../../../../shared/config/routes";
 
 type ContractFormProps = {
   mode: "create" | "edit";
   contractId?: string;
   initial?: Contract | null;
-  onSaved: (contract: Contract) => void;
+  onSaved: (contract: Contract, meta: { close: boolean }) => void;
   onCancel: () => void;
   tenantId: string | null;
 };
@@ -61,11 +63,21 @@ export function ContractForm({
 
   return (
     <form
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={form.handleSubmit((values) => onSubmit(false, values))}
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
-        eyebrow="Справочники / Договоры"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="Договоры"
+            directoryTo={routes.directories.contracts.list}
+            current={
+              mode === "create"
+                ? "Новый договор"
+                : `Договор ${initial?.number ?? ""}`
+            }
+          />
+        }
         title={
           mode === "create"
             ? "Новый договор"
@@ -127,7 +139,7 @@ export function ContractForm({
               </button>
               {" · "}
               <Link
-                to="/directories/counterparties"
+                to={routes.directories.counterparties.list}
                 search={tenantId ? { tenant: tenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -237,7 +249,14 @@ export function ContractForm({
               ? "Создать"
               : "Сохранить"}
         </Button>
-        <Button type="button" variant="secondary" disabled={pending}>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={pending}
+          onClick={() =>
+            void form.handleSubmit((values) => onSubmit(true, values))()
+          }
+        >
           Сохранить и закрыть
         </Button>
         <Button

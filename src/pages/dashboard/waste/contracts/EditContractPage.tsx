@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -7,19 +7,18 @@ import {
 } from "../../../../entities/waste/contracts";
 import { ContractForm } from "../../../../features/waste/upsert-contract";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditContractPage() {
   const { contractId } = useParams({
-    from: "/directories/contracts/$contractId",
+    from: routes.directories.contracts.detail,
   });
   const navigate = useNavigate({
-    from: "/directories/contracts/$contractId",
+    from: routes.directories.contracts.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -35,14 +34,11 @@ export function EditContractPage() {
 
   if (contractQuery.isError || !contractQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Договор не найден.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/contracts">К договорам</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.directories.contracts.list}
+        linkLabel="К договорам"
+        description="Договор не найден."
+      />
     );
   }
 
@@ -56,10 +52,13 @@ export function EditContractPage() {
         mode="edit"
         contractId={contractId}
         initial={contractQuery.data}
-        onSaved={() => {
+        onSaved={(_contract, { close }) => {
           toast.success("Договор успешно обновлён");
+          if (close) void navigate({ to: routes.directories.contracts.list });
         }}
-        onCancel={() => void navigate({ to: "/directories/contracts" })}
+        onCancel={() =>
+          void navigate({ to: routes.directories.contracts.list })
+        }
       />
     </TenantRequiredGate>
   );

@@ -17,6 +17,7 @@ import {
   FieldError,
   FieldLabel,
 } from "../../../shared/ui";
+import { routes } from "../../../shared/config/routes";
 
 type Pod9InstructionFieldProps = {
   unitId: string;
@@ -87,7 +88,7 @@ export function Pod9InstructionField({
         <AlertDescription>
           Сначала привяжите отходы к инструкции на карточке места учёта.{" "}
           <Link
-            to="/directories/units/$unitId"
+            to={routes.directories.units.detail}
             params={{ unitId }}
             search={{ instructionId: undefined }}
             className="font-medium text-primary underline-offset-4 hover:underline"

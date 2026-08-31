@@ -13,13 +13,14 @@ import {
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditOperationPage() {
   const { operationId } = useParams({
-    from: "/waste/operations/$operationId",
+    from: routes.waste.operations.detail,
   });
   const navigate = useNavigate({
-    from: "/waste/operations/$operationId",
+    from: routes.waste.operations.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -40,7 +41,7 @@ export function EditOperationPage() {
           <AlertDescription>Операция не найдена.</AlertDescription>
         </Alert>
         <Button asChild variant="outline" size="sm">
-          <Link to="/waste/operations">К журналу операций</Link>
+          <Link to={routes.waste.operations.list}>К журналу операций</Link>
         </Button>
       </div>
     );
@@ -54,13 +55,14 @@ export function EditOperationPage() {
       <OperationCard
         key={operationQuery.data.id}
         operation={operationQuery.data}
-        onSaved={() => {
+        onCancel={() => void navigate({ to: routes.waste.operations.list })}
+        onSaved={(_operation, { close }) => {
           toast.success("Операция успешно обновлена");
+          if (close) void navigate({ to: routes.waste.operations.list });
         }}
-        onCancel={() => void navigate({ to: "/waste/operations" })}
         onDeleted={() => {
           toast.success("Операция успешно удалена");
-          void navigate({ to: "/waste/operations" });
+          void navigate({ to: routes.waste.operations.list });
         }}
       />
     </TenantRequiredGate>

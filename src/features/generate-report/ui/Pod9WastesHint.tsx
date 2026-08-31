@@ -6,6 +6,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "../../../shared/ui";
+import { routes } from "../../../shared/config/routes";
 
 type Pod9WastesHintProps = {
   unitId: string;
@@ -50,7 +51,7 @@ export function Pod9WastesHint({
         <AlertDescription>
           Отчёт сформируется с титульным листом без журналов по отходам.{" "}
           <Link
-            to="/directories/units/$unitId"
+            to={routes.directories.units.detail}
             params={{ unitId }}
             search={{ instructionId }}
             className="font-medium text-primary underline-offset-4 hover:underline"

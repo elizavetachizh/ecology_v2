@@ -14,6 +14,7 @@ import {
   type ColumnDef,
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { routes } from "../../../../shared/config/routes";
 
 function passportsColumns(
   setDeleting: (passport: Passport) => void,
@@ -28,7 +29,7 @@ function passportsColumns(
       ),
       cell: ({ row }) => (
         <Link
-          to="/waste/passports/$passportId"
+          to={routes.waste.passports.detail}
           params={{ passportId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -112,7 +113,7 @@ function passportsColumns(
           )}
           <DataTableRowAction asChild label="Изменить паспорт">
             <Link
-              to="/waste/passports/$passportId"
+              to={routes.waste.passports.detail}
               params={{ passportId: row.original.id }}
             >
               <Pencil />

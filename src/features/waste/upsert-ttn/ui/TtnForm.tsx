@@ -14,6 +14,7 @@ import {
   PageContextBar,
 } from "../../../../shared/ui";
 import { useUpsertTtnForm } from "../model/use-upsert-ttn-form";
+import { routes } from "../../../../shared/config/routes";
 
 type TtnFormProps = {
   mode: "create" | "edit";
@@ -136,7 +137,7 @@ export function TtnForm({
             <>
               Только действующие договоры типа «Утилизация». Нет договора?{" "}
               <Link
-                to="/directories/contracts/new"
+                to={routes.directories.contracts.new}
                 search={activeTenantId ? { tenant: activeTenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"

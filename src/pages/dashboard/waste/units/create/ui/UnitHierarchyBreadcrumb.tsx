@@ -1,17 +1,12 @@
-import { Fragment } from "react";
-import { Link } from "@tanstack/react-router";
 import {
   useUnitAncestorChain,
   type Unit,
 } from "../../../../../../entities/waste/units";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+  DirectoryBreadcrumb,
+  type PageBreadcrumbItem,
 } from "../../../../../../shared/ui";
+import { routes } from "../../../../../../shared/config/routes";
 
 type UnitHierarchyBreadcrumbProps = {
   tenantId: string | null;
@@ -20,12 +15,6 @@ type UnitHierarchyBreadcrumbProps = {
   /** Подпись текущей страницы, если единицы ещё нет (create). */
   currentLabel?: string;
 };
-
-function crumbClassName(isLast: boolean) {
-  return isLast
-    ? "max-w-56 truncate sm:max-w-xs"
-    : "max-w-40 truncate sm:max-w-56";
-}
 
 export function UnitHierarchyBreadcrumb({
   tenantId,
@@ -39,64 +28,33 @@ export function UnitHierarchyBreadcrumb({
   });
 
   const creating = Boolean(currentLabel);
+  const extra: PageBreadcrumbItem[] = [];
+
+  if (loading && items.length <= 1 && unit?.parent_id) {
+    extra.push({ label: "…" });
+  }
+
+  items.forEach((item, index) => {
+    const isLastExisting = index === items.length - 1;
+    const isPage = !creating && isLastExisting;
+    extra.push(
+      isPage
+        ? { label: item.name }
+        : {
+            label: item.name,
+            to: routes.directories.units.detail,
+            params: { unitId: item.id },
+            search: { instructionId: undefined },
+          },
+    );
+  });
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link to="/directories/units">Структура</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-
-        {loading && items.length <= 1 && unit?.parent_id ? (
-          <>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <span className="text-muted-foreground">…</span>
-            </BreadcrumbItem>
-          </>
-        ) : null}
-
-        {items.map((item, index) => {
-          const isLastExisting = index === items.length - 1;
-          const isPage = !creating && isLastExisting;
-          return (
-            <Fragment key={item.id}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                {isPage ? (
-                  <BreadcrumbPage className={crumbClassName(true)}>
-                    {item.name}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link
-                      to="/directories/units/$unitId"
-                      params={{ unitId: item.id }}
-                      search={{ instructionId: undefined }}
-                      className={crumbClassName(isLastExisting && !creating)}
-                    >
-                      {item.name}
-                    </Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-            </Fragment>
-          );
-        })}
-
-        {currentLabel ? (
-          <>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className={crumbClassName(true)}>
-                {currentLabel}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </>
-        ) : null}
-      </BreadcrumbList>
-    </Breadcrumb>
+    <DirectoryBreadcrumb
+      directoryLabel="Структура организации"
+      directoryTo={routes.directories.units.list}
+      extra={extra}
+      current={currentLabel}
+    />
   );
 }

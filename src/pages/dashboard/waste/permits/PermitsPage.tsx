@@ -26,6 +26,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
+  DirectoryBreadcrumb,
   PageContextBar,
   TenantRequiredGate,
   toast,
@@ -35,15 +36,13 @@ import {
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { permitsColumns } from "./permits-columns";
-import {
-  PermitsFilters,
-  type PermitsFiltersValue,
-} from "./ui/permits-filters";
+import { PermitsFilters, type PermitsFiltersValue } from "./ui/permits-filters";
+import { routes } from "../../../../shared/config/routes";
 
 export function PermitsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/permits" });
-  const search = useSearch({ from: "/directories/permits" });
+  const navigate = useNavigate({ from: routes.directories.permits.list });
+  const search = useSearch({ from: routes.directories.permits.list });
 
   const [deleting, setDeleting] = useState<Permit | null>(null);
 
@@ -148,20 +147,21 @@ export function PermitsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Разрешения"
+              directoryTo={routes.directories.permits.list}
+            />
+          }
           title="Разрешения"
           description="Разрешения на захоронение отходов: номер, подразделение, сроки и лимиты по отходам."
           actions={
-            <>
-              <Button asChild size="sm">
-                <Link to="/directories/permits/new">
-                  <Plus className="size-3.5" />
-                  Создать разрешение
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button asChild size="sm">
+              <Link to={routes.directories.permits.new}>
+                <Plus className="size-3.5" />
+                Создать разрешение
+              </Link>
+            </Button>
           }
         />
 

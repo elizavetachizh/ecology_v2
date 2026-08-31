@@ -7,7 +7,12 @@ import {
   type OperationType,
 } from "../../../../entities/waste/operations";
 
-const amountSchema = z
+export const operationDateSchema = z
+  .string()
+  .min(1, "Укажите дату операции")
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+
+export const operationAmountSchema = z
   .string()
   .trim()
   .min(1, "Укажите количество")
@@ -54,14 +59,11 @@ export function needsTransferReceiptPurpose(type: OperationType | "") {
 
 export const operationFormSchema = z
   .object({
-    date: z
-      .string()
-      .min(1, "Укажите дату операции")
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД"),
+    date: operationDateSchema,
     operation_type: emptyOrEnum(OperationTypeValues),
     unit_id: z.string().uuid("Выберите место учёта"),
     waste_id: z.string().uuid("Выберите отход"),
-    amount: amountSchema,
+    amount: operationAmountSchema,
     waste_source_id: z.string(),
     use_purpose: emptyOrEnum(UsePurposeValues),
     neutralization_method: emptyOrEnum(NeutralizationMethodValues),

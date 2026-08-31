@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { useNavigate } from "@tanstack/react-router";
 import {
   InstructionForm,
@@ -22,16 +23,16 @@ export function CreateInstructionPage() {
         onSaved={(instruction, { close }) => {
           toast.success(instructionSavedToast(true));
           if (close) {
-            void navigate({ to: "/directories/instructions" });
+            void navigate({ to: routes.directories.instructions.list });
             return;
           }
           void navigate({
-            to: "/directories/instructions/$instructionId",
+            to: routes.directories.instructions.detail,
             params: { instructionId: instruction.id },
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: "/directories/instructions" })}
+        onCancel={() => void navigate({ to: routes.directories.instructions.list })}
       />
     </TenantRequiredGate>
   );

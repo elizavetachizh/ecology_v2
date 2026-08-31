@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTenant } from "../../../../../entities/tenant";
-import type { Operation } from "../../../../../entities/waste/operations";
 import {
   useUnitInstructionWastesListQuery,
   useUnitInstructionsListQuery,
@@ -13,22 +12,17 @@ import {
   resetWasteDependentFields,
 } from "../../model/operation-wizard";
 import { resolveInstructionId } from "../../model/pick-preferred-instruction";
-import { useInstructionIdForWaste } from "../../model/use-instruction-id-for-waste";
 import { OperationInstructionPicker } from "../OperationInstructionPicker";
 import { OperationWastePicker } from "../OperationWastePicker";
 
 type OperationStepBindingProps = {
-  mode: "create" | "edit";
   pending: boolean;
-  initial?: Operation | null;
   selectedInstructionId: string | undefined;
   onInstructionIdChange: (instructionId: string | undefined) => void;
 };
 
 export function OperationStepBinding({
-  mode,
   pending,
-  initial,
   selectedInstructionId,
   onInstructionIdChange,
 }: OperationStepBindingProps) {
@@ -46,39 +40,16 @@ export function OperationStepBinding({
     enabled: Boolean(unitId),
   });
 
-  const seedInstruction = useInstructionIdForWaste({
-    tenantId: activeTenantId,
-    unitId,
-    wasteId,
-    instructions: instructionsQuery.items,
-    enabled:
-      mode === "edit" &&
-      !selectedInstructionId &&
-      unitId === (initial?.unit_id ?? "") &&
-      wasteId === (initial?.waste_id ?? "") &&
-      !instructionsQuery.loading,
-  });
-
-  useEffect(() => {
-    if (selectedInstructionId || !seedInstruction.instructionId) return;
-    onInstructionIdChange(seedInstruction.instructionId);
-  }, [
-    seedInstruction.instructionId,
-    selectedInstructionId,
-    onInstructionIdChange,
-  ]);
-
   const instructionId = resolveInstructionId(
     selectedInstructionId,
     instructionsQuery.items,
-    instructionsQuery.loading || seedInstruction.loading,
+    instructionsQuery.loading,
   );
 
   useEffect(() => {
-    if (mode === "edit") return;
     if (selectedInstructionId || !instructionId) return;
     onInstructionIdChange(instructionId);
-  }, [mode, instructionId, selectedInstructionId, onInstructionIdChange]);
+  }, [instructionId, selectedInstructionId, onInstructionIdChange]);
 
   const wastesQuery = useUnitInstructionWastesListQuery({
     tenantId: activeTenantId,
@@ -93,9 +64,6 @@ export function OperationStepBinding({
   const selectedBinding = wastesQuery.items.find(
     (item) => item.waste_id === wasteId,
   );
-  const selectedWaste =
-    selectedBinding?.waste ??
-    (initial?.waste_id === wasteId ? initial.waste : null);
 
   return (
     <>
@@ -103,7 +71,7 @@ export function OperationStepBinding({
         key={unitId}
         unitId={unitId}
         instructions={instructionsQuery.items}
-        loading={instructionsQuery.loading || seedInstruction.loading}
+        loading={instructionsQuery.loading}
         error={instructionsQuery.error}
         value={instructionId}
         onChange={(nextId) => {
@@ -125,7 +93,7 @@ export function OperationStepBinding({
           loading={wastesQuery.loading}
           error={wastesQuery.error}
           value={wasteId}
-          selectedWaste={selectedWaste}
+          selectedWaste={selectedBinding?.waste ?? null}
           onChange={(nextWasteId) => {
             setValue("waste_id", nextWasteId, { shouldValidate: true });
             resetWasteDependentFields(setValue);

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { ContractWaste } from "../../../../entities/waste/contracts";
 import { cn } from "../../../../shared/lib/cn";
 import { Button, FieldError } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 type PassportWastesSelectProps = {
   wastes: ContractWaste[];
@@ -60,7 +61,7 @@ export function PassportWastesSelect({
         </p>
         <Button asChild variant="link" className="h-auto p-0 text-sm">
           <Link
-            to="/directories/contracts/$contractId"
+            to={routes.directories.contracts.detail}
             params={{ contractId: recyclingContractId }}
           >
             Открыть договор

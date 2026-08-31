@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { useNavigate } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
 import { WasteCatalogForm } from "../../../../features/waste/upsert-waste";
@@ -21,17 +22,17 @@ export function CreateWastePage() {
           onSaved={(waste, { close }) => {
             toast.success("Отход успешно создан");
             if (close) {
-              void navigate({ to: "/directories/wastes" });
+              void navigate({ to: routes.directories.wastes.list });
               return;
             }
             void navigate({
-              to: "/directories/wastes/$wasteId",
+              to: routes.directories.wastes.detail,
               params: { wasteId: waste.id },
               search: { instructionId: undefined },
               replace: true,
             });
           }}
-          onCancel={() => void navigate({ to: "/directories/wastes" })}
+          onCancel={() => void navigate({ to: routes.directories.wastes.list })}
         />
         <WasteInstructionUnitsCreateHint />
       </div>

@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
@@ -62,7 +63,7 @@ export function OperationInstructionPicker({
         <AlertDescription>
           Сначала привяжите отходы к инструкции на карточке места учёта.{" "}
           <Link
-            to="/directories/units/$unitId"
+            to={routes.directories.units.detail}
             params={{ unitId }}
             search={{ instructionId: undefined }}
             className="font-medium text-primary underline-offset-4 hover:underline"

@@ -19,8 +19,9 @@ import { counterpartyWriteErrorMessage } from "./counterparty-write-error";
 
 type UseUpsertCounterpartyFormParams = {
   mode: "create" | "edit";
+  counterpartyId?: string;
   initial?: Counterparty | null;
-  onSaved: (counterparty: Counterparty) => void;
+  onSaved: (counterparty: Counterparty, meta: { close: boolean }) => void;
 };
 
 export function toCounterpartyFormValues(
@@ -38,6 +39,7 @@ export function toCounterpartyFormValues(
 
 export function useUpsertCounterpartyForm({
   mode,
+  counterpartyId,
   initial,
   onSaved,
 }: UseUpsertCounterpartyFormParams) {
@@ -52,36 +54,39 @@ export function useUpsertCounterpartyForm({
   });
 
   const createMutation = useMutation({
-    mutationFn: (values: CounterpartyFormValues) =>
-      createCounterparty(toCounterpartyWriteBody(values)),
-    onSuccess: (created) => {
+    mutationFn: (vars: { values: CounterpartyFormValues; close: boolean }) =>
+      createCounterparty(toCounterpartyWriteBody(vars.values)),
+    onSuccess: (created, vars) => {
       void queryClient.invalidateQueries({
         queryKey: counterpartiesQueryKeys.lists(),
       });
-      onSaved(created);
+      onSaved(created, { close: vars.close });
     },
     onError: (err) => setError(counterpartyWriteErrorMessage(err)),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: CounterpartyFormValues) =>
-      updateCounterparty(initial!.id, toCounterpartyWriteBody(values)),
-    onSuccess: (updated) => {
+    mutationFn: (vars: { values: CounterpartyFormValues; close: boolean }) =>
+      updateCounterparty(
+        counterpartyId ?? initial!.id,
+        toCounterpartyWriteBody(vars.values),
+      ),
+    onSuccess: (updated, vars) => {
       void queryClient.invalidateQueries({
         queryKey: counterpartiesQueryKeys.lists(),
       });
       void queryClient.invalidateQueries({
         queryKey: counterpartiesQueryKeys.details(),
       });
-      onSaved(updated);
+      onSaved(updated, { close: vars.close });
     },
     onError: (err) => setError(counterpartyWriteErrorMessage(err)),
   });
 
-  const onSubmit = (values: CounterpartyFormValues) => {
+  const onSubmit = (close: boolean, values: CounterpartyFormValues) => {
     setError(null);
-    if (mode === "edit") updateMutation.mutate(values);
-    else createMutation.mutate(values);
+    if (mode === "edit") updateMutation.mutate({ values, close });
+    else createMutation.mutate({ values, close });
   };
 
   return {

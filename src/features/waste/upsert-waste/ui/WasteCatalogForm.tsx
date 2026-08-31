@@ -12,12 +12,14 @@ import {
   Alert,
   AlertDescription,
   Button,
+  DirectoryBreadcrumb,
   FieldLabel,
   PageContextBar,
   Select,
 } from "../../../../shared/ui";
 import { WasteClassifierSelect } from "../../select-waste-classifier";
 import { useUpsertWasteForm } from "../model/use-upsert-waste-form";
+import { routes } from "../../../../shared/config/routes";
 
 type WasteCatalogFormProps = {
   mode: "create" | "edit";
@@ -53,7 +55,17 @@ export function WasteCatalogForm({
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
-        eyebrow="Справочники / Отходы"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="Отходы"
+            directoryTo={routes.directories.wastes.list}
+            current={
+              mode === "create"
+                ? "Новый отход"
+                : (initial?.waste_classifier.name ?? "Отход")
+            }
+          />
+        }
         title={
           mode === "create"
             ? "Новый отход"

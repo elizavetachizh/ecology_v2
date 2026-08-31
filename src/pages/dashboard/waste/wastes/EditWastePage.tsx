@@ -1,26 +1,20 @@
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearch,
-} from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { WasteCatalogForm } from "../../../../features/waste/upsert-waste";
 import { WasteInstructionUnitsSection } from "../../../../features/waste/bind-waste-instruction-unit";
 import { useTenant } from "../../../../entities/tenant";
 import { getWaste, wastesQueryKeys } from "../../../../entities/waste/wastes";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditWastePage() {
-  const { wasteId } = useParams({ from: "/directories/wastes/$wasteId" });
-  const search = useSearch({ from: "/directories/wastes/$wasteId" });
-  const navigate = useNavigate({ from: "/directories/wastes/$wasteId" });
+  const { wasteId } = useParams({ from: routes.directories.wastes.detail });
+  const search = useSearch({ from: routes.directories.wastes.detail });
+  const navigate = useNavigate({ from: routes.directories.wastes.detail });
   const { activeTenantId } = useTenant();
 
   const wasteQuery = useQuery({
@@ -35,14 +29,11 @@ export function EditWastePage() {
 
   if (wasteQuery.isError || !wasteQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>Отход не найден.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/directories/wastes">К отходам</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.directories.wastes.list}
+        linkLabel="К отходам"
+        description="Отход не найден."
+      />
     );
   }
 
@@ -60,9 +51,9 @@ export function EditWastePage() {
           wasteId={wasteId}
           onSaved={(_waste, { close }) => {
             toast.success("Отход успешно обновлён");
-            if (close) void navigate({ to: "/directories/wastes" });
+            if (close) void navigate({ to: routes.directories.wastes.list });
           }}
-          onCancel={() => void navigate({ to: "/directories/wastes" })}
+          onCancel={() => void navigate({ to: routes.directories.wastes.list })}
         />
 
         <WasteInstructionUnitsSection

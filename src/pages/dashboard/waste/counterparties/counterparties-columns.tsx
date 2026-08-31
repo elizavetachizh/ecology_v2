@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import type { Counterparty } from "../../../../entities/waste/counterparties";
 import {
@@ -7,11 +8,10 @@ import {
   DataTableRowActions,
   type ColumnDef,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 function counterpartiesColumns(
   setDeleting: (counterparty: Counterparty) => void,
-  setModalMode: (mode: "edit" | "create") => void,
-  setEditing: (counterparty: Counterparty) => void,
 ): ColumnDef<Counterparty>[] {
   return [
     {
@@ -21,7 +21,13 @@ function counterpartiesColumns(
         <DataTableColumnHeader column={column} title="Наименование" />
       ),
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.name}</span>
+        <Link
+          to={routes.directories.counterparties.detail}
+          params={{ counterpartyId: row.original.id }}
+          className="font-medium hover:underline"
+        >
+          {row.original.name}
+        </Link>
       ),
     },
     {
@@ -68,15 +74,14 @@ function counterpartiesColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
-          <DataTableRowAction
-            label="Изменить контрагента"
-            onClick={() => {
-              setEditing(row.original);
-              setModalMode("edit");
-            }}
-          >
-            <Pencil />
-            Изменить
+          <DataTableRowAction asChild label="Изменить контрагента">
+            <Link
+              to={routes.directories.counterparties.detail}
+              params={{ counterpartyId: row.original.id }}
+            >
+              <Pencil />
+              Изменить
+            </Link>
           </DataTableRowAction>
           <DataTableRowAction
             label="Удалить контрагента"

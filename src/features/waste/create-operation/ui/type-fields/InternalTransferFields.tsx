@@ -1,6 +1,5 @@
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { useTenant } from "../../../../../entities/tenant";
-import type { Operation } from "../../../../../entities/waste/operations";
 import { useUnitsTreeQuery } from "../../../../../entities/waste/units";
 import { Alert, AlertDescription } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
@@ -9,12 +8,10 @@ import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
 
 type InternalTransferFieldsProps = {
   pending: boolean;
-  initial?: Operation | null;
 };
 
 export function InternalTransferFields({
   pending,
-  initial,
 }: InternalTransferFieldsProps) {
   const { activeTenantId } = useTenant();
   const {
@@ -47,9 +44,6 @@ export function InternalTransferFields({
             error={units.error}
             value={field.value}
             excludeUnitId={unitId}
-            fallbackUnit={
-              initial?.unit_side_id === field.value ? initial.unit_side : null
-            }
             onChange={field.onChange}
             disabled={pending}
             errorMessage={errors.unit_side_id?.message}

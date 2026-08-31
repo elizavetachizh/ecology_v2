@@ -5,6 +5,7 @@ import type {
   ContractType,
 } from "../../../../entities/waste/contracts";
 import { Button } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 type ContractNextStepCtaProps = {
   contractId: string;
@@ -36,7 +37,7 @@ export function ContractNextStepCta({
         {canCreatePassport ? (
           <Button asChild size="sm">
             <Link
-              to="/waste/passports/new"
+              to={routes.waste.passports.new}
               search={{ recycling_contract_id: contractId }}
             >
               Создать сопроводительный паспорт
@@ -55,7 +56,7 @@ export function ContractNextStepCta({
           variant={canCreatePassport ? "outline" : "default"}
         >
           <Link
-            to="/waste/ttns/new"
+            to={routes.waste.ttns.new}
             search={{ recycling_contract_id: contractId }}
           >
             Создать ТТН

@@ -25,7 +25,7 @@ type UseUpsertContractFormParams = {
   mode: "create" | "edit";
   contractId?: string;
   initial?: Contract | null;
-  onSaved: (contract: Contract) => void;
+  onSaved: (contract: Contract, meta: { close: boolean }) => void;
 };
 
 export function useUpsertContractForm({
@@ -44,36 +44,36 @@ export function useUpsertContractForm({
   });
 
   const createMutation = useMutation({
-    mutationFn: (values: ContractFormValues) =>
-      createContract(toContractWriteBody(values)),
-    onSuccess: (created) => {
+    mutationFn: (vars: { values: ContractFormValues; close: boolean }) =>
+      createContract(toContractWriteBody(vars.values)),
+    onSuccess: (created, vars) => {
       void queryClient.invalidateQueries({
         queryKey: contractsQueryKeys.lists(),
       });
-      onSaved(created);
+      onSaved(created, { close: vars.close });
     },
     onError: (err) => setError(contractWriteErrorMessage(err)),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: ContractFormValues) =>
-      updateContract(contractId!, toContractUpdateBody(values)),
-    onSuccess: (updated) => {
+    mutationFn: (vars: { values: ContractFormValues; close: boolean }) =>
+      updateContract(contractId!, toContractUpdateBody(vars.values)),
+    onSuccess: (updated, vars) => {
       void queryClient.invalidateQueries({
         queryKey: contractsQueryKeys.lists(),
       });
       void queryClient.invalidateQueries({
         queryKey: contractsQueryKeys.details(),
       });
-      onSaved(updated);
+      onSaved(updated, { close: vars.close });
     },
     onError: (err) => setError(contractWriteErrorMessage(err)),
   });
 
-  const onSubmit = (values: ContractFormValues) => {
+  const onSubmit = (close: boolean, values: ContractFormValues) => {
     setError(null);
-    if (mode === "edit") updateMutation.mutate(values);
-    else createMutation.mutate(values);
+    if (mode === "edit") updateMutation.mutate({ values, close });
+    else createMutation.mutate({ values, close });
   };
 
   return {

@@ -1,14 +1,7 @@
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  TenantContext,
-  type Tenant,
-  type TenantContextValue,
-} from "../../../../entities/tenant";
-import type { CurrentUser } from "../../../../entities/user";
-import { makeInstruction } from "../../../../entities/waste/instructions/model/instruction.fixture";
 import {
   makeOperation,
   operationFixture,
@@ -21,54 +14,26 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-vi.mock("../../../../entities/waste/units", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../../../../entities/waste/units")>();
-  return {
-    ...actual,
-    useUnitsTreeQuery: () => ({
-      tree: [],
-      loading: false,
-      error: null,
-    }),
-  };
-});
+vi.mock("../../../../entities/tenant", () => ({
+  useTenant: () => ({ activeTenantId: "tenant-1" }),
+}));
 
-vi.mock("../../../../entities/waste/unit-instruction-waste", async (importOriginal) => {
+vi.mock("../../../../entities/waste/waste-sources", async (importOriginal) => {
   const actual =
     await importOriginal<
-      typeof import("../../../../entities/waste/unit-instruction-waste")
+      typeof import("../../../../entities/waste/waste-sources")
     >();
   return {
     ...actual,
-    useUnitInstructionsListQuery: () => ({
-      items: [makeInstruction()],
+    useWasteSourcesOptions: () => ({
+      options: [{ id: "ws-1", name: "Цех №3" }],
       loading: false,
       error: null,
-    }),
-    useUnitInstructionWastesListQuery: () => ({
-      items: [
-        {
-          waste_id: operationFixture.waste_id,
-          waste: operationFixture.waste,
-          waste_sources: operationFixture.waste_source
-            ? [operationFixture.waste_source]
-            : [],
-        },
-      ],
-      total: 1,
-      loading: false,
-      error: null,
+      search: "",
+      setSearch: vi.fn(),
     }),
   };
 });
-
-vi.mock("../model/use-instruction-id-for-waste", () => ({
-  useInstructionIdForWaste: () => ({
-    instructionId: "ins-1",
-    loading: false,
-  }),
-}));
 
 vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
   const actual =
@@ -78,40 +43,13 @@ vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
   return {
     ...actual,
     useCurrentBalanceQuery: () => ({
-      balance: null,
+      balance: { unit_id: "unit-1", waste_id: "waste-1", amount: "10.000000" },
       loading: false,
       error: null,
+      refetch: vi.fn(),
     }),
   };
 });
-
-const user: CurrentUser = {
-  id: 1,
-  realm: "mingas",
-  uuid: "user-id",
-  username: "testuser",
-  email: null,
-  roles: ["operator"],
-  issuer: "https://auth.example.com/realms/mingas",
-};
-
-const tenant: Tenant = {
-  id: "tenant-1",
-  realm: "mingas",
-  name: "Головная",
-  short: "Головная",
-  parent_id: null,
-  children: [],
-};
-
-const tenantValue: TenantContextValue = {
-  user,
-  tenants: [tenant],
-  flatTenants: [tenant],
-  activeTenantId: "tenant-1",
-  activeTenant: tenant,
-  selectTenant: vi.fn(),
-};
 
 function renderCard(operation = operationFixture) {
   const client = new QueryClient({
@@ -122,14 +60,12 @@ function renderCard(operation = operationFixture) {
   });
   return render(
     <QueryClientProvider client={client}>
-      <TenantContext.Provider value={tenantValue}>
-        <OperationCard
-          operation={operation}
-          onSaved={vi.fn()}
-          onCancel={vi.fn()}
-          onDeleted={vi.fn()}
-        />
-      </TenantContext.Provider>
+      <OperationCard
+        operation={operation}
+        onCancel={vi.fn()}
+        onDeleted={vi.fn()}
+        onSaved={vi.fn()}
+      />
     </QueryClientProvider>,
   );
 }
@@ -137,49 +73,57 @@ function renderCard(operation = operationFixture) {
 afterEach(cleanup);
 
 describe("OperationCard", () => {
-  it("shows the operation card without wizard steps", async () => {
+  it("lets a confirmed formed operation edit date, amount and source", () => {
     renderCard();
 
     expect(
       screen.getByRole("heading", { name: "Образовано · 01.03.2026" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Подтверждено")).toBeInTheDocument();
-    expect(screen.getByText("tester")).toBeInTheDocument();
-    expect(screen.getByText("Создал")).toBeInTheDocument();
-    expect(screen.getByText("Создано")).toBeInTheDocument();
-    expect(screen.queryByText(/Шаг \d/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Дата операции/)).toHaveValue("2026-03-01");
+    expect(screen.getByLabelText(/Количество/)).toHaveValue(10);
     expect(
-      screen.queryByRole("button", { name: "Далее" }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("combobox", { name: "Источник образования" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Цех №3")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Сохранить" }),
     ).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText("Источник образования")).toBeInTheDocument();
-    });
-  });
-
-  it("locks operation type when the operation is linked", () => {
-    renderCard(makeOperation({ linked_operation_id: "op-2" }));
-
-    expect(screen.getByLabelText(/Тип операции/)).toBeDisabled();
     expect(
-      screen.getByText("Тип связанной пары передачи изменить нельзя."),
+      screen.getByRole("button", { name: "Сохранить и закрыть" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Удалить" })).toBeInTheDocument();
+    expect(screen.queryByText(/Шаг \d/)).not.toBeInTheDocument();
   });
 
-  it("hides save for a declined operation", () => {
+  it("hides editors and delete for a declined operation", () => {
     renderCard(makeOperation({ status: "declined", balance: null }));
 
+    expect(screen.queryByLabelText(/Дата операции/)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Сохранить" }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Удалить" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Отмена" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Тип операции/)).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Закрыть" })).toBeInTheDocument();
+  });
+
+  it("does not show waste source editor for a used operation", () => {
+    renderCard(
+      makeOperation({
+        operation_type: "used",
+        waste_source_id: null,
+        waste_source: null,
+        use_purpose: "energy",
+      }),
+    );
+
+    expect(screen.getByLabelText(/Дата операции/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Количество/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", { name: "Источник образования" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Цель использования")).toBeInTheDocument();
   });
 
   it("shows review actions when confirmation is required", () => {
@@ -195,6 +139,9 @@ describe("OperationCard", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Отклонить" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Сохранить" }),
     ).toBeInTheDocument();
   });
 });

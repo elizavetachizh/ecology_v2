@@ -18,6 +18,7 @@ import {
   FieldError,
   FieldLabel,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 type OperationUnitPickerProps = {
   tenantId: string | null;
@@ -138,7 +139,7 @@ export function OperationUnitPicker({
           <>
             Нет нужного места учёта?{" "}
             <Link
-              to="/directories/units"
+              to={routes.directories.units.list}
               search={tenantId ? { tenant: tenantId } : undefined}
               target="_blank"
               rel="noopener noreferrer"

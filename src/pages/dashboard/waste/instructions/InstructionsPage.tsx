@@ -10,6 +10,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
+  DirectoryBreadcrumb,
   ListSearchField,
   PageContextBar,
   Tabs,
@@ -37,11 +38,12 @@ import {
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { instructionsColumns } from "./instructions-columns";
+import { routes } from "../../../../shared/config/routes";
 
 export function InstructionsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/instructions" });
-  const search = useSearch({ from: "/directories/instructions" });
+  const navigate = useNavigate({ from: routes.directories.instructions.list });
+  const search = useSearch({ from: routes.directories.instructions.list });
 
   const [deletingInstruction, setDeletingInstruction] =
     useState<Instruction | null>(null);
@@ -135,20 +137,21 @@ export function InstructionsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Инструкции"
+              directoryTo={routes.directories.instructions.list}
+            />
+          }
           title="Инструкции"
           description="Первый шаг: создайте инструкцию по обращению с отходами. Затем заполните структурные единицы организации."
           actions={
-            <>
-              <Button asChild size="sm">
-                <Link to="/directories/instructions/new">
-                  <Plus className="size-3.5" />
-                  Создать инструкцию
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button asChild size="sm">
+              <Link to={routes.directories.instructions.new}>
+                <Plus className="size-3.5" />
+                Создать инструкцию
+              </Link>
+            </Button>
           }
         />
 

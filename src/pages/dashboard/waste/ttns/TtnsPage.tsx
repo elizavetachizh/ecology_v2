@@ -32,11 +32,12 @@ import {
 } from "../../../../shared/ui";
 import { ttnsColumns } from "./ttns-columns";
 import { TtnsFilters, type TtnsFiltersValue } from "./ui/ttns-filters";
+import { routes } from "../../../../shared/config/routes";
 
 export function TtnsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/waste/ttns" });
-  const search = useSearch({ from: "/waste/ttns" });
+  const navigate = useNavigate({ from: routes.waste.ttns.list });
+  const search = useSearch({ from: routes.waste.ttns.list });
 
   const [deleting, setDeleting] = useState<Ttn | null>(null);
   const columns = useMemo(() => ttnsColumns(setDeleting), []);
@@ -124,7 +125,7 @@ export function TtnsPage() {
           description="ТТН не связан с сопроводительным паспортом — документы ведутся отдельно."
           actions={
             <Button asChild size="sm">
-              <Link to="/waste/ttns/new">
+              <Link to={routes.waste.ttns.new}>
                 <Plus className="size-3.5" />
                 Создать ТТН
               </Link>

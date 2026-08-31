@@ -27,6 +27,7 @@ import {
   MultipleCombobox,
 } from "../../../../shared/ui";
 import { useBindWiuForm } from "../model/use-bind-wiu-form";
+import { routes } from "../../../../shared/config/routes";
 
 type BindWiuModalProps = {
   open: boolean;
@@ -179,7 +180,7 @@ function BindWiuModalForm({
             <FieldDescription>
               Нет нужного журнала?{" "}
               <Link
-                to="/directories/units"
+                to={routes.directories.units.list}
                 search={tenantId ? { tenant: tenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -220,7 +221,7 @@ function BindWiuModalForm({
             <FieldDescription>
               Можно выбрать несколько. Нет нужного источника?{" "}
               <Link
-                to="/directories/waste-sources"
+                to={routes.directories.wasteSources.list}
                 search={tenantId ? { tenant: tenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"

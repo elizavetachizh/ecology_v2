@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   AlertCircle,
@@ -8,6 +9,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "../lib/cn";
+import { Button } from "./button";
+import { Link } from "@tanstack/react-router";
 
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg]:absolute [&>svg]:top-3.5 [&>svg]:left-4 [&>svg+div]:translate-y-0 [&>svg~*]:pl-7",
@@ -93,4 +96,32 @@ function AlertDescription({
   );
 }
 
-export { Alert, AlertTitle, AlertDescription, alertVariants };
+function AlertDetailPageError({
+  children,
+  className,
+  directoryTo,
+  linkLabel,
+  description,
+}: {
+  children?: ReactNode;
+  className?: string;
+  directoryTo: string;
+  linkLabel: string;
+  description?: ReactNode;
+}) {
+  return (
+    <div className="space-y-4">
+      <Alert variant="error" className={className}>
+        {description ? (
+          <AlertDescription>{description}</AlertDescription>
+        ) : null}
+        {children}
+      </Alert>
+      <Button asChild variant="outline" size="sm">
+        <Link to={directoryTo}>{linkLabel}</Link>
+      </Button>
+    </div>
+  );
+}
+
+export { Alert, AlertTitle, AlertDescription, AlertDetailPageError };

@@ -26,6 +26,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
+  DirectoryBreadcrumb,
   PageContextBar,
   TenantRequiredGate,
   toast,
@@ -39,11 +40,12 @@ import {
   ContractsFilters,
   type ContractsFiltersValue,
 } from "./ui/contracts-filters";
+import { routes } from "../../../../shared/config/routes";
 
 export function ContractsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/contracts" });
-  const search = useSearch({ from: "/directories/contracts" });
+  const navigate = useNavigate({ from: routes.directories.contracts.list });
+  const search = useSearch({ from: routes.directories.contracts.list });
 
   const [deleting, setDeleting] = useState<Contract | null>(null);
 
@@ -152,20 +154,21 @@ export function ContractsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Договоры"
+              directoryTo={routes.directories.contracts.list}
+            />
+          }
           title="Договоры"
           description="Сначала контрагент, затем договор утилизации с перечнем отходов. Договор перевозки — только если в паспорте способ «по договору перевозки»."
           actions={
-            <>
-              <Button asChild size="sm">
-                <Link to="/directories/contracts/new">
-                  <Plus className="size-3.5" />
-                  Создать договор
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button asChild size="sm">
+              <Link to={routes.directories.contracts.new}>
+                <Plus className="size-3.5" />
+                Создать договор
+              </Link>
+            </Button>
           }
         />
 

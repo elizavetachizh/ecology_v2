@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { FormProvider } from "react-hook-form";
 import type { Operation } from "../../../../entities/waste/operations";
 import {
@@ -13,12 +13,12 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../shared/ui";
+import { useCreateOperationForm } from "../model/use-create-operation-form";
 import {
   STEP_TRIGGER_FIELDS,
   UPSERT_OPERATION_STEPS,
   resetAfterUnitChange,
 } from "../model/operation-wizard";
-import { useUpsertOperationForm } from "../model/use-upsert-operation-form";
 import { OperationStepBinding } from "./steps/OperationStepBinding";
 import { OperationStepDate } from "./steps/OperationStepDate";
 import { OperationStepDetails } from "./steps/OperationStepDetails";
@@ -35,11 +35,19 @@ export function CreateOperationModal({
   onOpenChange,
   onSaved,
 }: CreateOperationModalProps) {
+  const pendingRef = useRef(false);
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next && pendingRef.current) return;
+    onOpenChange(next);
+  };
+
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
+    <Modal open={open} onOpenChange={handleOpenChange}>
       {open ? (
         <CreateOperationModalForm
-          onOpenChange={onOpenChange}
+          pendingRef={pendingRef}
+          onOpenChange={handleOpenChange}
           onSaved={onSaved}
         />
       ) : null}
@@ -47,9 +55,12 @@ export function CreateOperationModal({
   );
 }
 
-type CreateOperationModalFormProps = Omit<CreateOperationModalProps, "open">;
+type CreateOperationModalFormProps = Omit<CreateOperationModalProps, "open"> & {
+  pendingRef: RefObject<boolean>;
+};
 
 function CreateOperationModalForm({
+  pendingRef,
   onOpenChange,
   onSaved,
 }: CreateOperationModalFormProps) {
@@ -57,27 +68,51 @@ function CreateOperationModalForm({
   const [selectedInstructionId, setSelectedInstructionId] = useState<
     string | undefined
   >();
-  const { form, error, pending, onSubmit } = useUpsertOperationForm({
-    mode: "create",
-    onSaved,
-  });
+  const { form, error, pending, onSubmit, clearError } = useCreateOperationForm(
+    {
+      onSaved,
+    },
+  );
+  useLayoutEffect(() => {
+    pendingRef.current = pending;
+    return () => {
+      pendingRef.current = false;
+    };
+  }, [pending, pendingRef]);
   const lastStep = step >= UPSERT_OPERATION_STEPS.length;
+
+  const changeStep = (updater: (prev: number) => number) => {
+    clearError();
+    setStep(updater);
+  };
 
   const goNext = async () => {
     const fields =
       STEP_TRIGGER_FIELDS[step as keyof typeof STEP_TRIGGER_FIELDS];
     const valid = await form.trigger(fields);
-    if (valid) setStep((prev) => prev + 1);
+    if (valid) changeStep((prev) => prev + 1);
   };
 
   const goBack = () => {
     form.clearErrors();
-    setStep((prev) => Math.max(prev - 1, 1));
+    changeStep((prev) => Math.max(prev - 1, 1));
   };
 
   return (
     <FormProvider {...form}>
-      <ModalContent className="max-w-xl">
+      <ModalContent
+        className="max-w-xl"
+        showClose={!pending}
+        onEscapeKeyDown={(event) => {
+          if (pending) event.preventDefault();
+        }}
+        onPointerDownOutside={(event) => {
+          if (pending) event.preventDefault();
+        }}
+        onInteractOutside={(event) => {
+          if (pending) event.preventDefault();
+        }}
+      >
         <form
           onSubmit={
             lastStep
@@ -108,7 +143,7 @@ function CreateOperationModalForm({
           </div>
 
           <div className="grid gap-4 py-2">
-            {error ? (
+            {lastStep && error ? (
               <Alert variant="error">
                 <AlertTitle>Не удалось сохранить</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
@@ -127,7 +162,6 @@ function CreateOperationModalForm({
             ) : null}
             {step === 3 ? (
               <OperationStepBinding
-                mode="create"
                 pending={pending}
                 selectedInstructionId={selectedInstructionId}
                 onInstructionIdChange={setSelectedInstructionId}

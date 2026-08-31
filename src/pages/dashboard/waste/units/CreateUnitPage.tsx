@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,7 +18,7 @@ export function CreateUnitPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
   const { parentId, isPod9 } = useSearch({
-    from: "/directories/units/new",
+    from: routes.directories.units.new,
   });
   const hasParent = Boolean(parentId);
 
@@ -45,7 +46,7 @@ export function CreateUnitPage() {
           <AlertDescription>Структурная единица не найдена.</AlertDescription>
         </Alert>
         <Button asChild variant="outline" size="sm">
-          <Link to="/directories/units">К структурам</Link>
+          <Link to={routes.directories.units.list}>К структурам</Link>
         </Button>
       </div>
     );
@@ -73,7 +74,7 @@ export function CreateUnitPage() {
             // После создания ПОД-9 всегда открываем карточку с привязками отходов.
             if (unit.is_pod9) {
               void navigate({
-                to: "/directories/units/$unitId",
+                to: routes.directories.units.detail,
                 params: { unitId: unit.id },
                 search: { instructionId: undefined },
                 replace: true,
@@ -82,7 +83,7 @@ export function CreateUnitPage() {
             }
             if (close) {
               void navigate({
-                to: "/directories/units",
+                to: routes.directories.units.list,
                 search: {
                   focusId: unit.id,
                   expandId: unit.parent_id ?? undefined,
@@ -91,13 +92,13 @@ export function CreateUnitPage() {
               return;
             }
             void navigate({
-              to: "/directories/units/$unitId",
+              to: routes.directories.units.detail,
               params: { unitId: unit.id },
               search: { instructionId: undefined },
               replace: true,
             });
           }}
-          onCancel={() => void navigate({ to: "/directories/units" })}
+          onCancel={() => void navigate({ to: routes.directories.units.list })}
         />
 
         {isPod9 ? <UnitInstructionWastesCreateHint /> : null}

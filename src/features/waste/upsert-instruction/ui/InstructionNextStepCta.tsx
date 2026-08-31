@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 /** Следующий шаг онбординга после действующей инструкции. */
 export function InstructionNextStepCta() {
@@ -13,7 +14,7 @@ export function InstructionNextStepCta() {
         </p>
       </div>
       <Button asChild size="sm">
-        <Link to="/directories/units">
+        <Link to={routes.directories.units.list}>
           Перейти к структуре
           <ArrowRight className="size-3.5" />
         </Link>

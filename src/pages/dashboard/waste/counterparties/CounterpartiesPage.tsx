@@ -12,7 +12,6 @@ import {
   type CounterpartySortField,
   type CounterpartySortOrder,
 } from "../../../../entities/waste/counterparties";
-import { CounterpartyFormModal } from "../../../../features/waste/upsert-counterparty";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
   Alert,
@@ -24,6 +23,7 @@ import {
   DataTablePagination,
   ListSearchField,
   PageContextBar,
+  DirectoryBreadcrumb,
   Select,
   Switch,
   TenantRequiredGate,
@@ -34,19 +34,17 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { routes } from "../../../../shared/config/routes";
 
 export function CounterpartiesPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/counterparties" });
-  const search = useSearch({ from: "/directories/counterparties" });
+  const navigate = useNavigate({
+    from: routes.directories.counterparties.list,
+  });
+  const search = useSearch({ from: routes.directories.counterparties.list });
 
-  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editing, setEditing] = useState<Counterparty | null>(null);
   const [deleting, setDeleting] = useState<Counterparty | null>(null);
-  const columns = useMemo(
-    () => counterpartiesColumns(setDeleting, setModalMode, setEditing),
-    [],
-  );
+  const columns = useMemo(() => counterpartiesColumns(setDeleting), []);
 
   const showInactive = search.is_active === false;
 
@@ -131,25 +129,21 @@ export function CounterpartiesPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Контрагенты"
+              directoryTo={routes.directories.counterparties.list}
+            />
+          }
           title="Контрагенты"
           description="Юрлица и физлица организации."
           actions={
-            <>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => {
-                  setEditing(null);
-                  setModalMode("create");
-                }}
-              >
+            <Button asChild size="sm">
+              <Link to={routes.directories.counterparties.new}>
                 <Plus className="size-3.5" />
                 Добавить контрагента
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+              </Link>
+            </Button>
           }
         />
 
@@ -222,27 +216,6 @@ export function CounterpartiesPage() {
           offset={offset}
           disabled={loading}
           onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
-        <CounterpartyFormModal
-          open={modalMode !== null}
-          mode={modalMode === "edit" ? "edit" : "create"}
-          initial={editing}
-          onOpenChange={(open) => {
-            if (!open) {
-              setModalMode(null);
-              setEditing(null);
-            }
-          }}
-          onSaved={() => {
-            toast.success(
-              modalMode === "edit"
-                ? "Контрагент успешно обновлён"
-                : "Контрагент успешно создан",
-            );
-            setModalMode(null);
-            setEditing(null);
-          }}
         />
 
         <ConfirmDialog

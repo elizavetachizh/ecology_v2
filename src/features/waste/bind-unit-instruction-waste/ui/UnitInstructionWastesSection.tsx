@@ -25,6 +25,7 @@ import {
 } from "../../../../shared/ui";
 import { BindUiwModal } from "./BindUiwModal";
 import { uiwColumns } from "./uiw-columns";
+import { routes } from "../../../../shared/config/routes";
 
 type UnitInstructionWastesSectionProps = {
   tenantId: string | null;
@@ -99,7 +100,7 @@ export function UnitInstructionWastesSection({
           Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
           отходов.{" "}
           <Link
-            to="/directories/instructions/new"
+            to={routes.directories.instructions.new}
             className="font-medium underline-offset-4 hover:underline"
           >
             Создать инструкцию

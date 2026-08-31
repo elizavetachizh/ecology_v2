@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, Eye, LoaderCircle } from "lucide-react";
 import { useTenant } from "../../../entities/tenant";
@@ -47,16 +47,27 @@ export function Pod9ReportForm() {
   const {
     control,
     register,
-    watch,
     setValue,
     handleSubmit,
     formState: { errors },
   } = form;
 
-  const unitId = watch("unit_id");
-  const instructionId = watch("instruction_id");
-  const startDate = watch("start_date");
-  const endDate = watch("end_date");
+  const unitId = useWatch<Pod9FormValues, "unit_id">({
+    control,
+    name: "unit_id",
+  });
+  const instructionId = useWatch<Pod9FormValues, "instruction_id">({
+    control,
+    name: "instruction_id",
+  });
+  const startDate = useWatch<Pod9FormValues, "start_date">({
+    control,
+    name: "start_date",
+  });
+  const endDate = useWatch<Pod9FormValues, "end_date">({
+    control,
+    name: "end_date",
+  });
 
   const units = useUnitsTreeQuery({
     tenantId: activeTenantId,
@@ -280,7 +291,11 @@ export function Pod9ReportForm() {
           disabled={pending}
           onClick={() => void handleSubmit(runPreview)()}
         >
-          {isPreviewLoading ? <LoaderCircle className="animate-spin" /> : <Eye />}
+          {isPreviewLoading ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <Eye />
+          )}
           Предпросмотр
         </Button>
         <Button

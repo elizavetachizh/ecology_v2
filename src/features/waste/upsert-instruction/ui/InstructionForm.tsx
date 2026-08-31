@@ -7,6 +7,7 @@ import {
   Alert,
   AlertDescription,
   Button,
+  DirectoryBreadcrumb,
   FormField,
   Input,
   PageContextBar,
@@ -15,6 +16,7 @@ import {
 import { useUpsertInstructionForm } from "../model/use-upsert-instruction-form";
 import { InstructionFormHint } from "./InstructionFormHint";
 import { InstructionNextStepCta } from "./InstructionNextStepCta";
+import { routes } from "../../../../shared/config/routes";
 
 type InstructionFormProps = {
   mode: "create" | "edit";
@@ -53,7 +55,15 @@ export function InstructionForm({
       onSubmit={form.handleSubmit((values) => onSubmit(false, values))}
     >
       <PageContextBar
-        eyebrow="Справочники / Инструкции"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="Инструкции"
+            directoryTo={routes.directories.instructions.list}
+            current={
+              mode === "create" ? "Новая инструкция" : `${initial?.name}`
+            }
+          />
+        }
         title={mode === "create" ? "Новая инструкция" : `${initial?.name}`}
         description={
           "По умолчанию документ действует. Укажите название и период."

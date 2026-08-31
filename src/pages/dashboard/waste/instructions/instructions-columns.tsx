@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { Link } from "@tanstack/react-router";
 import {
   InstructionStatusBadge,
@@ -25,7 +26,7 @@ function instructionsColumns(
       ),
       cell: ({ row }) => (
         <Link
-          to="/directories/instructions/$instructionId"
+          to={routes.directories.instructions.detail}
           params={{ instructionId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -75,7 +76,7 @@ function instructionsColumns(
         <DataTableRowActions>
           <DataTableRowAction asChild label="Редактировать инструкцию">
             <Link
-              to="/directories/instructions/$instructionId"
+              to={routes.directories.instructions.detail}
               params={{ instructionId: row.original.id }}
             >
               <Pencil />

@@ -1,19 +1,18 @@
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import { getTtn, ttnsQueryKeys } from "../../../../entities/waste/ttns";
 import { TtnForm } from "../../../../features/waste/upsert-ttn";
 import {
-  Alert,
-  AlertDescription,
-  Button,
+  AlertDetailPageError,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
+import { routes } from "../../../../shared/config/routes";
 
 export function EditTtnPage() {
-  const { ttnId } = useParams({ from: "/waste/ttns/$ttnId" });
-  const navigate = useNavigate({ from: "/waste/ttns/$ttnId" });
+  const { ttnId } = useParams({ from: routes.waste.ttns.detail });
+  const navigate = useNavigate({ from: routes.waste.ttns.detail });
   const { activeTenantId } = useTenant();
 
   const ttnQuery = useQuery({
@@ -28,14 +27,11 @@ export function EditTtnPage() {
 
   if (ttnQuery.isError || !ttnQuery.data) {
     return (
-      <div className="space-y-4">
-        <Alert variant="error">
-          <AlertDescription>ТТН не найдена.</AlertDescription>
-        </Alert>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/waste/ttns">К журналу ТТН</Link>
-        </Button>
-      </div>
+      <AlertDetailPageError
+        directoryTo={routes.waste.ttns.list}
+        linkLabel="К журналу ТТН"
+        description="ТТН не найдена."
+      />
     );
   }
 
@@ -51,7 +47,7 @@ export function EditTtnPage() {
         onSaved={() => {
           toast.success("ТТН успешно обновлена");
         }}
-        onCancel={() => void navigate({ to: "/waste/ttns" })}
+        onCancel={() => void navigate({ to: routes.waste.ttns.list })}
       />
     </TenantRequiredGate>
   );

@@ -137,7 +137,7 @@ API: полный CRUD `/api/v1/classifiers/wastes`.
 
 ### 3.5. Карточка инструкции с вкладками (wireframe §6)
 
-После появления связей wastes/limits/norms:
+После появления связей wastes/limits/standards:
 
 ```text
 pages/.../instruction-detail
@@ -364,7 +364,7 @@ Wireframe меню: Настройки организации, Помощь, Н�
 Без этих контрактов фронт не должен «угадывать» модель:
 
 1. **Operations** — CRUD, filters, statuses, link to unit/waste/instruction.
-2. **Balances / limits / norms** — read models + rules превышения.
+2. **Balances / limits / standards** — read models + rules превышения.
 3. **Generation sources** — MDM CRUD.
 4. **Waste bindings** / placement на structural unit + instruction.
 5. **POD-9 entity** (если это не просто отчёт): связь с unit.

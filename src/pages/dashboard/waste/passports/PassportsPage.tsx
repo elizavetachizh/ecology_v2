@@ -40,11 +40,12 @@ import {
   PassportsFilters,
   type PassportsFiltersValue,
 } from "./ui/passports-filters";
+import { routes } from "../../../../shared/config/routes";
 
 export function PassportsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/waste/passports" });
-  const search = useSearch({ from: "/waste/passports" });
+  const navigate = useNavigate({ from: routes.waste.passports.list });
+  const search = useSearch({ from: routes.waste.passports.list });
 
   const [deleting, setDeleting] = useState<Passport | null>(null);
 
@@ -162,7 +163,7 @@ export function PassportsPage() {
           description="Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан."
           actions={
             <Button asChild size="sm">
-              <Link to="/waste/passports/new">
+              <Link to={routes.waste.passports.new}>
                 <Plus className="size-3.5" />
                 Создать паспорт
               </Link>

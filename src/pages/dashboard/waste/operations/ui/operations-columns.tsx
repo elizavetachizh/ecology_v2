@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2, X } from "lucide-react";
+import { Check, Trash2, X } from "lucide-react";
 import {
   canMutateOperation,
   canReviewOperation,
@@ -22,14 +22,12 @@ function formatAmount(value: string): string {
 }
 
 type OperationsColumnActions = {
-  onEdit: (operation: Operation) => void;
   onDelete: (operation: Operation) => void;
   onApprove: (operation: Operation) => void;
   onReject: (operation: Operation) => void;
 };
 
 function operationsColumns({
-  onEdit,
   onDelete,
   onApprove,
   onReject,
@@ -65,7 +63,7 @@ function operationsColumns({
           className="block max-w-[220px] truncate"
           title={row.original.waste.waste_classifier.name}
         >
-          {row.original.waste.waste_classifier.name}
+          {row.original.waste.waste_classifier.code}
         </span>
       ),
     },
@@ -91,6 +89,7 @@ function operationsColumns({
       id: "amount",
       accessorKey: "amount",
       enableSorting: false,
+      size: 120,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Количество" />
       ),
@@ -101,14 +100,16 @@ function operationsColumns({
       id: "waste_source",
       accessorFn: (row) => row.waste_source?.name,
       enableSorting: false,
+      size: 180,
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Источник" />
+        <DataTableColumnHeader column={column} title="Источник образования" />
       ),
       cell: ({ row }) => row.original.waste_source?.name ?? "—",
     },
     {
       id: "balance",
       accessorFn: (row) => row.balance?.amount,
+      size: 180,
       enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Остаток после операции" />
@@ -117,6 +118,24 @@ function operationsColumns({
         row.original.balance
           ? `${formatAmount(row.original.balance.amount)} ${UOM_LABEL[row.original.waste.uom]}`
           : "—",
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => `${row.created_at} ${row.created_by.username}`,
+      size: 120,
+      enableSorting: false,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Cоздано" />
+      ),
+      cell: ({ row }) => (
+        <>
+          {row.original.created_by.username}
+          <br />
+          <span className="text-muted-foreground">
+            {formatDate(row.original.created_at.slice(0, 10))}
+          </span>
+        </>
+      ),
     },
     {
       id: "actions",
@@ -149,22 +168,13 @@ function operationsColumns({
               </>
             ) : null}
             {canMutate ? (
-              <>
-                <DataTableRowAction
-                  label="Изменить операцию"
-                  onClick={() => onEdit(operation)}
-                >
-                  <Pencil />
-                  Изменить
-                </DataTableRowAction>
-                <DataTableRowAction
-                  label="Удалить операцию"
-                  onClick={() => onDelete(operation)}
-                >
-                  <Trash2 className="text-destructive" />
-                  Удалить
-                </DataTableRowAction>
-              </>
+              <DataTableRowAction
+                label="Удалить операцию"
+                onClick={() => onDelete(operation)}
+              >
+                <Trash2 className="text-destructive" />
+                Удалить
+              </DataTableRowAction>
             ) : null}
           </DataTableRowActions>
         );

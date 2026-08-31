@@ -32,6 +32,7 @@ import {
 import { syncPassportWastes } from "../model/keep-wastes-allowed";
 import { useUpsertPassportForm } from "../model/use-upsert-passport-form";
 import { PassportWastesSelect } from "./PassportWastesSelect";
+import { routes } from "../../../../shared/config/routes";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -197,7 +198,7 @@ export function PassportForm({
             <>
               Только действующие договоры типа «Утилизация». Нет договора?{" "}
               <Link
-                to="/directories/contracts/new"
+                to={routes.directories.contracts.new}
                 search={activeTenantId ? { tenant: activeTenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"

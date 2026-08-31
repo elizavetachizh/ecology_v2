@@ -3,7 +3,6 @@ import { useTenant } from "../../../../../entities/tenant";
 import {
   OPERATION_TYPE_LABEL,
   OperationTypeValues,
-  type Operation,
 } from "../../../../../entities/waste/operations";
 import { useUnitInstructionWastesListQuery } from "../../../../../entities/waste/unit-instruction-waste";
 import { UOM_LABEL } from "../../../../../entities/waste/wastes";
@@ -25,13 +24,11 @@ import { OperationTypeFields } from "../type-fields/OperationTypeFields";
 
 type OperationStepDetailsProps = {
   pending: boolean;
-  initial?: Operation | null;
   instructionId: string | undefined;
 };
 
 export function OperationStepDetails({
   pending,
-  initial,
   instructionId,
 }: OperationStepDetailsProps) {
   const { activeTenantId } = useTenant();
@@ -44,7 +41,6 @@ export function OperationStepDetails({
   const wasteId = useWatch<OperationFormValues, "waste_id">({
     name: "waste_id",
   });
-  const typeLocked = Boolean(initial?.linked_operation_id);
 
   const wastesQuery = useUnitInstructionWastesListQuery({
     tenantId: activeTenantId,
@@ -59,9 +55,7 @@ export function OperationStepDetails({
   const selectedBinding = wastesQuery.items.find(
     (item) => item.waste_id === wasteId,
   );
-  const selectedWaste =
-    selectedBinding?.waste ??
-    (initial?.waste_id === wasteId ? initial.waste : null);
+  const selectedWaste = selectedBinding?.waste ?? null;
 
   return (
     <>
@@ -80,7 +74,7 @@ export function OperationStepDetails({
         <Select
           id="operation-type"
           className="w-full"
-          disabled={pending || typeLocked}
+          disabled={pending}
           aria-invalid={Boolean(errors.operation_type)}
           {...register("operation_type", {
             onChange: () => {
@@ -95,17 +89,12 @@ export function OperationStepDetails({
             </option>
           ))}
         </Select>
-        {typeLocked ? (
-          <FieldDescription>
-            Тип связанной пары передачи изменить нельзя.
-          </FieldDescription>
-        ) : null}
         <FieldError>{errors.operation_type?.message}</FieldError>
       </Field>
 
       <OperationTypeFields
-        pending={pending} tenantId={activeTenantId}
-        initial={initial}
+        pending={pending}
+        tenantId={activeTenantId}
         bindingSources={selectedBinding?.waste_sources ?? []}
       />
 
@@ -117,6 +106,7 @@ export function OperationStepDetails({
         <Input
           id="amount"
           inputMode="decimal"
+          type="number"
           placeholder="0"
           disabled={pending}
           aria-invalid={Boolean(errors.amount)}

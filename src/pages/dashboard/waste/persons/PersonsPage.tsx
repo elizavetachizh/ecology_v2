@@ -1,5 +1,6 @@
+import { routes } from "../../../../shared/config/routes";
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
@@ -24,6 +25,7 @@ import {
   DataTablePagination,
   ListSearchField,
   PageContextBar,
+  DirectoryBreadcrumb,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
@@ -35,8 +37,8 @@ import {
 
 export function PersonsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: "/directories/persons" });
-  const search = useSearch({ from: "/directories/persons" });
+  const navigate = useNavigate({ from: routes.directories.persons.list });
+  const search = useSearch({ from: routes.directories.persons.list });
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editing, setEditing] = useState<Person | null>(null);
   const [deleting, setDeleting] = useState<Person | null>(null);
@@ -117,25 +119,26 @@ export function PersonsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Ответственные"
+              directoryTo={routes.directories.persons.list}
+            />
+          }
           title="Ответственные"
           description="Справочник ответственных за экологический мониторинг."
           actions={
-            <>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => {
-                  setEditing(null);
-                  setModalMode("create");
-                }}
-              >
-                <Plus className="size-3.5" />
-                Добавить ответственного
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setEditing(null);
+                setModalMode("create");
+              }}
+            >
+              <Plus className="size-3.5" />
+              Добавить ответственного
+            </Button>
           }
         />
 

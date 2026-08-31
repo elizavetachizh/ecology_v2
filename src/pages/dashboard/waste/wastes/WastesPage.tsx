@@ -32,6 +32,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
+  DirectoryBreadcrumb,
   ListSearchField,
   PageContextBar,
   Select,
@@ -39,12 +40,13 @@ import {
   toast,
 } from "../../../../shared/ui";
 import { wastesColumns } from "./wastes-columns";
+import { routes } from "../../../../shared/config/routes";
 
 export function WastesDirectoryPage() {
   const { activeTenantId } = useTenant();
   const [deletingWaste, setDeletingWaste] = useState<Waste | null>(null);
-  const navigate = useNavigate({ from: "/directories/wastes" });
-  const search = useSearch({ from: "/directories/wastes" });
+  const navigate = useNavigate({ from: routes.directories.wastes.list });
+  const search = useSearch({ from: routes.directories.wastes.list });
   const columns = wastesColumns(setDeletingWaste);
   const listParams = useMemo(
     () => ({
@@ -127,20 +129,21 @@ export function WastesDirectoryPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Отходы"
+              directoryTo={routes.directories.wastes.list}
+            />
+          }
           title="Отходы"
           description="Создайте отход в справочнике, затем привяжите его к структурным единицам."
           actions={
-            <>
-              <Button asChild size="sm">
-                <Link to="/directories/wastes/new">
-                  <Plus className="size-3.5" />
-                  Создать отход
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/directories">К справочникам</Link>
-              </Button>
-            </>
+            <Button asChild size="sm">
+              <Link to={routes.directories.wastes.new}>
+                <Plus className="size-3.5" />
+                Создать отход
+              </Link>
+            </Button>
           }
         />
 

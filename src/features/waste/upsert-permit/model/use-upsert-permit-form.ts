@@ -25,7 +25,7 @@ type UseUpsertPermitFormParams = {
   mode: "create" | "edit";
   permitId?: string;
   initial?: Permit | null;
-  onSaved: (permit: Permit) => void;
+  onSaved: (permit: Permit, meta: { close: boolean }) => void;
 };
 
 export function useUpsertPermitForm({
@@ -44,36 +44,36 @@ export function useUpsertPermitForm({
   });
 
   const createMutation = useMutation({
-    mutationFn: (values: PermitFormValues) =>
-      createPermit(toPermitWriteBody(values)),
-    onSuccess: (created) => {
+    mutationFn: (vars: { values: PermitFormValues; close: boolean }) =>
+      createPermit(toPermitWriteBody(vars.values)),
+    onSuccess: (created, vars) => {
       void queryClient.invalidateQueries({
         queryKey: permitsQueryKeys.lists(),
       });
-      onSaved(created);
+      onSaved(created, { close: vars.close });
     },
     onError: (err) => setError(permitWriteErrorMessage(err)),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: PermitFormValues) =>
-      updatePermit(permitId!, toPermitUpdateBody(values)),
-    onSuccess: (updated) => {
+    mutationFn: (vars: { values: PermitFormValues; close: boolean }) =>
+      updatePermit(permitId!, toPermitUpdateBody(vars.values)),
+    onSuccess: (updated, vars) => {
       void queryClient.invalidateQueries({
         queryKey: permitsQueryKeys.lists(),
       });
       void queryClient.invalidateQueries({
         queryKey: permitsQueryKeys.details(),
       });
-      onSaved(updated);
+      onSaved(updated, { close: vars.close });
     },
     onError: (err) => setError(permitWriteErrorMessage(err)),
   });
 
-  const onSubmit = (values: PermitFormValues) => {
+  const onSubmit = (close: boolean, values: PermitFormValues) => {
     setError(null);
-    if (mode === "edit") updateMutation.mutate(values);
-    else createMutation.mutate(values);
+    if (mode === "edit") updateMutation.mutate({ values, close });
+    else createMutation.mutate({ values, close });
   };
 
   return {

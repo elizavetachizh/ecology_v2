@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import { Link } from "@tanstack/react-router";
 import { Pencil, Unlink } from "lucide-react";
 import type { WasteInstructionUnit } from "../../../../entities/waste/waste-instruction-units";
@@ -18,7 +19,7 @@ function wiuColumns(
       header: "Журнал ПОД-9",
       cell: ({ row }) => (
         <Link
-          to="/directories/units/$unitId"
+          to={routes.directories.units.detail}
           params={{ unitId: row.original.unit_id }}
           search={{ instructionId: undefined }}
           className="font-medium hover:underline"

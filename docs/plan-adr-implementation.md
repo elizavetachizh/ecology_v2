@@ -63,7 +63,7 @@
 /forbidden
 ```
 
-**Убрать из основного меню (вне scope):** `/waste/operations`, `/reports/pod-9`, stub limits/norms, mock POD-9 structure routes.
+**Убрать из основного меню (вне scope):** `/waste/operations`, `/reports/pod-9`, stub limits/standards, mock POD-9 structure routes.
 
 Левое меню (ADR §8): Dashboard, Подразделения, Инструкции, Отходы, Источники образования, (Классификатор), Настройки, Выход.
 

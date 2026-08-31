@@ -1,7 +1,6 @@
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import { useTenant } from "../../../../../entities/tenant";
-import type { Operation } from "../../../../../entities/waste/operations";
 import {
   useWasteSourcesOptions,
   type WasteSourceBrief,
@@ -14,27 +13,31 @@ import {
   FieldLabel,
   Select,
 } from "../../../../../shared/ui";
-import type { OperationFormValues } from "../../model/operation-form.schema";
+import { routes } from "../../../../../shared/config/routes";
+
+type WasteSourceFormValues = {
+  waste_source_id: string;
+};
 
 type FormedFieldsProps = {
   pending: boolean;
   bindingSources: WasteSourceBrief[];
-  initial?: Operation | null;
   tenantId: string | null;
+  currentSource?: WasteSourceBrief | null;
 };
 
 export function FormedFields({
   pending,
   tenantId,
   bindingSources,
-  initial,
+  currentSource,
 }: FormedFieldsProps) {
   const { activeTenantId } = useTenant();
   const {
     control,
     formState: { errors },
-  } = useFormContext<OperationFormValues>();
-  const wasteSourceId = useWatch<OperationFormValues, "waste_source_id">({
+  } = useFormContext<WasteSourceFormValues>();
+  const wasteSourceId = useWatch<WasteSourceFormValues, "waste_source_id">({
     name: "waste_source_id",
   });
 
@@ -46,7 +49,7 @@ export function FormedFields({
   const sourceOptions = useBindingSources ? bindingSources : sources.options;
   const selectedSource =
     sourceOptions.find((item) => item.id === wasteSourceId) ??
-    (initial?.waste_source_id === wasteSourceId ? initial.waste_source : null);
+    (currentSource?.id === wasteSourceId ? currentSource : undefined);
 
   return (
     <Field>
@@ -108,7 +111,7 @@ export function FormedFields({
           <>
             Источники из привязки отхода к этому месту учёта. Нет нужного?{" "}
             <Link
-              to="/directories/waste-sources"
+              to={routes.directories.wasteSources.list}
               search={tenantId ? { tenant: tenantId } : undefined}
               target="_blank"
               rel="noopener noreferrer"
@@ -121,7 +124,7 @@ export function FormedFields({
           <>
             Нет нужного источника?{" "}
             <Link
-              to="/directories/waste-sources"
+              to={routes.directories.wasteSources.list}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Создать в справочнике

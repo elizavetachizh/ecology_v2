@@ -9,6 +9,10 @@ import type {
   PermitStatus,
 } from "../../entities/waste/permits";
 import type {
+  StandardSortField,
+  StandardStatus,
+} from "../../entities/waste/standards";
+import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
@@ -81,6 +85,16 @@ export type ContractsSearch = ListSearchParams<ContractSortField> & {
 export type PermitsSearch = ListSearchParams<PermitSortField> & {
   status?: PermitStatus;
   unit_id?: string;
+};
+
+/** API списка нормативов без search — только фильтры + пагинация. */
+export type StandardsSearch = {
+  status?: StandardStatus;
+  unit_id?: string;
+  sort?: StandardSortField;
+  order?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
 };
 
 /** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */

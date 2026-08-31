@@ -5,11 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createOperation,
   operationsQueryKeys,
-  updateOperation,
 } from "../../../../entities/waste/operations";
 import { operationFixture } from "../../../../entities/waste/operations/model/operation.fixture";
 import { queryClient } from "../../../../shared/lib/query-client";
-import { useUpsertOperationForm } from "./use-upsert-operation-form";
+import { useCreateOperationForm } from "./use-create-operation-form";
 import type { OperationFormValues } from "./operation-form.schema";
 import { EMPTY_TYPE_SPECIFIC_VALUES } from "./operation-form.schema";
 
@@ -21,12 +20,10 @@ vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
   return {
     ...actual,
     createOperation: vi.fn(),
-    updateOperation: vi.fn(),
   };
 });
 
 const createOperationMock = vi.mocked(createOperation);
-const updateOperationMock = vi.mocked(updateOperation);
 
 const formedValues: OperationFormValues = {
   date: "2026-03-01",
@@ -64,12 +61,10 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
-describe("useUpsertOperationForm", () => {
+describe("useCreateOperationForm", () => {
   beforeEach(() => {
     createOperationMock.mockReset();
-    updateOperationMock.mockReset();
     createOperationMock.mockResolvedValue(operationFixture);
-    updateOperationMock.mockResolvedValue(operationFixture);
     vi.spyOn(queryClient, "invalidateQueries").mockResolvedValue(undefined);
   });
 
@@ -79,10 +74,9 @@ describe("useUpsertOperationForm", () => {
 
   it("posts create body and invalidates lists and balances", async () => {
     const onSaved = vi.fn();
-    const { result } = renderHook(
-      () => useUpsertOperationForm({ mode: "create", onSaved }),
-      { wrapper },
-    );
+    const { result } = renderHook(() => useCreateOperationForm({ onSaved }), {
+      wrapper,
+    });
 
     await act(() => result.current.onSubmit(formedValues));
 
@@ -99,40 +93,10 @@ describe("useUpsertOperationForm", () => {
     });
   });
 
-  it("patches on edit and sends null waste_source_id for used", async () => {
-    const onSaved = vi.fn();
-    const { result } = renderHook(
-      () =>
-        useUpsertOperationForm({
-          mode: "edit",
-          initial: operationFixture,
-          onSaved,
-        }),
-      { wrapper },
-    );
-
-    await act(() =>
-      result.current.onSubmit({
-        ...formedValues,
-        operation_type: "used",
-        waste_source_id: "",
-        use_purpose: "energy",
-      }),
-    );
-
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(operationFixture));
-    expect(updateOperationMock).toHaveBeenCalledWith("op-1", {
-      ...formedWriteBody,
-      operation_type: "used",
-      waste_source_id: null,
-      use_purpose: "energy",
-    });
-  });
-
   it("surfaces API error message", async () => {
     createOperationMock.mockRejectedValue(new Error("Недостаточно остатка"));
     const { result } = renderHook(
-      () => useUpsertOperationForm({ mode: "create", onSaved: vi.fn() }),
+      () => useCreateOperationForm({ onSaved: vi.fn() }),
       { wrapper },
     );
 
@@ -141,5 +105,8 @@ describe("useUpsertOperationForm", () => {
     await waitFor(() =>
       expect(result.current.error).toBe("Недостаточно остатка"),
     );
+
+    act(() => result.current.clearError());
+    expect(result.current.error).toBeNull();
   });
 });

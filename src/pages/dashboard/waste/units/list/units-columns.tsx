@@ -9,6 +9,7 @@ import {
   DataTableRowActions,
   type ColumnDef,
 } from "../../../../../shared/ui";
+import { routes } from "../../../../../shared/config/routes";
 
 export type UnitsTableActions = {
   onCreateChild: (unitId: string) => void;
@@ -39,7 +40,7 @@ export function unitsColumns(
       cell: ({ row }) => {
         const link = (
           <Link
-            to="/directories/units/$unitId"
+            to={routes.directories.units.detail}
             params={{ unitId: row.original.id }}
             search={{ instructionId: undefined }}
             className="font-medium hover:underline"
@@ -115,7 +116,7 @@ export function unitsColumns(
             ) : null}
             <DataTableRowAction asChild label="Редактировать единицу">
               <Link
-                to="/directories/units/$unitId"
+                to={routes.directories.units.detail}
                 params={{ unitId: unit.id }}
                 search={{ instructionId: undefined }}
               >

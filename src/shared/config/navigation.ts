@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { DIRECTORY_CARDS } from "./directories";
+import { routes } from "./routes";
 
 export type NavLeaf = {
   id: string;
@@ -33,7 +34,7 @@ export const navigationGroups: NavGroup[] = [
       {
         id: "directories-hub",
         title: "Все справочники",
-        to: "/directories",
+        to: routes.directories.index,
       },
       ...DIRECTORY_CARDS,
     ],
@@ -42,37 +43,37 @@ export const navigationGroups: NavGroup[] = [
     id: "operations",
     title: "Журнал операций",
     icon: ClipboardList,
-    to: "/waste/operations",
+    to: routes.waste.operations.list,
   },
   {
     id: "passports",
     title: "Сопроводительные паспорта",
     icon: FileText,
-    to: "/waste/passports",
+    to: routes.waste.passports.list,
   },
   {
     id: "ttns",
     title: "ТТН",
     icon: Truck,
-    to: "/waste/ttns",
+    to: routes.waste.ttns.list,
   },
   {
     id: "balances",
     title: "Остатки отходов",
     icon: Trash2,
-    to: "/waste/balances",
+    to: routes.waste.balances,
   },
   {
     id: "reports",
     title: "Отчеты",
     icon: BookOpen,
     children: [
-      { id: "pod-9", title: "ПОД-9", to: "/reports/pod-9" },
-      { id: "pod-10", title: "ПОД-10", to: "/reports/pod-10" },
+      { id: "pod-9", title: "ПОД-9", to: routes.reports.pod9 },
+      { id: "pod-10", title: "ПОД-10", to: routes.reports.pod10 },
       {
         id: "stat-1-waste",
         title: "Статистика 1-отходы",
-        to: "/reports/1-waste",
+        to: routes.reports.stat1Waste,
       },
     ],
   },

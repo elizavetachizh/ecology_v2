@@ -1,3 +1,4 @@
+import { routes } from "../../../../shared/config/routes";
 import {
   HAZARD_CLASS_LABEL,
   PHYSICAL_STATE_LABEL,
@@ -42,7 +43,7 @@ function wastesColumns(
         const name = row.original.waste_classifier.name;
         return (
           <Link
-            to="/directories/wastes/$wasteId"
+            to={routes.directories.wastes.detail}
             params={{ wasteId: row.original.id }}
             search={{ instructionId: undefined }}
             title={name}
@@ -92,7 +93,7 @@ function wastesColumns(
         <DataTableRowActions>
           <DataTableRowAction asChild label="Изменить отход">
             <Link
-              to="/directories/wastes/$wasteId"
+              to={routes.directories.wastes.detail}
               params={{ wasteId: row.original.id }}
               search={{ instructionId: undefined }}
             >

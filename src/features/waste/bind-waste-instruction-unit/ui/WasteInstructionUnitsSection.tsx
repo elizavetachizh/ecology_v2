@@ -24,6 +24,7 @@ import {
 } from "../../../../shared/ui";
 import { BindWiuModal } from "./BindWiuModal";
 import { wiuColumns } from "./wiu-columns";
+import { routes } from "../../../../shared/config/routes";
 
 type WasteInstructionUnitsSectionProps = {
   tenantId: string | null;
@@ -98,7 +99,7 @@ export function WasteInstructionUnitsSection({
           Сначала создайте инструкцию в справочнике, затем вернитесь к привязке
           журналов ПОД-9.{" "}
           <Link
-            to="/directories/instructions/new"
+            to={routes.directories.instructions.new}
             className="font-medium underline-offset-4 hover:underline"
           >
             Создать инструкцию
