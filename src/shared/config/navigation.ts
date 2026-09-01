@@ -2,6 +2,7 @@ import {
   BookOpen,
   ClipboardList,
   FileText,
+  LayoutDashboard,
   Library,
   Trash2,
   Truck,
@@ -26,6 +27,12 @@ export type NavGroup = {
 };
 
 export const navigationGroups: NavGroup[] = [
+  {
+    id: "home",
+    title: "Главная",
+    icon: LayoutDashboard,
+    to: routes.home,
+  },
   {
     id: "directories",
     title: "Справочники",

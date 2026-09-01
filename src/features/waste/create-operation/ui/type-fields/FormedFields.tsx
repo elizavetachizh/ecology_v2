@@ -98,6 +98,10 @@ export function FormedFields({
               }
               search={sources.search}
               setSearch={sources.setSearch}
+              onRefresh={() => {
+                void sources.refetch();
+              }}
+              refreshing={sources.refreshing}
               className="w-full"
               contentClassName="w-full"
               aria-label="Источник образования"

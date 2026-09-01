@@ -149,6 +149,17 @@ describe("operationFormSchema", () => {
     expect(operationFormSchema.parse(ttn)).toEqual(ttn);
   });
 
+  it("accepts a comma decimal and normalizes it for the API", () => {
+    const result = operationFormSchema.safeParse({
+      ...base,
+      operation_type: "formed",
+      waste_source_id: SOURCE_ID,
+      amount: "0,2",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.amount).toBe("0.2");
+  });
+
   it("rejects amount 0 and non-decimal strings", () => {
     expect(
       operationFormSchema.safeParse({
@@ -164,6 +175,14 @@ describe("operationFormSchema", () => {
         operation_type: "formed",
         waste_source_id: SOURCE_ID,
         amount: "1.1234567",
+      }).success,
+    ).toBe(false);
+    expect(
+      operationFormSchema.safeParse({
+        ...base,
+        operation_type: "formed",
+        waste_source_id: SOURCE_ID,
+        amount: "1,1234567",
       }).success,
     ).toBe(false);
   });

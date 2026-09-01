@@ -35,5 +35,8 @@ describe("pod9FallbackFileName", () => {
     expect(pod9FallbackFileName("2026-01-01", "2026-03-01")).toBe(
       "pod-9_2026-01-01_2026-03-01.xlsx",
     );
+    expect(pod9FallbackFileName("2026-01-01", "2026-03-01", "pdf")).toBe(
+      "pod-9_2026-01-01_2026-03-01.pdf",
+    );
   });
 });

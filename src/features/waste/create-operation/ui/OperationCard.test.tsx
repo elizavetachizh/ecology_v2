@@ -28,9 +28,11 @@ vi.mock("../../../../entities/waste/waste-sources", async (importOriginal) => {
     useWasteSourcesOptions: () => ({
       options: [{ id: "ws-1", name: "Цех №3" }],
       loading: false,
+      refreshing: false,
       error: null,
       search: "",
       setSearch: vi.fn(),
+      refetch: vi.fn(),
     }),
   };
 });

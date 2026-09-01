@@ -108,4 +108,34 @@ describe("AsyncCombobox", () => {
       "Обрезки фанеры",
     );
   });
+
+  it("hides the refresh button without onRefresh", () => {
+    render(<Harness />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Отход" }));
+
+    expect(
+      screen.queryByRole("button", { name: "Обновить список" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("calls onRefresh from the refresh button", () => {
+    const onRefresh = vi.fn();
+    render(<Harness onRefresh={onRefresh} />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Отход" }));
+    fireEvent.click(screen.getByRole("button", { name: "Обновить список" }));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the refresh button while refreshing", () => {
+    render(<Harness onRefresh={vi.fn()} refreshing />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Отход" }));
+
+    expect(
+      screen.getByRole("button", { name: "Обновить список" }),
+    ).toBeDisabled();
+  });
 });

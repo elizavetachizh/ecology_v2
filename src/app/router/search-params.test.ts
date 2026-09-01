@@ -5,8 +5,10 @@ import { TtnStatusValues } from "../../entities/waste/ttns";
 import { PermitStatusValues } from "../../entities/waste/permits";
 import { StandardStatusValues } from "../../entities/waste/standards";
 import {
+  parseHomeSearch,
   parseRootSearch,
   parseSearchEnum,
+  parseSearchIntRange,
   parseSearchIsoDate,
   parseSearchQuery,
 } from "./search-params";
@@ -16,6 +18,53 @@ describe("parseRootSearch", () => {
     expect(parseRootSearch({ tenant: "org-1" })).toEqual({ tenant: "org-1" });
     expect(parseRootSearch({ tenant: "  " })).toEqual({ tenant: undefined });
     expect(parseRootSearch({})).toEqual({ tenant: undefined });
+  });
+});
+
+describe("parseHomeSearch", () => {
+  it("parses as-of date, selection and months range", () => {
+    expect(
+      parseHomeSearch({
+        on_date: "2026-08-15",
+        unit_id: "unit-1",
+        waste_id: "waste-1",
+        months: "12",
+      }),
+    ).toEqual({
+      on_date: "2026-08-15",
+      unit_id: "unit-1",
+      waste_id: "waste-1",
+      months: 12,
+    });
+  });
+
+  it("drops broken date and months outside 1…24", () => {
+    expect(
+      parseHomeSearch({
+        on_date: "15.08.2026",
+        months: 48,
+      }),
+    ).toEqual({
+      on_date: undefined,
+      unit_id: undefined,
+      waste_id: undefined,
+      months: undefined,
+    });
+  });
+});
+
+describe("parseSearchIntRange", () => {
+  it("accepts integers inside the inclusive range", () => {
+    expect(parseSearchIntRange("6", 1, 24)).toBe(6);
+    expect(parseSearchIntRange(12, 1, 24)).toBe(12);
+    expect(parseSearchIntRange("24", 1, 24)).toBe(24);
+  });
+
+  it("rejects empty, out of range and non-numeric values", () => {
+    expect(parseSearchIntRange("", 1, 24)).toBeUndefined();
+    expect(parseSearchIntRange("0", 1, 24)).toBeUndefined();
+    expect(parseSearchIntRange("25", 1, 24)).toBeUndefined();
+    expect(parseSearchIntRange("abc", 1, 24)).toBeUndefined();
   });
 });
 

@@ -46,8 +46,10 @@ export function useUnitsOptions({
   return {
     options: unitsQuery.data ?? [],
     loading: canFetch && unitsQuery.isLoading,
+    refreshing: canFetch && unitsQuery.isFetching && !unitsQuery.isLoading,
     error: unitsQuery.error,
     search,
     setSearch,
+    refetch: unitsQuery.refetch,
   };
 }

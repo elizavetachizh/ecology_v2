@@ -38,8 +38,10 @@ export function useWastesOptions({
   return {
     options: wastesQuery.data ?? [],
     loading: canFetch && wastesQuery.isLoading,
+    refreshing: canFetch && wastesQuery.isFetching && !wastesQuery.isLoading,
     error: wastesQuery.error,
     search,
     setSearch,
+    refetch: wastesQuery.refetch,
   };
 }

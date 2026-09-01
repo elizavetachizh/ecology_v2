@@ -12,15 +12,23 @@ export const operationDateSchema = z
   .min(1, "Укажите дату операции")
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
 
+function normalizeDecimalSeparator(value: string): string {
+  return value.replace(",", ".");
+}
+
 export const operationAmountSchema = z
   .string()
   .trim()
   .min(1, "Укажите количество")
-  .regex(/^\d+(\.\d{1,6})?$/, "Число больше 0, не более 6 знаков после запятой")
+  .regex(
+    /^\d+([.,]\d{1,6})?$/,
+    "Число больше 0, не более 6 знаков после запятой",
+  )
   .refine((value) => {
-    const n = Number(value);
+    const n = Number(normalizeDecimalSeparator(value));
     return Number.isFinite(n) && n > 0 && n <= 999_999.999_999;
-  }, "Количество должно быть больше 0");
+  }, "Количество должно быть больше 0")
+  .transform(normalizeDecimalSeparator);
 
 const uuidValue = z.string().uuid();
 

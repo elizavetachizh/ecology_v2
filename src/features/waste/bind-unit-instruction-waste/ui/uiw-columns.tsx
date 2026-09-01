@@ -19,6 +19,7 @@ function uiwColumns(
     {
       id: "waste",
       header: "Отход",
+      size: 300,
       cell: ({ row }) => (
         <Link
           to={routes.directories.wastes.detail}

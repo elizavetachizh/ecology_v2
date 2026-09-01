@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Download, Eye, LoaderCircle } from "lucide-react";
+import { Download, Eye, FileText, LoaderCircle } from "lucide-react";
 import { useTenant } from "../../../entities/tenant";
 import { useUnitsTreeQuery } from "../../../entities/waste/units";
 import {
@@ -20,8 +20,7 @@ import {
   Input,
   PageContextBar,
 } from "../../../shared/ui";
-import { generatePod9Report } from "../api/generatePod9Report";
-import { previewPod9Report } from "../api/previewPod9Report";
+import { fetchPod9Report } from "../api/fetchPod9Report";
 import { downloadBlob } from "../lib/download-blob";
 import {
   pod9FormDefaultValues,
@@ -29,14 +28,14 @@ import {
   type Pod9FormValues,
 } from "../model/pod9-form.schema";
 import { pod9ReportErrorMessage } from "../model/pod9-report-error";
-import type { ReportPreview } from "../model/preview.types";
+import type { GeneratedReportFile } from "../model/preview.types";
 import { resolveReportInstructionId } from "../model/resolve-instruction-id";
+import { PdfPreviewPanel } from "./PdfPreviewPanel";
 import { Pod9InstructionField } from "./Pod9InstructionField";
-import { Pod9ReportPreviewModal } from "./Pod9ReportPreviewModal";
 import { Pod9UnitField } from "./Pod9UnitField";
 import { Pod9WastesHint } from "./Pod9WastesHint";
 
-type ReportAction = "preview" | "download";
+type ReportAction = "preview" | "download-xlsx" | "download-pdf";
 
 export function Pod9ReportForm() {
   const { activeTenantId } = useTenant();
@@ -117,15 +116,15 @@ export function Pod9ReportForm() {
   ]);
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [preview, setPreview] = useState<ReportPreview | null>(null);
-  const [activeSheet, setActiveSheet] = useState(0);
+  const [preview, setPreview] = useState<GeneratedReportFile | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [action, setAction] = useState<ReportAction | null>(null);
   const requestRef = useRef<AbortController | null>(null);
 
   const isPreviewLoading = action === "preview";
-  const isDownloadLoading = action === "download";
+  const isDownloadXlsxLoading = action === "download-xlsx";
+  const isDownloadPdfLoading = action === "download-pdf";
   const pending = action !== null;
 
   const abortPending = () => {
@@ -140,13 +139,14 @@ export function Pod9ReportForm() {
 
     setPreviewOpen(true);
     setPreview(null);
-    setActiveSheet(0);
     setPreviewError(null);
     setDownloadError(null);
     setAction("preview");
 
     try {
-      setPreview(await previewPod9Report(values, controller.signal));
+      setPreview(
+        await fetchPod9Report({ ...values, format: "pdf" }, controller.signal),
+      );
     } catch (requestError) {
       if (controller.signal.aborted) return;
       setPreviewError(pod9ReportErrorMessage(requestError));
@@ -155,16 +155,47 @@ export function Pod9ReportForm() {
     }
   };
 
-  const runDownload = async (values: Pod9FormValues) => {
+  const runDownloadXlsx = async (values: Pod9FormValues) => {
     abortPending();
     const controller = new AbortController();
     requestRef.current = controller;
 
     setDownloadError(null);
-    setAction("download");
+    setAction("download-xlsx");
 
     try {
-      const file = await generatePod9Report(values, controller.signal);
+      const file = await fetchPod9Report(
+        { ...values, format: "xlsx" },
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
+      downloadBlob(file.blob, file.fileName);
+    } catch (requestError) {
+      if (controller.signal.aborted) return;
+      setDownloadError(pod9ReportErrorMessage(requestError));
+    } finally {
+      if (!controller.signal.aborted) setAction(null);
+    }
+  };
+
+  const runDownloadPdf = async (values: Pod9FormValues) => {
+    if (preview) {
+      downloadBlob(preview.blob, preview.fileName);
+      return;
+    }
+
+    abortPending();
+    const controller = new AbortController();
+    requestRef.current = controller;
+
+    setDownloadError(null);
+    setAction("download-pdf");
+
+    try {
+      const file = await fetchPod9Report(
+        { ...values, format: "pdf" },
+        controller.signal,
+      );
       if (controller.signal.aborted) return;
       downloadBlob(file.blob, file.fileName);
     } catch (requestError) {
@@ -181,11 +212,6 @@ export function Pod9ReportForm() {
       abortPending();
       setAction(null);
     }
-  };
-
-  const downloadFromPreview = () => {
-    if (!preview) return;
-    downloadBlob(preview.blob, preview.fileName);
   };
 
   return (
@@ -284,6 +310,10 @@ export function Pod9ReportForm() {
         </Alert>
       ) : null}
 
+      <p className="text-sm text-muted-foreground">
+        Предпросмотр — PDF; для работы в Excel скачайте xlsx.
+      </p>
+
       <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
@@ -300,29 +330,45 @@ export function Pod9ReportForm() {
         </Button>
         <Button
           type="button"
+          variant="outline"
           disabled={pending}
-          onClick={() => void handleSubmit(runDownload)()}
+          onClick={() => void handleSubmit(runDownloadXlsx)()}
         >
-          {isDownloadLoading ? (
+          {isDownloadXlsxLoading ? (
             <LoaderCircle className="animate-spin" />
           ) : (
             <Download />
           )}
           Скачать Excel
         </Button>
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={() => void handleSubmit(runDownloadPdf)()}
+        >
+          {isDownloadPdfLoading ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <FileText />
+          )}
+          Скачать PDF
+        </Button>
       </div>
 
-      <Pod9ReportPreviewModal
+      <PdfPreviewPanel
         open={previewOpen}
         onOpenChange={handlePreviewOpenChange}
         periodLabel={`${formatDate(startDate)} — ${formatDate(endDate)}`}
         preview={preview}
-        activeSheet={activeSheet}
-        onActiveSheetChange={setActiveSheet}
         error={previewError}
         isLoading={isPreviewLoading}
+        isDownloading={isDownloadXlsxLoading}
         onRetry={() => void handleSubmit(runPreview)()}
-        onDownload={downloadFromPreview}
+        onDownloadExcel={() => void handleSubmit(runDownloadXlsx)()}
+        onDownloadPdf={() => {
+          if (!preview) return;
+          downloadBlob(preview.blob, preview.fileName);
+        }}
       />
     </form>
   );

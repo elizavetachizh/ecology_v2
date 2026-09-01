@@ -32,6 +32,10 @@ import type {
 } from "../../entities/waste/wastes";
 import type { AuthContextValue } from "../../shared/auth/auth.types";
 import type { PersonSortField } from "../../entities/waste/persons";
+import {
+  DASHBOARD_MONTHS_MAX,
+  DASHBOARD_MONTHS_MIN,
+} from "../../entities/waste/dashboards";
 
 export type RouterContext = {
   auth: AuthContextValue;
@@ -97,6 +101,27 @@ export type StandardsSearch = {
   offset?: number;
 };
 
+/** Главная: as-of остатки + выбранная цепочка для графика. */
+export type HomeSearch = {
+  on_date?: string;
+  unit_id?: string;
+  waste_id?: string;
+  months?: number;
+};
+
+export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
+  return {
+    on_date: parseSearchIsoDate(search.on_date),
+    unit_id: parseSearchQuery(search.unit_id),
+    waste_id: parseSearchQuery(search.waste_id),
+    months: parseSearchIntRange(
+      search.months,
+      DASHBOARD_MONTHS_MIN,
+      DASHBOARD_MONTHS_MAX,
+    ),
+  };
+}
+
 /** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */
 export type OperationsSearch = {
   unit_id?: string;
@@ -157,9 +182,17 @@ export function parseSearchOrder(value: unknown): "asc" | "desc" | undefined {
   return value === "asc" || value === "desc" ? value : undefined;
 }
 
-export function parseSearchLimit(value: unknown): number | undefined {
+export function parseSearchIntRange(
+  value: unknown,
+  min: number,
+  max: number,
+): number | undefined {
   const n = Number(value);
-  return Number.isFinite(n) && n >= 1 && n <= 200 ? Math.floor(n) : undefined;
+  return Number.isFinite(n) && n >= min && n <= max ? Math.floor(n) : undefined;
+}
+
+export function parseSearchLimit(value: unknown): number | undefined {
+  return parseSearchIntRange(value, 1, 200);
 }
 
 export function parseSearchOffset(value: unknown): number | undefined {

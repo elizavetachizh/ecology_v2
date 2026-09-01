@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { Check, ChevronsUpDown, Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, RefreshCw, Search, X } from "lucide-react";
 import { cn } from "../lib/cn";
 
 export type AsyncComboboxOption = {
@@ -24,6 +24,8 @@ export type AsyncComboboxProps = {
   "aria-label"?: string;
   search: string;
   setSearch: (value: string) => void;
+  onRefresh?: () => void;
+  refreshing?: boolean;
   selectedLabel?: string;
   /** Кастомный рендер пункта списка. По умолчанию — `option.label`. */
   renderOption?: (
@@ -38,6 +40,8 @@ export function AsyncCombobox({
   options,
   search,
   setSearch,
+  onRefresh,
+  refreshing = false,
   value,
   onValueChange,
   placeholder = "Выберите опцию",
@@ -152,32 +156,57 @@ export function AsyncCombobox({
             contentClassName,
           )}
         >
-          <div className="relative border-b border-border p-2">
-            <Search
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={searchPlaceholder}
-              aria-label={searchPlaceholder}
-              autoFocus
-              className={cn(
-                "h-8 w-full rounded-md bg-transparent pr-8 pl-8 text-sm outline-none",
-                "placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/40",
+          <div className="flex items-center gap-1 border-b border-border p-2">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
+                autoFocus
+                className={cn(
+                  "h-8 w-full rounded-md bg-transparent pr-8 pl-8 text-sm outline-none",
+                  "placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/40",
+                )}
+              />
+              {search && (
+                <button
+                  type="button"
+                  aria-label="Очистить поиск"
+                  onClick={() => setSearch("")}
+                  className="absolute top-1/2 right-1 flex size-7 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <X aria-hidden className="size-3.5" />
+                </button>
               )}
-            />
-            {search && (
+            </div>
+            {onRefresh ? (
               <button
                 type="button"
-                aria-label="Очистить поиск"
-                onClick={() => setSearch("")}
-                className="absolute top-1/2 right-3 flex size-7 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                aria-label="Обновить список"
+                aria-busy={refreshing}
+                disabled={disabled || refreshing}
+                onClick={onRefresh}
+                title="Обновить список"
+                data-slot="async-combobox-refresh"
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground",
+                  "outline-none transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "focus-visible:ring-2 focus-visible:ring-ring/40",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                )}
               >
-                <X aria-hidden className="size-3.5" />
+                <RefreshCw
+                  aria-hidden
+                  className={cn("size-4", refreshing && "animate-spin")}
+                />
               </button>
-            )}
+            ) : null}
           </div>
 
           <div

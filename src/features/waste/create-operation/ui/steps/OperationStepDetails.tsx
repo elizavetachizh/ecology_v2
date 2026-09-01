@@ -106,8 +106,8 @@ export function OperationStepDetails({
         <Input
           id="amount"
           inputMode="decimal"
-          type="number"
-          placeholder="0"
+          autoComplete="off"
+          placeholder="0,2"
           disabled={pending}
           aria-invalid={Boolean(errors.amount)}
           {...register("amount")}

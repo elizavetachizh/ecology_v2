@@ -59,16 +59,14 @@ describe("MultipleCombobox", () => {
     expect(onValueChange).toHaveBeenNthCalledWith(1, ["a"]);
     expect(onValueChange).toHaveBeenNthCalledWith(2, ["a", "b"]);
     expect(screen.getByRole("listbox")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Источники" })).toHaveTextContent(
-      "+1",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Источники" }),
+    ).toHaveTextContent("+1");
   });
 
   it("removes an already selected option", () => {
     const onValueChange = vi.fn();
-    render(
-      <Harness initialValue={["a", "b"]} onValueChange={onValueChange} />,
-    );
+    render(<Harness initialValue={["a", "b"]} onValueChange={onValueChange} />);
 
     fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
     fireEvent.click(screen.getByRole("option", { name: "Альфа" }));
@@ -91,5 +89,35 @@ describe("MultipleCombobox", () => {
 
     fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
     expect(screen.getByText("Источники не найдены")).toBeInTheDocument();
+  });
+
+  it("hides the refresh button without onRefresh", () => {
+    render(<Harness />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
+
+    expect(
+      screen.queryByRole("button", { name: "Обновить список" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("calls onRefresh from the refresh button", () => {
+    const onRefresh = vi.fn();
+    render(<Harness onRefresh={onRefresh} />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
+    fireEvent.click(screen.getByRole("button", { name: "Обновить список" }));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the refresh button while refreshing", () => {
+    render(<Harness onRefresh={vi.fn()} refreshing />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
+
+    expect(
+      screen.getByRole("button", { name: "Обновить список" }),
+    ).toBeDisabled();
   });
 });

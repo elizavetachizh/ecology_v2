@@ -172,6 +172,10 @@ function BindWiuModalForm({
                   }
                   search={units.search}
                   setSearch={units.setSearch}
+                  onRefresh={() => {
+                    void units.refetch();
+                  }}
+                  refreshing={units.refreshing}
                   className="w-full"
                   aria-label="Структурная единица ПОД-9"
                 />
@@ -209,6 +213,10 @@ function BindWiuModalForm({
                   onValueChange={field.onChange}
                   search={sources.search}
                   setSearch={sources.setSearch}
+                  onRefresh={() => {
+                    void sources.refetch();
+                  }}
+                  refreshing={sources.refreshing}
                   placeholder="Необязательно — выберите источники"
                   searchPlaceholder="Поиск источника"
                   emptyMessage={

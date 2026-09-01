@@ -164,6 +164,10 @@ function BindUiwModalForm({
                   }
                   search={wastes.search}
                   setSearch={wastes.setSearch}
+                  onRefresh={() => {
+                    void wastes.refetch();
+                  }}
+                  refreshing={wastes.refreshing}
                   className="w-full"
                   aria-label="Отход"
                 />
@@ -201,6 +205,10 @@ function BindUiwModalForm({
                   onValueChange={field.onChange}
                   search={sources.search}
                   setSearch={sources.setSearch}
+                  onRefresh={() => {
+                    void sources.refetch();
+                  }}
+                  refreshing={sources.refreshing}
                   placeholder="Необязательно — выберите источники"
                   searchPlaceholder="Поиск источника"
                   emptyMessage={

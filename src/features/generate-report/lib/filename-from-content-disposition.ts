@@ -20,6 +20,7 @@ export function filenameFromContentDisposition(
 export function pod9FallbackFileName(
   startDate: string,
   endDate: string,
+  format: "xlsx" | "pdf" = "xlsx",
 ): string {
-  return `pod-9_${startDate}_${endDate}.xlsx`;
+  return `pod-9_${startDate}_${endDate}.${format}`;
 }

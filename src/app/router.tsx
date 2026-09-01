@@ -76,7 +76,9 @@ import {
   parseSearchOffset,
   parseSearchOrder,
   parseSearchQuery,
+  parseHomeSearch,
   parseRootSearch,
+  type HomeSearch,
   type InstructionsSearch,
   type OperationsSearch,
   type PassportsSearch,
@@ -114,6 +116,8 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.home,
+  validateSearch: (search: Record<string, unknown>): HomeSearch =>
+    parseHomeSearch(search),
   component: HomePage,
 });
 
