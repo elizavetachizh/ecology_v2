@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ContractWaste } from "../../../../entities/waste/contracts";
+import { wasteLabel } from "../../../../entities/waste/wastes";
 import { cn } from "../../../../shared/lib/cn";
 import { Button, FieldError } from "../../../../shared/ui";
 import { routes } from "../../../../shared/config/routes";
@@ -15,10 +16,6 @@ type PassportWastesSelectProps = {
   conflict: boolean;
   onChange: (ids: string[]) => void;
 };
-
-function wasteLabel(item: ContractWaste) {
-  return `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`;
-}
 
 export function PassportWastesSelect({
   wastes,
@@ -109,7 +106,7 @@ export function PassportWastesSelect({
                 onChange={() => toggle(item.waste_id)}
               />
               <span className="min-w-0 flex-1 truncate">
-                {wasteLabel(item)}
+                {wasteLabel(item.waste)}
               </span>
             </label>
           );

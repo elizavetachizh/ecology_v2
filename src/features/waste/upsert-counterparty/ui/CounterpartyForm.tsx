@@ -8,6 +8,7 @@ import {
 import { routes } from "../../../../shared/config/routes";
 import { useUpsertCounterpartyForm } from "../model/use-upsert-counterparty-form";
 import { CounterpartyFormFields } from "./CounterpartyFormFields";
+import { CounterpartyNextStepCta } from "./CounterpartyNextStepCta";
 
 type CounterpartyFormProps = {
   mode: "create" | "edit";
@@ -93,6 +94,9 @@ export function CounterpartyForm({
           Закрыть
         </Button>
       </div>
+      {mode === "edit" && (
+        <CounterpartyNextStepCta counterpartyId={counterpartyId} />
+      )}
     </form>
   );
 }

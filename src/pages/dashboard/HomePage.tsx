@@ -32,19 +32,12 @@ export function HomePage() {
   const onDate = search.on_date ?? todayIsoDate();
   const months = search.months ?? DEFAULT_DASHBOARD_MONTHS;
 
-  const {
-    groups,
-    loading,
-    error,
-  } = useDashboardBalanceQuery({
+  const { groups, loading, error } = useDashboardBalanceQuery({
     tenantId: activeTenantId,
     params: { on_date: onDate },
   });
 
-  const fallback = useMemo(
-    () => firstDashboardSelection(groups),
-    [groups],
-  );
+  const fallback = useMemo(() => firstDashboardSelection(groups), [groups]);
   const unitId = search.unit_id ?? fallback?.unit_id;
   const wasteId = search.waste_id ?? fallback?.waste_id;
   const selected = Boolean(unitId && wasteId);

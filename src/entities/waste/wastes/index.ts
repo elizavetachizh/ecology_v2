@@ -28,5 +28,8 @@ export {
   DEFAULT_WASTES_OPTIONS_LIMIT,
 } from "./model/wastes.types";
 export { wastesQueryKeys } from "./model/waste-query-keys";
+export { wasteLabel } from "./model/waste-label";
 export { useWastesListQuery } from "./model/use-wastes-list-query";
 export { useWastesOptions } from "./model/use-wastes-query";
+
+export { WasteSelect } from "./ui/WasteSelect";

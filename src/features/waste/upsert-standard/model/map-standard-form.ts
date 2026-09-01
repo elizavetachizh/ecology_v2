@@ -3,7 +3,7 @@ import type {
   StandardCreate,
   StandardUpdate,
 } from "../../../../entities/waste/standards";
-import { UOM_LABEL } from "../../../../entities/waste/wastes";
+import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 import {
   emptyStandardWasteRow,
   type StandardFormValues,
@@ -39,7 +39,7 @@ export function toStandardFormValues(standard: Standard): StandardFormValues {
       ...standard.wastes.map((item) => ({
         waste_id: item.waste_id,
         amount: item.amount,
-        label: `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`,
+        label: wasteLabel(item.waste),
         uomLabel: UOM_LABEL[item.waste.uom],
       })),
       { ...emptyStandardWasteRow },

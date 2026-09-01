@@ -33,5 +33,6 @@ export function useCounterpartiesListQuery({
     fetching: canFetch && query.isFetching,
     error: query.error,
     refetch: query.refetch,
+    refreshing: canFetch && query.isFetching && !query.isLoading,
   };
 }

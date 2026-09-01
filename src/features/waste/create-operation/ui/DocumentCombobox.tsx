@@ -37,12 +37,16 @@ type DocumentComboboxViewProps = {
   fallbackDocument?: { number: string; date: string } | null;
   disabled?: boolean;
   onChange: (id: string) => void;
+  refetch?: () => void;
+  refreshing?: boolean;
 };
 
 function DocumentComboboxView({
   kind,
   items,
   loading,
+  refetch,
+  refreshing,
   value,
   fallbackDocument,
   disabled,
@@ -82,6 +86,8 @@ function DocumentComboboxView({
       className="w-full"
       contentClassName="w-full"
       aria-label={copy["aria-label"]}
+      onRefresh={refetch ? () => void refetch() : undefined}
+      refreshing={refreshing}
     />
   );
 }
@@ -130,6 +136,10 @@ function PassportDocumentCombobox({
       kind="passport"
       items={items}
       loading={query.loading}
+      refreshing={query.refreshing}
+      refetch={() => {
+        void query.refetch();
+      }}
       value={value}
       fallbackDocument={fallbackDocument}
       disabled={disabled}
@@ -167,7 +177,7 @@ function TtnDocumentCombobox({
       value={value}
       fallbackDocument={fallbackDocument}
       disabled={disabled}
-      onChange={onChange}
+      onChange={onChange} refetch={() => void query.refetch()} refreshing={query.refreshing}
     />
   );
 }

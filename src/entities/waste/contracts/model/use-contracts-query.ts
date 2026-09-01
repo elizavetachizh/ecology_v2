@@ -56,5 +56,7 @@ export function useContractsOptions({
     error: query.error,
     search,
     setSearch,
+    refetch: query.refetch,
+    refreshing: canFetch && query.isFetching && !query.isLoading,
   };
 }

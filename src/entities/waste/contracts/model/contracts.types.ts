@@ -14,6 +14,20 @@ export const ContractTypeValues = Object.keys(CONTRACT_TYPE_LABEL) as [
   ...ContractType[],
 ];
 
+export const TRANSFER_PURPOSE_LABEL = {
+  use: "Использование",
+  neutralization: "Обезвреживание",
+  storage: "Хранение",
+  disposal: "Захоронение",
+} as const;
+
+export type TransferPurpose = keyof typeof TRANSFER_PURPOSE_LABEL;
+
+export const TransferPurposeValues = Object.keys(TRANSFER_PURPOSE_LABEL) as [
+  TransferPurpose,
+  ...TransferPurpose[],
+];
+
 export const CONTRACT_STATUS_LABEL = {
   active: "Действует",
   inactive: "Не действует",
@@ -34,10 +48,9 @@ export const ContractStatusValues = Object.keys(CONTRACT_STATUS_LABEL) as [
   ...ContractStatus[],
 ];
 
-export const ContractAllStatusValues = Object.keys(CONTRACT_ALL_STATUS_LABEL) as [
-  ContractAllStatus,
-  ...ContractAllStatus[],
-];
+export const ContractAllStatusValues = Object.keys(
+  CONTRACT_ALL_STATUS_LABEL,
+) as [ContractAllStatus, ...ContractAllStatus[]];
 
 export const CONTRACT_STATUS_BADGE_VARIANT: Record<
   ContractStatus,
@@ -73,6 +86,8 @@ export type Contract = {
   counterparty_id: string;
   counterparty: CounterpartyBrief;
   amount: string | null;
+  with_ownership_transfer: boolean;
+  transfer_purpose: TransferPurpose | null;
   wastes: ContractWaste[];
   created_at: string;
   updated_at: string;
@@ -87,6 +102,8 @@ export type ContractBrief = {
   contract_type: ContractType;
   status: ContractStatus;
   counterparty: CounterpartyBrief;
+  with_ownership_transfer: boolean;
+  transfer_purpose: TransferPurpose | null;
 };
 
 export type ContractWasteWrite = {
@@ -102,6 +119,8 @@ export type ContractCreate = {
   status?: ContractStatus;
   counterparty_id: string;
   amount?: string | null;
+  with_ownership_transfer?: boolean;
+  transfer_purpose?: TransferPurpose | null;
   wastes?: ContractWasteWrite[];
 };
 
@@ -114,6 +133,8 @@ export type ContractUpdate = {
   status?: ContractStatus;
   counterparty_id?: string;
   amount?: string | null;
+  with_ownership_transfer?: boolean;
+  transfer_purpose?: TransferPurpose | null;
   wastes?: ContractWasteWrite[];
 };
 
@@ -134,6 +155,7 @@ export type GetContractsParams = {
   status?: ContractStatus;
   contract_type?: ContractType;
   counterparty_id?: string;
+  waste_id?: string;
   sort?: ContractSortField;
   order?: ContractSortOrder;
   limit: number;

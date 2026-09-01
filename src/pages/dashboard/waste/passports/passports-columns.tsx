@@ -82,7 +82,7 @@ function passportsColumns(
         <div className="flex max-w-xs flex-wrap gap-1">
           {row.original.wastes.map((waste) => (
             <Badge key={waste.id} variant="secondary">
-              {waste.waste.waste_classifier.name}
+              {waste.waste.waste_classifier.code}
             </Badge>
           ))}
         </div>

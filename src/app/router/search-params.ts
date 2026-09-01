@@ -84,6 +84,12 @@ export type ContractsSearch = ListSearchParams<ContractSortField> & {
   status?: ContractStatus;
   contract_type?: ContractType;
   counterparty_id?: string;
+  waste_id?: string;
+};
+
+export type CreateContractSearch = {
+  counterparty_id?: string;
+  contract_type?: ContractType;
 };
 
 export type PermitsSearch = ListSearchParams<PermitSortField> & {

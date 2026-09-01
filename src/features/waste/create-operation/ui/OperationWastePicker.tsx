@@ -6,6 +6,7 @@ import type { UnitInstructionWaste } from "../../../../entities/waste/unit-instr
 import {
   HAZARD_CLASS_LABEL,
   UOM_LABEL,
+  wasteLabel,
   type WasteBrief,
 } from "../../../../entities/waste/wastes";
 import { cn } from "../../../../shared/lib/cn";
@@ -34,10 +35,6 @@ type OperationWastePickerProps = {
   disabled?: boolean;
   errorMessage?: string;
 };
-
-function wasteLabel(waste: Pick<WasteBrief, "waste_classifier">) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
-}
 
 function UnitCardLink({
   unitId,

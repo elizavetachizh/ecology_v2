@@ -5,12 +5,14 @@ export function contractWriteErrorMessage(error: unknown): string {
     return "Контрагент или отход не найден.";
   }
   if (error instanceof ApiError && error.status === 400) {
-    return "Проверьте даты и перечень отходов: окончание не раньше начала, отходы без дублей.";
+    return "Проверьте даты, перечень отходов и поля передачи. Цель обязательна для утилизации; для перевозки она не задаётся. Тип нельзя сменить, если на договор ссылается паспорт или ТТН.";
   }
   if (error instanceof ApiError && error.status === 422) {
-    return "Проверьте поля договора: номер, даты, сумма если указана.";
+    return "Проверьте поля договора: номер, даты, сумма, цель передачи.";
   }
-  return error instanceof Error ? error.message : "Не удалось сохранить договор";
+  return error instanceof Error
+    ? error.message
+    : "Не удалось сохранить договор";
 }
 
 export function contractDeleteErrorMessage(error: unknown): string {

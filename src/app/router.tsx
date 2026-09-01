@@ -94,6 +94,7 @@ import {
   type WasteSourcesSearch,
   type WastesSearch,
   type PersonsSearch,
+  type CreateContractSearch,
 } from "./router/search-params";
 import { CreateUnitPage } from "../pages/dashboard/waste/units/CreateUnitPage";
 import { CreateWastePage } from "../pages/dashboard/waste/wastes/CreateWastePage";
@@ -378,6 +379,7 @@ const directoriesContractsRoute = createRoute({
       status: parseSearchEnum(search.status, ContractStatusValues),
       contract_type: parseSearchEnum(search.contract_type, ContractTypeValues),
       counterparty_id: parseSearchQuery(search.counterparty_id),
+      waste_id: parseSearchQuery(search.waste_id),
       sort: parseSearchEnum(search.sort, ContractSortFields),
       order: parseSearchOrder(search.order),
       limit: parseSearchLimit(search.limit),
@@ -390,6 +392,10 @@ const directoriesContractsRoute = createRoute({
 const directoriesCreateContractRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.directories.contracts.new,
+  validateSearch: (search: Record<string, unknown>): CreateContractSearch => ({
+    counterparty_id: parseSearchQuery(search.counterparty_id),
+    contract_type: parseSearchEnum(search.contract_type, ContractTypeValues),
+  }),
   component: CreateContractPage,
 });
 

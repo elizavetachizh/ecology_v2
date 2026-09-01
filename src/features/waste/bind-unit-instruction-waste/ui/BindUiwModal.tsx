@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import {
   UOM_LABEL,
   useWastesOptions,
+  WasteSelect,
   type WasteBrief,
 } from "../../../../entities/waste/wastes";
 import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
@@ -14,7 +15,6 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-  AsyncCombobox,
   Badge,
   Button,
   Field,
@@ -42,10 +42,6 @@ type BindUiwModalProps = {
   onOpenChange: (open: boolean) => void;
   onSaved: (binding: UnitInstructionWaste) => void;
 };
-
-function wasteLabel(waste: WasteBrief) {
-  return `${waste.waste_classifier.code} - ${waste.waste_classifier.name}`;
-}
 
 export function BindUiwModal({
   open,
@@ -143,33 +139,10 @@ function BindUiwModalForm({
               name="waste_id"
               control={control}
               render={({ field }) => (
-                <AsyncCombobox
-                  options={wastes.options.map((waste) => ({
-                    value: waste.id,
-                    label: wasteLabel(waste),
-                  }))}
+                <WasteSelect
+                  tenantId={tenantId}
                   value={field.value}
-                  selectedLabel={
-                    selectedWaste
-                      ? `${selectedWaste.waste_classifier.code} - ${selectedWaste.waste_classifier.name}`
-                      : undefined
-                  }
-                  onValueChange={(id) => field.onChange(id ?? "")}
-                  placeholder="Выберите отход из справочника"
-                  searchPlaceholder="Поиск по коду или названию"
-                  emptyMessage={
-                    wastes.loading
-                      ? "Загрузка…"
-                      : "Начните вводить код или название"
-                  }
-                  search={wastes.search}
-                  setSearch={wastes.setSearch}
-                  onRefresh={() => {
-                    void wastes.refetch();
-                  }}
-                  refreshing={wastes.refreshing}
-                  className="w-full"
-                  aria-label="Отход"
+                  onChange={(id) => field.onChange(id ?? "")}
                 />
               )}
             />

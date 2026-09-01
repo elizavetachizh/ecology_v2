@@ -3,6 +3,7 @@ import type {
   ContractCreate,
   ContractUpdate,
 } from "../../../../entities/waste/contracts";
+import { wasteLabel } from "../../../../entities/waste/wastes";
 import {
   emptyContractWasteRow,
   type ContractFormValues,
@@ -15,6 +16,7 @@ function emptyToNull(value: string): string | null {
 export function toContractWriteBody(
   values: ContractFormValues,
 ): ContractCreate {
+  const isRecycling = values.contract_type === "recycling";
   return {
     number: values.number.trim(),
     start_date: values.start_date,
@@ -23,6 +25,10 @@ export function toContractWriteBody(
     status: values.status,
     counterparty_id: values.counterparty_id,
     amount: emptyToNull(values.amount),
+    with_ownership_transfer: isRecycling
+      ? values.with_ownership_transfer
+      : false,
+    transfer_purpose: isRecycling ? values.transfer_purpose || null : null,
     wastes: values.wastes
       .filter((item) => item.waste_id)
       .map((item) => ({
@@ -48,11 +54,13 @@ export function toContractFormValues(contract: Contract): ContractFormValues {
     status: contract.status,
     counterparty_id: contract.counterparty_id,
     amount: contract.amount ?? "",
+    with_ownership_transfer: contract.with_ownership_transfer,
+    transfer_purpose: contract.transfer_purpose ?? "",
     wastes: [
       ...contract.wastes.map((item) => ({
         waste_id: item.waste_id,
         cost_per_unit: item.cost_per_unit ?? "",
-        label: `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`,
+        label: wasteLabel(item.waste),
       })),
       { ...emptyContractWasteRow },
     ],

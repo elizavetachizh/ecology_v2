@@ -110,6 +110,8 @@ export function PermitForm({
             <>
               Нет нужного места учёта?{" "}
               <Link
+                target="_blank"
+                rel="noopener noreferrer"
                 to={routes.directories.units.list}
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
@@ -169,10 +171,11 @@ export function PermitForm({
             Лимиты на захоронение
           </h2>
           <p className="text-sm text-muted-foreground">
-            Пока API принимает только захоронение. Пустой перечень при
-            сохранении очищает список (полная замена).{" "}
+            Не нашли нужного отхода?{" "}
             <Link
               to={routes.directories.wastes.list}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Справочник отходов
@@ -193,7 +196,7 @@ export function PermitForm({
             : mode === "create"
               ? "Создать"
               : "Сохранить"}
-        </Button>{" "}
+        </Button>
         <Button
           type="button"
           variant="secondary"

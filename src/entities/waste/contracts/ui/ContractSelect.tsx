@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { AsyncCombobox } from "../../../../shared/ui";
 import { getContract } from "../api/get-contract";
 import { contractsQueryKeys } from "../model/contracts-query-keys";
-import type {
-  Contract,
-  ContractStatus,
-  ContractType,
+import {
+  TRANSFER_PURPOSE_LABEL,
+  type Contract,
+  type ContractStatus,
+  type ContractType,
 } from "../model/contracts.types";
 import { useContractsOptions } from "../model/use-contracts-query";
 
@@ -20,8 +21,13 @@ type ContractSelectProps = {
   onChange: (id: string) => void;
 };
 
-function contractLabel(item: Pick<Contract, "number" | "counterparty">) {
-  return `${item.number} — ${item.counterparty.name}`;
+function contractLabel(
+  item: Pick<Contract, "number" | "counterparty" | "transfer_purpose">,
+) {
+  const purpose = item.transfer_purpose
+    ? ` · ${TRANSFER_PURPOSE_LABEL[item.transfer_purpose]}`
+    : "";
+  return `${item.number} — ${item.counterparty.name}${purpose}`;
 }
 
 export function ContractSelect({
@@ -78,6 +84,10 @@ export function ContractSelect({
       aria-label={
         ariaLabel ?? (isRecycling ? "Договор утилизации" : "Договор перевозки")
       }
+      onRefresh={() => {
+        void contracts.refetch();
+      }}
+      refreshing={contracts.refreshing}
     />
   );
 }

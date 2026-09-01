@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
 import { ContractForm } from "../../../../features/waste/upsert-contract";
 import { TenantRequiredGate, toast } from "../../../../shared/ui";
@@ -7,14 +7,15 @@ import { routes } from "../../../../shared/config/routes";
 export function CreateContractPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-
+  const search = useSearch({ from: routes.directories.contracts.new });
   return (
     <TenantRequiredGate
       tenantId={activeTenantId}
       description="Создание договора доступно после выбора организации в верхней панели."
     >
       <ContractForm
-        tenantId={activeTenantId}
+        defaultCounterpartyId={search.counterparty_id}
+        defaultContractType={search.contract_type}
         mode="create"
         onSaved={(contract, { close }) => {
           toast.success("Договор успешно создан");

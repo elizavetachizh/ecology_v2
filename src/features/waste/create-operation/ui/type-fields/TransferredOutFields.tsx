@@ -24,9 +24,7 @@ type TransferredOutFieldsProps = {
   pending: boolean;
 };
 
-export function TransferredOutFields({
-  pending,
-}: TransferredOutFieldsProps) {
+export function TransferredOutFields({ pending }: TransferredOutFieldsProps) {
   const { activeTenantId } = useTenant();
   const {
     control,
@@ -119,6 +117,8 @@ export function TransferredOutFields({
             нужного?{" "}
             <Link
               to={routes.waste.passports.new}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Создать сопроводительный паспорт
@@ -151,6 +151,8 @@ export function TransferredOutFields({
             проверяет сервер. Нет нужной?{" "}
             <Link
               to={routes.waste.ttns.new}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Создать ТТН

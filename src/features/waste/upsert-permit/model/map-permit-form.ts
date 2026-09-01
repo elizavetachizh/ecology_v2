@@ -3,7 +3,7 @@ import type {
   PermitCreate,
   PermitUpdate,
 } from "../../../../entities/waste/permits";
-import { UOM_LABEL } from "../../../../entities/waste/wastes";
+import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 import {
   emptyPermitBurialWasteRow,
   type PermitFormValues,
@@ -44,7 +44,7 @@ export function toPermitFormValues(permit: Permit): PermitFormValues {
       ...permit.burial_wastes.map((item) => ({
         waste_id: item.waste_id,
         amount: item.amount,
-        label: `${item.waste.waste_classifier.code} — ${item.waste.waste_classifier.name}`,
+        label: wasteLabel(item.waste),
         uomLabel: UOM_LABEL[item.waste.uom],
       })),
       { ...emptyPermitBurialWasteRow },

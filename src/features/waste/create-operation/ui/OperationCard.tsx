@@ -16,7 +16,7 @@ import {
   USE_PURPOSE_LABEL,
   type Operation,
 } from "../../../../entities/waste/operations";
-import { UOM_LABEL } from "../../../../entities/waste/wastes";
+import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 import { formatDate, formatDateTime } from "../../../../shared/lib/format-date";
 import {
   Alert,
@@ -166,10 +166,7 @@ export function OperationCard({
             </>
           )}
           <SummaryItem label="Место учёта" value={operation.unit.name} />
-          <SummaryItem
-            label="Отход"
-            value={`${operation.waste.waste_classifier.code} - ${operation.waste.waste_classifier.name}`}
-          />
+          <SummaryItem label="Отход" value={wasteLabel(operation.waste)} />
           <SummaryItem
             label="Тип операции"
             value={OPERATION_TYPE_LABEL[operation.operation_type]}

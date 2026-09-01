@@ -30,6 +30,8 @@ export const passportFixture: Passport = {
       id: "88888888-8888-4888-8888-888888888888",
       name: "Ромашка",
     },
+    with_ownership_transfer: false,
+    transfer_purpose: "use",
   },
   transport_type: "self",
   transport_contract_id: null,

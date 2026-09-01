@@ -18,6 +18,7 @@ export function getContracts(
     searchParams.set("counterparty_id", params.counterparty_id);
   if (params.contract_type)
     searchParams.set("contract_type", params.contract_type);
+  if (params.waste_id) searchParams.set("waste_id", params.waste_id);
   if (params.sort) searchParams.set("sort", params.sort);
   if (params.order) searchParams.set("order", params.order);
   return apiJson<ContractListResponse>(

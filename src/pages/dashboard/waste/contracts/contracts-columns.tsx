@@ -3,6 +3,7 @@ import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
   CONTRACT_TYPE_LABEL,
   ContractStatusBadge,
+  TRANSFER_PURPOSE_LABEL,
   type Contract,
   type ContractStatus,
 } from "../../../../entities/waste/contracts";
@@ -46,6 +47,25 @@ function contractsColumns(
       cell: ({ row }) => CONTRACT_TYPE_LABEL[row.original.contract_type],
     },
     {
+      id: "transfer_purpose",
+      accessorKey: "transfer_purpose",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Цель передачи" />
+      ),
+      enableSorting: false,
+      cell: ({ row }) => {
+        const purpose = row.original.transfer_purpose;
+        return (
+          <div className="flex max-w-xs flex-wrap items-center gap-1">
+            {purpose ? TRANSFER_PURPOSE_LABEL[purpose] : "—"}
+            {row.original.with_ownership_transfer ? (
+              <Badge variant="secondary">С передачей права</Badge>
+            ) : null}
+          </div>
+        );
+      },
+    },
+    {
       id: "counterparty",
       header: "Контрагент",
       enableSorting: false,
@@ -82,7 +102,11 @@ function contractsColumns(
       cell: ({ row }) => (
         <div className="flex max-w-xs flex-wrap gap-1">
           {row.original.wastes.map((waste) => (
-            <Badge title={waste.waste.waste_classifier.name} key={waste.id} variant="secondary">
+            <Badge
+              title={waste.waste.waste_classifier.name}
+              key={waste.id}
+              variant="secondary"
+            >
               {waste.waste.waste_classifier.code}
             </Badge>
           ))}

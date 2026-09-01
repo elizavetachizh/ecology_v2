@@ -82,6 +82,7 @@ export function ContractsPage() {
       status: search.status,
       contract_type: search.contract_type,
       counterparty_id: search.counterparty_id,
+      waste_id: search.waste_id,
       sort: search.sort ?? ("start_date" as const),
       order: search.order ?? ("desc" as const),
       limit: search.limit ?? DEFAULT_CONTRACTS_LIST_LIMIT,
@@ -130,6 +131,7 @@ export function ContractsPage() {
           "status" in patch ||
           "contract_type" in patch ||
           "counterparty_id" in patch ||
+          "waste_id" in patch ||
           "sort" in patch ||
           "order" in patch
         ) {
@@ -179,6 +181,7 @@ export function ContractsPage() {
             status: search.status,
             contract_type: search.contract_type,
             counterparty_id: search.counterparty_id,
+            waste_id: search.waste_id,
           }}
           onChange={patchSearch}
         />

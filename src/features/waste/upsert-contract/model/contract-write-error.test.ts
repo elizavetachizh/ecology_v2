@@ -11,7 +11,7 @@ describe("contractWriteErrorMessage", () => {
       contractWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 400", 400, "http_error"),
       ),
-    ).toMatch(/отходы/);
+    ).toMatch(/цель обязательна/i);
   });
 });
 

@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import {
   UOM_LABEL,
   useWastesOptions,
-  type WasteBrief,
+  wasteLabel,
 } from "../../../../entities/waste/wastes";
 import {
   AsyncCombobox,
@@ -21,10 +21,6 @@ type StandardWastesEditorProps = {
   tenantId: string | null;
   pending: boolean;
 };
-
-function wasteLabel(waste: Pick<WasteBrief, "waste_classifier">) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
-}
 
 export function StandardWastesEditor({
   form,
@@ -104,10 +100,7 @@ export function StandardWastesEditor({
                     type="hidden"
                     {...register(`wastes.${index}.waste_id`)}
                   />
-                  <input
-                    type="hidden"
-                    {...register(`wastes.${index}.label`)}
-                  />
+                  <input type="hidden" {...register(`wastes.${index}.label`)} />
                   <input
                     type="hidden"
                     {...register(`wastes.${index}.uomLabel`)}
@@ -162,10 +155,7 @@ export function StandardWastesEditor({
                     type="hidden"
                     {...register(`wastes.${index}.waste_id`)}
                   />
-                  <input
-                    type="hidden"
-                    {...register(`wastes.${index}.label`)}
-                  />
+                  <input type="hidden" {...register(`wastes.${index}.label`)} />
                   <input
                     type="hidden"
                     {...register(`wastes.${index}.uomLabel`)}
@@ -189,6 +179,10 @@ export function StandardWastesEditor({
                     className="w-full"
                     contentClassName="w-full"
                     aria-label="Отход для норматива образования"
+                    onRefresh={() => {
+                      void wastes.refetch();
+                    }}
+                    refreshing={wastes.refreshing}
                   />
                   <FieldError>
                     {formState.errors.wastes?.[index]?.waste_id?.message}

@@ -115,15 +115,6 @@ export function PassportForm({
         actions={<PassportStatusBadge status={initial?.status ?? "active"} />}
       />
 
-      <Alert variant="info">
-        <AlertTitle>Договор утилизации</AlertTitle>
-        <AlertDescription>
-          Выберите договор утилизации — список отходов паспорта ограничен его
-          перечнем. Договор перевозки нужен только если выбран способ «по
-          договору перевозки».
-        </AlertDescription>
-      </Alert>
-
       {error ? (
         <Alert variant="error">
           <AlertTitle>Не удалось сохранить</AlertTitle>
@@ -131,7 +122,7 @@ export function PassportForm({
         </Alert>
       ) : null}
 
-      <section className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
+      <section className="grid items-start gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         <h2 className="text-sm font-semibold text-foreground md:col-span-2">
           Реквизиты
         </h2>
@@ -297,6 +288,24 @@ export function PassportForm({
             label="Договор перевозки"
             required
             error={errors.transport_contract_id?.message}
+            description={
+              <>
+                Нет в списке нужного?{" "}
+                <Link
+                  to={routes.directories.contracts.new}
+                  search={
+                    activeTenantId
+                      ? { tenant: activeTenantId, contract_type: "transport" }
+                      : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
           >
             <Controller
               name="transport_contract_id"
@@ -369,6 +378,22 @@ export function PassportForm({
             label="Контрагент"
             required
             error={errors.waste_producer_id?.message}
+            description={
+              <>
+                Нет в списке нужного?{" "}
+                <Link
+                  to={routes.directories.counterparties.new}
+                  search={
+                    activeTenantId ? { tenant: activeTenantId } : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
           >
             <Controller
               name="waste_producer_id"
@@ -406,7 +431,7 @@ export function PassportForm({
           disabled={pending}
           onClick={onCancel}
         >
-          Отмена
+          Закрыть
         </Button>
       </div>
     </form>

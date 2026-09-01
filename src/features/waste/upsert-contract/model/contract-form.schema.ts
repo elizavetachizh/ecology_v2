@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   ContractStatusValues,
   ContractTypeValues,
+  TransferPurposeValues,
 } from "../../../../entities/waste/contracts";
 
 const isoDate = z
@@ -43,6 +44,8 @@ export const contractFormSchema = z
     status: z.enum(ContractStatusValues),
     counterparty_id: z.string().uuid("Выберите контрагента"),
     amount: optionalPositiveDecimal,
+    with_ownership_transfer: z.boolean(),
+    transfer_purpose: z.union([z.enum(TransferPurposeValues), z.literal("")]),
     wastes: z.array(
       z.object({
         waste_id: z.union([z.string().uuid(), z.literal("")]),
@@ -57,6 +60,13 @@ export const contractFormSchema = z
         code: "custom",
         path: ["end_date"],
         message: "Дата окончания не может быть раньше даты начала",
+      });
+    }
+    if (values.contract_type === "recycling" && !values.transfer_purpose) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["transfer_purpose"],
+        message: "Укажите цель передачи",
       });
     }
     const seen = new Set<string>();
@@ -98,5 +108,7 @@ export const contractFormDefaultValues: ContractFormValues = {
   status: "active",
   counterparty_id: "",
   amount: "",
+  with_ownership_transfer: false,
+  transfer_purpose: "",
   wastes: [{ ...emptyContractWasteRow }],
 };

@@ -4,7 +4,10 @@ import { Link } from "@tanstack/react-router";
 import {
   CONTRACT_TYPE_LABEL,
   ContractTypeValues,
+  TRANSFER_PURPOSE_LABEL,
+  TransferPurposeValues,
   type Contract,
+  type ContractType,
 } from "../../../../entities/waste/contracts";
 import { useTenant } from "../../../../entities/tenant";
 import { CounterpartySelect } from "../../../../entities/waste/counterparties";
@@ -15,10 +18,14 @@ import {
   Badge,
   Button,
   DirectoryBreadcrumb,
+  Field,
+  FieldDescription,
+  FieldLabel,
   FormField,
   Input,
   PageContextBar,
   Select,
+  Switch,
 } from "../../../../shared/ui";
 import { useUpsertContractForm } from "../model/use-upsert-contract-form";
 import { ContractNextStepCta } from "./ContractNextStepCta";
@@ -29,16 +36,18 @@ type ContractFormProps = {
   mode: "create" | "edit";
   contractId?: string;
   initial?: Contract | null;
+  defaultCounterpartyId?: string;
+  defaultContractType?: ContractType;
   onSaved: (contract: Contract, meta: { close: boolean }) => void;
   onCancel: () => void;
-  tenantId: string | null;
 };
 
 export function ContractForm({
   mode,
   contractId,
   initial,
-  tenantId,
+  defaultCounterpartyId,
+  defaultContractType,
   onSaved,
   onCancel,
 }: ContractFormProps) {
@@ -48,6 +57,8 @@ export function ContractForm({
     mode,
     contractId,
     initial,
+    defaultCounterpartyId,
+    defaultContractType,
     onSaved,
   });
   const {
@@ -106,12 +117,23 @@ export function ContractForm({
           required
           className="md:col-span-2"
           error={errors.contract_type?.message}
-          description="Утилизация - для дальнейшего создания сопроводительных паспортов/ТТН. Перевозка - для вывоза отходов сторонней организацией (не нами и не контрагентом по договору с типом 'утилизация')"
+          description={
+            mode === "edit"
+              ? "Утилизация — для паспортов и ТТН. Перевозка — если вывозит сторонняя организация. Смена типа будет отклонена, если на договор уже ссылается паспорт или ТТН."
+              : "Утилизация - для дальнейшего создания сопроводительных паспортов/ТТН. Перевозка - для вывоза отходов сторонней организацией (не нами и не контрагентом по договору с типом 'утилизация')"
+          }
         >
           <Select
             id="contract_type"
             disabled={pending}
-            {...register("contract_type")}
+            {...register("contract_type", {
+              onChange: (event) => {
+                if (event.target.value === "transport") {
+                  setValue("transfer_purpose", "");
+                  setValue("with_ownership_transfer", false);
+                }
+              },
+            })}
           >
             {ContractTypeValues.map((value) => (
               <option key={value} value={value}>
@@ -120,6 +142,59 @@ export function ContractForm({
             ))}
           </Select>
         </FormField>
+
+        {contractType === "recycling" ? (
+          <>
+            <FormField
+              htmlFor="transfer_purpose"
+              label="Цель передачи"
+              required
+              className="md:col-span-2"
+              error={errors.transfer_purpose?.message}
+              description="Обязательна для договора утилизации. Для перевозки не указывается."
+            >
+              <Select
+                id="transfer_purpose"
+                disabled={pending}
+                {...register("transfer_purpose")}
+                aria-invalid={Boolean(errors.transfer_purpose)}
+              >
+                <option value="">Выберите цель</option>
+                {TransferPurposeValues.map((value) => (
+                  <option key={value} value={value}>
+                    {TRANSFER_PURPOSE_LABEL[value]}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+
+            <Field className="md:col-span-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <FieldLabel htmlFor="with_ownership_transfer">
+                    С передачей права собственности
+                  </FieldLabel>
+                  <FieldDescription>
+                    Отходы передаются с переходом права собственности.
+                  </FieldDescription>
+                </div>
+                <Controller
+                  name="with_ownership_transfer"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      id="with_ownership_transfer"
+                      checked={field.value}
+                      disabled={pending}
+                      onCheckedChange={field.onChange}
+                      aria-label="С передачей права собственности"
+                    />
+                  )}
+                />
+              </div>
+            </Field>
+          </>
+        ) : null}
 
         <FormField
           htmlFor="counterparty_id"
@@ -140,7 +215,7 @@ export function ContractForm({
               {" · "}
               <Link
                 to={routes.directories.counterparties.list}
-                search={tenantId ? { tenant: tenantId } : undefined}
+                search={activeTenantId ? { tenant: activeTenantId } : undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
@@ -223,23 +298,23 @@ export function ContractForm({
           />
         </FormField>
       </div>
-
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-        <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-foreground">
-            Перечень отходов
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Допустим на обоих типах договора. Пустой перечень при сохранении
-            очищает список (полная замена).
-          </p>
-        </div>
-        <ContractWastesEditor
-          form={form}
-          tenantId={activeTenantId}
-          pending={pending}
-        />
-      </section>
+      {contractType === "recycling" ? (
+        <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+          <div className="space-y-1">
+            <h2 className="text-sm font-semibold text-foreground">
+              Перечень отходов
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Обязательно для договора утилизации. Для перевозки не указывается.
+            </p>
+          </div>
+          <ContractWastesEditor
+            form={form}
+            tenantId={activeTenantId}
+            pending={pending}
+          />
+        </section>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>

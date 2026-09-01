@@ -13,8 +13,8 @@ import {
 import {
   getWaste,
   useWastesOptions,
+  wasteLabel,
   wastesQueryKeys,
-  type Waste,
 } from "../../../../../entities/waste/wastes";
 import {
   AsyncCombobox,
@@ -45,10 +45,6 @@ type OperationsFiltersProps = {
 
 function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
-
-function wasteLabel(waste: Pick<Waste, "waste_classifier">) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
 }
 
 export function OperationsFilters({

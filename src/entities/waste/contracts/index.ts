@@ -16,16 +16,20 @@ export type {
   ContractStatus,
   ContractType,
   ContractAllStatus,
+  TransferPurpose,
   GetContractsParams,
 } from "./model/contracts.types";
 export {
   CONTRACT_STATUS_BADGE_VARIANT,
-  CONTRACT_STATUS_LABEL,CONTRACT_ALL_STATUS_LABEL,
+  CONTRACT_STATUS_LABEL,
+  CONTRACT_ALL_STATUS_LABEL,
   CONTRACT_TYPE_LABEL,
+  TRANSFER_PURPOSE_LABEL,
   ContractSortFields,
   ContractStatusValues,
   ContractTypeValues,
   ContractAllStatusValues,
+  TransferPurposeValues,
   DEFAULT_CONTRACTS_LIST_LIMIT,
   DEFAULT_CONTRACTS_OPTIONS_LIMIT,
 } from "./model/contracts.types";

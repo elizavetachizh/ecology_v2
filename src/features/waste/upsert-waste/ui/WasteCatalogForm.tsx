@@ -6,6 +6,7 @@ import {
   PhysicalStateValues,
   UOM_LABEL,
   UomValues,
+  wasteLabel,
   type Waste,
 } from "../../../../entities/waste/wastes";
 import {
@@ -92,7 +93,7 @@ export function WasteCatalogForm({
                 value={field.value ? String(field.value) : ""}
                 selectedLabel={
                   field.value === initial?.waste_classifier_id
-                    ? `${initial.waste_classifier.code} — ${initial.waste_classifier.name}`
+                    ? wasteLabel(initial)
                     : undefined
                 }
                 onChange={(item) => field.onChange(item?.id ?? 0)}

@@ -1,5 +1,5 @@
 import type { UnitBrief } from "../../units";
-import type { WasteBrief } from "../../wastes";
+import { wasteLabel, type WasteBrief } from "../../wastes";
 import type {
   DashboardBalance,
   DashboardBalancePoint,
@@ -35,7 +35,7 @@ export function unitTitle(
 export function wasteTitle(
   waste: Pick<WasteBrief, "waste_classifier">,
 ): string {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
+  return wasteLabel(waste);
 }
 
 export function flattenDashboardBalance(

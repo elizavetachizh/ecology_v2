@@ -1,43 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 import { AsyncCombobox } from "../../../../shared/ui";
-import { getCounterparty } from "../api/get-counterparty";
-import { counterpartiesQueryKeys } from "../model/counterparties-query-keys";
-import type { Counterparty } from "../model/counterparties.types";
-import { useCounterpartiesOptions } from "../model/use-counterparties-query";
+import { HAZARD_CLASS_LABEL, type WasteBrief } from "../model/wastes.types";
+import { wasteLabel } from "../model/waste-label";
+import { useWastesOptions } from "../model/use-wastes-query";
+import { wastesQueryKeys } from "../model/waste-query-keys";
+import { getWaste } from "../api/get-waste";
 
-type CounterpartySelectProps = {
+type WasteSelectProps = {
   tenantId: string | null;
   value: string;
   disabled?: boolean;
+  enabled?: boolean;
   placeholder?: string;
   "aria-label"?: string;
   onChange: (id: string) => void;
 };
 
-function counterpartyLabel(item: Pick<Counterparty, "name" | "unp">) {
-  return item.unp ? `${item.name} (${item.unp})` : item.name;
+function wasteSelectLabel(
+  item: Pick<WasteBrief, "waste_classifier" | "hazard_class">,
+) {
+  return `${wasteLabel(item)} (${HAZARD_CLASS_LABEL[item.hazard_class]})`;
 }
 
-export function CounterpartySelect({
+export function WasteSelect({
   tenantId,
   value,
   disabled,
-  placeholder = "Выберите контрагента",
-  "aria-label": ariaLabel = "Контрагент",
+  enabled = true,
+  placeholder = "Выберите отход из справочника",
+  "aria-label": ariaLabel = "Отход",
   onChange,
-}: CounterpartySelectProps) {
+}: WasteSelectProps) {
+  const canFetch = Boolean(tenantId) && enabled;
   const { options, loading, search, setSearch, refetch, refreshing } =
-    useCounterpartiesOptions({
+    useWastesOptions({
       tenantId,
-      enabled: Boolean(tenantId),
+      enabled: canFetch,
     });
 
   const selectedQuery = useQuery({
-    queryKey: counterpartiesQueryKeys.detail(
-      tenantId ?? "none",
-      value || "none",
-    ),
-    queryFn: ({ signal }) => getCounterparty(value, signal),
+    queryKey: wastesQueryKeys.detail(tenantId ?? "none", value || "none"),
+    queryFn: ({ signal }) => getWaste(value, signal),
     enabled: Boolean(tenantId && value),
   });
 
@@ -49,13 +52,13 @@ export function CounterpartySelect({
     <AsyncCombobox
       options={options.map((item) => ({
         value: item.id,
-        label: counterpartyLabel(item),
+        label: wasteSelectLabel(item),
       }))}
       value={value}
-      selectedLabel={selected ? counterpartyLabel(selected) : undefined}
+      selectedLabel={selected ? wasteSelectLabel(selected) : undefined}
       onValueChange={onChange}
       placeholder={placeholder}
-      searchPlaceholder="Поиск по УНП или наименованию"
+      searchPlaceholder="Поиск по коду или наименованию"
       emptyMessage={loading ? "Загрузка…" : "Ничего не найдено"}
       search={search}
       setSearch={setSearch}

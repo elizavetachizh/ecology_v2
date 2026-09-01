@@ -31,6 +31,8 @@ export const ttnFixture: Ttn = {
       id: "88888888-8888-4888-8888-888888888888",
       name: "Ромашка",
     },
+    with_ownership_transfer: false,
+    transfer_purpose: "use",
   },
   created_at: "2026-03-15T00:00:00Z",
   updated_at: "2026-03-15T00:00:00Z",

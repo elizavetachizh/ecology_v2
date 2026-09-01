@@ -7,6 +7,7 @@ import {
   type ContractType,
 } from "../../../../../entities/waste/contracts";
 import { CounterpartySelect } from "../../../../../entities/waste/counterparties";
+import { WasteSelect } from "../../../../../entities/waste/wastes";
 import {
   ListSearchField,
   Select,
@@ -20,6 +21,7 @@ export type ContractsFiltersValue = {
   status?: ContractStatus;
   contract_type?: ContractType;
   counterparty_id?: string;
+  waste_id?: string;
 };
 
 type ContractsFiltersProps = {
@@ -69,7 +71,16 @@ export function ContractsFilters({
             onChange={(id) => onChange({ counterparty_id: id || undefined })}
           />
         </div>
+        <div className="w-64">
+          <WasteSelect
+            tenantId={tenantId}
+            value={values.waste_id ?? ""}
+            placeholder="Все отходы"
+            onChange={(id) => onChange({ waste_id: id || undefined })}
+          />
+        </div>
       </div>
+
       <Tabs
         value={values.status ?? "all"}
         onValueChange={(value) =>

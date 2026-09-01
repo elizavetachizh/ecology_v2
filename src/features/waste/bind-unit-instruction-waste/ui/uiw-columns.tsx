@@ -8,7 +8,7 @@ import {
 import { Pencil, Unlink } from "lucide-react";
 import { WasteSourcesCell } from "../../../../entities/waste/waste-sources";
 import type { UnitInstructionWaste } from "../../../../entities/waste/unit-instruction-waste";
-import { UOM_LABEL } from "../../../../entities/waste/wastes";
+import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 
 function uiwColumns(
   setEditing: (waste: UnitInstructionWaste) => void,
@@ -27,7 +27,7 @@ function uiwColumns(
           search={{ instructionId: undefined }}
           className="font-medium hover:underline"
         >
-          {`${row.original.waste.waste_classifier.code} - ${row.original.waste.waste_classifier.name}`}
+          {wasteLabel(row.original.waste)}
         </Link>
       ),
     },

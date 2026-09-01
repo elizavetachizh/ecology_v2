@@ -9,6 +9,8 @@ const valid = {
   status: "active" as const,
   counterparty_id: "550e8400-e29b-41d4-a716-446655440000",
   amount: "",
+  with_ownership_transfer: false,
+  transfer_purpose: "use" as const,
   wastes: [],
 };
 
@@ -50,5 +52,22 @@ describe("contractFormSchema", () => {
     expect(
       contractFormSchema.safeParse({ ...valid, amount: "0" }).success,
     ).toBe(false);
+  });
+
+  it("requires transfer_purpose for recycling", () => {
+    expect(
+      contractFormSchema.safeParse({ ...valid, transfer_purpose: "" }).success,
+    ).toBe(false);
+  });
+
+  it("accepts transport without transfer_purpose", () => {
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        contract_type: "transport",
+        transfer_purpose: "",
+        with_ownership_transfer: false,
+      }).success,
+    ).toBe(true);
   });
 });

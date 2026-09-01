@@ -7,6 +7,7 @@ import {
   createContract,
   updateContract,
   type Contract,
+  type ContractType,
 } from "../../../../entities/waste/contracts";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
@@ -25,6 +26,8 @@ type UseUpsertContractFormParams = {
   mode: "create" | "edit";
   contractId?: string;
   initial?: Contract | null;
+  defaultCounterpartyId?: string;
+  defaultContractType?: ContractType;
   onSaved: (contract: Contract, meta: { close: boolean }) => void;
 };
 
@@ -32,6 +35,8 @@ export function useUpsertContractForm({
   mode,
   contractId,
   initial,
+  defaultCounterpartyId,
+  defaultContractType,
   onSaved,
 }: UseUpsertContractFormParams) {
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +45,11 @@ export function useUpsertContractForm({
     resolver: zodResolver(contractFormSchema),
     defaultValues: initial
       ? toContractFormValues(initial)
-      : contractFormDefaultValues,
+      : {
+          ...contractFormDefaultValues,
+          counterparty_id: defaultCounterpartyId ?? "",
+          contract_type: defaultContractType ?? "recycling",
+        },
   });
 
   const createMutation = useMutation({

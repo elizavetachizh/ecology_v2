@@ -105,6 +105,8 @@ export function StandardForm({
               места учёта?{" "}
               <Link
                 to={routes.directories.units.list}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 Открыть структуру
@@ -150,9 +152,11 @@ export function StandardForm({
             Нормативы по отходам
           </h2>
           <p className="text-sm text-muted-foreground">
-            Пустой перечень при сохранении очищает список (полная замена).{" "}
+            Не нашли нужного отхода?{" "}
             <Link
               to={routes.directories.wastes.list}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               Справочник отходов

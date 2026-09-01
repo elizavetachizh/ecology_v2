@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import {
   UOM_LABEL,
   useWastesOptions,
-  type WasteBrief,
+  wasteLabel,
 } from "../../../../entities/waste/wastes";
 import {
   AsyncCombobox,
@@ -21,10 +21,6 @@ type PermitBurialWastesEditorProps = {
   tenantId: string | null;
   pending: boolean;
 };
-
-function wasteLabel(waste: Pick<WasteBrief, "waste_classifier">) {
-  return `${waste.waste_classifier.code} — ${waste.waste_classifier.name}`;
-}
 
 export function PermitBurialWastesEditor({
   form,
@@ -186,6 +182,10 @@ export function PermitBurialWastesEditor({
                       wastes.loading ? "Загрузка…" : "Ничего не найдено"
                     }
                     search={wastes.search}
+                    onRefresh={() => {
+                      void wastes.refetch();
+                    }}
+                    refreshing={wastes.refreshing}
                     setSearch={wastes.setSearch}
                     disabled={pending}
                     className="w-full"

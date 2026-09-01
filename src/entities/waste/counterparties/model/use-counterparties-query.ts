@@ -47,8 +47,10 @@ export function useCounterpartiesOptions({
   return {
     options: query.data ?? [],
     loading: canFetch && query.isLoading,
+    refreshing: canFetch && query.isFetching && !query.isLoading,
     error: query.error,
     search,
     setSearch,
+    refetch: query.refetch,
   };
 }
