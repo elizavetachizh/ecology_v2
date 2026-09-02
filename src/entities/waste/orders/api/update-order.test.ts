@@ -14,8 +14,12 @@ describe("updateOrder", () => {
     apiSendJsonMock.mockResolvedValue(orderFixture);
   });
 
-  it("patches number and date, tenant-scoped", async () => {
-    const body = { number: "13-ОД", date: "2024-02-01" };
+  it("patches number, start_date and unit_id, tenant-scoped", async () => {
+    const body = {
+      number: "13-ОД",
+      start_date: "2024-02-01",
+      unit_id: "unit-2",
+    };
     await expect(updateOrder("order-1", body)).resolves.toEqual(orderFixture);
 
     expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/mdm/orders/order-1", {

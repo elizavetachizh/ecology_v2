@@ -12,7 +12,6 @@ import {
   type OperationFormValues,
 } from "../../model/operation-form.schema";
 import { DocumentCombobox } from "../DocumentCombobox";
-import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
 import { routes } from "../../../../../shared/config/routes";
 
 const DOCUMENT_KIND_LABEL = {
@@ -41,7 +40,6 @@ export function TransferredOutFields({ pending }: TransferredOutFieldsProps) {
 
   return (
     <>
-      <TransferReceiptPurposeField pending={pending} />
       <Field>
         <p
           id="document-kind-label"

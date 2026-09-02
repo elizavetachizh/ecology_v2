@@ -14,14 +14,11 @@ describe("createOrder", () => {
     apiSendJsonMock.mockResolvedValue(orderFixture);
   });
 
-  it("posts create body with first state, tenant-scoped", async () => {
+  it("posts number, start_date and unit_id, tenant-scoped", async () => {
     const body = {
       number: "12-ОД",
-      date: "2024-01-15",
-      state: {
-        start_date: "2024-01-15",
-        items: [{ unit_id: "unit-1", person_id: "person-1" }],
-      },
+      start_date: "2024-01-15",
+      unit_id: "unit-1",
     };
     await expect(createOrder(body)).resolves.toEqual(orderFixture);
 
@@ -37,8 +34,8 @@ describe("createOrder", () => {
     const signal = new AbortController().signal;
     const body = {
       number: "12-ОД",
-      date: "2024-01-15",
-      state: { start_date: "2024-01-15", items: [] },
+      start_date: "2024-01-15",
+      unit_id: "unit-1",
     };
     await createOrder(body, signal);
 

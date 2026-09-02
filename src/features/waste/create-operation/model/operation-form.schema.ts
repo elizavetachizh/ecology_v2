@@ -58,11 +58,7 @@ export function isInternalTransferType(
 }
 
 export function needsTransferReceiptPurpose(type: OperationType | "") {
-  return (
-    isInternalTransferType(type) ||
-    type === "received_out" ||
-    type === "transferred_out"
-  );
+  return isInternalTransferType(type) || type === "received_out";
 }
 
 export const operationFormSchema = z

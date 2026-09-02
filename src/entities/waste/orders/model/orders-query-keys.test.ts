@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import { ordersQueryKeys } from "./orders-query-keys";
 
 describe("ordersQueryKeys", () => {
-  it("builds hierarchical list, detail, state and responsible keys", () => {
+  it("builds hierarchical list and detail keys", () => {
     const params = {
       limit: 50,
       offset: 0,
-      sort: "date" as const,
+      sort: "start_date" as const,
       order: "desc" as const,
+      status: "active" as const,
     };
 
     expect(ordersQueryKeys.all).toEqual(["mdm", "orders"]);
@@ -26,44 +27,6 @@ describe("ordersQueryKeys", () => {
       "detail",
       "tenant-1",
       "order-1",
-    ]);
-    expect(ordersQueryKeys.stateList("tenant-1", "order-1")).toEqual([
-      "mdm",
-      "orders",
-      "states",
-      "tenant-1",
-      "order-1",
-    ]);
-    expect(ordersQueryKeys.state("tenant-1", "order-1", "state-1")).toEqual([
-      "mdm",
-      "orders",
-      "states",
-      "tenant-1",
-      "order-1",
-      "state-1",
-    ]);
-    expect(
-      ordersQueryKeys.unitResponsibleOn("tenant-1", {
-        unitId: "unit-1",
-        on: "2024-06-01",
-      }),
-    ).toEqual([
-      "mdm",
-      "orders",
-      "unit-responsible",
-      "tenant-1",
-      "unit-1",
-      "2024-06-01",
-    ]);
-    expect(
-      ordersQueryKeys.unitResponsibleOn("tenant-1", { unitId: "unit-1" }),
-    ).toEqual([
-      "mdm",
-      "orders",
-      "unit-responsible",
-      "tenant-1",
-      "unit-1",
-      null,
     ]);
   });
 });

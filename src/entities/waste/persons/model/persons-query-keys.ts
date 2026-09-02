@@ -1,7 +1,4 @@
-import type {
-  GetPersonAssignmentsParams,
-  GetPersonsParams,
-} from "./persons.types";
+import type { GetPersonsParams } from "./persons.types";
 
 export const personsQueryKeys = {
   all: ["mdm", "persons"] as const,
@@ -11,15 +8,4 @@ export const personsQueryKeys = {
   details: () => [...personsQueryKeys.all, "detail"] as const,
   detail: (tenantId: string, id: string) =>
     [...personsQueryKeys.details(), tenantId, id] as const,
-  assignments: () => [...personsQueryKeys.all, "assignments"] as const,
-  assignmentList: (
-    tenantId: string,
-    params: Pick<GetPersonAssignmentsParams, "personId" | "on">,
-  ) =>
-    [
-      ...personsQueryKeys.assignments(),
-      tenantId,
-      params.personId,
-      params.on ?? null,
-    ] as const,
 };

@@ -9,9 +9,23 @@ import {
 } from "../../../../entities/waste/ttns";
 import { AsyncCombobox } from "../../../../shared/ui";
 import type { OperationDocumentKind } from "../model/operation-form.schema";
+import { formatDate } from "../../../../shared/lib/format-date";
+import {
+  TRANSFER_PURPOSE_LABEL,
+  type TransferPurpose,
+} from "../../../../entities/waste/contracts";
 
-function documentLabel(item: { number: string; date: string }) {
-  return `№${item.number} от ${item.date}`;
+type DocumentItem = {
+  id: string;
+  number: string;
+  date: string;
+  recycling_contract?: { transfer_purpose: TransferPurpose | null };
+};
+
+function documentLabel(
+  item: Pick<DocumentItem, "number" | "date" | "recycling_contract">,
+) {
+  return `${item.number} от ${formatDate(item.date)} · ${item.recycling_contract?.transfer_purpose ? TRANSFER_PURPOSE_LABEL[item.recycling_contract.transfer_purpose] : ""}`;
 }
 
 const COPY = {
@@ -26,8 +40,6 @@ const COPY = {
     "aria-label": "ТТН",
   },
 } as const;
-
-type DocumentItem = { id: string; number: string; date: string };
 
 type DocumentComboboxViewProps = {
   kind: OperationDocumentKind;
@@ -177,7 +189,9 @@ function TtnDocumentCombobox({
       value={value}
       fallbackDocument={fallbackDocument}
       disabled={disabled}
-      onChange={onChange} refetch={() => void query.refetch()} refreshing={query.refreshing}
+      onChange={onChange}
+      refetch={() => void query.refetch()}
+      refreshing={query.refreshing}
     />
   );
 }

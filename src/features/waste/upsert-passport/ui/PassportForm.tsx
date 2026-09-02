@@ -20,6 +20,7 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
+  DirectoryBreadcrumb,
   Field,
   FormField,
   Input,
@@ -106,7 +107,17 @@ export function PassportForm({
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
-        eyebrow="Отходы / Сопроводительные паспорта"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="Сопроводительные паспорта"
+            directoryTo={routes.waste.passports.list}
+            current={
+              mode === "create"
+                ? "Новый сопроводительный паспорт"
+                : `Паспорт ${initial?.number ?? ""}`
+            }
+          />
+        }
         title={
           mode === "create"
             ? "Новый сопроводительный паспорт"

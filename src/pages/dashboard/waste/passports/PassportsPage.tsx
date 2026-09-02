@@ -31,6 +31,7 @@ import {
   ConfirmDialog,
   DataTable,
   DataTablePagination,
+  DirectoryBreadcrumb,
   PageContextBar,
   TenantRequiredGate,
   toast,
@@ -159,6 +160,12 @@ export function PassportsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
+          eyebrow={
+            <DirectoryBreadcrumb
+              directoryLabel="Сопроводительные паспорта"
+              directoryTo={routes.waste.passports.list}
+            />
+          }
           title="Сопроводительные паспорта"
           description="Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан."
           actions={

@@ -9,6 +9,7 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
+  DirectoryBreadcrumb,
   FormField,
   Input,
   PageContextBar,
@@ -53,7 +54,17 @@ export function TtnForm({
       className="mx-auto max-w-4xl space-y-6"
     >
       <PageContextBar
-        eyebrow="Отходы / ТТН"
+        eyebrow={
+          <DirectoryBreadcrumb
+            directoryLabel="ТТН"
+            directoryTo={routes.waste.ttns.list}
+            current={
+              mode === "create"
+                ? "Новая ТТН"
+                : `ТТН ${initial?.number ?? ""}`
+            }
+          />
+        }
         title={
           mode === "create"
             ? "Новая товарно-транспортная накладная"

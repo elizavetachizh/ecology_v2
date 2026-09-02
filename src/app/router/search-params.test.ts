@@ -4,6 +4,7 @@ import { PassportTransportTypeValues } from "../../entities/waste/passports";
 import { TtnStatusValues } from "../../entities/waste/ttns";
 import { PermitStatusValues } from "../../entities/waste/permits";
 import { StandardStatusValues } from "../../entities/waste/standards";
+import { OrderStatusValues } from "../../entities/waste/orders";
 import {
   parseHomeSearch,
   parseRootSearch,
@@ -124,5 +125,13 @@ describe("standards search params", () => {
     expect(parseSearchEnum("active", StandardStatusValues)).toBe("active");
     expect(parseSearchEnum("inactive", StandardStatusValues)).toBe("inactive");
     expect(parseSearchEnum("draft", StandardStatusValues)).toBeUndefined();
+  });
+});
+
+describe("orders search params", () => {
+  it("parses status enum", () => {
+    expect(parseSearchEnum("active", OrderStatusValues)).toBe("active");
+    expect(parseSearchEnum("inactive", OrderStatusValues)).toBe("inactive");
+    expect(parseSearchEnum("draft", OrderStatusValues)).toBeUndefined();
   });
 });

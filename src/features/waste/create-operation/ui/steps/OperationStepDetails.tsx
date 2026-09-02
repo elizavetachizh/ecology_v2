@@ -5,7 +5,16 @@ import {
   OperationTypeValues,
 } from "../../../../../entities/waste/operations";
 import { useUnitInstructionWastesListQuery } from "../../../../../entities/waste/unit-instruction-waste";
-import { UOM_LABEL } from "../../../../../entities/waste/wastes";
+import {
+  flattenUnitTreePaths,
+  formatUnitPathLabel,
+  useUnitsTreeQuery,
+} from "../../../../../entities/waste/units";
+import {
+  HAZARD_CLASS_LABEL,
+  UOM_LABEL,
+  wasteLabel,
+} from "../../../../../entities/waste/wastes";
 import {
   Field,
   FieldDescription,
@@ -20,6 +29,7 @@ import {
   resetTypeSpecificFields,
 } from "../../model/operation-wizard";
 import { CurrentBalanceHint } from "../CurrentBalanceHint";
+import { OperationSelectionSummary } from "../OperationSelectionSummary";
 import { OperationTypeFields } from "../type-fields/OperationTypeFields";
 
 type OperationStepDetailsProps = {
@@ -42,6 +52,11 @@ export function OperationStepDetails({
     name: "waste_id",
   });
 
+  const units = useUnitsTreeQuery({
+    tenantId: activeTenantId,
+    params: { sort: "name", order: "asc" },
+  });
+
   const wastesQuery = useUnitInstructionWastesListQuery({
     tenantId: activeTenantId,
     scope: {
@@ -57,8 +72,29 @@ export function OperationStepDetails({
   );
   const selectedWaste = selectedBinding?.waste ?? null;
 
+  const selectedFromTree = flattenUnitTreePaths(units.tree, {
+    pod9Only: true,
+  }).find((item) => item.unit.id === unitId);
+  const brief = selectedBinding?.unit;
+  const selectedUnitLabel = selectedFromTree
+    ? formatUnitPathLabel(selectedFromTree.path)
+    : brief
+      ? brief.short_name
+        ? `${brief.name} (${brief.short_name})`
+        : brief.name
+      : undefined;
+
   return (
     <>
+      <OperationSelectionSummary
+        unitLabel={selectedUnitLabel}
+        wasteLabel={selectedWaste ? wasteLabel(selectedWaste) : undefined}
+        wasteMeta={
+          selectedWaste
+            ? `${HAZARD_CLASS_LABEL[selectedWaste.hazard_class]} · ${UOM_LABEL[selectedWaste.uom]}`
+            : undefined
+        }
+      />
       <CurrentBalanceHint
         tenantId={activeTenantId}
         unitId={unitId}

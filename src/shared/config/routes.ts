@@ -61,6 +61,7 @@ export const routes = {
     permits: crud(directoryPath("permits"), "permitId"),
     limits: { list: directoryPath("limits") },
     standards: crud(directoryPath("standards"), "standardId"),
+    orders: crud(directoryPath("orders"), "orderId"),
     persons: { list: directoryPath("persons") },
   },
   waste: {

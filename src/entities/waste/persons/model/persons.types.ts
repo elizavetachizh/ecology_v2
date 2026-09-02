@@ -15,7 +15,7 @@ export type Person = {
   updated_by: UserProfile;
 };
 
-/** Nested в приказах — без audit. */
+/** Nested в ответах — без audit. */
 export type PersonBrief = Pick<
   Person,
   "id" | "name" | "first_name" | "last_name" | "middle_name"
@@ -54,11 +54,6 @@ export type GetPersonsParams = {
   order?: PersonSortOrder;
   limit: number;
   offset: number;
-};
-
-export type GetPersonAssignmentsParams = {
-  personId: string;
-  on?: string;
 };
 
 export const DEFAULT_PERSONS_LIST_LIMIT = 50;

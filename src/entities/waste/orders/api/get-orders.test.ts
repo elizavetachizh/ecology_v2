@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiJson } from "../../../../shared/api/api-client";
 import { getOrders } from "./get-orders";
-import { orderListItemFixture } from "../model/order.fixture";
+import { orderFixture } from "../model/order.fixture";
 import type { OrderListResponse } from "../model/orders.types";
 
 vi.mock("../../../../shared/api/api-client", () => ({
@@ -14,7 +14,7 @@ const response: OrderListResponse = {
   total: 1,
   limit: 50,
   offset: 0,
-  items: [orderListItemFixture],
+  items: [orderFixture],
 };
 
 describe("getOrders", () => {
@@ -29,35 +29,38 @@ describe("getOrders", () => {
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/orders?limit=50&offset=0",
-      { signal: undefined, tenantScoped: true },
+      { method: "GET", tenantScoped: true, signal: undefined },
     );
   });
 
-  it("includes search, sort and order when provided", async () => {
+  it("includes filters, sort and order when provided", async () => {
     await getOrders({
       search: "12",
-      sort: "date",
+      status: "active",
+      unit_id: "unit-1",
+      sort: "start_date",
       order: "desc",
       limit: 20,
       offset: 10,
     });
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/mdm/orders?limit=20&offset=10&search=12&sort=date&order=desc",
-      { signal: undefined, tenantScoped: true },
+      "/api/v1/mdm/orders?limit=20&offset=10&search=12&status=active&unit_id=unit-1&sort=start_date&order=desc",
+      { method: "GET", tenantScoped: true, signal: undefined },
     );
   });
 
-  it("omits empty search from query string", async () => {
+  it("omits empty search and unit_id from query string", async () => {
     await getOrders({
       search: "",
+      unit_id: "",
       limit: 50,
       offset: 0,
     });
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/orders?limit=50&offset=0",
-      { signal: undefined, tenantScoped: true },
+      { method: "GET", tenantScoped: true, signal: undefined },
     );
   });
 
@@ -67,7 +70,7 @@ describe("getOrders", () => {
 
     expect(apiJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/orders?limit=50&offset=0",
-      { signal, tenantScoped: true },
+      { method: "GET", tenantScoped: true, signal },
     );
   });
 });

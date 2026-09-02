@@ -11,10 +11,16 @@ export function getOrders(
     offset: String(params.offset),
   });
   if (params.search) searchParams.set("search", params.search);
+  if (params.status) searchParams.set("status", params.status);
+  if (params.unit_id) searchParams.set("unit_id", params.unit_id);
   if (params.sort) searchParams.set("sort", params.sort);
   if (params.order) searchParams.set("order", params.order);
   return apiJson<OrderListResponse>(
     `${ordersCollectionPath()}?${searchParams}`,
-    { signal, tenantScoped: true },
+    {
+      method: "GET",
+      tenantScoped: true,
+      signal,
+    },
   );
 }

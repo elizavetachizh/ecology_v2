@@ -8,6 +8,11 @@ describe("routes", () => {
       new: "/directories/standards/new",
       detail: "/directories/standards/$standardId",
     });
+    expect(routes.directories.orders).toEqual({
+      list: "/directories/orders",
+      new: "/directories/orders/new",
+      detail: "/directories/orders/$orderId",
+    });
   });
 
   it("keeps domain key independent of URL slug shape", () => {

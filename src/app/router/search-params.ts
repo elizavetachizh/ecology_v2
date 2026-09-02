@@ -13,6 +13,10 @@ import type {
   StandardStatus,
 } from "../../entities/waste/standards";
 import type {
+  OrderSortField,
+  OrderStatus,
+} from "../../entities/waste/orders";
+import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
@@ -105,6 +109,11 @@ export type StandardsSearch = {
   order?: "asc" | "desc";
   limit?: number;
   offset?: number;
+};
+
+export type OrdersSearch = ListSearchParams<OrderSortField> & {
+  status?: OrderStatus;
+  unit_id?: string;
 };
 
 /** Главная: as-of остатки + выбранная цепочка для графика. */

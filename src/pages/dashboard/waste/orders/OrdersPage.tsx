@@ -4,20 +4,15 @@ import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
-  DEFAULT_TTNS_LIST_LIMIT,
-  deleteTtn,
-  ttnsQueryKeys,
-  useTtnsListQuery,
-  type Ttn,
-  type TtnSortField,
-} from "../../../../entities/waste/ttns";
-import { ttnDeleteErrorMessage } from "../../../../features/waste/upsert-ttn";
-import { formatDate } from "../../../../shared/lib/format-date";
+  DEFAULT_ORDERS_LIST_LIMIT,
+  deleteOrder,
+  ordersQueryKeys,
+  useOrdersListQuery,
+  type Order,
+  type OrderSortField,
+} from "../../../../entities/waste/orders";
+import { orderDeleteErrorMessage } from "../../../../features/waste/upsert-order";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  sortingFromSearch,
-  sortingToSearch,
-} from "../../../../shared/lib/sorting";
 import {
   Alert,
   AlertDescription,
@@ -31,59 +26,67 @@ import {
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
-import { ttnsColumns } from "./ttns-columns";
-import { TtnsFilters, type TtnsFiltersValue } from "./ui/ttns-filters";
+import {
+  sortingFromSearch,
+  sortingToSearch,
+} from "../../../../shared/lib/sorting";
+import { formatDate } from "../../../../shared/lib/format-date";
+import { ordersColumns } from "./orders-columns";
+import { OrdersFilters, type OrdersFiltersValue } from "./ui/orders-filters";
 import { routes } from "../../../../shared/config/routes";
 
-export function TtnsPage() {
-  const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: routes.waste.ttns.list });
-  const search = useSearch({ from: routes.waste.ttns.list });
+function unitLabel(unit: Order["unit"]) {
+  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
+}
 
-  const [deleting, setDeleting] = useState<Ttn | null>(null);
-  const columns = useMemo(() => ttnsColumns(setDeleting), []);
+export function OrdersPage() {
+  const { activeTenantId } = useTenant();
+  const navigate = useNavigate({ from: routes.directories.orders.list });
+  const search = useSearch({ from: routes.directories.orders.list });
+
+  const [deleting, setDeleting] = useState<Order | null>(null);
+
+  const columns = useMemo(() => ordersColumns(setDeleting), []);
 
   const listParams = useMemo(
     () => ({
       search: search.q || undefined,
       status: search.status,
       unit_id: search.unit_id,
-      recycling_contract_id: search.recycling_contract_id,
-      date_from: search.date_from,
-      date_to: search.date_to,
-      sort: search.sort ?? ("date" as const),
+      sort: search.sort ?? ("start_date" as const),
       order: search.order ?? ("desc" as const),
-      limit: search.limit ?? DEFAULT_TTNS_LIST_LIMIT,
+      limit: search.limit ?? DEFAULT_ORDERS_LIST_LIMIT,
       offset: search.offset ?? 0,
     }),
     [search],
   );
 
   const sorting = useMemo(
-    () => sortingFromSearch(search.sort ?? "date", search.order ?? "desc"),
+    () =>
+      sortingFromSearch(search.sort ?? "start_date", search.order ?? "desc"),
     [search.sort, search.order],
   );
 
-  const { items, total, limit, offset, loading, error } = useTtnsListQuery({
+  const { items, total, limit, offset, loading, error } = useOrdersListQuery({
     tenantId: activeTenantId,
     params: listParams,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteTtn(id),
+    mutationFn: (id: string) => deleteOrder(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ttnsQueryKeys.lists(),
+        queryKey: ordersQueryKeys.lists(),
       });
       setDeleting(null);
-      toast.success("ТТН успешно удалена");
+      toast.success("Приказ успешно удалён");
     },
-    onError: (err) => toast.error(ttnDeleteErrorMessage(err)),
+    onError: (err) => toast.error(orderDeleteErrorMessage(err)),
   });
 
   const patchSearch = (
-    patch: TtnsFiltersValue & {
-      sort?: TtnSortField | undefined;
+    patch: OrdersFiltersValue & {
+      sort?: OrderSortField | undefined;
       order?: "asc" | "desc" | undefined;
       offset?: number;
     },
@@ -95,9 +98,6 @@ export function TtnsPage() {
           "q" in patch ||
           "status" in patch ||
           "unit_id" in patch ||
-          "recycling_contract_id" in patch ||
-          "date_from" in patch ||
-          "date_to" in patch ||
           "sort" in patch ||
           "order" in patch
         ) {
@@ -111,38 +111,42 @@ export function TtnsPage() {
   if (error) {
     return (
       <Alert variant="error">
-        <AlertTitle>Не удалось загрузить ТТН</AlertTitle>
+        <AlertTitle>Не удалось загрузить приказы</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
   }
 
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="ТТН">
+    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="приказов">
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
           eyebrow={
             <DirectoryBreadcrumb
-              directoryLabel="ТТН"
-              directoryTo={routes.waste.ttns.list}
+              directoryLabel="Приказы"
+              directoryTo={routes.directories.orders.list}
             />
           }
-          title="Товарно-транспортные накладные"
-          description="ТТН не связан с сопроводительным паспортом — документы ведутся отдельно."
+          title="Приказы"
+          description="Приказы по подразделениям: номер и дата начала действия. Документ бессрочный."
           actions={
             <Button asChild size="sm">
-              <Link to={routes.waste.ttns.new}>
+              <Link to={routes.directories.orders.new}>
                 <Plus className="size-3.5" />
-                Создать ТТН
+                Создать приказ
               </Link>
             </Button>
           }
         />
 
-        <TtnsFilters
+        <OrdersFilters
           tenantId={activeTenantId}
-          values={search}
+          values={{
+            q: search.q,
+            status: search.status,
+            unit_id: search.unit_id,
+          }}
           onChange={patchSearch}
         />
 
@@ -156,12 +160,12 @@ export function TtnsPage() {
           onSortingChange={(next) => {
             const { sort, order } = sortingToSearch(next);
             patchSearch({
-              sort: (sort as TtnSortField | undefined) ?? undefined,
+              sort: (sort as OrderSortField | undefined) ?? undefined,
               order,
             });
           }}
-          emptyTitle="ТТН пока нет"
-          emptyDescription="Создайте накладную: номер, дата перевозки, единица и действующий договор утилизации."
+          emptyTitle="Приказов пока нет"
+          emptyDescription="Создайте первый приказ."
         />
         <DataTablePagination
           total={total}
@@ -177,12 +181,13 @@ export function TtnsPage() {
           onOpenChange={(open) => {
             if (!open) setDeleting(null);
           }}
-          title="Удалить ТТН?"
+          title="Удалить приказ?"
           confirmLabel="Удалить"
           description={
             <>
-              ТТН «{deleting?.number}» от {formatDate(deleting?.date ?? null)}{" "}
-              будет удалена.
+              Приказ «{deleting?.number}» подразделения «
+              {deleting ? unitLabel(deleting.unit) : ""}» от{" "}
+              {deleting ? formatDate(deleting.start_date) : ""} будет удалён.
             </>
           }
           onConfirm={() => {

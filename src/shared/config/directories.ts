@@ -68,6 +68,13 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: routes.directories.standards.list,
   },
   {
+    id: "orders",
+    title: "Приказы",
+    description:
+      "Приказы по подразделениям: номер и дата начала действия. Документ бессрочный.",
+    to: routes.directories.orders.list,
+  },
+  {
     id: "persons",
     title: "Ответственные",
     description: "Ответственные за экологическое мониторинг",

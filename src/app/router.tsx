@@ -36,6 +36,9 @@ import { EditPermitPage } from "../pages/dashboard/waste/permits/EditPermitPage"
 import { StandardsPage } from "../pages/dashboard/waste/standards/StandardsPage";
 import { CreateStandardPage } from "../pages/dashboard/waste/standards/CreateStandardPage";
 import { EditStandardPage } from "../pages/dashboard/waste/standards/EditStandardPage";
+import { OrdersPage } from "../pages/dashboard/waste/orders/OrdersPage";
+import { CreateOrderPage } from "../pages/dashboard/waste/orders/CreateOrderPage";
+import { EditOrderPage } from "../pages/dashboard/waste/orders/EditOrderPage";
 import { Pod9ReportPage } from "../pages/dashboard/reports/pod9";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
@@ -61,6 +64,7 @@ import {
   StandardSortFields,
   StandardStatusValues,
 } from "../entities/waste/standards";
+import { OrderSortFields, OrderStatusValues } from "../entities/waste/orders";
 import {
   PassportSortFields,
   PassportStatusValues,
@@ -91,6 +95,7 @@ import {
   type ContractsSearch,
   type PermitsSearch,
   type StandardsSearch,
+  type OrdersSearch,
   type WasteSourcesSearch,
   type WastesSearch,
   type PersonsSearch,
@@ -462,6 +467,35 @@ const directoriesEditStandardRoute = createRoute({
   component: EditStandardPage,
 });
 
+const directoriesOrdersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.orders.list,
+  validateSearch: (search: Record<string, unknown>): OrdersSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      status: parseSearchEnum(search.status, OrderStatusValues),
+      unit_id: parseSearchQuery(search.unit_id),
+      sort: parseSearchEnum(search.sort, OrderSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: OrdersPage,
+});
+
+const directoriesCreateOrderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.orders.new,
+  component: CreateOrderPage,
+});
+
+const directoriesEditOrderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.orders.detail,
+  component: EditOrderPage,
+});
+
 const directoriesInstructionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.directories.instructions.list,
@@ -548,6 +582,9 @@ const routeTree = rootRoute.addChildren([
   directoriesStandardsRoute,
   directoriesCreateStandardRoute,
   directoriesEditStandardRoute,
+  directoriesOrdersRoute,
+  directoriesCreateOrderRoute,
+  directoriesEditOrderRoute,
   directoriesInstructionsRoute,
   directoriesCreateInstructionRoute,
   directoriesEditInstructionRoute,

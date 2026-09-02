@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { personsQueryKeys } from "./persons-query-keys";
 
 describe("personsQueryKeys", () => {
-  it("builds hierarchical list, detail and assignment keys", () => {
+  it("builds hierarchical list and detail keys", () => {
     const params = {
       limit: 50,
       offset: 0,
@@ -27,21 +27,5 @@ describe("personsQueryKeys", () => {
       "tenant-1",
       "person-1",
     ]);
-    expect(
-      personsQueryKeys.assignmentList("tenant-1", {
-        personId: "person-1",
-        on: "2024-06-01",
-      }),
-    ).toEqual([
-      "mdm",
-      "persons",
-      "assignments",
-      "tenant-1",
-      "person-1",
-      "2024-06-01",
-    ]);
-    expect(
-      personsQueryKeys.assignmentList("tenant-1", { personId: "person-1" }),
-    ).toEqual(["mdm", "persons", "assignments", "tenant-1", "person-1", null]);
   });
 });

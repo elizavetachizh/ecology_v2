@@ -202,6 +202,10 @@ export function OperationCard({
             </dd>
           </div>
           <SummaryItem
+            label="Контрагент"
+            value={operation.counterparty?.name ?? "—"}
+          />
+          <SummaryItem
             label="Дата создания операции"
             value={formatDateTime(operation.created_at)}
           />
