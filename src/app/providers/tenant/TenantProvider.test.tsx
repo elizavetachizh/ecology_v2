@@ -15,8 +15,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getTenants, useTenant } from "../../../entities/tenant";
-import { getCurrentUser } from "../../../entities/user";
-import { currentUser } from "../../../entities/user";
+import { currentUser, getCurrentUser } from "../../../entities/user";
 import {
   clearAllActiveTenantIds,
   readActiveTenantId,
@@ -26,9 +25,14 @@ import { clearSessionState } from "../../../shared/auth/cleanup-session";
 import { parseRootSearch } from "../../router/search-params";
 import { TenantProvider } from "./TenantProvider";
 
-vi.mock("../../../entities/user", () => ({
-  getCurrentUser: vi.fn(),
-}));
+vi.mock("../../../entities/user", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../entities/user")>();
+  return {
+    ...actual,
+    getCurrentUser: vi.fn(),
+  };
+});
 
 vi.mock("../../../entities/tenant", async (importOriginal) => {
   const actual =
