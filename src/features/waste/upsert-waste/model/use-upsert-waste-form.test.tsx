@@ -74,11 +74,13 @@ describe("useUpsertWasteForm", () => {
     updateMock.mockReset();
     createMock.mockResolvedValue(waste);
     updateMock.mockResolvedValue(waste);
+    queryClient.clear();
     vi.spyOn(queryClient, "invalidateQueries").mockResolvedValue(undefined);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    queryClient.clear();
   });
 
   it("creates a waste and notifies onSaved", async () => {
@@ -120,9 +122,7 @@ describe("useUpsertWasteForm", () => {
       physical_state: "solid",
     });
 
-    await act(() =>
-      result.current.onSubmit(true, { ...values, uom: "kg" }),
-    );
+    await act(() => result.current.onSubmit(true, { ...values, uom: "kg" }));
 
     await waitFor(() =>
       expect(onSaved).toHaveBeenCalledWith(waste, { close: true }),
@@ -132,6 +132,11 @@ describe("useUpsertWasteForm", () => {
       uom: "kg",
     });
     expect(createMock).not.toHaveBeenCalled();
+    expect(
+      queryClient.getQueryData(
+        wastesQueryKeys.detail(waste.tenant_id, waste.id),
+      ),
+    ).toEqual(waste);
   });
 
   it("surfaces an API error on create", async () => {

@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  currentCalendarYear,
+  firstBurialPermitSelection,
   firstDashboardSelection,
   flattenDashboardBalance,
   formatBalanceAmount,
+  sumChartAmounts,
   summarizeDashboardBalance,
   toChartPoints,
   todayIsoDate,
   unitTitle,
   wasteTitle,
+  yearFromIsoDate,
 } from "./dashboard-view";
-import { dashboardBalanceFixture } from "./dashboard.fixture";
+import {
+  dashboardBalanceFixture,
+  dashboardBurialPermitFixture,
+} from "./dashboard.fixture";
 
 describe("todayIsoDate", () => {
   afterEach(() => {
@@ -127,5 +134,48 @@ describe("firstDashboardSelection", () => {
         },
       ]),
     ).toEqual({ unit_id: "u1", waste_id: "waste-1" });
+  });
+});
+
+describe("yearFromIsoDate", () => {
+  it("reads the year prefix", () => {
+    expect(yearFromIsoDate("2026-08-15", 2020)).toBe(2026);
+  });
+
+  it("falls back when the date is not ISO", () => {
+    expect(yearFromIsoDate("bad", 2024)).toBe(2024);
+  });
+});
+
+describe("currentCalendarYear", () => {
+  it("returns the local calendar year", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 1, 12, 0, 0));
+    expect(currentCalendarYear()).toBe(2026);
+    vi.useRealTimers();
+  });
+});
+
+describe("firstBurialPermitSelection", () => {
+  it("prefers the first non-zero waste on a permit", () => {
+    expect(firstBurialPermitSelection([dashboardBurialPermitFixture])).toEqual({
+      permit_id: "permit-1",
+      waste_id: "waste-1",
+    });
+  });
+
+  it("returns null when there are no rows", () => {
+    expect(firstBurialPermitSelection([])).toBeNull();
+  });
+});
+
+describe("sumChartAmounts", () => {
+  it("sums numeric point amounts", () => {
+    expect(
+      sumChartAmounts([
+        { date: "2026-01-31", amount: "5.000000" },
+        { date: "2026-02-28", amount: "3" },
+      ]),
+    ).toBe(8);
   });
 });

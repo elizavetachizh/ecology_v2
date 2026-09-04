@@ -57,11 +57,12 @@ export function useUpsertInstructionForm({
     mutationFn: (vars: { values: InstructionFormValues; close: boolean }) =>
       updateInstruction(instructionId!, toInstructionWriteBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        instructionsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: instructionsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: instructionsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

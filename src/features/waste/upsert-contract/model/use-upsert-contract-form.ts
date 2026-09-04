@@ -68,11 +68,12 @@ export function useUpsertContractForm({
     mutationFn: (vars: { values: ContractFormValues; close: boolean }) =>
       updateContract(contractId!, toContractUpdateBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        contractsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: contractsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: contractsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

@@ -12,10 +12,7 @@ import type {
   StandardSortField,
   StandardStatus,
 } from "../../entities/waste/standards";
-import type {
-  OrderSortField,
-  OrderStatus,
-} from "../../entities/waste/orders";
+import type { OrderSortField, OrderStatus } from "../../entities/waste/orders";
 import type {
   InstructionSortField,
   InstructionStatus,
@@ -39,6 +36,8 @@ import type { PersonSortField } from "../../entities/waste/persons";
 import {
   DASHBOARD_MONTHS_MAX,
   DASHBOARD_MONTHS_MIN,
+  DASHBOARD_YEAR_MAX,
+  DASHBOARD_YEAR_MIN,
 } from "../../entities/waste/dashboards";
 
 export type RouterContext = {
@@ -116,12 +115,15 @@ export type OrdersSearch = ListSearchParams<OrderSortField> & {
   unit_id?: string;
 };
 
-/** Главная: as-of остатки + выбранная цепочка для графика. */
+/** Главная: as-of остатки + выбранная цепочка для графика + захоронение. */
 export type HomeSearch = {
   on_date?: string;
   unit_id?: string;
   waste_id?: string;
   months?: number;
+  year?: number;
+  permit_id?: string;
+  permit_waste_id?: string;
 };
 
 export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
@@ -134,6 +136,13 @@ export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
       DASHBOARD_MONTHS_MIN,
       DASHBOARD_MONTHS_MAX,
     ),
+    year: parseSearchIntRange(
+      search.year,
+      DASHBOARD_YEAR_MIN,
+      DASHBOARD_YEAR_MAX,
+    ),
+    permit_id: parseSearchQuery(search.permit_id),
+    permit_waste_id: parseSearchQuery(search.permit_waste_id),
   };
 }
 

@@ -63,11 +63,12 @@ export function useUpsertTtnForm({
     mutationFn: (values: TtnFormValues) =>
       updateTtn(ttnId!, toTtnUpdateBody(values)),
     onSuccess: (updated) => {
+      queryClient.setQueryData(
+        ttnsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: ttnsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ttnsQueryKeys.details(),
       });
       onSaved(updated);
     },

@@ -14,7 +14,7 @@ import {
   unitFormSchema,
   type UnitFormValues,
 } from "./unit-form.schema";
-import { toUnitWriteBody } from "./map-unit-form";
+import { toUnitFormValues, toUnitWriteBody } from "./map-unit-form";
 
 type UseUpsertUnitFormParams = {
   mode: "create" | "edit";
@@ -29,17 +29,6 @@ type UseUpsertUnitFormParams = {
   initial?: Unit | null;
   onSaved: (unit: Unit, meta: { close: boolean }) => void;
 };
-
-function valuesFromUnit(unit: Unit): UnitFormValues {
-  return {
-    name: unit.name,
-    short_name: unit.short_name ?? "",
-    parent_id: unit.parent_id ?? "",
-    region_id: unit.region?.id,
-    district_id: unit.district?.id,
-    is_pod9: unit.is_pod9 ?? false,
-  };
-}
 
 export function useUpsertUnitForm({
   mode,
@@ -56,7 +45,7 @@ export function useUpsertUnitForm({
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitFormSchema),
     defaultValues: initial
-      ? valuesFromUnit(initial)
+      ? toUnitFormValues(initial)
       : {
           ...unitFormDefaultValues,
           parent_id: defaultParentId ?? "",
@@ -85,14 +74,15 @@ export function useUpsertUnitForm({
     mutationFn: (vars: { values: UnitFormValues; close: boolean }) =>
       updateUnit(unitId!, toUnitWriteBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        unitsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.lists(),
       });
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.trees(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: unitsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

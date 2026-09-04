@@ -38,7 +38,9 @@ export function useUpsertOrderForm({
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
-    defaultValues: initial ? toOrderFormValues(initial) : orderFormDefaultValues,
+    defaultValues: initial
+      ? toOrderFormValues(initial)
+      : orderFormDefaultValues,
   });
 
   const createMutation = useMutation({
@@ -57,11 +59,12 @@ export function useUpsertOrderForm({
     mutationFn: (vars: { values: OrderFormValues; close: boolean }) =>
       updateOrder(orderId!, toOrderUpdateBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        ordersQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: ordersQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: ordersQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

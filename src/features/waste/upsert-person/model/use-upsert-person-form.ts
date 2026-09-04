@@ -67,6 +67,10 @@ export function useUpsertPersonForm({
     mutationFn: (values: { values: PersonFormValues; close: boolean }) =>
       updatePerson(personId ?? initial!.id, toPersonWriteBody(values.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        personsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: personsQueryKeys.lists(),
       });

@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { HAZARD_CLASS_LABEL } from "../../../entities/waste/wastes";
 import type { UnitInstructionWaste } from "../../../entities/waste/unit-instruction-waste";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "../../../shared/ui";
+import { Alert, AlertDescription, AlertTitle } from "../../../shared/ui";
 import { routes } from "../../../shared/config/routes";
 
 type Pod9WastesHintProps = {
@@ -72,9 +68,8 @@ export function Pod9WastesHint({
           Отходы в отчёте
         </h3>
         <p className="text-sm text-muted-foreground">
-          {total} отходов — по одному листу на каждый. В строки попадут только
-          подтверждённые операции за период; остаток на дату окончания берётся с
-          сервера.
+          {total} отходов — по одному листу на каждый отход. В журнал попадут
+          только подтверждённые операции за период.
         </p>
       </div>
       <ul className="grid gap-1 text-sm">

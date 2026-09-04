@@ -14,7 +14,10 @@ import {
   counterpartyFormSchema,
   type CounterpartyFormValues,
 } from "./counterparty-form.schema";
-import { toCounterpartyWriteBody } from "./map-counterparty-form";
+import {
+  toCounterpartyFormValues,
+  toCounterpartyWriteBody,
+} from "./map-counterparty-form";
 import { counterpartyWriteErrorMessage } from "./counterparty-write-error";
 
 type UseUpsertCounterpartyFormParams = {
@@ -23,20 +26,6 @@ type UseUpsertCounterpartyFormParams = {
   initial?: Counterparty | null;
   onSaved: (counterparty: Counterparty, meta: { close: boolean }) => void;
 };
-
-export function toCounterpartyFormValues(
-  counterparty: Counterparty,
-): CounterpartyFormValues {
-  return {
-    name: counterparty.name,
-    full_name: counterparty.full_name ?? "",
-    unp: counterparty.unp ?? "",
-    address: counterparty.address ?? "",
-    contact: counterparty.contact ?? "",
-    is_individual: counterparty.is_individual,
-    is_active: counterparty.is_active,
-  };
-}
 
 export function useUpsertCounterpartyForm({
   mode,
@@ -73,11 +62,12 @@ export function useUpsertCounterpartyForm({
         toCounterpartyWriteBody(vars.values),
       ),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        counterpartiesQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: counterpartiesQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: counterpartiesQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

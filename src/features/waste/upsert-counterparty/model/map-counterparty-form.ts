@@ -1,4 +1,7 @@
-import type { CounterpartyCreate } from "../../../../entities/waste/counterparties";
+import type {
+  Counterparty,
+  CounterpartyCreate,
+} from "../../../../entities/waste/counterparties";
 import type { CounterpartyFormValues } from "./counterparty-form.schema";
 
 export function toCounterpartyWriteBody(
@@ -12,5 +15,19 @@ export function toCounterpartyWriteBody(
     contact: values.contact.trim() || null,
     is_individual: values.is_individual,
     is_active: values.is_active,
+  };
+}
+
+export function toCounterpartyFormValues(
+  counterparty: Counterparty,
+): CounterpartyFormValues {
+  return {
+    name: counterparty.name,
+    full_name: counterparty.full_name ?? "",
+    unp: counterparty.unp ?? "",
+    address: counterparty.address ?? "",
+    contact: counterparty.contact ?? "",
+    is_individual: counterparty.is_individual,
+    is_active: counterparty.is_active,
   };
 }

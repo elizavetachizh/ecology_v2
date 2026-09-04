@@ -59,11 +59,12 @@ export function useUpsertPermitForm({
     mutationFn: (vars: { values: PermitFormValues; close: boolean }) =>
       updatePermit(permitId!, toPermitUpdateBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        permitsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: permitsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: permitsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },

@@ -57,11 +57,12 @@ export function useUpsertWasteSourceForm({
     mutationFn: (values: WasteSourceFormValues) =>
       updateWasteSource(initial!.id, { name: values.name }),
     onSuccess: (updated) => {
+      queryClient.setQueryData(
+        wasteSourcesQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: wasteSourcesQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: wasteSourcesQueryKeys.details(),
       });
       onSaved(updated);
     },

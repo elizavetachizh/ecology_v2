@@ -98,7 +98,7 @@ function CreateOperationModalForm({
   return (
     <FormProvider {...form}>
       <ModalContent
-        className="max-w-xl"
+        className="max-w-2xl"
         showClose={!pending}
         onEscapeKeyDown={(event) => {
           if (pending) event.preventDefault();

@@ -26,5 +26,30 @@ describe("dashboardsQueryKeys", () => {
       "tenant-1",
       statParams,
     ]);
+
+    const burialParams = { year: 2026 };
+    const burialStatParams = {
+      year: 2026,
+      permit_id: "permit-1",
+      waste_id: "waste-1",
+    };
+    expect(dashboardsQueryKeys.burialPermits()).toEqual([
+      "dashboards",
+      "burial-permits",
+    ]);
+    expect(dashboardsQueryKeys.burialPermit("tenant-1", burialParams)).toEqual([
+      "dashboards",
+      "burial-permits",
+      "tenant-1",
+      burialParams,
+    ]);
+    expect(
+      dashboardsQueryKeys.burialPermitStat("tenant-1", burialStatParams),
+    ).toEqual([
+      "dashboards",
+      "burial-permit-stat",
+      "tenant-1",
+      burialStatParams,
+    ]);
   });
 });

@@ -56,6 +56,7 @@ describe("OperationWastePicker", () => {
     expect(link.getAttribute("href")).toContain("unit-1");
     expect(link.getAttribute("href")).toContain("instructionId=ins-1");
     expect(link.getAttribute("href")).toContain("tenant=tenant-1");
+    expect(screen.getByRole("combobox", { name: "Отход" })).toBeInTheDocument();
   });
 
   it("links to the unit card when no wastes are bound", () => {

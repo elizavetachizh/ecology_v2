@@ -16,9 +16,13 @@ import {
 import { currentUser } from "../../entities/user";
 import { getDashboardBalance } from "../../entities/waste/dashboards";
 import { getDashboardBalanceStat } from "../../entities/waste/dashboards";
+import { getDashboardBurialPermits } from "../../entities/waste/dashboards";
+import { getDashboardBurialPermitStat } from "../../entities/waste/dashboards";
 import {
   dashboardBalanceFixture,
   dashboardBalanceStatFixture,
+  dashboardBurialPermitFixture,
+  dashboardBurialPermitStatFixture,
 } from "../../entities/waste/dashboards/model/dashboard.fixture";
 import { HomePage } from "./HomePage";
 
@@ -43,8 +47,26 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  "../../entities/waste/dashboards/api/get-dashboard-burial-permits",
+  () => ({
+    getDashboardBurialPermits: vi.fn(),
+  }),
+);
+
+vi.mock(
+  "../../entities/waste/dashboards/api/get-dashboard-burial-permit-stat",
+  () => ({
+    getDashboardBurialPermitStat: vi.fn(),
+  }),
+);
+
 const getDashboardBalanceMock = vi.mocked(getDashboardBalance);
 const getDashboardBalanceStatMock = vi.mocked(getDashboardBalanceStat);
+const getDashboardBurialPermitsMock = vi.mocked(getDashboardBurialPermits);
+const getDashboardBurialPermitStatMock = vi.mocked(
+  getDashboardBurialPermitStat,
+);
 
 const user = currentUser({ email: null });
 
@@ -97,19 +119,30 @@ describe("HomePage", () => {
     getDashboardBalanceStatMock.mockReset();
     getDashboardBalanceMock.mockResolvedValue([dashboardBalanceFixture]);
     getDashboardBalanceStatMock.mockResolvedValue(dashboardBalanceStatFixture);
+    getDashboardBurialPermitsMock.mockReset();
+    getDashboardBurialPermitStatMock.mockReset();
+    getDashboardBurialPermitsMock.mockResolvedValue([
+      dashboardBurialPermitFixture,
+    ]);
+    getDashboardBurialPermitStatMock.mockResolvedValue(
+      dashboardBurialPermitStatFixture,
+    );
   });
 
   it("asks to pick an organization when tenant is missing", () => {
     renderPage(noTenantValue);
     expect(screen.getByText("Выберите организацию")).toBeInTheDocument();
     expect(getDashboardBalanceMock).not.toHaveBeenCalled();
+    expect(getDashboardBurialPermitsMock).not.toHaveBeenCalled();
   });
 
   it("loads the as-of snapshot and the first series", async () => {
     renderPage();
 
     expect(await screen.findByText("Остатки отходов")).toBeInTheDocument();
-    expect(await screen.findByText("Test waste")).toBeInTheDocument();
+    expect(
+      (await screen.findAllByText("Test waste")).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText("Подразделений")).toBeInTheDocument();
     expect(screen.getByText("Позиций")).toBeInTheDocument();
 
@@ -130,13 +163,29 @@ describe("HomePage", () => {
         expect.any(AbortSignal),
       );
     });
+    expect(await screen.findByText("Захоронение")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getDashboardBurialPermitsMock).toHaveBeenCalledWith(
+        { year: 2026 },
+        expect.any(AbortSignal),
+      );
+    });
+    await waitFor(() => {
+      expect(getDashboardBurialPermitStatMock).toHaveBeenCalledWith(
+        {
+          year: 2026,
+          permit_id: "permit-1",
+          waste_id: "waste-1",
+        },
+        expect.any(AbortSignal),
+      );
+    });
   });
 
   it("writes the clicked waste to search params", async () => {
     renderPage();
-    await screen.findByText("Zero waste");
-
-    fireEvent.click(screen.getByText("Zero waste"));
+    const zeroRows = await screen.findAllByText("Zero waste");
+    fireEvent.click(zeroRows[0]!);
 
     expect(navigateMock).toHaveBeenCalled();
     const updater = navigateMock.mock.calls[0]![0].search as (prev: {
@@ -146,6 +195,22 @@ describe("HomePage", () => {
       on_date: "2026-08-15",
       unit_id: "unit-1",
       waste_id: "waste-2",
+    });
+  });
+
+  it("writes the clicked burial waste to search params", async () => {
+    renderPage();
+    const zeroRows = await screen.findAllByText("Zero waste");
+    fireEvent.click(zeroRows[1]!);
+
+    expect(navigateMock).toHaveBeenCalled();
+    const updater = navigateMock.mock.calls[0]![0].search as (prev: {
+      on_date?: string;
+    }) => unknown;
+    expect(updater({ on_date: "2026-08-15" })).toEqual({
+      on_date: "2026-08-15",
+      permit_id: "permit-1",
+      permit_waste_id: "waste-2",
     });
   });
 

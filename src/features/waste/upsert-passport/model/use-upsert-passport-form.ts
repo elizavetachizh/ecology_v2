@@ -64,11 +64,12 @@ export function useUpsertPassportForm({
     mutationFn: (values: PassportFormValues) =>
       updatePassport(passportId!, toPassportUpdateBody(values)),
     onSuccess: (updated) => {
+      queryClient.setQueryData(
+        passportsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: passportsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: passportsQueryKeys.details(),
       });
       onSaved(updated);
     },

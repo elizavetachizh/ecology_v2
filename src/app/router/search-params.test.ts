@@ -36,6 +36,9 @@ describe("parseHomeSearch", () => {
       unit_id: "unit-1",
       waste_id: "waste-1",
       months: 12,
+      year: undefined,
+      permit_id: undefined,
+      permit_waste_id: undefined,
     });
   });
 
@@ -50,6 +53,27 @@ describe("parseHomeSearch", () => {
       unit_id: undefined,
       waste_id: undefined,
       months: undefined,
+      year: undefined,
+      permit_id: undefined,
+      permit_waste_id: undefined,
+    });
+  });
+
+  it("parses burial year and permit selection", () => {
+    expect(
+      parseHomeSearch({
+        year: "2026",
+        permit_id: "permit-1",
+        permit_waste_id: "waste-1",
+      }),
+    ).toEqual({
+      on_date: undefined,
+      unit_id: undefined,
+      waste_id: undefined,
+      months: undefined,
+      year: 2026,
+      permit_id: "permit-1",
+      permit_waste_id: "waste-1",
     });
   });
 });

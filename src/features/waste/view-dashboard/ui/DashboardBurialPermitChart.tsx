@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -9,24 +9,21 @@ import {
   YAxis,
 } from "recharts";
 import {
-  DASHBOARD_MONTHS_PRESETS,
   formatBalanceAmount,
+  sumChartAmounts,
   toChartPoints,
   unitTitle,
   wasteTitle,
-  type DashboardBalanceStat,
+  type DashboardBurialPermitStat,
 } from "../../../../entities/waste/dashboards";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
-import { Select } from "../../../../shared/ui";
 
-type DashboardBalanceChartProps = {
-  stat: DashboardBalanceStat | null;
+type DashboardBurialPermitChartProps = {
+  stat: DashboardBurialPermitStat | null;
   loading?: boolean;
   error?: Error | null;
-  months: number;
-  onMonthsChange: (months: number) => void;
   selected: boolean;
 };
 
@@ -38,54 +35,26 @@ function ChartFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function monthOptions(months: number): number[] {
-  if (DASHBOARD_MONTHS_PRESETS.some((preset) => preset === months)) {
-    return [...DASHBOARD_MONTHS_PRESETS];
-  }
-  return [...DASHBOARD_MONTHS_PRESETS, months].sort((a, b) => a - b);
-}
-
 function ChartHeader({
   title,
   description,
   amount,
-  months,
-  onMonthsChange,
 }: {
   title: string;
   description?: string;
   amount?: string;
-  months: number;
-  onMonthsChange: (months: number) => void;
 }) {
   return (
-    <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-      <div className="min-w-0 space-y-1">
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        ) : null}
-        {amount ? (
-          <p className="text-2xl font-semibold tabular-nums tracking-tight">
-            {amount}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">месяцев</span>
-        <Select
-          aria-label="Число точек графика"
-          className="w-20"
-          value={String(months)}
-          onChange={(event) => onMonthsChange(Number(event.target.value))}
-        >
-          {monthOptions(months).map((preset) => (
-            <option key={preset} value={preset}>
-              {preset}
-            </option>
-          ))}
-        </Select>
-      </div>
+    <div className="mb-3 min-w-0 space-y-1">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      {description ? (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      ) : null}
+      {amount ? (
+        <p className="text-2xl font-semibold tabular-nums tracking-tight">
+          {amount}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -106,7 +75,7 @@ function tooltipValue(payload: unknown): string | number | undefined {
   return undefined;
 }
 
-function BalanceTooltip({
+function BurialTooltip({
   active,
   label,
   payload,
@@ -129,28 +98,24 @@ function BalanceTooltip({
   );
 }
 
-export function DashboardBalanceChart({
+export function DashboardBurialPermitChart({
   stat,
   loading = false,
   error = null,
-  months,
-  onMonthsChange,
   selected,
-}: DashboardBalanceChartProps) {
+}: DashboardBurialPermitChartProps) {
   const points = stat ? toChartPoints(stat.points) : [];
   const uom = stat ? UOM_LABEL[stat.waste.uom] : "";
-  const last = points[points.length - 1];
+  const yearTotal = stat ? sumChartAmounts(stat.points) : 0;
 
   if (!selected) {
     return (
       <ChartFrame>
         <ChartHeader
-          title="Динамика остатка"
-          description="Выберите отход в таблице, чтобы увидеть график."
-          months={months}
-          onMonthsChange={onMonthsChange}
+          title="Вывоз на захоронение"
+          description="Выберите отход в таблице, чтобы увидеть помесячный факт."
         />
-        <ChartEmpty>Нет выбранной пары подразделение / отход.</ChartEmpty>
+        <ChartEmpty>Нет выбранной пары разрешение / отход.</ChartEmpty>
       </ChartFrame>
     );
   }
@@ -159,14 +124,10 @@ export function DashboardBalanceChart({
     const notFound = error instanceof ApiError && error.status === 404;
     return (
       <ChartFrame>
-        <ChartHeader
-          title="Динамика остатка"
-          months={months}
-          onMonthsChange={onMonthsChange}
-        />
+        <ChartHeader title="Вывоз на захоронение" />
         <ChartEmpty>
           {notFound
-            ? "Подразделение или отход не найдены в организации."
+            ? "Разрешение или отход не найдены в организации."
             : error.message}
         </ChartEmpty>
       </ChartFrame>
@@ -176,11 +137,7 @@ export function DashboardBalanceChart({
   if (loading && !stat) {
     return (
       <ChartFrame>
-        <ChartHeader
-          title="Динамика остатка"
-          months={months}
-          onMonthsChange={onMonthsChange}
-        />
+        <ChartHeader title="Вывоз на захоронение" />
         <ChartEmpty>Загрузка…</ChartEmpty>
       </ChartFrame>
     );
@@ -189,27 +146,25 @@ export function DashboardBalanceChart({
   return (
     <ChartFrame>
       <ChartHeader
-        title="Динамика остатка"
+        title="Вывоз на захоронение"
         description={
           stat
-            ? `${unitTitle(stat.unit)} · ${wasteTitle(stat.waste)}`
+            ? `${stat.permit.number} · ${unitTitle(stat.permit.unit)} · ${wasteTitle(stat.waste)}`
             : undefined
         }
         amount={
-          last
-            ? `${formatBalanceAmount(String(last.amount))} ${uom}`
+          stat
+            ? `${formatBalanceAmount(String(yearTotal))} / ${formatBalanceAmount(stat.limit)} ${uom}`
             : undefined
         }
-        months={months}
-        onMonthsChange={onMonthsChange}
       />
       <div
         className="h-72 w-full min-w-0"
         role="img"
-        aria-label="Динамика остатка по месяцам"
+        aria-label="Вывоз на захоронение по месяцам"
       >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
+          <BarChart
             data={points}
             margin={{ top: 8, right: 8, left: 4, bottom: 0 }}
           >
@@ -237,9 +192,9 @@ export function DashboardBalanceChart({
               axisLine={false}
             />
             <Tooltip
-              cursor={{ stroke: "var(--chart-3)", strokeDasharray: "3 3" }}
+              cursor={{ fill: "var(--muted)", fillOpacity: 0.35 }}
               content={(props) => (
-                <BalanceTooltip
+                <BurialTooltip
                   active={props.active}
                   label={props.label}
                   payload={props.payload}
@@ -247,18 +202,13 @@ export function DashboardBalanceChart({
                 />
               )}
             />
-            <Area
-              type="monotone"
+            <Bar
               dataKey="amount"
-              stroke="var(--chart-3)"
-              fill="var(--chart-1)"
-              fillOpacity={0.35}
-              strokeWidth={2}
-              dot={{ r: 3, fill: "var(--chart-3)", strokeWidth: 0 }}
-              activeDot={{ r: 5 }}
+              fill="var(--chart-3)"
+              radius={[4, 4, 0, 0]}
               isAnimationActive={false}
             />
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </ChartFrame>

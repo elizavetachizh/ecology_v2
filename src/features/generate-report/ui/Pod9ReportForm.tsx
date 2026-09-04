@@ -266,7 +266,7 @@ export function Pod9ReportForm() {
 
         <FormField
           htmlFor="start_date"
-          label="Начало периода"
+          label="Начало периода отчёта"
           required
           error={errors.start_date?.message}
         >
@@ -281,7 +281,7 @@ export function Pod9ReportForm() {
 
         <FormField
           htmlFor="end_date"
-          label="Конец периода"
+          label="Конец периода отчёта"
           required
           error={errors.end_date?.message}
         >
@@ -309,10 +309,6 @@ export function Pod9ReportForm() {
           <AlertDescription>{downloadError}</AlertDescription>
         </Alert>
       ) : null}
-
-      <p className="text-sm text-muted-foreground">
-        Предпросмотр — PDF; для работы в Excel скачайте xlsx.
-      </p>
 
       <div className="flex flex-wrap items-center gap-2">
         <Button

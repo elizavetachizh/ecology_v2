@@ -59,11 +59,12 @@ export function useUpsertStandardForm({
     mutationFn: (vars: { values: StandardFormValues; close: boolean }) =>
       updateStandard(standardId!, toStandardUpdateBody(vars.values)),
     onSuccess: (updated, vars) => {
+      queryClient.setQueryData(
+        standardsQueryKeys.detail(updated.tenant_id, updated.id),
+        updated,
+      );
       void queryClient.invalidateQueries({
         queryKey: standardsQueryKeys.lists(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: standardsQueryKeys.details(),
       });
       onSaved(updated, { close: vars.close });
     },
