@@ -13,7 +13,7 @@ import {
   type Tenant,
   type TenantContextValue,
 } from "../../../entities/tenant";
-import type { CurrentUser } from "../../../entities/user";
+import { currentUser } from "../../../entities/user";
 import { Pod9ReportForm } from "./Pod9ReportForm";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -65,15 +65,7 @@ vi.mock("../api/fetchPod9Report", () => ({
   fetchPod9Report: (...args: unknown[]) => fetchMock(...args),
 }));
 
-const user: CurrentUser = {
-  id: 1,
-  realm: "mingas",
-  uuid: "user-id",
-  username: "testuser",
-  email: null,
-  roles: ["operator"],
-  issuer: "https://auth.example.com/realms/mingas",
-};
+const user = currentUser({ email: null });
 
 const tenant: Tenant = {
   id: "tenant-1",

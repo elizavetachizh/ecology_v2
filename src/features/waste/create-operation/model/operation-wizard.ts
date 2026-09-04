@@ -52,6 +52,7 @@ export function resetTypeSpecificFields(
 export function resetAfterUnitChange(
   setValue: UseFormSetValue<OperationFormValues>,
 ) {
+  setValue("instruction_id", "");
   setValue("waste_id", "");
   setValue("unit_side_id", "");
   resetWasteDependentFields(setValue);

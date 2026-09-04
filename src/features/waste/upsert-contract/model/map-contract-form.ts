@@ -24,17 +24,21 @@ export function toContractWriteBody(
     contract_type: values.contract_type,
     status: values.status,
     counterparty_id: values.counterparty_id,
+    counterparty_address: emptyToNull(values.counterparty_address),
+    counterparty_contact: emptyToNull(values.counterparty_contact),
     amount: emptyToNull(values.amount),
     with_ownership_transfer: isRecycling
       ? values.with_ownership_transfer
       : false,
     transfer_purpose: isRecycling ? values.transfer_purpose || null : null,
-    wastes: values.wastes
-      .filter((item) => item.waste_id)
-      .map((item) => ({
-        waste_id: item.waste_id,
-        cost_per_unit: emptyToNull(item.cost_per_unit),
-      })),
+    wastes: isRecycling
+      ? values.wastes
+          .filter((item) => item.waste_id)
+          .map((item) => ({
+            waste_id: item.waste_id,
+            cost_per_unit: emptyToNull(item.cost_per_unit),
+          }))
+      : [],
   };
 }
 
@@ -53,6 +57,8 @@ export function toContractFormValues(contract: Contract): ContractFormValues {
     contract_type: contract.contract_type,
     status: contract.status,
     counterparty_id: contract.counterparty_id,
+    counterparty_address: contract.counterparty_address ?? "",
+    counterparty_contact: contract.counterparty_contact ?? "",
     amount: contract.amount ?? "",
     with_ownership_transfer: contract.with_ownership_transfer,
     transfer_purpose: contract.transfer_purpose ?? "",

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiJson } from "../../../shared/api/api-client";
 import { getCurrentUser } from "./get-current-user";
-import type { CurrentUser } from "../model/user.types";
+import { currentUserFixture } from "../model/user.fixture";
 
 vi.mock("../../../shared/api/api-client", () => ({
   apiJson: vi.fn(),
@@ -9,23 +9,13 @@ vi.mock("../../../shared/api/api-client", () => ({
 
 const apiJsonMock = vi.mocked(apiJson);
 
-const user: CurrentUser = {
-  id: 1,
-  realm: "tenant-01",
-  uuid: "user-id",
-  username: "testuser",
-  email: "test@example.com",
-  roles: ["operator"],
-  issuer: "https://auth.example.com/realms/tenant-01",
-};
-
 describe("getCurrentUser", () => {
   beforeEach(() => {
-    apiJsonMock.mockResolvedValue(user);
+    apiJsonMock.mockResolvedValue(currentUserFixture);
   });
 
   it("requests /me without tenant scope", async () => {
-    await expect(getCurrentUser()).resolves.toEqual(user);
+    await expect(getCurrentUser()).resolves.toEqual(currentUserFixture);
 
     expect(apiJsonMock).toHaveBeenCalledWith("/api/v1/me", {
       signal: undefined,

@@ -15,14 +15,7 @@ import {
   UOM_LABEL,
   wasteLabel,
 } from "../../../../../entities/waste/wastes";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  Input,
-  Select,
-} from "../../../../../shared/ui";
+import { FormField, Input, Select } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 import {
   UIW_LIST_PARAMS,
@@ -34,13 +27,9 @@ import { OperationTypeFields } from "../type-fields/OperationTypeFields";
 
 type OperationStepDetailsProps = {
   pending: boolean;
-  instructionId: string | undefined;
 };
 
-export function OperationStepDetails({
-  pending,
-  instructionId,
-}: OperationStepDetailsProps) {
+export function OperationStepDetails({ pending }: OperationStepDetailsProps) {
   const { activeTenantId } = useTenant();
   const {
     register,
@@ -50,6 +39,9 @@ export function OperationStepDetails({
   const unitId = useWatch<OperationFormValues, "unit_id">({ name: "unit_id" });
   const wasteId = useWatch<OperationFormValues, "waste_id">({
     name: "waste_id",
+  });
+  const instructionId = useWatch<OperationFormValues, "instruction_id">({
+    name: "instruction_id",
   });
 
   const units = useUnitsTreeQuery({
@@ -103,10 +95,12 @@ export function OperationStepDetails({
         transportUnit={selectedBinding?.transport_unit}
       />
 
-      <Field>
-        <FieldLabel htmlFor="operation-type" required>
-          Тип операции
-        </FieldLabel>
+      <FormField
+        error={errors.operation_type?.message}
+        htmlFor="operation-type"
+        required
+        label="Тип операции"
+      >
         <Select
           id="operation-type"
           className="w-full"
@@ -125,8 +119,7 @@ export function OperationStepDetails({
             </option>
           ))}
         </Select>
-        <FieldError>{errors.operation_type?.message}</FieldError>
-      </Field>
+      </FormField>
 
       <OperationTypeFields
         pending={pending}
@@ -134,11 +127,13 @@ export function OperationStepDetails({
         bindingSources={selectedBinding?.waste_sources ?? []}
       />
 
-      <Field>
-        <FieldLabel htmlFor="amount" required>
-          Количество
-          {selectedWaste ? ` (${UOM_LABEL[selectedWaste.uom]})` : ""}
-        </FieldLabel>
+      <FormField
+        error={errors.amount?.message}
+        htmlFor="amount"
+        required
+        label={`Количество ${selectedWaste ? ` (${UOM_LABEL[selectedWaste.uom]})` : ""}`}
+        description={"Число больше 0, до 6 знаков после запятой."}
+      >
         <Input
           id="amount"
           inputMode="decimal"
@@ -148,11 +143,7 @@ export function OperationStepDetails({
           aria-invalid={Boolean(errors.amount)}
           {...register("amount")}
         />
-        <FieldDescription>
-          Число больше 0, до 6 знаков после запятой.
-        </FieldDescription>
-        <FieldError>{errors.amount?.message}</FieldError>
-      </Field>
+      </FormField>
     </>
   );
 }

@@ -11,6 +11,7 @@ export type Counterparty = {
   full_name: string | null;
   unp: string | null;
   address: string | null;
+  contact: string | null;
   is_active: boolean;
   is_individual: boolean;
   created_at: string;
@@ -26,6 +27,7 @@ export type CounterpartyCreate = {
   full_name?: string | null;
   unp?: string | null;
   address?: string | null;
+  contact?: string | null;
   is_active?: boolean;
   is_individual?: boolean;
 };

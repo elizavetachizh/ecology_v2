@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import { useTenant } from "../../../entities/tenant";
 import { can } from "../../../shared/auth/permissions";
-import { useAuth } from "../../../shared/auth/auth-context";
 
 type CanProps = {
   permission: string;
@@ -9,6 +9,6 @@ type CanProps = {
 };
 
 export function Can({ permission, children, fallback = null }: CanProps) {
-  const { roles } = useAuth();
-  return can(roles, permission) ? children : fallback;
+  const { user } = useTenant();
+  return can(user.roles, permission) ? children : fallback;
 }

@@ -15,7 +15,7 @@ import {
 } from "../../../../entities/waste/contracts";
 import {
   contractDeleteErrorMessage,
-  contractWriteErrorMessage,
+  contractStatusErrorMessage,
 } from "../../../../features/waste/upsert-contract";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
@@ -36,6 +36,7 @@ import {
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { contractsColumns } from "./contracts-columns";
+import { hasContractsListFilters } from "./ui/has-contracts-list-filters";
 import {
   ContractsFilters,
   type ContractsFiltersValue,
@@ -65,7 +66,7 @@ export function ContractsPage() {
           : "Договор помечен как действующий",
       );
     },
-    onError: (err) => toast.error(contractWriteErrorMessage(err)),
+    onError: (err) => toast.error(contractStatusErrorMessage(err)),
   });
 
   const columns = useMemo(
@@ -96,6 +97,8 @@ export function ContractsPage() {
       sortingFromSearch(search.sort ?? "start_date", search.order ?? "desc"),
     [search.sort, search.order],
   );
+
+  const hasFilters = hasContractsListFilters(search);
 
   const { items, total, limit, offset, loading, error } = useContractsListQuery(
     {
@@ -200,8 +203,12 @@ export function ContractsPage() {
               order,
             });
           }}
-          emptyTitle="Договоров пока нет"
-          emptyDescription="Создайте свой первый договор."
+          emptyTitle={hasFilters ? "Ничего не найдено" : "Договоров пока нет"}
+          emptyDescription={
+            hasFilters
+              ? "Измените фильтры или сбросьте поиск."
+              : "Создайте свой первый договор."
+          }
         />
         <DataTablePagination
           total={total}

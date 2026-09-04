@@ -1,11 +1,6 @@
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
-import {
-  UOM_LABEL,
-  useWastesOptions,
-  WasteSelect,
-  type WasteBrief,
-} from "../../../../entities/waste/wastes";
+import { UOM_LABEL, WasteSelect } from "../../../../entities/waste/wastes";
 import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
 import type {
   UnitInstructionWaste,
@@ -17,10 +12,7 @@ import {
   AlertTitle,
   Badge,
   Button,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
+  FormField,
   Input,
   Modal,
   ModalContent,
@@ -93,7 +85,6 @@ function BindUiwModalForm({
     formState: { errors },
   } = form;
 
-  const wastes = useWastesOptions({ tenantId, enabled: true });
   const sources = useWasteSourcesOptions({
     tenantId,
     enabled: true,
@@ -101,14 +92,6 @@ function BindUiwModalForm({
   });
 
   const selectedWasteId = form.watch("waste_id");
-  const selectedWaste =
-    wastes.options.find((item) => item.id === selectedWasteId) ??
-    (initial?.waste_id === selectedWasteId
-      ? ({
-          id: initial.waste.id,
-          waste_classifier: initial.waste.waste_classifier,
-        } as WasteBrief)
-      : null);
 
   return (
     <ModalContent className="max-w-lg">
@@ -131,10 +114,26 @@ function BindUiwModalForm({
             </Alert>
           ) : null}
 
-          <Field>
-            <FieldLabel htmlFor="waste_id" required>
-              Отход
-            </FieldLabel>
+          <FormField
+            htmlFor="waste_id"
+            label="Отход"
+            required
+            error={errors.waste_id?.message}
+            description={
+              <>
+                Нет нужного отхода?{" "}
+                <Link
+                  to={routes.directories.wastes.new}
+                  search={tenantId ? { tenant: tenantId } : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
+          >
             <Controller
               name="waste_id"
               control={control}
@@ -142,29 +141,31 @@ function BindUiwModalForm({
                 <WasteSelect
                   tenantId={tenantId}
                   value={field.value}
-                  onChange={(id) => field.onChange(id ?? "")}
+                  onChange={field.onChange}
                 />
               )}
             />
-            <FieldDescription>
-              Нет нужного отхода?{" "}
-              <Link
-                to={routes.directories.wastes.new}
-                search={tenantId ? { tenant: tenantId } : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Создать в справочнике
-              </Link>
-            </FieldDescription>
-            <FieldError>{errors.waste_id?.message}</FieldError>
-          </Field>
+          </FormField>
 
-          <Field>
-            <FieldLabel htmlFor="waste_source_ids">
-              Источники образования
-            </FieldLabel>
+          <FormField
+            htmlFor="waste_source_ids"
+            label="Источники образования"
+            error={errors.waste_source_ids?.message}
+            description={
+              <>
+                Можно выбрать несколько. Нет нужного источника?{" "}
+                <Link
+                  to={routes.directories.wasteSources.list}
+                  search={tenantId ? { tenant: tenantId } : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
+          >
             <Controller
               name="waste_source_ids"
               control={control}
@@ -191,25 +192,15 @@ function BindUiwModalForm({
                 />
               )}
             />
-            <FieldDescription>
-              Можно выбрать несколько. Нет нужного источника?{" "}
-              <Link
-                to={routes.directories.wasteSources.list}
-                search={tenantId ? { tenant: tenantId } : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Создать в справочнике
-              </Link>
-            </FieldDescription>
-            <FieldError>{errors.waste_source_ids?.message}</FieldError>
-          </Field>
+          </FormField>
 
-          <Field>
-            <FieldLabel htmlFor="transport_unit" required>
-              Транспортная единица
-            </FieldLabel>
+          <FormField
+            htmlFor="transport_unit"
+            label="Транспортная единица"
+            required
+            error={errors.transport_unit?.message}
+            description="Число от 0 до 999999.999999, до 6 знаков после запятой. По умолчанию 0."
+          >
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <Input
@@ -220,14 +211,11 @@ function BindUiwModalForm({
                   {...register("transport_unit")}
                 />
               </div>
-              {selectedWaste && <Badge>{UOM_LABEL[selectedWaste.uom]}</Badge>}
+              {initial?.waste_id === selectedWasteId && (
+                <Badge>{UOM_LABEL[initial.waste.uom]}</Badge>
+              )}
             </div>
-            <FieldDescription>
-              Число от 0 до 999999.999999, до 6 знаков после запятой. По
-              умолчанию 0.
-            </FieldDescription>
-            <FieldError>{errors.transport_unit?.message}</FieldError>
-          </Field>
+          </FormField>
         </div>
 
         <ModalFooter>

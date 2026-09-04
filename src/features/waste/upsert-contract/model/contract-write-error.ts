@@ -21,3 +21,15 @@ export function contractDeleteErrorMessage(error: unknown): string {
   }
   return error instanceof Error ? error.message : "Не удалось удалить договор";
 }
+
+export function contractStatusErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status === 404) {
+    return "Договор не найден.";
+  }
+  if (error instanceof ApiError && error.status === 400) {
+    return "Не удалось изменить статус договора.";
+  }
+  return error instanceof Error
+    ? error.message
+    : "Не удалось изменить статус договора";
+}

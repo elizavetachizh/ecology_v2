@@ -17,7 +17,7 @@ type ContractNextStepCtaProps = {
 export function ContractNextStepCta({
   contractId,
   contractType,
-  status, 
+  status,
   wasteCount,
 }: ContractNextStepCtaProps) {
   if (contractType !== "recycling" || status !== "active") return null;

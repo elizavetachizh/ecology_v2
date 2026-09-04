@@ -17,21 +17,20 @@ import { OperationWastePicker } from "../OperationWastePicker";
 
 type OperationStepBindingProps = {
   pending: boolean;
-  selectedInstructionId: string | undefined;
-  onInstructionIdChange: (instructionId: string | undefined) => void;
 };
 
-export function OperationStepBinding({
-  pending,
-  selectedInstructionId,
-  onInstructionIdChange,
-}: OperationStepBindingProps) {
+export function OperationStepBinding({ pending }: OperationStepBindingProps) {
   const { activeTenantId } = useTenant();
   const { setValue, formState } = useFormContext<OperationFormValues>();
   const unitId = useWatch<OperationFormValues, "unit_id">({ name: "unit_id" });
   const wasteId = useWatch<OperationFormValues, "waste_id">({
     name: "waste_id",
   });
+  const selectedInstructionId = useWatch<OperationFormValues, "instruction_id">(
+    {
+      name: "instruction_id",
+    },
+  );
 
   const instructionsQuery = useUnitInstructionsListQuery({
     tenantId: activeTenantId,
@@ -48,8 +47,8 @@ export function OperationStepBinding({
 
   useEffect(() => {
     if (selectedInstructionId || !instructionId) return;
-    onInstructionIdChange(instructionId);
-  }, [instructionId, selectedInstructionId, onInstructionIdChange]);
+    setValue("instruction_id", instructionId);
+  }, [instructionId, selectedInstructionId, setValue]);
 
   const wastesQuery = useUnitInstructionWastesListQuery({
     tenantId: activeTenantId,
@@ -76,7 +75,7 @@ export function OperationStepBinding({
         value={instructionId}
         onChange={(nextId) => {
           if (nextId === instructionId) return;
-          onInstructionIdChange(nextId);
+          setValue("instruction_id", nextId);
           setValue("waste_id", "");
           resetWasteDependentFields(setValue);
         }}

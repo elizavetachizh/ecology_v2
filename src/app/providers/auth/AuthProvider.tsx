@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from "react";
 import type { AuthClaims, AuthStatus } from "../../../shared/auth/auth.types";
-import { getRealmRoles } from "../../../shared/auth/permissions";
 import {
   ApiError,
   setUnauthorizedHandler,
@@ -189,22 +188,17 @@ export function AuthProvider({
     setAttempt((value) => value + 1);
   }, []);
 
-  const login = useCallback(
-    () => getKeycloak().login({ prompt: "login" }),
-    [],
-  );
-  const roles = useMemo(() => getRealmRoles(claims), [claims]);
+  const login = useCallback(() => getKeycloak().login({ prompt: "login" }), []);
   const value = useMemo(
     () => ({
       status,
       authenticated: status === "authenticated" || status === "refreshing",
       claims,
-      roles,
       error,
       login,
       retry,
     }),
-    [claims, error, login, retry, roles, status],
+    [claims, error, login, retry, status],
   );
 
   if (status === "initializing") return <AuthLoadingScreen />;

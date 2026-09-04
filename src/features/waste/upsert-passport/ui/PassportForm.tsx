@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -47,6 +48,7 @@ type PassportFormProps = {
   passportId?: string;
   initial?: Passport | null;
   defaultRecyclingContractId?: string;
+  headerActions?: ReactNode;
   onSaved: (passport: Passport) => void;
   onCancel: () => void;
 };
@@ -56,6 +58,7 @@ export function PassportForm({
   passportId,
   initial,
   defaultRecyclingContractId,
+  headerActions,
   onSaved,
   onCancel,
 }: PassportFormProps) {
@@ -94,7 +97,10 @@ export function PassportForm({
     wasteIds,
     recyclingQuery.data ? recyclingWastes.map((item) => item.waste_id) : null,
   );
-
+  const title =
+    mode === "create"
+      ? "Новый сопроводительный паспорт"
+      : `Паспорт ${initial?.number ?? ""}`;
   return (
     <form
       onSubmit={form.handleSubmit((values) => {
@@ -111,19 +117,16 @@ export function PassportForm({
           <DirectoryBreadcrumb
             directoryLabel="Сопроводительные паспорта"
             directoryTo={routes.waste.passports.list}
-            current={
-              mode === "create"
-                ? "Новый сопроводительный паспорт"
-                : `Паспорт ${initial?.number ?? ""}`
-            }
+            current={title}
           />
         }
-        title={
-          mode === "create"
-            ? "Новый сопроводительный паспорт"
-            : `Паспорт ${initial?.number ?? ""}`
+        title={title}
+        actions={
+          <>
+            {headerActions}
+            <PassportStatusBadge status={initial?.status ?? "active"} />
+          </>
         }
-        actions={<PassportStatusBadge status={initial?.status ?? "active"} />}
       />
 
       {error ? (

@@ -20,7 +20,7 @@ export default function AppHeader({
   const initials = user.username.slice(0, 2).toUpperCase();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-2 sm:px-4">
+    <header className="relative z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-2 sm:px-4">
       <Button
         type="button"
         variant="ghost"

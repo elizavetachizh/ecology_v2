@@ -14,8 +14,8 @@ const transportUnitSchema = z
   }, "Значение вне допустимого диапазона");
 
 export const bindWiuFormSchema = z.object({
-  unit_id: z.string().uuid("Выберите структурную единицу ПОД-9"),
-  waste_source_ids: z.array(z.string().uuid()),
+  unit_id: z.uuid("Выберите структурную единицу ПОД-9"),
+  waste_source_ids: z.array(z.uuid("Выберите источники образования")),
   transport_unit: transportUnitSchema,
 });
 

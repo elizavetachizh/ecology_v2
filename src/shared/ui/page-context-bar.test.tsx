@@ -16,9 +16,7 @@ describe("PageContextBar", () => {
 
     expect(screen.getByRole("heading", { name: "Отходы" })).toBeInTheDocument();
     expect(screen.getByText("Справочник отходов")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Создать" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Создать" })).toBeInTheDocument();
   });
 
   it("renders a string eyebrow as muted text", () => {
@@ -35,7 +33,9 @@ describe("PageContextBar", () => {
       />,
     );
 
-    expect(screen.getByRole("navigation", { name: "Путь" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Путь" }),
+    ).toBeInTheDocument();
   });
 
   it("is sticky by default and can be turned off for lists", () => {
@@ -47,7 +47,7 @@ describe("PageContextBar", () => {
     expect(
       screen.getByRole("heading", { name: "Форма" }).parentElement
         ?.parentElement,
-    ).toHaveClass("sticky");
+    ).toHaveClass("sticky", "bg-background");
 
     rerender(<PageContextBar title="Список" sticky={false} />);
 

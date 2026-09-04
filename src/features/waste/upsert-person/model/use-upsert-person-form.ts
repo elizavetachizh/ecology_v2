@@ -33,7 +33,7 @@ function getPersonFormValues(
       first_name: initial.first_name ?? "",
       last_name: initial.last_name ?? "",
       middle_name: initial.middle_name ?? "",
-      uuid: initial.uuid ?? "",
+      beltopgas_uuid: initial.beltopgas_uuid ?? "",
     };
   }
   return createEmptyPersonFormValues;

@@ -13,10 +13,7 @@ import {
   AsyncCombobox,
   Badge,
   Button,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
+  FormField,
   Input,
   Modal,
   ModalContent,
@@ -143,14 +140,31 @@ function BindWiuModalForm({
             </Alert>
           ) : null}
 
-          <Field>
-            <FieldLabel htmlFor="unit_id" required>
-              Журнал ПОД-9
-            </FieldLabel>
+          <FormField
+            htmlFor="unit_id"
+            label="Журнал ПОД-9"
+            required
+            error={errors.unit_id?.message}
+            description={
+              <>
+                Нет нужного журнала?{" "}
+                <Link
+                  to={routes.directories.units.list}
+                  search={tenantId ? { tenant: tenantId } : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Открыть структуру
+                </Link>
+              </>
+            }
+          >
             <Controller
               name="unit_id"
               control={control}
               render={({ field }) => (
+                // на будущее мб вынести в entities /waste/units
                 <AsyncCombobox
                   options={units.options.map((unit) => ({
                     value: unit.id,
@@ -162,7 +176,7 @@ function BindWiuModalForm({
                   }
                   renderOption={(option) => renderPod9UnitOption(option)}
                   renderValue={(option) => renderPod9UnitOption(option)}
-                  onValueChange={(id) => field.onChange(id ?? "")}
+                  onValueChange={field.onChange}
                   placeholder="Выберите журнал ПОД-9"
                   searchPlaceholder="Поиск по названию или краткому"
                   emptyMessage={
@@ -181,25 +195,27 @@ function BindWiuModalForm({
                 />
               )}
             />
-            <FieldDescription>
-              Нет нужного журнала?{" "}
-              <Link
-                to={routes.directories.units.list}
-                search={tenantId ? { tenant: tenantId } : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Открыть структуру
-              </Link>
-            </FieldDescription>
-            <FieldError>{errors.unit_id?.message}</FieldError>
-          </Field>
+          </FormField>
 
-          <Field>
-            <FieldLabel htmlFor="waste_source_ids">
-              Источники образования
-            </FieldLabel>
+          <FormField
+            htmlFor="waste_source_ids"
+            label="Источники образования"
+            error={errors.waste_source_ids?.message}
+            description={
+              <>
+                Можно выбрать несколько. Нет нужного источника?{" "}
+                <Link
+                  to={routes.directories.wasteSources.list}
+                  search={tenantId ? { tenant: tenantId } : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
+          >
             <Controller
               name="waste_source_ids"
               control={control}
@@ -226,25 +242,15 @@ function BindWiuModalForm({
                 />
               )}
             />
-            <FieldDescription>
-              Можно выбрать несколько. Нет нужного источника?{" "}
-              <Link
-                to={routes.directories.wasteSources.list}
-                search={tenantId ? { tenant: tenantId } : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Создать в справочнике
-              </Link>
-            </FieldDescription>
-            <FieldError>{errors.waste_source_ids?.message}</FieldError>
-          </Field>
+          </FormField>
 
-          <Field>
-            <FieldLabel htmlFor="transport_unit" required>
-              Транспортная единица
-            </FieldLabel>
+          <FormField
+            htmlFor="transport_unit"
+            label="Транспортная единица"
+            required
+            error={errors.transport_unit?.message}
+            description="Число от 0 до 999999.999999, до 6 знаков после запятой. По умолчанию 0."
+          >
             <Input
               id="transport_unit"
               inputMode="decimal"
@@ -252,12 +258,7 @@ function BindWiuModalForm({
               aria-invalid={Boolean(errors.transport_unit)}
               {...register("transport_unit")}
             />
-            <FieldDescription>
-              Число от 0 до 999999.999999, до 6 знаков после запятой. По
-              умолчанию 0.
-            </FieldDescription>
-            <FieldError>{errors.transport_unit?.message}</FieldError>
-          </Field>
+          </FormField>
         </div>
 
         <ModalFooter>

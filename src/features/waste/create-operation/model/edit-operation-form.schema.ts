@@ -5,7 +5,7 @@ import {
   operationDateSchema,
 } from "./operation-form.schema";
 
-const uuidValue = z.string().uuid();
+const uuidValue = z.uuid();
 
 export function createEditOperationFormSchema(requireWasteSource: boolean) {
   return z

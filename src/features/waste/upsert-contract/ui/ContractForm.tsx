@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   CONTRACT_TYPE_LABEL,
+  ContractStatusBadge,
   ContractTypeValues,
   TRANSFER_PURPOSE_LABEL,
   TransferPurposeValues,
@@ -10,12 +12,16 @@ import {
   type ContractType,
 } from "../../../../entities/waste/contracts";
 import { useTenant } from "../../../../entities/tenant";
-import { CounterpartySelect } from "../../../../entities/waste/counterparties";
+import {
+  CounterpartySelect,
+  counterpartiesQueryKeys,
+  getCounterparty,
+} from "../../../../entities/waste/counterparties";
 import { CounterpartyFormModal } from "../../upsert-counterparty";
+import { applyCounterpartySnapshot } from "../model/counterparty-snapshot";
 import {
   Alert,
   AlertDescription,
-  Badge,
   Button,
   DirectoryBreadcrumb,
   Field,
@@ -30,6 +36,7 @@ import {
 import { useUpsertContractForm } from "../model/use-upsert-contract-form";
 import { ContractNextStepCta } from "./ContractNextStepCta";
 import { ContractWastesEditor } from "./ContractWastesEditor";
+import { emptyContractWasteRow } from "../model/contract-form.schema";
 import { routes } from "../../../../shared/config/routes";
 
 type ContractFormProps = {
@@ -66,11 +73,35 @@ export function ContractForm({
     register,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = form;
   const contractType = watch("contract_type");
   const status = watch("status");
   const wastes = watch("wastes");
+  const prefillCounterpartyId =
+    mode === "create" ? defaultCounterpartyId : undefined;
+  const prefillCounterparty = useQuery({
+    queryKey: counterpartiesQueryKeys.detail(
+      activeTenantId ?? "none",
+      prefillCounterpartyId || "none",
+    ),
+    queryFn: ({ signal }) => getCounterparty(prefillCounterpartyId!, signal),
+    enabled: Boolean(activeTenantId && prefillCounterpartyId),
+  });
+  const appliedPrefillId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const item = prefillCounterparty.data;
+    if (!item) return;
+    if (appliedPrefillId.current === item.id) return;
+    if (getValues("counterparty_id") !== item.id) return;
+    appliedPrefillId.current = item.id;
+    applyCounterpartySnapshot(setValue, item);
+  }, [prefillCounterparty.data, getValues, setValue]);
+
+  const title =
+    mode === "create" ? "Новый договор" : `Договор ${initial?.number ?? ""}`;
 
   return (
     <form
@@ -82,25 +113,13 @@ export function ContractForm({
           <DirectoryBreadcrumb
             directoryLabel="Договоры"
             directoryTo={routes.directories.contracts.list}
-            current={
-              mode === "create"
-                ? "Новый договор"
-                : `Договор ${initial?.number ?? ""}`
-            }
+            current={title}
           />
         }
-        title={
-          mode === "create"
-            ? "Новый договор"
-            : `Договор ${initial?.number ?? ""}`
-        }
+        title={title}
         actions={
           mode === "edit" &&
-          (initial?.status === "active" ? (
-            <Badge variant="success">Действует</Badge>
-          ) : initial?.status === "inactive" ? (
-            <Badge variant="destructive">Не действует</Badge>
-          ) : null)
+          initial && <ContractStatusBadge status={initial.status} />
         }
       />
 
@@ -131,6 +150,7 @@ export function ContractForm({
                 if (event.target.value === "transport") {
                   setValue("transfer_purpose", "");
                   setValue("with_ownership_transfer", false);
+                  setValue("wastes", [{ ...emptyContractWasteRow }]);
                 }
               },
             })}
@@ -234,9 +254,40 @@ export function ContractForm({
                 value={field.value}
                 disabled={pending}
                 placeholder="Выберите активного контрагента"
-                onChange={field.onChange}
+                onChange={(id, item) => {
+                  field.onChange(id);
+                  applyCounterpartySnapshot(setValue, item ?? null);
+                }}
               />
             )}
+          />
+        </FormField>
+        <FormField
+          htmlFor="counterparty_address"
+          label="Адрес контрагента"
+          error={errors.counterparty_address?.message}
+          description="Подставляется из карточки контрагента, можно изменить."
+        >
+          <Input
+            id="counterparty_address"
+            {...register("counterparty_address")}
+            placeholder="г. Минск, ул. Ленина, 1"
+            disabled={pending}
+            aria-invalid={Boolean(errors.counterparty_address)}
+          />
+        </FormField>
+        <FormField
+          htmlFor="counterparty_contact"
+          label="Контакты контрагента"
+          error={errors.counterparty_contact?.message}
+          description="Подставляется из карточки контрагента, можно изменить."
+        >
+          <Input
+            id="counterparty_contact"
+            {...register("counterparty_contact")}
+            placeholder="+375 17 ХХХ-ХХ-ХХ"
+            disabled={pending}
+            aria-invalid={Boolean(errors.counterparty_contact)}
           />
         </FormField>
         <FormField
@@ -359,6 +410,7 @@ export function ContractForm({
         onOpenChange={setCounterpartyModalOpen}
         onSaved={(created) => {
           setValue("counterparty_id", created.id, { shouldValidate: true });
+          applyCounterpartySnapshot(setValue, created);
           setCounterpartyModalOpen(false);
         }}
       />

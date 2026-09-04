@@ -9,6 +9,7 @@ const valid = {
   full_name: "ООО «Ромашка»",
   unp: "091234567",
   address: "г. Минск",
+  contact: "+375 17 000-00-00",
   is_individual: false,
   is_active: true,
 };

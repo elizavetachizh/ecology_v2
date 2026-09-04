@@ -6,6 +6,7 @@ import {
   passportsQueryKeys,
 } from "../../../../entities/waste/passports";
 import { PassportForm } from "../../../../features/waste/upsert-passport";
+import { PrintPassportButton } from "../../../../features/waste/print-passport";
 import {
   AlertDetailPageError,
   TenantRequiredGate,
@@ -51,6 +52,12 @@ export function EditPassportPage() {
         mode="edit"
         passportId={passportId}
         initial={passportQuery.data}
+        headerActions={
+          <PrintPassportButton
+            passportId={passportId}
+            number={passportQuery.data.number}
+          />
+        }
         onSaved={() => {
           toast.success("Паспорт успешно обновлён");
         }}

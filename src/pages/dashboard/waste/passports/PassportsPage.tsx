@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { PrintPassportsJournalButton } from "../../../../features/waste/print-passport";
 import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
@@ -169,12 +170,18 @@ export function PassportsPage() {
           title="Сопроводительные паспорта"
           description="Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан."
           actions={
-            <Button asChild size="sm">
-              <Link to={routes.waste.passports.new}>
-                <Plus className="size-3.5" />
-                Создать паспорт
-              </Link>
-            </Button>
+            <>
+              <PrintPassportsJournalButton
+                defaultStartDate={search.date_from}
+                defaultEndDate={search.date_to}
+              />
+              <Button asChild size="sm">
+                <Link to={routes.waste.passports.new}>
+                  <Plus className="size-3.5" />
+                  Создать паспорт
+                </Link>
+              </Button>
+            </>
           }
         />
 

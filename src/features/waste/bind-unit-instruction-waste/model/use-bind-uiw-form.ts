@@ -14,6 +14,7 @@ import {
   bindUiwFormSchema,
   type BindUiwFormValues,
 } from "./bind-uiw-form.schema";
+import { uiwWriteErrorMessage } from "./uiw-write-error";
 
 type UseBindUiwFormParams = {
   mode: "create" | "edit";
@@ -22,9 +23,7 @@ type UseBindUiwFormParams = {
   onSaved: (binding: UnitInstructionWaste) => void;
 };
 
-function valuesFromInitial(
-  initial: UnitInstructionWaste,
-): BindUiwFormValues {
+function valuesFromInitial(initial: UnitInstructionWaste): BindUiwFormValues {
   return {
     waste_id: initial.waste_id,
     waste_source_ids: initial.waste_source_ids,
@@ -59,7 +58,7 @@ export function useBindUiwForm({
       invalidateBindingQueries();
       onSaved(created);
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(uiwWriteErrorMessage(err)),
   });
 
   const updateMutation = useMutation({
@@ -73,7 +72,7 @@ export function useBindUiwForm({
       invalidateBindingQueries();
       onSaved(updated);
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(uiwWriteErrorMessage(err)),
   });
 
   const onSubmit = (values: BindUiwFormValues) => {

@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
-import type { CurrentUser } from "../../user";
+import { currentUser } from "../../user";
 import type { Tenant } from "./tenant.types";
 import {
   TenantContext,
@@ -9,15 +9,10 @@ import {
   type TenantContextValue,
 } from "./tenant-context";
 
-const user: CurrentUser = {
-  id: 1,
+const user = currentUser({
   realm: "tenant-01",
-  uuid: "user-id",
-  username: "testuser",
-  email: "test@example.com",
-  roles: ["operator"],
   issuer: "https://auth.example.com/realms/tenant-01",
-};
+});
 
 const tenant: Tenant = {
   id: "tenant-1",

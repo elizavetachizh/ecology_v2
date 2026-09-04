@@ -41,7 +41,7 @@ export const CONTRACT_ALL_STATUS_LABEL = {
 
 export type ContractStatus = keyof typeof CONTRACT_STATUS_LABEL;
 
-export type ContractAllStatus = keyof typeof CONTRACT_ALL_STATUS_LABEL;
+export type ContractAllStatus = "all" | ContractStatus;
 
 export const ContractStatusValues = Object.keys(CONTRACT_STATUS_LABEL) as [
   ContractStatus,
@@ -74,6 +74,11 @@ export type ContractWaste = {
   updated_by: UserProfile;
 };
 
+export type ContractWasteWrite = {
+  waste_id: string;
+  cost_per_unit?: string | null;
+};
+
 /** ContractRead */
 export type Contract = {
   id: string;
@@ -85,6 +90,8 @@ export type Contract = {
   status: ContractStatus;
   counterparty_id: string;
   counterparty: CounterpartyBrief;
+  counterparty_address: string | null;
+  counterparty_contact: string | null;
   amount: string | null;
   with_ownership_transfer: boolean;
   transfer_purpose: TransferPurpose | null;
@@ -96,20 +103,16 @@ export type Contract = {
 };
 
 /** Nested in passport / TTN reads. */
-export type ContractBrief = {
-  id: string;
-  number: string;
-  contract_type: ContractType;
-  status: ContractStatus;
-  counterparty: CounterpartyBrief;
-  with_ownership_transfer: boolean;
-  transfer_purpose: TransferPurpose | null;
-};
-
-export type ContractWasteWrite = {
-  waste_id: string;
-  cost_per_unit?: string | null;
-};
+export type ContractBrief = Pick<
+  Contract,
+  | "id"
+  | "number"
+  | "contract_type"
+  | "status"
+  | "counterparty"
+  | "with_ownership_transfer"
+  | "transfer_purpose"
+>;
 
 export type ContractCreate = {
   number: string;
@@ -118,6 +121,8 @@ export type ContractCreate = {
   contract_type: ContractType;
   status?: ContractStatus;
   counterparty_id: string;
+  counterparty_address?: string | null;
+  counterparty_contact?: string | null;
   amount?: string | null;
   with_ownership_transfer?: boolean;
   transfer_purpose?: TransferPurpose | null;
@@ -125,18 +130,7 @@ export type ContractCreate = {
 };
 
 /** PATCH wastes: omit = не трогать; [] = очистить перечень. */
-export type ContractUpdate = {
-  number?: string;
-  start_date?: string;
-  end_date?: string | null;
-  contract_type?: ContractType;
-  status?: ContractStatus;
-  counterparty_id?: string;
-  amount?: string | null;
-  with_ownership_transfer?: boolean;
-  transfer_purpose?: TransferPurpose | null;
-  wastes?: ContractWasteWrite[];
-};
+export type ContractUpdate = Partial<ContractCreate>;
 
 export const ContractSortFields = [
   "number",
@@ -146,7 +140,7 @@ export const ContractSortFields = [
   "status",
   "created_at",
   "id",
-] as const;
+] as const satisfies readonly (keyof Contract)[];
 export type ContractSortField = (typeof ContractSortFields)[number];
 export type ContractSortOrder = "asc" | "desc";
 

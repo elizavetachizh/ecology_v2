@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import {
   flattenUnitTreePaths,
   formatUnitPathLabel,
-  type UnitBrief,
   type UnitTree,
 } from "../../../../entities/waste/units";
 import {
@@ -13,10 +12,7 @@ import {
   AlertTitle,
   AsyncCombobox,
   Badge,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
+  FormField,
 } from "../../../../shared/ui";
 import { routes } from "../../../../shared/config/routes";
 
@@ -27,7 +23,7 @@ type OperationUnitPickerProps = {
   error: Error | null;
   value: string;
   onChange: (unitId: string) => void;
-  fallbackUnit?: UnitBrief | null;
+
   excludeUnitId?: string;
   disabled?: boolean;
   errorMessage?: string;
@@ -58,7 +54,6 @@ export function OperationUnitPicker({
   error,
   value,
   onChange,
-  fallbackUnit,
   excludeUnitId,
   disabled = false,
   errorMessage,
@@ -66,7 +61,7 @@ export function OperationUnitPicker({
   label = "Место учёта",
   placeholder = "Выберите место учёта…",
   "aria-label": ariaLabel = "Место учёта",
-  description,
+  description = "",
 }: OperationUnitPickerProps) {
   const [search, setSearch] = useState("");
 
@@ -78,6 +73,9 @@ export function OperationUnitPicker({
   }, [tree, excludeUnitId]);
 
   const query = search.trim().toLowerCase();
+
+  // логика обсуждаема, т.к. пока не понятно что именно необходимо развернуть
+  // вернуться к этой логике после обсуждения
   const filtered = useMemo(() => {
     if (!query) return entries;
     return entries.filter((item) => {
@@ -90,9 +88,7 @@ export function OperationUnitPicker({
   const selected = entries.find((item) => item.unit.id === value);
   const selectedLabel = selected
     ? formatUnitPathLabel(selected.path)
-    : fallbackUnit?.id === value
-      ? fallbackUnit.name
-      : undefined;
+    : undefined;
 
   if (error) {
     return (
@@ -104,10 +100,26 @@ export function OperationUnitPicker({
   }
 
   return (
-    <Field>
-      <FieldLabel htmlFor={htmlFor} required>
-        {label}
-      </FieldLabel>
+    <FormField
+      htmlFor={htmlFor}
+      required
+      label={label}
+      error={errorMessage}
+      description={
+        <>
+          {description} Нет нужного места учёта?{" "}
+          <Link
+            to={routes.directories.units.list}
+            search={tenantId ? { tenant: tenantId } : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Открыть структуру
+          </Link>
+        </>
+      }
+    >
       <AsyncCombobox
         options={filtered.map((item) => ({
           value: item.unit.id,
@@ -134,23 +146,6 @@ export function OperationUnitPicker({
         aria-label={ariaLabel}
         disabled={disabled || loading}
       />
-      <FieldDescription>
-        {description ?? (
-          <>
-            Нет нужного места учёта?{" "}
-            <Link
-              to={routes.directories.units.list}
-              search={tenantId ? { tenant: tenantId } : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Открыть структуру
-            </Link>
-          </>
-        )}
-      </FieldDescription>
-      <FieldError>{errorMessage}</FieldError>
-    </Field>
+    </FormField>
   );
 }

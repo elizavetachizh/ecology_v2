@@ -23,10 +23,10 @@ export const permitFormSchema = z
       .max(255, "Не более 255 символов"),
     start_date: isoDate,
     end_date: z.union([isoDate, z.literal("")]),
-    unit_id: z.string().uuid("Выберите подразделение"),
+    unit_id: z.uuid("Выберите подразделение"),
     burial_wastes: z.array(
       z.object({
-        waste_id: z.union([z.string().uuid(), z.literal("")]),
+        waste_id: z.union([z.uuid(), z.literal("")]),
         amount: burialAmount,
         label: z.string(),
         uomLabel: z.string(),

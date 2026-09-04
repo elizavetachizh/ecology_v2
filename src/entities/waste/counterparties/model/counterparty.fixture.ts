@@ -16,6 +16,7 @@ export const counterpartyFixture: Counterparty = {
   full_name: "ООО «Ромашка»",
   unp: "091234567",
   address: "г. Минск, ул. Ленина, 1",
+  contact: "+375 17 000-00-00",
   is_active: true,
   is_individual: false,
   created_at: "2026-01-01T00:00:00Z",

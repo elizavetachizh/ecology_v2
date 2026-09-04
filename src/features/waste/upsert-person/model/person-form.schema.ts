@@ -5,7 +5,7 @@ export const personFormSchema = z.object({
   first_name: z.string().optional(),
   last_name: z.string().optional(),
   middle_name: z.string().optional(),
-  uuid: z.string().optional(),
+  beltopgas_uuid: z.string().max(50).optional(),
 });
 
 export type PersonFormValues = z.infer<typeof personFormSchema>;
@@ -15,5 +15,5 @@ export const createEmptyPersonFormValues: PersonFormValues = {
   first_name: "",
   last_name: "",
   middle_name: "",
-  uuid: "",
+  beltopgas_uuid: "",
 };

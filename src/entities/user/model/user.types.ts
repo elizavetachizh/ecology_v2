@@ -1,10 +1,16 @@
+/** Ключ = keyword тенанта, значение — роли (`editor`, `user`, …). */
+export type UserRoles = Record<string, string[]>;
+
 export type CurrentUser = {
-  id: number;
+  id: string;
   realm: string;
   uuid: string;
   username: string;
   email: string | null;
-  roles: string[];
+  first_name: string | null;
+  last_name: string | null;
+  roles: UserRoles;
+  beltopgas_uuid: string | null;
   issuer: string;
 };
 

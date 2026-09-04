@@ -30,7 +30,7 @@ export const operationAmountSchema = z
   }, "Количество должно быть больше 0")
   .transform(normalizeDecimalSeparator);
 
-const uuidValue = z.string().uuid();
+const uuidValue = z.uuid();
 
 function requireUuid(
   ctx: z.RefinementCtx,
@@ -65,8 +65,9 @@ export const operationFormSchema = z
   .object({
     date: operationDateSchema,
     operation_type: emptyOrEnum(OperationTypeValues),
-    unit_id: z.string().uuid("Выберите место учёта"),
-    waste_id: z.string().uuid("Выберите отход"),
+    unit_id: z.uuid("Выберите место учёта"),
+    instruction_id: z.string(),
+    waste_id: z.uuid("Выберите отход"),
     amount: operationAmountSchema,
     waste_source_id: z.string(),
     use_purpose: emptyOrEnum(UsePurposeValues),
@@ -212,6 +213,7 @@ export function createEmptyOperationFormValues(): OperationFormValues {
     date: todayIsoDate(),
     operation_type: "",
     unit_id: "",
+    instruction_id: "",
     waste_id: "",
     amount: "",
     ...EMPTY_TYPE_SPECIFIC_VALUES,

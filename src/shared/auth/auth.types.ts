@@ -20,7 +20,6 @@ export type AuthContextValue = {
   status: AuthStatus;
   authenticated: boolean;
   claims: AuthClaims | undefined;
-  roles: readonly string[];
   error: Error | null;
   login: () => Promise<void>;
   retry: () => void;

@@ -41,6 +41,7 @@ describe("resolveInstructionId", () => {
 
   it("falls back to preferred when selection is missing and loaded", () => {
     expect(resolveInstructionId(undefined, list, false)).toBe("active-1");
+    expect(resolveInstructionId("", list, false)).toBe("active-1");
     expect(resolveInstructionId("gone", list, false)).toBe("active-1");
   });
 

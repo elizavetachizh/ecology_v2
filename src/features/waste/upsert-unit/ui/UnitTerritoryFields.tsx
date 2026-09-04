@@ -5,6 +5,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  FormField,
 } from "../../../../shared/ui";
 import { DistrictClassifierSelect } from "../../select-district-classifier";
 import { RegionClassifierSelect } from "../../select-region-classifier";
@@ -30,8 +31,12 @@ export function UnitTerritoryFields({
 }: UnitTerritoryFieldsProps) {
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="region_id">Регион</FieldLabel>
+      <FormField
+        htmlFor="region_id"
+        label="Регион"
+        error={errors.region_id?.message}
+        description="Выберите регион, чтобы открыть список районов. При выборе родителя подставляется автоматически; можно изменить вручную."
+      >
         <Controller
           name="region_id"
           control={control}
@@ -46,12 +51,7 @@ export function UnitTerritoryFields({
             />
           )}
         />
-        <FieldDescription>
-          Выберите регион, чтобы открыть список районов. При выборе родителя
-          подставляется автоматически; можно изменить вручную.
-        </FieldDescription>
-        <FieldError>{errors.region_id?.message}</FieldError>
-      </Field>
+      </FormField>
 
       <Field>
         <FieldLabel htmlFor="district_id">Район</FieldLabel>

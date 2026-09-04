@@ -28,7 +28,7 @@ export const PASSPORT_ALL_STATUS_LABEL = {
 } as const;
 
 export type PassportStatus = keyof typeof PASSPORT_STATUS_LABEL;
-export type PassportAllStatus = keyof typeof PASSPORT_ALL_STATUS_LABEL;
+export type PassportAllStatus = "all" | PassportStatus;
 
 export const PassportStatusValues = Object.keys(PASSPORT_STATUS_LABEL) as [
   PassportStatus,
@@ -134,6 +134,25 @@ export type PassportListResponse = {
   limit: number;
   offset: number;
   items: Passport[];
+};
+
+export const PASSPORT_FILE_FORMATS = ["docx", "pdf"] as const;
+export type PassportFileFormat = (typeof PASSPORT_FILE_FORMATS)[number];
+
+export const PASSPORT_JOURNAL_FORMATS = ["xlsx", "pdf"] as const;
+export type PassportJournalFormat = (typeof PASSPORT_JOURNAL_FORMATS)[number];
+
+export type GetPassportsDownloadParams = {
+  start_date: string;
+  end_date: string;
+  unit_id?: string;
+  format?: PassportJournalFormat;
+};
+
+export type PassportDownloadFile = {
+  blob: Blob;
+  contentType: string;
+  fileName: string;
 };
 
 export const DEFAULT_PASSPORTS_LIST_LIMIT = 50;

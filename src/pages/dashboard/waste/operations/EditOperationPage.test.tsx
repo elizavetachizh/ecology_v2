@@ -7,7 +7,7 @@ import {
   type Tenant,
   type TenantContextValue,
 } from "../../../../entities/tenant";
-import type { CurrentUser } from "../../../../entities/user";
+import { currentUser } from "../../../../entities/user";
 import { getOperation } from "../../../../entities/waste/operations";
 import { EditOperationPage } from "./EditOperationPage";
 
@@ -32,15 +32,7 @@ vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
 
 const getOperationMock = vi.mocked(getOperation);
 
-const user: CurrentUser = {
-  id: 1,
-  realm: "mingas",
-  uuid: "user-id",
-  username: "testuser",
-  email: null,
-  roles: ["operator"],
-  issuer: "https://auth.example.com/realms/mingas",
-};
+const user = currentUser({ email: null });
 
 const tenant: Tenant = {
   id: "tenant-1",

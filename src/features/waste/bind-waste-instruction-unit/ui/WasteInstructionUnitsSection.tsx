@@ -25,6 +25,7 @@ import {
 import { BindWiuModal } from "./BindWiuModal";
 import { wiuColumns } from "./wiu-columns";
 import { routes } from "../../../../shared/config/routes";
+import { wiuDeleteErrorMessage } from "../model/wiu-write-error";
 
 type WasteInstructionUnitsSectionProps = {
   tenantId: string | null;
@@ -82,7 +83,9 @@ export function WasteInstructionUnitsSection({
     onSuccess: () => {
       invalidateBindingQueries();
       setDetaching(null);
+      toast.success("Журнал ПОД-9 успешно отвязан");
     },
+    onError: (err) => toast.error(wiuDeleteErrorMessage(err)),
   });
 
   const columns = wiuColumns(setEditing, setModalMode, setDetaching);
@@ -177,8 +180,8 @@ export function WasteInstructionUnitsSection({
             onSaved={() => {
               toast.success(
                 modalMode === "create"
-                  ? "Привязка журналов ПОД-9 успешно создана"
-                  : "Привязка журналов ПОД-9 успешно обновлена",
+                  ? "Привязка журнала ПОД-9 успешно создана"
+                  : "Привязка журнала ПОД-9 успешно обновлена",
               );
               setModalMode(null);
               setEditing(null);
