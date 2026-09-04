@@ -32,6 +32,7 @@ export function toCounterpartyFormValues(
     full_name: counterparty.full_name ?? "",
     unp: counterparty.unp ?? "",
     address: counterparty.address ?? "",
+    contact: counterparty.contact ?? "",
     is_individual: counterparty.is_individual,
     is_active: counterparty.is_active,
   };

@@ -17,10 +17,10 @@ const wasteAmount = z
 export const standardFormSchema = z
   .object({
     start_date: isoDate,
-    unit_id: z.string().uuid("Выберите подразделение"),
+    unit_id: z.uuid("Выберите подразделение"),
     wastes: z.array(
       z.object({
-        waste_id: z.union([z.string().uuid(), z.literal("")]),
+        waste_id: z.union([z.uuid(), z.literal("")]),
         amount: wasteAmount,
         label: z.string(),
         uomLabel: z.string(),

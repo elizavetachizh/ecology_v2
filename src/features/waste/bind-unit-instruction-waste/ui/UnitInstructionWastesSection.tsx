@@ -24,6 +24,7 @@ import {
   toast,
 } from "../../../../shared/ui";
 import { BindUiwModal } from "./BindUiwModal";
+import { uiwDeleteErrorMessage } from "../model/uiw-write-error";
 import { uiwColumns } from "./uiw-columns";
 import { routes } from "../../../../shared/config/routes";
 
@@ -83,7 +84,9 @@ export function UnitInstructionWastesSection({
     onSuccess: () => {
       invalidateBindingQueries();
       setDetaching(null);
+      toast.success("Отход успешно отвязан");
     },
+    onError: (err) => toast.error(uiwDeleteErrorMessage(err)),
   });
 
   const columns = uiwColumns(setEditing, setModalMode, setDetaching);
@@ -175,8 +178,8 @@ export function UnitInstructionWastesSection({
             onSaved={() => {
               toast.success(
                 modalMode === "create"
-                  ? "Привязка отходов успешно создана"
-                  : "Привязка отходов успешно обновлена",
+                  ? "Привязка отхода успешно создана"
+                  : "Привязка отхода успешно обновлена",
               );
               setModalMode(null);
               setEditing(null);
@@ -187,6 +190,7 @@ export function UnitInstructionWastesSection({
       confirm={
         <ConfirmDialog
           open={detaching !== null}
+          confirmDisabled={deleteMutation.isPending}
           onOpenChange={(open) => {
             if (!open) setDetaching(null);
           }}
@@ -200,7 +204,7 @@ export function UnitInstructionWastesSection({
             </>
           }
           onConfirm={() => {
-            if (detaching) void deleteMutation.mutateAsync(detaching.id);
+            if (detaching) deleteMutation.mutate(detaching.id);
           }}
         />
       }

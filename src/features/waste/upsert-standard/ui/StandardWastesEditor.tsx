@@ -224,7 +224,7 @@ export function StandardWastesEditor({
               <Button
                 type="button"
                 variant="ghost"
-                disabled={pending}
+                disabled={pending || emptyIndexes.length > 0}
                 onClick={() => append({ ...emptyStandardWasteRow })}
                 className="h-10 w-full justify-start rounded-none px-3 font-normal"
               >

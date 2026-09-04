@@ -6,10 +6,6 @@ export function WasteInstructionUnitsCreateHint() {
         <h2 className="text-sm font-semibold text-foreground">
           Привязка журналов ПОД-9 по инструкции
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Сохраните отход — после создания можно будет привязать журналы ПОД-9,
-          источники образования и транспортную единицу.
-        </p>
       </div>
 
       <div className="flex h-28 items-center justify-center rounded-lg border border-dashed border-border px-4 text-center">
@@ -18,8 +14,8 @@ export function WasteInstructionUnitsCreateHint() {
             Привязки станут доступны после создания
           </p>
           <p className="text-sm text-muted-foreground">
-            После сохранения отхода выберите инструкцию и привяжите журналы
-            ПОД-9, в которых ведется учет отхода.
+            После сохранения отхода выберите инструкцию, привяжите журналы
+            ПОД-9, укажите источники образования и транспортную единицу.
           </p>
         </div>
       </div>

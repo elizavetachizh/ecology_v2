@@ -14,7 +14,7 @@ import {
   AlertDescription,
   Button,
   DirectoryBreadcrumb,
-  FieldLabel,
+  FormField,
   PageContextBar,
   Select,
 } from "../../../../shared/ui";
@@ -49,6 +49,10 @@ export function WasteCatalogForm({
     register,
     formState: { errors },
   } = form;
+  const title =
+    mode === "create"
+      ? "Новый отход"
+      : (initial?.waste_classifier.name ?? "Отход");
 
   return (
     <form
@@ -60,18 +64,10 @@ export function WasteCatalogForm({
           <DirectoryBreadcrumb
             directoryLabel="Отходы"
             directoryTo={routes.directories.wastes.list}
-            current={
-              mode === "create"
-                ? "Новый отход"
-                : (initial?.waste_classifier.name ?? "Отход")
-            }
+            current={title}
           />
         }
-        title={
-          mode === "create"
-            ? "Новый отход"
-            : (initial?.waste_classifier.name ?? "Отход")
-        }
+        title={title}
       />
 
       <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
@@ -81,10 +77,13 @@ export function WasteCatalogForm({
           </Alert>
         ) : null}
 
-        <div className="grid gap-1.5 md:col-span-2">
-          <FieldLabel htmlFor="waste_classifier_id">
-            Отход из классификатора
-          </FieldLabel>
+        <FormField
+          htmlFor="waste_classifier_id"
+          label="Отход из классификатора"
+          required
+          className="md:col-span-2"
+          error={errors.waste_classifier_id?.message}
+        >
           <Controller
             name="waste_classifier_id"
             control={control}
@@ -100,15 +99,13 @@ export function WasteCatalogForm({
               />
             )}
           />
-          {errors.waste_classifier_id && (
-            <span className="text-xs text-destructive">
-              {errors.waste_classifier_id.message}
-            </span>
-          )}
-        </div>
+        </FormField>
 
-        <div className="grid gap-1.5">
-          <FieldLabel htmlFor="hazard_class">Класс опасности</FieldLabel>
+        <FormField
+          htmlFor="hazard_class"
+          label="Класс опасности"
+          error={errors.hazard_class?.message}
+        >
           <Select id="hazard_class" {...register("hazard_class")}>
             {HazardClassValues.map((value) => (
               <option key={value} value={value}>
@@ -116,15 +113,13 @@ export function WasteCatalogForm({
               </option>
             ))}
           </Select>
-          {errors.hazard_class && (
-            <span className="text-xs text-destructive">
-              {errors.hazard_class.message}
-            </span>
-          )}
-        </div>
+        </FormField>
 
-        <div className="grid gap-1.5">
-          <FieldLabel htmlFor="uom">Единица измерения</FieldLabel>
+        <FormField
+          htmlFor="uom"
+          label="Единица измерения"
+          error={errors.uom?.message}
+        >
           <Select id="uom" {...register("uom")}>
             {UomValues.map((value) => (
               <option key={value} value={value}>
@@ -132,15 +127,13 @@ export function WasteCatalogForm({
               </option>
             ))}
           </Select>
-          {errors.uom && (
-            <span className="text-xs text-destructive">
-              {errors.uom.message}
-            </span>
-          )}
-        </div>
+        </FormField>
 
-        <div className="grid gap-1.5">
-          <FieldLabel htmlFor="physical_state">Агрегатное состояние</FieldLabel>
+        <FormField
+          htmlFor="physical_state"
+          label="Агрегатное состояние"
+          error={errors.physical_state?.message}
+        >
           <Select
             id="physical_state"
             {...register("physical_state", {
@@ -154,12 +147,7 @@ export function WasteCatalogForm({
               </option>
             ))}
           </Select>
-          {errors.physical_state && (
-            <span className="text-xs text-destructive">
-              {errors.physical_state.message}
-            </span>
-          )}
-        </div>
+        </FormField>
       </div>
 
       <div className="flex flex-wrap gap-2">

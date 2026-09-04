@@ -48,6 +48,11 @@ export function TtnForm({
     formState: { errors },
   } = form;
 
+  const title =
+    mode === "create"
+      ? "Новая товарно-транспортная накладная"
+      : `ТТН ${initial?.number ?? ""}`;
+
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
@@ -58,18 +63,10 @@ export function TtnForm({
           <DirectoryBreadcrumb
             directoryLabel="ТТН"
             directoryTo={routes.waste.ttns.list}
-            current={
-              mode === "create"
-                ? "Новая ТТН"
-                : `ТТН ${initial?.number ?? ""}`
-            }
+            current={title}
           />
         }
-        title={
-          mode === "create"
-            ? "Новая товарно-транспортная накладная"
-            : `ТТН ${initial?.number ?? ""}`
-        }
+        title={title}
         actions={<TtnStatusBadge status={initial?.status ?? "active"} />}
       />
 

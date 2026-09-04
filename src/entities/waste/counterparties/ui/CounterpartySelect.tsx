@@ -11,8 +11,23 @@ type CounterpartySelectProps = {
   disabled?: boolean;
   placeholder?: string;
   "aria-label"?: string;
-  onChange: (id: string) => void;
+  onChange: (
+    id: string,
+    item?: Pick<Counterparty, "address" | "contact"> | null,
+  ) => void;
 };
+
+function resolveCounterparty(
+  id: string,
+  options: Counterparty[],
+  detail: Counterparty | undefined,
+): Counterparty | null {
+  if (!id) return null;
+  return (
+    options.find((item) => item.id === id) ??
+    (detail?.id === id ? detail : null)
+  );
+}
 
 function counterpartyLabel(item: Pick<Counterparty, "name" | "unp">) {
   return item.unp ? `${item.name} (${item.unp})` : item.name;
@@ -41,9 +56,7 @@ export function CounterpartySelect({
     enabled: Boolean(tenantId && value),
   });
 
-  const selected =
-    options.find((item) => item.id === value) ??
-    (selectedQuery.data?.id === value ? selectedQuery.data : null);
+  const selected = resolveCounterparty(value, options, selectedQuery.data);
 
   return (
     <AsyncCombobox
@@ -53,7 +66,9 @@ export function CounterpartySelect({
       }))}
       value={value}
       selectedLabel={selected ? counterpartyLabel(selected) : undefined}
-      onValueChange={onChange}
+      onValueChange={(id) => {
+        onChange(id, resolveCounterparty(id, options, selectedQuery.data));
+      }}
       placeholder={placeholder}
       searchPlaceholder="Поиск по УНП или наименованию"
       emptyMessage={loading ? "Загрузка…" : "Ничего не найдено"}

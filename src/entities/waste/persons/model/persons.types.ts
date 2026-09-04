@@ -8,14 +8,15 @@ export type Person = {
   first_name: string | null;
   last_name: string | null;
   middle_name: string | null;
-  uuid: string | null;
+  beltopgas_uuid: string | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
   created_by: UserProfile;
   updated_by: UserProfile;
 };
 
-/** Nested в ответах — без audit. */
+/** Nested в ответах — без audit / user_id. */
 export type PersonBrief = Pick<
   Person,
   "id" | "name" | "first_name" | "last_name" | "middle_name"
@@ -26,7 +27,7 @@ export type PersonCreate = {
   first_name?: string | null;
   last_name?: string | null;
   middle_name?: string | null;
-  uuid?: string | null;
+  beltopgas_uuid?: string | null;
 };
 
 export type PersonUpdate = Partial<PersonCreate>;

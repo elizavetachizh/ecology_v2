@@ -13,9 +13,7 @@ import {
   AlertDescription,
   AlertTitle,
   Button,
-  Field,
-  FieldDescription,
-  FieldLabel,
+  FormField,
 } from "../../../../shared/ui";
 
 type OperationInstructionPickerProps = {
@@ -76,8 +74,16 @@ export function OperationInstructionPicker({
   }
 
   return (
-    <Field>
-      <FieldLabel htmlFor="operation-instruction">Инструкция</FieldLabel>
+    <FormField
+      htmlFor="operation-instruction"
+      label="Инструкция"
+      // error={error && error.message}
+      description={
+        !selected && instructions.length > 0 ? (
+          <>Нет действующей инструкции — выберите из списка.</>
+        ) : null
+      }
+    >
       {selected && !expanded ? (
         <div
           id="operation-instruction"
@@ -139,11 +145,6 @@ export function OperationInstructionPicker({
           })}
         </div>
       )}
-      {!selected && instructions.length > 0 ? (
-        <FieldDescription>
-          Нет действующей инструкции — выберите из списка.
-        </FieldDescription>
-      ) : null}
-    </Field>
+    </FormField>
   );
 }

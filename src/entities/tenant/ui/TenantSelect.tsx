@@ -2,7 +2,11 @@ import { useId, useMemo, useState } from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Check, ChevronsUpDown, Search, X } from "lucide-react";
 import { cn } from "../../../shared/lib/cn";
-import { filterTenantTree, tenantLabel } from "../model/flatten-tenant-tree";
+import {
+  filterTenantTree,
+  flattenTenantTree,
+  tenantLabel,
+} from "../model/flatten-tenant-tree";
 import type { Tenant } from "../model/tenant.types";
 
 export type TenantSelectProps = {
@@ -36,11 +40,11 @@ export function TenantSelect({
     () => filterTenantTree(tenants, search),
     [tenants, search],
   );
-  const selected = useMemo(() => {
-    const match = nodes.find((node) => node.tenant.id === value);
-    if (match) return match.tenant;
-    return findTenant(tenants, value);
-  }, [nodes, tenants, value]);
+
+  const selected = useMemo(
+    () => flattenTenantTree(tenants).find((n) => n.tenant.id === value)?.tenant,
+    [tenants, value],
+  );
 
   const hasTenants = tenants.length > 0;
   const isDisabled = disabled || !hasTenants;
@@ -53,7 +57,6 @@ export function TenantSelect({
   const select = (tenantId: string) => {
     onValueChange(tenantId);
     setOpen(false);
-    setSearch("");
   };
 
   return (
@@ -146,6 +149,8 @@ export function TenantSelect({
               nodes.map(({ tenant, depth }) => {
                 const selectedItem = tenant.id === value;
                 const label = tenantLabel(tenant);
+                const short = tenant.short.trim();
+                const showFullName = Boolean(short) && short !== tenant.name;
                 return (
                   <button
                     key={tenant.id}
@@ -163,9 +168,7 @@ export function TenantSelect({
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{label}</span>
-                      {tenant.short &&
-                      tenant.short !== tenant.name &&
-                      label === tenant.short ? (
+                      {showFullName ? (
                         <span className="block truncate text-xs font-normal text-muted-foreground">
                           {tenant.name}
                         </span>
@@ -183,17 +186,4 @@ export function TenantSelect({
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   );
-}
-
-function findTenant(
-  tenants: Tenant[],
-  tenantId: string | null,
-): Tenant | undefined {
-  if (!tenantId) return undefined;
-  for (const tenant of tenants) {
-    if (tenant.id === tenantId) return tenant;
-    const nested = findTenant(tenant.children ?? [], tenantId);
-    if (nested) return nested;
-  }
-  return undefined;
 }

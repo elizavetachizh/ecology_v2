@@ -9,6 +9,7 @@ export function toCounterpartyWriteBody(
     full_name: values.full_name.trim() || null,
     unp: values.unp.trim() || null,
     address: values.address.trim() || null,
+    contact: values.contact.trim() || null,
     is_individual: values.is_individual,
     is_active: values.is_active,
   };

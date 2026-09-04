@@ -29,6 +29,7 @@ const formedValues: OperationFormValues = {
   date: "2026-03-01",
   operation_type: "formed",
   unit_id: "unit-1",
+  instruction_id: "ins-1",
   waste_id: "waste-1",
   amount: "10.000000",
   ...EMPTY_TYPE_SPECIFIC_VALUES,

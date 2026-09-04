@@ -15,6 +15,7 @@ export const counterpartyFormSchema = z.object({
       message: "УНП — ровно 9 цифр",
     }),
   address: z.string().max(255, "Не более 255 символов"),
+  contact: z.string().max(255, "Не более 255 символов"),
   is_individual: z.boolean(),
   is_active: z.boolean(),
 });
@@ -26,6 +27,7 @@ export const counterpartyFormDefaultValues: CounterpartyFormValues = {
   full_name: "",
   unp: "",
   address: "",
+  contact: "",
   is_individual: false,
   is_active: true,
 };

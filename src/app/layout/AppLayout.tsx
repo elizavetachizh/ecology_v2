@@ -49,8 +49,12 @@ function AppShell() {
           onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
           onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
         />
-        <main className="min-h-0 flex-1 overflow-auto p-3 sm:p-4 lg:p-6">
-          <Outlet />
+        {/* Padding on an inner wrapper: padding on the scroller lets sticky
+            form headers leak fields into the gap under AppHeader. */}
+        <main className="min-h-0 flex-1 overflow-auto">
+          <div className="p-3 sm:p-4 lg:p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

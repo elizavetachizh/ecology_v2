@@ -8,6 +8,8 @@ export type PageContextBarProps = {
   actions?: ReactNode;
   /**
    * Sticky chrome for forms (default).
+   * Negative horizontal margin matches AppLayout page padding so the bar
+   * covers the full scrollport and content cannot peek above it.
    * List pages: `sticky={false}` — обычный page header без прилипания.
    */
   sticky?: boolean;
@@ -28,7 +30,7 @@ export function PageContextBar({
       className={cn(
         "flex flex-wrap items-start justify-between gap-3",
         sticky &&
-          "sticky top-0 z-20 -mx-2 border-b bg-background/95 px-2 py-3 backdrop-blur",
+          "sticky top-0 z-20 -mx-3 border-b bg-background px-3 py-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6",
         className,
       )}
     >

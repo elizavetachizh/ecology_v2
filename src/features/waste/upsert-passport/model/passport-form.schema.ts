@@ -17,7 +17,7 @@ const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
 
-const optionalUuid = z.union([z.string().uuid(), z.literal("")]);
+const optionalUuid = z.union([z.uuid(), z.literal("")]);
 
 export const passportFormSchema = z
   .object({
@@ -27,10 +27,10 @@ export const passportFormSchema = z
       .min(1, "Укажите номер паспорта")
       .max(255, "Не более 255 символов"),
     date: isoDate.min(1, "Укажите дату вывоза"),
-    unit_id: z.string().uuid("Выберите структурную единицу"),
-    recycling_contract_id: z.string().uuid("Выберите договор утилизации"),
+    unit_id: z.uuid("Выберите структурную единицу"),
+    recycling_contract_id: z.uuid("Выберите договор утилизации"),
     waste_ids: z
-      .array(z.string().uuid())
+      .array(z.uuid())
       .min(1, "Добавьте хотя бы один отход из перечня договора"),
     transport_type: z.enum(PassportTransportTypeValues, {
       error: "Выберите, кто перевозит",

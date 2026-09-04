@@ -4,8 +4,8 @@ import {
   AlertDescription,
   Field,
   FieldDescription,
-  FieldError,
   FieldLabel,
+  FormField,
   Input,
   Switch,
 } from "../../../../shared/ui";
@@ -39,10 +39,12 @@ export function CounterpartyFormFields({
         </Alert>
       ) : null}
 
-      <Field>
-        <FieldLabel htmlFor="name" required>
-          Наименование
-        </FieldLabel>
+      <FormField
+        htmlFor="name"
+        label="Наименование"
+        required
+        error={errors.name?.message}
+      >
         <Input
           id="name"
           {...register("name")}
@@ -51,11 +53,13 @@ export function CounterpartyFormFields({
           disabled={pending}
           aria-invalid={Boolean(errors.name)}
         />
-        <FieldError>{errors.name?.message}</FieldError>
-      </Field>
+      </FormField>
 
-      <Field>
-        <FieldLabel htmlFor="full_name">Полное наименование</FieldLabel>
+      <FormField
+        htmlFor="full_name"
+        label="Полное наименование"
+        error={errors.full_name?.message}
+      >
         <Input
           id="full_name"
           {...register("full_name")}
@@ -63,11 +67,14 @@ export function CounterpartyFormFields({
           disabled={pending}
           aria-invalid={Boolean(errors.full_name)}
         />
-        <FieldError>{errors.full_name?.message}</FieldError>
-      </Field>
+      </FormField>
 
-      <Field>
-        <FieldLabel htmlFor="unp">УНП</FieldLabel>
+      <FormField
+        htmlFor="unp"
+        label="УНП"
+        error={errors.unp?.message}
+        description="УНП — ровно 9 цифр. Можно не указывать."
+      >
         <Controller
           name="unp"
           control={control}
@@ -82,7 +89,6 @@ export function CounterpartyFormFields({
               placeholder="091234567"
               disabled={pending}
               aria-invalid={Boolean(errors.unp)}
-              aria-describedby="unp-hint"
               value={field.value}
               onBlur={field.onBlur}
               onChange={(event) =>
@@ -91,14 +97,13 @@ export function CounterpartyFormFields({
             />
           )}
         />
-        <FieldDescription id="unp-hint">
-          УНП — ровно 9 цифр. Можно не указывать.
-        </FieldDescription>
-        <FieldError>{errors.unp?.message}</FieldError>
-      </Field>
+      </FormField>
 
-      <Field>
-        <FieldLabel htmlFor="address">Адрес</FieldLabel>
+      <FormField
+        htmlFor="address"
+        label="Адрес"
+        error={errors.address?.message}
+      >
         <Input
           id="address"
           {...register("address")}
@@ -106,8 +111,21 @@ export function CounterpartyFormFields({
           disabled={pending}
           aria-invalid={Boolean(errors.address)}
         />
-        <FieldError>{errors.address?.message}</FieldError>
-      </Field>
+      </FormField>
+
+      <FormField
+        htmlFor="contact"
+        label="Контакты"
+        error={errors.contact?.message}
+      >
+        <Input
+          id="contact"
+          {...register("contact")}
+          placeholder="+375 17 000-00-00"
+          disabled={pending}
+          aria-invalid={Boolean(errors.contact)}
+        />
+      </FormField>
 
       <Field>
         <div className="flex items-start justify-between gap-3">

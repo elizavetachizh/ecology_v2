@@ -8,6 +8,8 @@ const valid = {
   contract_type: "recycling" as const,
   status: "active" as const,
   counterparty_id: "550e8400-e29b-41d4-a716-446655440000",
+  counterparty_address: "",
+  counterparty_contact: "",
   amount: "",
   with_ownership_transfer: false,
   transfer_purpose: "use" as const,
@@ -69,5 +71,21 @@ describe("contractFormSchema", () => {
         with_ownership_transfer: false,
       }).success,
     ).toBe(true);
+  });
+
+  it("rejects counterparty snapshot fields longer than 255", () => {
+    const tooLong = "x".repeat(256);
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        counterparty_address: tooLong,
+      }).success,
+    ).toBe(false);
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        counterparty_contact: tooLong,
+      }).success,
+    ).toBe(false);
   });
 });

@@ -10,6 +10,7 @@ const formedValues: OperationFormValues = {
   date: "2026-03-01",
   operation_type: "formed",
   unit_id: "unit-1",
+  instruction_id: "ins-1",
   waste_id: "waste-1",
   amount: "10.000000",
   ...EMPTY_TYPE_SPECIFIC_VALUES,
@@ -65,7 +66,15 @@ describe("map-operation-form", () => {
     expect(body.counterparty_id).toBeNull();
   });
 
-  it("starts create form with empty operation_type", () => {
-    expect(createEmptyOperationFormValues().operation_type).toBe("");
+  it("starts create form with empty operation_type and instruction", () => {
+    const empty = createEmptyOperationFormValues();
+    expect(empty.operation_type).toBe("");
+    expect(empty.instruction_id).toBe("");
+  });
+
+  it("does not send instruction_id in the write body", () => {
+    expect(toOperationWriteBody(formedValues)).not.toHaveProperty(
+      "instruction_id",
+    );
   });
 });

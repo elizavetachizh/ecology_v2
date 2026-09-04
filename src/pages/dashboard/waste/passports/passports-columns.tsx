@@ -1,3 +1,4 @@
+import { PrintPassportRowAction } from "../../../../features/waste/print-passport";
 import { Link } from "@tanstack/react-router";
 import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
@@ -94,6 +95,10 @@ function passportsColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
+          <PrintPassportRowAction
+            passportId={row.original.id}
+            number={row.original.number}
+          />
           {row.original.status === "active" ? (
             <DataTableRowAction
               label="Пометить как недействующий"

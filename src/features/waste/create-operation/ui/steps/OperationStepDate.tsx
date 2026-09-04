@@ -1,5 +1,5 @@
 import { useFormContext } from "react-hook-form";
-import { Field, FieldError, FieldLabel, Input } from "../../../../../shared/ui";
+import { FormField, Input } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 
 type OperationStepDateProps = {
@@ -13,10 +13,12 @@ export function OperationStepDate({ pending }: OperationStepDateProps) {
   } = useFormContext<OperationFormValues>();
 
   return (
-    <Field>
-      <FieldLabel htmlFor="operation-date" required>
-        Дата создания операции
-      </FieldLabel>
+    <FormField
+      error={errors.date?.message}
+      htmlFor="operation-date"
+      required
+      label={"Дата создания операции"}
+    >
       <Input
         id="operation-date"
         type="date"
@@ -24,7 +26,6 @@ export function OperationStepDate({ pending }: OperationStepDateProps) {
         aria-invalid={Boolean(errors.date)}
         {...register("date")}
       />
-      <FieldError>{errors.date?.message}</FieldError>
-    </Field>
+    </FormField>
   );
 }

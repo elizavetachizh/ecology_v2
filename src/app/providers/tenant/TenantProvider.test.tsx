@@ -16,6 +16,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getTenants, useTenant } from "../../../entities/tenant";
 import { getCurrentUser } from "../../../entities/user";
+import { currentUser } from "../../../entities/user/model/user.fixture";
 import {
   clearAllActiveTenantIds,
   readActiveTenantId,
@@ -41,15 +42,10 @@ vi.mock("../../../entities/tenant", async (importOriginal) => {
 const getCurrentUserMock = vi.mocked(getCurrentUser);
 const getTenantsMock = vi.mocked(getTenants);
 
-const user = {
-  id: 1,
+const user = currentUser({
   realm: "tenant-01",
-  uuid: "user-id",
-  username: "testuser",
-  email: "test@example.com",
-  roles: ["operator"],
   issuer: "https://auth.example.com/realms/tenant-01",
-};
+});
 
 const twoTenants = [
   {
@@ -204,6 +200,15 @@ describe("TenantProvider", () => {
       expect(readActiveTenantId("tenant-01")).toBe("tenant-1");
       expect(router.state.location.search.tenant).toBe("tenant-1");
     });
+  });
+
+  it("stays without an active tenant when the filtered list is empty", async () => {
+    getTenantsMock.mockResolvedValue([]);
+    await renderProvider();
+
+    expect(await screen.findByText("testuser")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByTestId("active-tenant")).toHaveTextContent("none");
   });
 
   it("clearSessionState removes persisted tenant ids", async () => {

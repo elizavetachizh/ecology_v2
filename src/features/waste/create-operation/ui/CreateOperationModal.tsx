@@ -65,9 +65,6 @@ function CreateOperationModalForm({
   onSaved,
 }: CreateOperationModalFormProps) {
   const [step, setStep] = useState(1);
-  const [selectedInstructionId, setSelectedInstructionId] = useState<
-    string | undefined
-  >();
   const { form, error, pending, onSubmit, clearError } = useCreateOperationForm(
     {
       onSaved,
@@ -154,25 +151,11 @@ function CreateOperationModalForm({
             {step === 2 ? (
               <OperationStepUnit
                 pending={pending}
-                onUnitChange={() => {
-                  setSelectedInstructionId(undefined);
-                  resetAfterUnitChange(form.setValue);
-                }}
+                onUnitChange={() => resetAfterUnitChange(form.setValue)}
               />
             ) : null}
-            {step === 3 ? (
-              <OperationStepBinding
-                pending={pending}
-                selectedInstructionId={selectedInstructionId}
-                onInstructionIdChange={setSelectedInstructionId}
-              />
-            ) : null}
-            {step === 4 ? (
-              <OperationStepDetails
-                pending={pending}
-                instructionId={selectedInstructionId}
-              />
-            ) : null}
+            {step === 3 ? <OperationStepBinding pending={pending} /> : null}
+            {step === 4 ? <OperationStepDetails pending={pending} /> : null}
           </div>
 
           <ModalFooter>

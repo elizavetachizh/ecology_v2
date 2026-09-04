@@ -124,16 +124,16 @@ function renderStep() {
       defaultValues: {
         ...createEmptyOperationFormValues(),
         unit_id: "unit-1",
+        instruction_id: "ins-1",
         waste_id: "waste-1",
       },
     });
     return <FormProvider {...form}>{children}</FormProvider>;
   }
 
-  return render(
-    <OperationStepDetails pending={false} instructionId="ins-1" />,
-    { wrapper: Wrapper },
-  );
+  return render(<OperationStepDetails pending={false} />, {
+    wrapper: Wrapper,
+  });
 }
 
 afterEach(cleanup);
@@ -169,6 +169,11 @@ describe("OperationStepDetails", () => {
       screen.getByText("12345678901 — Отход тестовый"),
     ).toBeInTheDocument();
     expect(screen.getByText("4 класс опасности · кг")).toBeInTheDocument();
+    expect(useUiwListQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scope: expect.objectContaining({ instructionId: "ins-1" }),
+      }),
+    );
   });
 
   it("prefers the unit path from the tree over the brief name", () => {

@@ -24,6 +24,7 @@ const emptySpecific = {
 const base = {
   date: "2026-03-01",
   unit_id: UNIT_ID,
+  instruction_id: "",
   waste_id: WASTE_ID,
   amount: "10.5",
   ...emptySpecific,

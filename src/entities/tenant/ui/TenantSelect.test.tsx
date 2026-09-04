@@ -50,6 +50,16 @@ describe("TenantSelect", () => {
     expect(onValueChange).toHaveBeenCalledWith("child");
   });
 
+  it("disables the combobox when the tenant list is empty", () => {
+    render(<TenantSelect tenants={[]} value={null} onValueChange={vi.fn()} />);
+
+    const trigger = screen.getByRole("combobox", {
+      name: "Активная организация",
+    });
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveTextContent("Нет доступных организаций");
+  });
+
   it("filters the tree by search and keeps the parent of a match", () => {
     render(
       <TenantSelect tenants={[parent]} value={null} onValueChange={vi.fn()} />,
