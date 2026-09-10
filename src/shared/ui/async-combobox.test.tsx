@@ -82,9 +82,7 @@ describe("AsyncCombobox", () => {
 
   it("shows the empty message and forwards search", () => {
     const setSearch = vi.fn();
-    render(
-      <Harness options={[]} search="xyz" setSearch={setSearch} />,
-    );
+    render(<Harness options={[]} search="xyz" setSearch={setSearch} />);
 
     fireEvent.click(screen.getByRole("combobox", { name: "Отход" }));
     expect(screen.getByText("Ничего не найдено")).toBeInTheDocument();
@@ -129,13 +127,21 @@ describe("AsyncCombobox", () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it("disables the refresh button while refreshing", () => {
-    render(<Harness onRefresh={vi.fn()} refreshing />);
+  it("applies labelStyles to option labels", () => {
+    render(
+      <Harness
+        options={[
+          {
+            value: "child",
+            label: "ГРС",
+            labelStyles: { paddingLeft: "0.75rem" },
+          },
+        ]}
+      />,
+    );
 
     fireEvent.click(screen.getByRole("combobox", { name: "Отход" }));
-
-    expect(
-      screen.getByRole("button", { name: "Обновить список" }),
-    ).toBeDisabled();
+    const option = screen.getByRole("option", { name: "ГРС" });
+    expect(option.querySelector("span")?.style.paddingLeft).toBe("0.75rem");
   });
 });

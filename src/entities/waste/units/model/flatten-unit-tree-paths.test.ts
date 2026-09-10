@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   flattenUnitTreePaths,
   formatUnitPathLabel,
+  unitTreeDepth,
+  unitTreeDepthStyle,
 } from "./flatten-unit-tree-paths";
 import type { Unit, UnitTree } from "./units.types";
 
@@ -53,15 +55,17 @@ describe("formatUnitPathLabel", () => {
   it("joins names with arrows", () => {
     expect(
       formatUnitPathLabel([
-        { name: "подразделение 1" },
-        { name: "подразделение 1.1" },
-        { name: "подразделение 1.1.1" },
+        { name: "подразделение 1", short_name: null },
+        { name: "подразделение 1.1", short_name: null },
+        { name: "подразделение 1.1.1", short_name: null },
       ]),
     ).toBe("подразделение 1 -> подразделение 1.1 -> подразделение 1.1.1");
   });
 
   it("returns a single name for a root node", () => {
-    expect(formatUnitPathLabel([{ name: "корень" }])).toBe("корень");
+    expect(formatUnitPathLabel([{ name: "корень", short_name: null }])).toBe(
+      "корень",
+    );
   });
 });
 
@@ -109,7 +113,25 @@ describe("flattenUnitTreePaths", () => {
     ]);
   });
 
+  it("skips POD-9 nodes and their children", () => {
+    const items = flattenUnitTreePaths(forest, { excludePod9: true });
+    expect(items.map((item) => item.unit.id)).toEqual([
+      "dept-1",
+      "dept-1.1",
+      "dept-2",
+    ]);
+  });
+
   it("returns an empty list for an empty forest", () => {
     expect(flattenUnitTreePaths([])).toEqual([]);
+  });
+
+  it("indents children relative to the root", () => {
+    const items = flattenUnitTreePaths(forest);
+    expect(items.map((item) => unitTreeDepth(item.path))).toEqual([
+      0, 1, 2, 2, 0,
+    ]);
+    expect(unitTreeDepthStyle(0)).toEqual({ paddingLeft: "0rem" });
+    expect(unitTreeDepthStyle(2)).toEqual({ paddingLeft: "1.5rem" });
   });
 });

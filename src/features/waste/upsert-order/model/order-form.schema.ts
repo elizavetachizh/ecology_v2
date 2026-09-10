@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 const isoDate = z
   .string()
@@ -12,21 +13,15 @@ export const orderFormSchema = z.object({
     .max(255, "Не более 255 символов"),
   start_date: isoDate,
   unit_id: z
-    .uuid({ message: "Выберите корректное подразделение" })
-    .or(z.literal("")) // Разрешаем пустую строку
-    .transform((val) => (val === "" ? undefined : val)) // Превращаем в undefined для отправки
+    .union([
+      z.uuid({ message: "Выберите корректное подразделение" }),
+      z.literal(""),
+      z.null(),
+    ])
     .optional(),
 });
 
 export type OrderFormValues = z.infer<typeof orderFormSchema>;
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export const orderFormDefaultValues: OrderFormValues = {
   number: "",

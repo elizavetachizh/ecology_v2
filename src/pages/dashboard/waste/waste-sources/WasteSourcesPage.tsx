@@ -15,17 +15,9 @@ import {
 import { WasteSourceFormModal } from "../../../../features/waste/upsert-waste-source";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
   Button,
   ConfirmDialog,
-  DataTable,
-  DataTablePagination,
   ListSearchField,
-  PageContextBar,
-  DirectoryBreadcrumb,
-  TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { wasteSourcesColumns } from "./waste-sources-columns";
@@ -33,6 +25,7 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { routes } from "../../../../shared/config/routes";
 
 export function WasteSourcesPage() {
@@ -105,117 +98,97 @@ export function WasteSourcesPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить источники</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate
+    <DirectoryListChrome
       tenantId={activeTenantId}
       resourceLabel="источников образования"
-    >
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Источники образования"
-              directoryTo={routes.directories.wasteSources.list}
-            />
-          }
-          title="Источники образования"
-          description="Справочник источников образования отходов организации."
-          actions={
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                setEditing(null);
-                setModalMode("create");
-              }}
-            >
-              <Plus className="size-3.5" />
-              Добавить источник
-            </Button>
-          }
-        />
-
+      error={error}
+      errorTitle="Не удалось загрузить источники"
+      header={{
+        title: "Источники образования",
+        description: "Справочник источников образования отходов организации.",
+        directoryLabel: "Источники образования",
+        directoryTo: routes.directories.wasteSources.list,
+        actions: (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              setEditing(null);
+              setModalMode("create");
+            }}
+          >
+            <Plus className="size-3.5" />
+            Добавить источник
+          </Button>
+        ),
+      }}
+      toolbar={
         <ListSearchField
           value={search.q ?? ""}
           placeholder="Поиск по наименованию"
           onSearch={(q) => patchSearch({ q: q || undefined })}
         />
-
-        <DataTable
-          columns={columns}
-          data={sources}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as WasteSourceSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Источников пока нет"
-          emptyDescription="Создайте первый источник образования отходов."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
-        <WasteSourceFormModal
-          open={modalMode !== null}
-          mode={modalMode === "edit" ? "edit" : "create"}
-          initial={editing}
-          onOpenChange={(open) => {
-            if (!open) {
+      }
+      columns={columns}
+      data={sources}
+      loading={loading}
+      emptyTitle="Источников пока нет"
+      emptyDescription="Создайте первый источник образования отходов."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as WasteSourceSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
+        <>
+          <WasteSourceFormModal
+            open={modalMode !== null}
+            mode={modalMode === "edit" ? "edit" : "create"}
+            initial={editing}
+            onOpenChange={(open) => {
+              if (!open) {
+                setModalMode(null);
+                setEditing(null);
+              }
+            }}
+            onSaved={() => {
+              toast.success(
+                modalMode === "edit"
+                  ? "Источник успешно обновлён"
+                  : "Источник успешно создан",
+              );
               setModalMode(null);
               setEditing(null);
+            }}
+          />
+          <ConfirmDialog
+            open={deleting !== null}
+            confirmDisabled={deleteMutation.isPending}
+            onOpenChange={(open) => {
+              if (!open) setDeleting(null);
+            }}
+            title="Удалить источник?"
+            confirmLabel="Удалить"
+            description={
+              <>
+                Источник «{deleting?.name}» будет удалён из справочника. В
+                связанных привязках отходов поле источника станет пустым.
+              </>
             }
-          }}
-          onSaved={() => {
-            toast.success(
-              modalMode === "edit"
-                ? "Источник успешно обновлён"
-                : "Источник успешно создан",
-            );
-            setModalMode(null);
-            setEditing(null);
-          }}
-        />
-
-        <ConfirmDialog
-          open={deleting !== null}
-          confirmDisabled={deleteMutation.isPending}
-          onOpenChange={(open) => {
-            if (!open) setDeleting(null);
-          }}
-          title="Удалить источник?"
-          confirmLabel="Удалить"
-          description={
-            <>
-              Источник «{deleting?.name}» будет удалён из справочника. В
-              связанных привязках отходов поле источника станет пустым.
-            </>
-          }
-          onConfirm={() => {
-            if (deleting) void deleteMutation.mutateAsync(deleting.id);
-          }}
-        />
-      </div>
-    </TenantRequiredGate>
+            onConfirm={() => {
+              if (deleting) void deleteMutation.mutateAsync(deleting.id);
+            }}
+          />
+        </>
+      }
+    />
   );
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 const isoDate = z
   .string()
@@ -18,14 +19,6 @@ export const ttnFormSchema = z.object({
 });
 
 export type TtnFormValues = z.infer<typeof ttnFormSchema>;
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export const ttnFormDefaultValues: TtnFormValues = {
   number: "",

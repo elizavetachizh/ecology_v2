@@ -16,7 +16,7 @@ describe("standardWriteErrorMessage", () => {
       standardWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 409", 409, "http_error"),
       ),
-    ).toMatch(/уже есть норматив/);
+    ).toMatch(/норматив с такой датой начала/);
   });
 
   it("maps 400 to waste copy", () => {

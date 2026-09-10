@@ -47,15 +47,17 @@ function ModalOverlay({
 
 function ModalContent({
   className,
+  overlayClassName,
   children,
   showClose = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showClose?: boolean;
+  overlayClassName?: string;
 }) {
   return (
     <ModalPortal>
-      <ModalOverlay />
+      <ModalOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="modal-content"
         className={cn(
@@ -117,7 +119,10 @@ function ModalTitle({
   return (
     <DialogPrimitive.Title
       data-slot="modal-title"
-      className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+      className={cn(
+        "text-lg font-semibold leading-none tracking-tight",
+        className,
+      )}
       {...props}
     />
   );

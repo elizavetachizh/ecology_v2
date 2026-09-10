@@ -35,7 +35,7 @@ export function DateFilterInput({
       {...props}
       ref={inputRef}
       type="date"
-      className={cn("w-40", className)}
+      className={cn("w-36", className)}
       defaultValue={committed}
       onFocus={(event) => {
         focusedRef.current = true;

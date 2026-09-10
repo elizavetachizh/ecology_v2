@@ -8,7 +8,7 @@ import {
   type WasteInstructionUnit,
   type WasteInstructionUnitScope,
 } from "../../../../entities/waste/waste-instruction-units";
-import { invalidateBindingQueries } from "../../../../shared/lib/invalidate-binding-queries";
+import { invalidateBindingQueries } from "../../bind-unit-instruction-waste";
 import {
   bindWiuFormDefaultValues,
   bindWiuFormSchema,

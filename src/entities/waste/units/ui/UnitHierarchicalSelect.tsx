@@ -1,54 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
-import {
-  getUnit,
-  unitsQueryKeys,
-  type Unit,
-  useUnitsTreeQuery,
-  type UnitTree,
-} from "../../../../entities/waste/units";
-import { AsyncCombobox, Badge } from "../../../../shared/ui";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AsyncCombobox, Badge } from "../../../../shared/ui";
 import { useDebounce } from "../../../../shared/hooks";
+import { getUnit } from "../api/get-unit";
+import {
+  flattenUnitTreePaths,
+  formatUnitPathLabel,
+  unitTreeDepth,
+  unitTreeDepthStyle,
+} from "../model/flatten-unit-tree-paths";
+import { unitsQueryKeys } from "../model/unit-query-keys";
+import type { Unit } from "../model/units.types";
+import { useUnitsTreeQuery } from "../model/use-units-tree-query";
 
-export function flattenTree(
-  nodes: UnitTree[],
-  parentPath: string[] = [],
-): {
-  id: string;
-  name: string;
-  short_name: string | null;
-  is_pod9?: boolean;
-  path: string[];
-}[] {
-  let result: {
-    id: string;
-    name: string;
-    short_name: string | null;
-    is_pod9?: boolean;
-    path: string[];
-  }[] = [];
-  for (const node of nodes) {
-    const path = [...parentPath, node.name];
-    result.push({
-      id: node.id,
-      name: node.name,
-      short_name: node.short_name,
-      is_pod9: node.is_pod9,
-      path,
-    });
-    if (node.children && node.children.length) {
-      result = result.concat(flattenTree(node.children, path));
-    }
-  }
-  return result;
-}
-
-type ParentUnitSelectProps = {
+type UnitHierarchicalSelectProps = {
   tenantId: string | null;
   value: string;
   /** Текущая единица (edit) — нельзя выбрать себя родителем. */
   excludeUnitId?: string;
-  is_pod9?: boolean;
+  /**
+   * Фильтр как query `is_pod9` у GET /mdm/units:
+   * не задан — всё дерево;
+   * true — только места учёта ПОД-9;
+   * false — без ПОД-9.
+   */
+  isPod9?: boolean;
   /** Для ПОД-9 родитель обязателен — меняем placeholder. */
   required?: boolean;
   onChange: (unit: Unit | null) => void;
@@ -78,30 +54,30 @@ export function UnitHierarchicalSelect({
   tenantId,
   value,
   excludeUnitId,
-  is_pod9 = false,
+  isPod9,
   required = false,
   onChange,
-}: ParentUnitSelectProps) {
+}: UnitHierarchicalSelectProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
-  const listParams = {
-    search: debouncedSearch || undefined,
-    limit: 20,
-    offset: 0,
-    is_pod9,
-  };
+  const pod9Only = isPod9 === true;
+  const excludePod9 = isPod9 === false;
 
   const { tree, loading } = useUnitsTreeQuery({
     tenantId,
     enabled: Boolean(tenantId),
-    params: listParams,
+    params: {
+      search: debouncedSearch || undefined,
+      sort: "name",
+      order: "asc",
+      ...(isPod9 != null ? { is_pod9: isPod9 } : {}),
+    },
   });
 
-  // Плоский список всех узлов с путями
-  const flatItems = useMemo(() => {
-    if (!tree) return [];
-    return flattenTree(tree);
-  }, [tree]);
+  const items = useMemo(
+    () => flattenUnitTreePaths(tree, { pod9Only, excludePod9 }),
+    [tree, pod9Only, excludePod9],
+  );
 
   const parentDetailQuery = useQuery({
     queryKey: unitsQueryKeys.detail(tenantId ?? "none", value || "none"),
@@ -109,13 +85,13 @@ export function UnitHierarchicalSelect({
     enabled: Boolean(tenantId && value),
   });
 
-  const filtered = flatItems.filter((unit) => unit.id !== excludeUnitId);
+  const selectedFromTree = items.find((item) => item.unit.id === value);
   const selectedUnit =
-    filtered.find((unit) => unit.id === value) ??
+    selectedFromTree?.unit ??
     (parentDetailQuery.data?.id === value ? parentDetailQuery.data : null);
 
   const isPod9ById = new Map(
-    filtered.map((unit) => [unit.id, unit.is_pod9] as const),
+    items.map((item) => [item.unit.id, item.unit.is_pod9] as const),
   );
   if (selectedUnit) {
     isPod9ById.set(selectedUnit.id, selectedUnit.is_pod9);
@@ -123,13 +99,22 @@ export function UnitHierarchicalSelect({
 
   return (
     <AsyncCombobox
-      options={filtered.map((unit) => ({
-        value: unit.id,
-        label: unitLabel(unit),
-        labelStyles: { marginLeft: `${unit.path.length}rem` },
+      options={items.map((item) => ({
+        value: item.unit.id,
+        label: pod9Only ? formatUnitPathLabel(item.path) : unitLabel(item.unit),
+        disabled: item.unit.id === excludeUnitId,
+        labelStyles: pod9Only
+          ? undefined
+          : unitTreeDepthStyle(unitTreeDepth(item.path)),
       }))}
       value={value}
-      selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
+      selectedLabel={
+        selectedUnit
+          ? pod9Only && selectedFromTree
+            ? formatUnitPathLabel(selectedFromTree.path)
+            : unitLabel(selectedUnit)
+          : undefined
+      }
       renderOption={(option) =>
         renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
       }
@@ -141,21 +126,25 @@ export function UnitHierarchicalSelect({
           onChange(null);
           return;
         }
-        const item =
-          filtered.find((unit) => unit.id === id) ??
-          (parentDetailQuery.data?.id === id ? parentDetailQuery.data : null);
-        onChange(item);
+        const fromTree = items.find((item) => item.unit.id === id)?.unit;
+        const fromDetail =
+          parentDetailQuery.data?.id === id ? parentDetailQuery.data : null;
+        onChange(fromTree ?? fromDetail);
       }}
       placeholder={
-        required
-          ? "Выберите родительскую единицу…"
-          : "Без родителя (корневая единица) или выберите…"
+        pod9Only
+          ? "Выберите место учёта…"
+          : required
+            ? "Выберите родительскую единицу…"
+            : "Все структурные единицы"
       }
       searchPlaceholder="Поиск по названию или краткому"
       emptyMessage={
         loading
           ? "Загрузка…"
-          : "Ничего не найдено. Создайте родителя или уточните поиск."
+          : pod9Only
+            ? "Нет мест учёта ПОД-9. Добавьте место учёта в структуре организации."
+            : "Ничего не найдено. Создайте родителя или уточните поиск."
       }
       className="w-full"
       contentClassName="w-full"

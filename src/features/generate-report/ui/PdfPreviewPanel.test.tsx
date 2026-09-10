@@ -20,6 +20,7 @@ describe("PdfPreviewPanel", () => {
       <PdfPreviewPanel
         open
         onOpenChange={vi.fn()}
+        title="ПОД-9"
         periodLabel="01.01.2026 — 01.03.2026"
         preview={preview}
         error={null}

@@ -9,7 +9,7 @@ export function toOrderWriteBody(values: OrderFormValues): OrderCreate {
   return {
     number: values.number.trim(),
     start_date: values.start_date,
-    unit_id: values.unit_id ?? null,
+    unit_id: values.unit_id ? values.unit_id : null,
   };
 }
 
@@ -21,6 +21,6 @@ export function toOrderFormValues(order: Order): OrderFormValues {
   return {
     number: order.number,
     start_date: order.start_date,
-    unit_id: order.unit_id,
+    unit_id: order.unit_id ?? "",
   };
 }

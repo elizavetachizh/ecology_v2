@@ -1,22 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { pod10ReportErrorMessage } from "./pod10-report-error";
-import { ApiError } from "../../../../shared/api/api-client.ts";
+import { ApiError } from "../../../shared/api/api-client";
 
 describe("pod10ReportErrorMessage", () => {
-  it("maps 404 to unit/instruction copy", () => {
-    expect(
-      pod10ReportErrorMessage(
-        new ApiError("Сервер вернул ошибку 404", 404, "http_error"),
-      ),
-    ).toMatch(/Не удалось сформировать отчёт ПОД-10/);
-  });
-
-  it("maps 400 to period copy", () => {
+  it("maps 400 to period and territory copy", () => {
     expect(
       pod10ReportErrorMessage(
         new ApiError("Сервер вернул ошибку 400", 400, "http_error"),
       ),
-    ).toMatch(/период/);
+    ).toMatch(/период и территорию/);
   });
 
   it("maps 502/503 for PDF conversion", () => {

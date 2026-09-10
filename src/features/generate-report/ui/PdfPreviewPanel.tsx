@@ -1,5 +1,5 @@
 import { Download, LoaderCircle } from "lucide-react";
-import type { GeneratedReportFile } from "../model/preview.types";
+import type { GeneratedReportFile } from "../../../entities/reports";
 import {
   Alert,
   AlertDescription,
@@ -25,7 +25,7 @@ type PdfPreviewPanelProps = {
   onRetry: () => void;
   onDownloadExcel: () => void;
   onDownloadPdf: () => void;
-  title?: string;
+  title: string;
 };
 
 export function PdfPreviewPanel({
@@ -40,13 +40,16 @@ export function PdfPreviewPanel({
   onRetry,
   onDownloadExcel,
   onDownloadPdf,
-  title = "ПОД-9",
+  title,
 }: PdfPreviewPanelProps) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
-      <ModalContent className="h-[min(90vh,860px)] max-h-[90vh] max-w-[min(96vw,1440px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden p-0">
+      <ModalContent
+        overlayClassName="z-[60]"
+        className="z-[60] h-[min(90vh,860px)] max-h-[90vh] max-w-[min(96vw,1440px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden p-0"
+      >
         <ModalHeader className="border-b border-border px-6 py-5">
-          <ModalTitle>Предпросмотр отчета {title}</ModalTitle>
+          <ModalTitle>Предпросмотр {title}</ModalTitle>
           <ModalDescription>
             Период: {periodLabel}
             {preview ? ` · ${preview.fileName}` : ""}

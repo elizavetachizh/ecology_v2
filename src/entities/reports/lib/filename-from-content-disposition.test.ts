@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   filenameFromContentDisposition,
-  pod9FallbackFileName,
+  reportFallbackFileName,
 } from "./filename-from-content-disposition";
 
 describe("filenameFromContentDisposition", () => {
@@ -30,13 +30,13 @@ describe("filenameFromContentDisposition", () => {
   });
 });
 
-describe("pod9FallbackFileName", () => {
+describe("reportFallbackFileName", () => {
   it("matches backend filename shape", () => {
-    expect(pod9FallbackFileName("2026-01-01", "2026-03-01")).toBe(
+    expect(reportFallbackFileName("pod-9", "2026-01-01", "2026-03-01")).toBe(
       "pod-9_2026-01-01_2026-03-01.xlsx",
     );
-    expect(pod9FallbackFileName("2026-01-01", "2026-03-01", "pdf")).toBe(
-      "pod-9_2026-01-01_2026-03-01.pdf",
-    );
+    expect(
+      reportFallbackFileName("pod-10", "2026-01-01", "2026-03-01", "pdf"),
+    ).toBe("pod-10_2026-01-01_2026-03-01.pdf");
   });
 });

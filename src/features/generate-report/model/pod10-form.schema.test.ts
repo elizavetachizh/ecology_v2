@@ -1,20 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { pod10FormSchema } from "./pod10-form.schema.ts";
+import { pod10FormSchema } from "./pod10-form.schema";
 
 const valid = {
-  district_id: "550e8400-e29b-41d4-a716-446655440000",
-  region_id: "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
   start_date: "2026-01-01",
   end_date: "2026-03-01",
 };
 
 describe("pod10FormSchema", () => {
-  it("accepts backend query params", () => {
+  it("accepts period without geo", () => {
     expect(pod10FormSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("requires a region_id", () => {
-    const parsed = pod10FormSchema.safeParse({ ...valid, region_id: "" });
+  it("accepts optional region, district and entry_date", () => {
+    expect(
+      pod10FormSchema.safeParse({
+        ...valid,
+        region_id: 5,
+        district_id: 12,
+        entry_date: "2026-03-02",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects invalid region_id", () => {
+    const parsed = pod10FormSchema.safeParse({ ...valid, region_id: "minsk" });
     expect(parsed.success).toBe(false);
   });
 
@@ -25,9 +34,9 @@ describe("pod10FormSchema", () => {
     });
     expect(parsed.success).toBe(false);
     if (!parsed.success) {
-      expect(parsed.error.issues.some((issue) => issue.path[0] === "end_date")).toBe(
-        true,
-      );
+      expect(
+        parsed.error.issues.some((issue) => issue.path[0] === "end_date"),
+      ).toBe(true);
     }
   });
 

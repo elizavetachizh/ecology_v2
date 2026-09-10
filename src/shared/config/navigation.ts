@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { DIRECTORY_CARDS } from "./directories";
+import { REPORT_NAV_ITEMS } from "./reports";
 import { routes } from "./routes";
 
 export type NavLeaf = {
@@ -75,8 +76,7 @@ export const navigationGroups: NavGroup[] = [
     title: "Отчеты",
     icon: BookOpen,
     children: [
-      { id: "pod-9", title: "ПОД-9", to: routes.reports.pod9 },
-      { id: "pod-10", title: "ПОД-10", to: routes.reports.pod10 },
+      ...REPORT_NAV_ITEMS,
       {
         id: "stat-1-waste",
         title: "Статистика 1-отходы",

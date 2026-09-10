@@ -6,6 +6,7 @@ import {
   UsePurposeValues,
   type OperationType,
 } from "../../../../entities/waste/operations";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 export const operationDateSchema = z
   .string()
@@ -199,14 +200,6 @@ export const EMPTY_TYPE_SPECIFIC_VALUES: Pick<
   passport_id: "",
   ttn_id: "",
 };
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export function createEmptyOperationFormValues(): OperationFormValues {
   return {

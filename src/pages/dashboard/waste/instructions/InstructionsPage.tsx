@@ -1,22 +1,15 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useTenant } from "../../../../entities/tenant";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-  Button,
   ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
   ListSearchField,
-  PageContextBar,
   Tabs,
   TabsList,
   TabsTrigger,
-  TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { useMutation } from "@tanstack/react-query";
@@ -37,6 +30,7 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { instructionsColumns } from "./instructions-columns";
 import { routes } from "../../../../shared/config/routes";
 
@@ -123,102 +117,79 @@ export function InstructionsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить инструкции</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="инструкций">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Инструкции"
-              directoryTo={routes.directories.instructions.list}
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="инструкций"
+      error={error}
+      errorTitle="Не удалось загрузить инструкции"
+      header={{
+        title: "Инструкции",
+        description:
+          "Первый шаг: создайте инструкцию по обращению с отходами. Затем заполните структурные единицы организации.",
+        directoryLabel: "Инструкции",
+        directoryTo: routes.directories.instructions.list,
+        createTo: routes.directories.instructions.new,
+        createLabel: "Создать инструкцию",
+      }}
+      toolbar={
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <ListSearchField
+              value={search.q ?? ""}
+              placeholder="Поиск по названию или краткому"
+              onSearch={(q) => patchSearch({ q: q || undefined })}
             />
-          }
-          title="Инструкции"
-          description="Первый шаг: создайте инструкцию по обращению с отходами. Затем заполните структурные единицы организации."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.instructions.new}>
-                <Plus className="size-3.5" />
-                Создать инструкцию
-              </Link>
-            </Button>
-          }
-        />
-
-        <div className="flex flex-wrap items-center gap-2">
-          <ListSearchField
-            value={search.q ?? ""}
-            placeholder="Поиск по названию или краткому"
-            onSearch={(q) => patchSearch({ q: q || undefined })}
-          />
-          <Tabs
-            value={search.status ?? "all"}
-            onValueChange={(value) =>
-              patchSearch({
-                status:
-                  value === "all" ? undefined : (value as InstructionStatus),
-              })
-            }
-            className="gap-0"
-          >
-            <TabsList aria-label="Статус">
-              <TabsTrigger value="all">Все</TabsTrigger>
-              {InstructionStatusValues.map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {INSTRUCTION_STATUS_LABEL[status]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {!loading && instructions.length === 0 ? (
-          <Alert variant="info">
-            <AlertTitle>Начните с инструкции</AlertTitle>
-            <AlertDescription>
-              Эколог сначала создаёт свой документ — инструкцию. После
-              сохранения система предложит перейти к созданию структурных
-              единиц.
-            </AlertDescription>
-          </Alert>
-        ) : null}
-
-        <DataTable
-          columns={columns}
-          data={instructions}
-          getRowId={(row) => row.id}
-          isLoading={loading}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as InstructionSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Инструкций пока нет"
-          emptyDescription="Создайте первую инструкцию — это отправная точка заполнения справочников."
-        />
-
-        <DataTablePagination
-          total={total}
-          limit={limit ?? DEFAULT_INSTRUCTIONS_LIST_LIMIT}
-          offset={offset ?? 0}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+            <Tabs
+              value={search.status ?? "all"}
+              onValueChange={(value) =>
+                patchSearch({
+                  status:
+                    value === "all" ? undefined : (value as InstructionStatus),
+                })
+              }
+              className="gap-0"
+            >
+              <TabsList aria-label="Статус">
+                <TabsTrigger value="all">Все</TabsTrigger>
+                {InstructionStatusValues.map((status) => (
+                  <TabsTrigger key={status} value={status}>
+                    {INSTRUCTION_STATUS_LABEL[status]}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+          {!loading && instructions.length === 0 ? (
+            <Alert variant="info">
+              <AlertTitle>Начните с инструкции</AlertTitle>
+              <AlertDescription>
+                Эколог сначала создаёт свой документ — инструкцию. После
+                сохранения система предложит перейти к созданию структурных
+                единиц.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+        </>
+      }
+      columns={columns}
+      data={instructions}
+      loading={loading}
+      emptyTitle="Инструкций пока нет"
+      emptyDescription="Создайте первую инструкцию — это отправная точка заполнения справочников."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as InstructionSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit ?? DEFAULT_INSTRUCTIONS_LIST_LIMIT}
+      offset={offset ?? 0}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deletingInstruction !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -238,7 +209,7 @@ export function InstructionsPage() {
             }
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

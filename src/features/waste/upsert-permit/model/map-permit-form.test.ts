@@ -57,4 +57,16 @@ describe("toPermitWriteBody", () => {
       }).status,
     ).toBe("active");
   });
+
+  it("sends null unit_id when subdivision is empty", () => {
+    expect(
+      toPermitWriteBody({
+        number: "Р-001",
+        start_date: "2026-01-15",
+        end_date: "",
+        unit_id: "",
+        burial_wastes: [],
+      }).unit_id,
+    ).toBeNull();
+  });
 });

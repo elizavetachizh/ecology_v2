@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { formatDate, formatDateTime } from "./format-date";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  addYearsIsoDate,
+  formatDate,
+  formatDateTime,
+  todayIsoDate,
+} from "./format-date";
 
 describe("formatDate", () => {
   it("formats an ISO date as dd.mm.yyyy", () => {
@@ -26,5 +31,27 @@ describe("formatDateTime", () => {
 
   it("returns a dash for empty values", () => {
     expect(formatDateTime(null)).toBe("—");
+  });
+});
+
+describe("addYearsIsoDate", () => {
+  it("shifts a calendar date by the given years", () => {
+    expect(addYearsIsoDate("2026-09-10", 5)).toBe("2031-09-10");
+  });
+
+  it("moves Feb 29 to Mar 1 when the target year is not a leap year", () => {
+    expect(addYearsIsoDate("2024-02-29", 5)).toBe("2029-03-01");
+  });
+});
+
+describe("todayIsoDate", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns local YYYY-MM-DD", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 1, 12, 0, 0));
+    expect(todayIsoDate()).toBe("2026-09-01");
   });
 });

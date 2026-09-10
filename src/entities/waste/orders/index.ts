@@ -19,9 +19,11 @@ export {
   ORDER_ALL_STATUS_LABEL,
   ORDER_STATUS_BADGE_VARIANT,
   ORDER_STATUS_LABEL,
+  ORDER_TENANT_WIDE_UNIT_LABEL,
   OrderAllStatusValues,
   OrderSortFields,
   OrderStatusValues,
+  orderUnitLabel,
 } from "./model/orders.types";
 export { ordersQueryKeys } from "./model/orders-query-keys";
 export { useOrdersListQuery } from "./model/use-orders-list-query";

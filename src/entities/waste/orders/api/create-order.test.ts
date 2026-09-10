@@ -30,6 +30,22 @@ describe("createOrder", () => {
     });
   });
 
+  it("posts tenant-wide order with null unit_id", async () => {
+    const body = {
+      number: "12-ОД",
+      start_date: "2024-01-15",
+      unit_id: null,
+    };
+    await createOrder(body);
+
+    expect(apiSendJsonMock).toHaveBeenCalledWith("/api/v1/mdm/orders", {
+      method: "POST",
+      body,
+      tenantScoped: true,
+      signal: undefined,
+    });
+  });
+
   it("forwards abort signal", async () => {
     const signal = new AbortController().signal;
     const body = {

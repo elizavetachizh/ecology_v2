@@ -2,13 +2,13 @@ import { ApiError } from "../../../../shared/api/api-client";
 
 export function orderWriteErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 404) {
-    return "Подразделение не найдено.";
+    return "Приказ или подразделение не найдено.";
   }
   if (error instanceof ApiError && error.status === 409) {
-    return "Для этого подразделения уже есть приказ с такой датой начала.";
+    return "Уже есть приказ с такой датой начала для этого подразделения или для всего предприятия.";
   }
   if (error instanceof ApiError && error.status === 422) {
-    return "Проверьте поля приказа: номер, дата начала, подразделение.";
+    return "Проверьте поля приказа: номер и дата начала.";
   }
   return error instanceof Error ? error.message : "Не удалось сохранить приказ";
 }

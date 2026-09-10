@@ -12,7 +12,7 @@ import {
   useUnitInstructionWastesListQuery,
   type UnitInstructionWaste,
 } from "../../../../entities/waste/unit-instruction-waste";
-import { invalidateBindingQueries } from "../../../../shared/lib/invalidate-binding-queries";
+import { invalidateBindingQueries } from "../model/invalidate-binding-queries";
 import {
   Alert,
   AlertDescription,

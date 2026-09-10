@@ -1,17 +1,22 @@
 import { z } from "zod";
 
+function normalizeDecimalSeparator(value: string): string {
+  return value.replace(",", ".");
+}
+
 const transportUnitSchema = z
   .string()
   .trim()
   .min(1, "Укажите транспортную единицу")
   .regex(
-    /^\d+(\.\d{1,6})?$/,
+    /^\d+([.,]\d{1,6})?$/,
     "Число от 0 до 999999.999999, не более 6 знаков после запятой",
   )
   .refine((value) => {
-    const n = Number(value);
+    const n = Number(normalizeDecimalSeparator(value));
     return Number.isFinite(n) && n >= 0 && n <= 999_999.999_999;
-  }, "Значение вне допустимого диапазона");
+  }, "Значение вне допустимого диапазона")
+  .transform(normalizeDecimalSeparator);
 
 export const bindWiuFormSchema = z.object({
   unit_id: z.uuid("Выберите структурную единицу ПОД-9"),

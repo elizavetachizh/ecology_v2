@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PassportTransportTypeValues } from "../../../../entities/waste/passports";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 export const PASSPORT_WASTE_PRODUCER_TYPE_LABEL = {
   self: "Самостоятельно",
@@ -76,14 +77,6 @@ export const passportFormSchema = z
   });
 
 export type PassportFormValues = z.infer<typeof passportFormSchema>;
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export const passportFormDefaultValues: PassportFormValues = {
   number: "",

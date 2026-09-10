@@ -8,22 +8,25 @@ import {
   type UnitInstructionWaste,
 } from "../../../../entities/waste/unit-instruction-waste";
 import { ApiError } from "../../../../shared/api/api-client";
-import { invalidateBindingQueries } from "../../../../shared/lib/invalidate-binding-queries";
+import { invalidateBindingQueries } from "./invalidate-binding-queries";
 import { useBindUiwForm } from "./use-bind-uiw-form";
 
-vi.mock("../../../../entities/waste/unit-instruction-waste", async (importOriginal) => {
-  const actual =
-    await importOriginal<
-      typeof import("../../../../entities/waste/unit-instruction-waste")
-    >();
-  return {
-    ...actual,
-    createUnitInstructionWaste: vi.fn(),
-    updateUnitInstructionWaste: vi.fn(),
-  };
-});
+vi.mock(
+  "../../../../entities/waste/unit-instruction-waste",
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import("../../../../entities/waste/unit-instruction-waste")
+      >();
+    return {
+      ...actual,
+      createUnitInstructionWaste: vi.fn(),
+      updateUnitInstructionWaste: vi.fn(),
+    };
+  },
+);
 
-vi.mock("../../../../shared/lib/invalidate-binding-queries", () => ({
+vi.mock("./invalidate-binding-queries", () => ({
   invalidateBindingQueries: vi.fn(),
 }));
 

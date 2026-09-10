@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 const isoDate = z
   .string()
@@ -17,7 +18,13 @@ const wasteAmount = z
 export const standardFormSchema = z
   .object({
     start_date: isoDate,
-    unit_id: z.uuid("Выберите подразделение"),
+    unit_id: z
+      .union([
+        z.uuid({ message: "Выберите корректное подразделение" }),
+        z.literal(""),
+        z.null(),
+      ])
+      .optional(),
     wastes: z.array(
       z.object({
         waste_id: z.union([z.uuid(), z.literal("")]),
@@ -51,14 +58,6 @@ export const standardFormSchema = z
 
 export type StandardFormValues = z.infer<typeof standardFormSchema>;
 export type StandardFormWaste = StandardFormValues["wastes"][number];
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export const emptyStandardWasteRow: StandardFormWaste = {
   waste_id: "",

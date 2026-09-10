@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileText } from "lucide-react";
+import { fetchPod9Report } from "../../../entities/reports";
 import { useTenant } from "../../../entities/tenant";
 import { useUnitsTreeQuery } from "../../../entities/waste/units";
 import {
@@ -10,34 +10,27 @@ import {
   useUnitInstructionWastesListQuery,
   useUnitInstructionsListQuery,
 } from "../../../entities/waste/unit-instruction-waste";
+import { REPORTS } from "../../../shared/config/reports";
 import { formatDate } from "../../../shared/lib/format-date";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  FormField,
-  FormSection,
-  Input,
-  PageContextBar,
-} from "../../../shared/ui";
-import { fetchPod9Report } from "../api/fetchPod9Report";
-import { downloadBlob } from "../../../shared/lib/download-blob.ts";
 import {
   pod9FormDefaultValues,
   pod9FormSchema,
   type Pod9FormValues,
 } from "../model/pod9-form.schema";
 import { pod9ReportErrorMessage } from "../model/pod9-report-error";
-import type { GeneratedReportFile } from "../model/preview.types";
 import { resolveReportInstructionId } from "../model/resolve-instruction-id";
-import { PdfPreviewPanel } from "./PdfPreviewPanel";
+import { useGenerateReport } from "../model/use-generate-report";
 import { Pod9InstructionField } from "./Pod9InstructionField";
 import { Pod9UnitField } from "./Pod9UnitField";
 import { Pod9WastesHint } from "./Pod9WastesHint";
+import { ReportGenerateForm } from "./ReportGenerateForm";
+import { ReportPeriodFields } from "./ReportPeriodFields";
 
-type ReportAction = "preview" | "download-xlsx" | "download-pdf";
+type Pod9ReportFormProps = {
+  showPageHeader?: boolean;
+};
 
-export function Pod9ReportForm() {
+export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
   const { activeTenantId } = useTenant();
   const form = useForm<Pod9FormValues>({
     resolver: zodResolver(pod9FormSchema),
@@ -115,200 +108,91 @@ export function Pod9ReportForm() {
     setValue,
   ]);
 
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [preview, setPreview] = useState<GeneratedReportFile | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [action, setAction] = useState<ReportAction | null>(null);
-  const requestRef = useRef<AbortController | null>(null);
-
-  const isPreviewLoading = action === "preview";
-  const isDownloadXlsxLoading = action === "download-xlsx";
-  const pending = action !== null;
-
-  const abortPending = () => {
-    requestRef.current?.abort();
-    requestRef.current = null;
-  };
-
-  const runPreview = async (values: Pod9FormValues) => {
-    console.log(values);
-    abortPending();
-    const controller = new AbortController();
-    requestRef.current = controller;
-
-    setPreviewOpen(true);
-    setPreview(null);
-    setPreviewError(null);
-    setDownloadError(null);
-    setAction("preview");
-
-    try {
-      setPreview(
-        await fetchPod9Report({ ...values, format: "pdf" }, controller.signal),
-      );
-    } catch (requestError) {
-      if (controller.signal.aborted) return;
-      setPreviewError(pod9ReportErrorMessage(requestError));
-    } finally {
-      if (!controller.signal.aborted) setAction(null);
-    }
-  };
-
-  const runDownloadXlsx = async (values: Pod9FormValues) => {
-    abortPending();
-    const controller = new AbortController();
-    requestRef.current = controller;
-
-    setDownloadError(null);
-    setAction("download-xlsx");
-
-    try {
-      const file = await fetchPod9Report(
-        { ...values, format: "xlsx" },
-        controller.signal,
-      );
-      if (controller.signal.aborted) return;
-      downloadBlob(file.blob, file.fileName);
-    } catch (requestError) {
-      if (controller.signal.aborted) return;
-      setDownloadError(pod9ReportErrorMessage(requestError));
-    } finally {
-      if (!controller.signal.aborted) setAction(null);
-    }
-  };
-
-  const handlePreviewOpenChange = (nextOpen: boolean) => {
-    setPreviewOpen(nextOpen);
-    if (!nextOpen && isPreviewLoading) {
-      abortPending();
-      setAction(null);
-    }
-  };
+  const generate = useGenerateReport<Pod9FormValues>({
+    fetchFile: (values, format, signal) =>
+      fetchPod9Report({ ...values, format }, signal),
+    mapError: pod9ReportErrorMessage,
+  });
 
   return (
-    <form className="mx-auto max-w-4xl space-y-6">
-      <PageContextBar
-        eyebrow="Отчёты"
-        title="ПОД-9"
-        description="Журнал учёта движения отходов: место учёта, инструкция и период. Отходы берутся из привязок, в строки — подтверждённые операции."
+    <ReportGenerateForm
+      report={REPORTS.pod9}
+      showPageHeader={showPageHeader}
+      pending={generate.pending}
+      downloadError={generate.downloadError}
+      onGenerate={() => void handleSubmit(generate.runPreview)()}
+      preview={{
+        open: generate.previewOpen,
+        onOpenChange: generate.handlePreviewOpenChange,
+        periodLabel: `${formatDate(startDate)} — ${formatDate(endDate)}`,
+        file: generate.preview,
+        error: generate.previewError,
+        isLoading: generate.isPreviewLoading,
+        isDownloading: generate.isDownloading,
+        onRetry: () => void handleSubmit(generate.runPreview)(),
+        onDownloadExcel: () => void handleSubmit(generate.runDownloadXlsx)(),
+        onDownloadPdf: generate.downloadPreviewPdf,
+      }}
+      afterSection={
+        <Pod9WastesHint
+          unitId={unitId}
+          instructionId={instructionId}
+          items={uiwQuery.items}
+          total={uiwQuery.total}
+          loading={uiwQuery.loading}
+          error={uiwQuery.error}
+        />
+      }
+    >
+      <Controller
+        name="unit_id"
+        control={control}
+        render={({ field }) => (
+          <Pod9UnitField
+            tree={units.tree}
+            loading={units.loading}
+            error={units.error}
+            value={field.value}
+            onChange={(next) => {
+              if (next !== field.value) {
+                setValue("instruction_id", "");
+              }
+              field.onChange(next);
+            }}
+            disabled={generate.pending}
+            errorMessage={errors.unit_id?.message}
+          />
+        )}
       />
 
-      <FormSection
-        title="Параметры отчёта"
-        description="Выберите место учёта ПОД-9 и инструкцию, по которой ведётся журнал. Период ограничивает операции в таблицах листов."
-      >
-        <Controller
-          name="unit_id"
-          control={control}
-          render={({ field }) => (
-            <Pod9UnitField
-              tree={units.tree}
-              loading={units.loading}
-              error={units.error}
-              value={field.value}
-              onChange={(next) => {
-                if (next !== field.value) {
-                  setValue("instruction_id", "");
-                }
-                field.onChange(next);
-              }}
-              disabled={pending}
-              errorMessage={errors.unit_id?.message}
-            />
-          )}
-        />
-
-        <Controller
-          name="instruction_id"
-          control={control}
-          render={({ field }) => (
-            <Pod9InstructionField
-              unitId={unitId}
-              instructions={instructionsQuery.items}
-              loading={instructionsQuery.loading}
-              error={instructionsQuery.error}
-              value={field.value}
-              onChange={field.onChange}
-              disabled={pending}
-              errorMessage={errors.instruction_id?.message}
-            />
-          )}
-        />
-
-        <FormField
-          htmlFor="start_date"
-          label="Начало периода отчёта"
-          required
-          error={errors.start_date?.message}
-        >
-          <Input
-            id="start_date"
-            type="date"
-            disabled={pending}
-            aria-invalid={Boolean(errors.start_date)}
-            {...register("start_date")}
+      <Controller
+        name="instruction_id"
+        control={control}
+        render={({ field }) => (
+          <Pod9InstructionField
+            unitId={unitId}
+            instructions={instructionsQuery.items}
+            loading={instructionsQuery.loading}
+            error={instructionsQuery.error}
+            value={field.value}
+            onChange={field.onChange}
+            disabled={generate.pending}
+            errorMessage={errors.instruction_id?.message}
           />
-        </FormField>
-
-        <FormField
-          htmlFor="end_date"
-          label="Конец периода отчёта"
-          required
-          error={errors.end_date?.message}
-        >
-          <Input
-            id="end_date"
-            type="date"
-            disabled={pending}
-            aria-invalid={Boolean(errors.end_date)}
-            {...register("end_date")}
-          />
-        </FormField>
-      </FormSection>
-
-      <Pod9WastesHint
-        unitId={unitId}
-        instructionId={instructionId}
-        items={uiwQuery.items}
-        total={uiwQuery.total}
-        loading={uiwQuery.loading}
-        error={uiwQuery.error}
+        )}
       />
 
-      {downloadError ? (
-        <Alert variant="error">
-          <AlertDescription>{downloadError}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          disabled={pending}
-          onClick={() => void handleSubmit(runPreview)()}
-        >
-          <FileText />
-          Сформировать
-        </Button>
-      </div>
-
-      <PdfPreviewPanel
-        open={previewOpen}
-        onOpenChange={handlePreviewOpenChange}
-        periodLabel={`${formatDate(startDate)} — ${formatDate(endDate)}`}
-        preview={preview}
-        error={previewError}
-        downloadError={downloadError}
-        isLoading={isPreviewLoading}
-        isDownloading={isDownloadXlsxLoading}
-        onRetry={() => void handleSubmit(runPreview)()}
-        onDownloadExcel={() => void handleSubmit(runDownloadXlsx)()}
-        onDownloadPdf={() => {
-          if (!preview) return;
-          downloadBlob(preview.blob, preview.fileName);
+      <ReportPeriodFields
+        start={{
+          register: register("start_date"),
+          error: errors.start_date?.message,
         }}
+        end={{
+          register: register("end_date"),
+          error: errors.end_date?.message,
+        }}
+        disabled={generate.pending}
       />
-    </form>
+    </ReportGenerateForm>
   );
 }

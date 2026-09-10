@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -14,19 +13,10 @@ import {
 } from "../../../../entities/waste/counterparties";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
   ConfirmDialog,
-  DataTable,
-  DataTablePagination,
   ListSearchField,
-  PageContextBar,
-  DirectoryBreadcrumb,
   Select,
   Switch,
-  TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { counterpartiesColumns } from "./counterparties-columns";
@@ -34,6 +24,7 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { routes } from "../../../../shared/config/routes";
 
 export function CounterpartiesPage() {
@@ -115,38 +106,21 @@ export function CounterpartiesPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить контрагентов</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="контрагентов">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Контрагенты"
-              directoryTo={routes.directories.counterparties.list}
-            />
-          }
-          title="Контрагенты"
-          description="Юрлица и физлица организации."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.counterparties.new}>
-                <Plus className="size-3.5" />
-                Добавить контрагента
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="контрагентов"
+      error={error}
+      errorTitle="Не удалось загрузить контрагентов"
+      header={{
+        title: "Контрагенты",
+        description: "Юрлица и физлица организации.",
+        directoryLabel: "Контрагенты",
+        directoryTo: routes.directories.counterparties.list,
+        createTo: routes.directories.counterparties.new,
+        createLabel: "Добавить контрагента",
+      }}
+      toolbar={
         <div className="flex flex-wrap items-center gap-3">
           <ListSearchField
             value={search.q ?? ""}
@@ -192,32 +166,25 @@ export function CounterpartiesPage() {
             Показать неактивных
           </label>
         </div>
-
-        <DataTable
-          columns={columns}
-          data={counterparties}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as CounterpartySortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Контрагентов пока нет"
-          emptyDescription="Добавьте первого контрагента — юрлицо или физлицо организации."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={counterparties}
+      loading={loading}
+      emptyTitle="Контрагентов пока нет"
+      emptyDescription="Добавьте первого контрагента — юрлицо или физлицо организации."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as CounterpartySortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -236,7 +203,7 @@ export function CounterpartiesPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

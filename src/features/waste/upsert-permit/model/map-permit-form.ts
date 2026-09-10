@@ -19,7 +19,7 @@ export function toPermitWriteBody(values: PermitFormValues): PermitCreate {
     start_date: values.start_date,
     end_date: emptyToNull(values.end_date),
     status: "active",
-    unit_id: values.unit_id,
+    unit_id: values.unit_id ? values.unit_id : null,
     burial_wastes: values.burial_wastes
       .filter((item) => item.waste_id)
       .map((item) => ({
@@ -39,7 +39,7 @@ export function toPermitFormValues(permit: Permit): PermitFormValues {
     number: permit.number,
     start_date: permit.start_date,
     end_date: permit.end_date ?? "",
-    unit_id: permit.unit_id,
+    unit_id: permit.unit_id ?? "",
     burial_wastes: [
       ...permit.burial_wastes.map((item) => ({
         waste_id: item.waste_id,

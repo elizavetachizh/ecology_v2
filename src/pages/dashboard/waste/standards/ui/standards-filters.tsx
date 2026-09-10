@@ -3,7 +3,7 @@ import {
   StandardAllStatusValues,
   type StandardStatus,
 } from "../../../../../entities/waste/standards";
-import { UnitSelect } from "../../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../../entities/waste/units";
 import { Tabs, TabsList, TabsTrigger } from "../../../../../shared/ui";
 
 export type StandardsFiltersValue = {
@@ -26,11 +26,11 @@ export function StandardsFilters({
     <>
       <div className="flex flex-wrap items-center gap-2">
         <div className="w-64">
-          <UnitSelect
+          <UnitHierarchicalSelect
             tenantId={tenantId}
             value={values.unit_id ?? ""}
-            placeholder="Все подразделения"
-            onChange={(id) => onChange({ unit_id: id || undefined })}
+            isPod9={false}
+            onChange={(unit) => onChange({ unit_id: unit?.id ?? undefined })}
           />
         </div>
       </div>

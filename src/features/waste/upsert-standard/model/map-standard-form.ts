@@ -14,7 +14,7 @@ export function toStandardWriteBody(
 ): StandardCreate {
   return {
     start_date: values.start_date,
-    unit_id: values.unit_id,
+    unit_id: values.unit_id ? values.unit_id : null,
     wastes: values.wastes
       .filter((item) => item.waste_id)
       .map((item) => ({
@@ -34,7 +34,7 @@ export function toStandardUpdateBody(
 export function toStandardFormValues(standard: Standard): StandardFormValues {
   return {
     start_date: standard.start_date,
-    unit_id: standard.unit_id,
+    unit_id: standard.unit_id ?? "",
     wastes: [
       ...standard.wastes.map((item) => ({
         waste_id: item.waste_id,

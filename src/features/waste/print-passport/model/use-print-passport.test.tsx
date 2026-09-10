@@ -18,7 +18,7 @@ vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
   };
 });
 
-vi.mock("../lib/download-blob", () => ({
+vi.mock("../../../../shared/lib/download-blob", () => ({
   downloadBlob: vi.fn(),
 }));
 

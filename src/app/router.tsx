@@ -16,7 +16,7 @@ import { TtnsPage } from "../pages/dashboard/waste/ttns/TtnsPage";
 import { CreateTtnPage } from "../pages/dashboard/waste/ttns/CreateTtnPage";
 import { EditTtnPage } from "../pages/dashboard/waste/ttns/EditTtnPage";
 import { DirectoriesHubPage } from "../pages/dashboard/directories";
-import { UnitsPage } from "../pages/dashboard/waste/units/UnitsPage";
+import { UnitsPage } from "../pages/dashboard/waste/units/unitsPage";
 import { EditUnitPage } from "../pages/dashboard/waste/units/EditUnitPage";
 import { DirectoryStubPage } from "../pages/dashboard/directories/DirectoryStubPage";
 import { InstructionsPage } from "../pages/dashboard/waste/instructions/InstructionsPage";
@@ -107,7 +107,7 @@ import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/Cre
 import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
 import { PersonSortFields } from "../entities/waste/persons";
 import { routes } from "../shared/config/routes";
-import { Pod10ReportPage } from "../pages/dashboard/reports/pod10.tsx";
+import { Pod10ReportPage } from "../pages/dashboard/reports/pod10";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   validateSearch: parseRootSearch,

@@ -11,7 +11,7 @@ import {
   useWasteInstructionUnitsListQuery,
   type WasteInstructionUnit,
 } from "../../../../entities/waste/waste-instruction-units";
-import { invalidateBindingQueries } from "../../../../shared/lib/invalidate-binding-queries";
+import { invalidateBindingQueries } from "../../bind-unit-instruction-waste";
 import {
   Alert,
   AlertDescription,

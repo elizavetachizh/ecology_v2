@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -18,23 +17,12 @@ import {
   permitWriteErrorMessage,
 } from "../../../../features/waste/upsert-permit";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
 import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { permitsColumns } from "./permits-columns";
 import { PermitsFilters, type PermitsFiltersValue } from "./ui/permits-filters";
 import { routes } from "../../../../shared/config/routes";
@@ -133,38 +121,22 @@ export function PermitsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить разрешения</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="разрешений">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Разрешения"
-              directoryTo={routes.directories.permits.list}
-            />
-          }
-          title="Разрешения"
-          description="Разрешения на захоронение отходов: номер, подразделение, сроки и лимиты по отходам."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.permits.new}>
-                <Plus className="size-3.5" />
-                Создать разрешение
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="разрешений"
+      error={error}
+      errorTitle="Не удалось загрузить разрешения"
+      header={{
+        title: "Разрешения",
+        description:
+          "Разрешения на захоронение отходов: номер, подразделение, сроки и лимиты по отходам.",
+        directoryLabel: "Разрешения",
+        directoryTo: routes.directories.permits.list,
+        createTo: routes.directories.permits.new,
+        createLabel: "Создать разрешение",
+      }}
+      toolbar={
         <PermitsFilters
           tenantId={activeTenantId}
           values={{
@@ -174,32 +146,25 @@ export function PermitsPage() {
           }}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as PermitSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Разрешений пока нет"
-          emptyDescription="Создайте первое разрешение на захоронение."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle="Разрешений пока нет"
+      emptyDescription="Создайте первое разрешение на захоронение."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as PermitSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -218,7 +183,7 @@ export function PermitsPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

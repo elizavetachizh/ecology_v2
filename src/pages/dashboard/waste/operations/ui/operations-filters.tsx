@@ -1,28 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   OPERATION_TYPE_LABEL,
   OperationTypeValues,
   type OperationType,
 } from "../../../../../entities/waste/operations";
+import { UnitHierarchicalSelect } from "../../../../../entities/waste/units";
+import { WasteSelect } from "../../../../../entities/waste/wastes";
 import {
-  getUnit,
-  unitsQueryKeys,
-  useUnitsOptions,
-  type Unit,
-} from "../../../../../entities/waste/units";
-import {
-  getWaste,
-  useWastesOptions,
-  wasteLabel,
-  wastesQueryKeys,
-} from "../../../../../entities/waste/wastes";
-import {
-  AsyncCombobox,
   Button,
   DateFilterInput,
   Modal,
   ModalContent,
+  ModalDescription,
   ModalFooter,
+  ModalHeader,
+  ModalTitle,
   Select,
 } from "../../../../../shared/ui";
 import { Plus } from "lucide-react";
@@ -43,52 +34,12 @@ type OperationsFiltersProps = {
   onChange: (patch: OperationsFiltersValue) => void;
 };
 
-function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
-
 export function OperationsFilters({
   tenantId,
   values,
   onChange,
 }: OperationsFiltersProps) {
   const [pod9Open, setPod9Open] = useState(false);
-  const units = useUnitsOptions({
-    tenantId,
-    enabled: Boolean(tenantId),
-  });
-  const wastes = useWastesOptions({
-    tenantId,
-    enabled: Boolean(tenantId),
-  });
-
-  const selectedUnitQuery = useQuery({
-    queryKey: unitsQueryKeys.detail(
-      tenantId ?? "none",
-      values.unit_id ?? "none",
-    ),
-    queryFn: ({ signal }) => getUnit(values.unit_id!, signal),
-    enabled: Boolean(tenantId && values.unit_id),
-  });
-  const selectedWasteQuery = useQuery({
-    queryKey: wastesQueryKeys.detail(
-      tenantId ?? "none",
-      values.waste_id ?? "none",
-    ),
-    queryFn: ({ signal }) => getWaste(values.waste_id!, signal),
-    enabled: Boolean(tenantId && values.waste_id),
-  });
-
-  const selectedUnit =
-    units.options.find((unit) => unit.id === values.unit_id) ??
-    (selectedUnitQuery.data?.id === values.unit_id
-      ? selectedUnitQuery.data
-      : null);
-  const selectedWaste =
-    wastes.options.find((waste) => waste.id === values.waste_id) ??
-    (selectedWasteQuery.data?.id === values.waste_id
-      ? selectedWasteQuery.data
-      : null);
 
   const handlePod9OpenChange = (nextOpen: boolean) => {
     setPod9Open(nextOpen);
@@ -113,38 +64,23 @@ export function OperationsFilters({
             onValueChange={(date_to) => onChange({ date_to })}
           />
         </div>
-        <AsyncCombobox
-          options={units.options.map((unit) => ({
-            value: unit.id,
-            label: unitLabel(unit),
-          }))}
-          value={values.unit_id ?? ""}
-          selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
-          onValueChange={(id) => onChange({ unit_id: id || undefined })}
-          placeholder="Все структурные единицы"
-          searchPlaceholder="Поиск по названию или краткому"
-          emptyMessage={units.loading ? "Загрузка…" : "Ничего не найдено"}
-          search={units.search}
-          setSearch={units.setSearch}
-          className="w-64"
-          aria-label="Фильтр по структурной единице"
-        />
-        <AsyncCombobox
-          options={wastes.options.map((waste) => ({
-            value: waste.id,
-            label: wasteLabel(waste),
-          }))}
-          value={values.waste_id ?? ""}
-          selectedLabel={selectedWaste ? wasteLabel(selectedWaste) : undefined}
-          onValueChange={(id) => onChange({ waste_id: id || undefined })}
-          placeholder="Все отходы"
-          searchPlaceholder="Поиск по коду или названию"
-          emptyMessage={wastes.loading ? "Загрузка…" : "Ничего не найдено"}
-          search={wastes.search}
-          setSearch={wastes.setSearch}
-          className="w-72"
-          aria-label="Фильтр по отходу"
-        />
+        <div className="w-64">
+          <UnitHierarchicalSelect
+            tenantId={tenantId}
+            value={values.unit_id ?? ""}
+            isPod9={true}
+            onChange={(unit) => onChange({ unit_id: unit?.id ?? undefined })}
+          />
+        </div>
+        <div className="w-64">
+          <WasteSelect
+            tenantId={tenantId}
+            aria-label="Фильтр по отходу"
+            value={values.waste_id ?? ""}
+            onChange={(id) => onChange({ waste_id: id || undefined })}
+          />
+        </div>
+
         <Select
           aria-label="Фильтр по типу операции"
           className="w-48"
@@ -152,8 +88,7 @@ export function OperationsFilters({
           onChange={(e) =>
             onChange({
               operation_type: (e.target.value || undefined) as
-                | OperationType
-                | undefined,
+                OperationType | undefined,
             })
           }
         >
@@ -172,7 +107,13 @@ export function OperationsFilters({
 
       <Modal open={pod9Open} onOpenChange={handlePod9OpenChange}>
         <ModalContent className="max-w-5xl ">
-          <Pod9ReportForm key={tenantId} />
+          <ModalHeader>
+            <ModalTitle>ПОД-9</ModalTitle>
+            <ModalDescription>
+              Сформируйте ПОД-9 отчет для выбранного периода и единицы.
+            </ModalDescription>
+          </ModalHeader>
+          <Pod9ReportForm key={tenantId} showPageHeader={false} />
 
           <ModalFooter className="border-t border-border px-6 py-4">
             <Button

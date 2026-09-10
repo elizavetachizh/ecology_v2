@@ -56,8 +56,8 @@ export type Permit = {
   start_date: string;
   end_date: string | null;
   status: PermitStatus;
-  unit_id: string;
-  unit: UnitBrief;
+  unit_id: string | null;
+  unit: UnitBrief | null;
   burial_wastes: PermitBurialWaste[];
   created_at: string;
   updated_at: string;
@@ -75,7 +75,7 @@ export type PermitCreate = {
   start_date: string;
   end_date?: string | null;
   status?: PermitStatus;
-  unit_id: string;
+  unit_id?: string | null;
   burial_wastes?: PermitBurialWasteWrite[];
 };
 
@@ -85,7 +85,7 @@ export type PermitUpdate = {
   start_date?: string;
   end_date?: string | null;
   status?: PermitStatus;
-  unit_id?: string;
+  unit_id?: string | null;
   burial_wastes?: PermitBurialWasteWrite[];
 };
 

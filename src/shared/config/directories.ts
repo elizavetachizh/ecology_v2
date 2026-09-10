@@ -71,7 +71,7 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     id: "orders",
     title: "Приказы",
     description:
-      "Приказы по подразделениям: номер и дата начала действия. Документ бессрочный.",
+      "Приказы по подразделениям или на всё предприятие: номер и дата начала действия. Документ бессрочный.",
     to: routes.directories.orders.list,
   },
   {

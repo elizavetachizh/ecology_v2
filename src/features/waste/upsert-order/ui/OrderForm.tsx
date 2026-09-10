@@ -5,7 +5,7 @@ import {
   type Order,
 } from "../../../../entities/waste/orders";
 import { useTenant } from "../../../../entities/tenant";
-import { UnitSelect } from "../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
@@ -103,18 +103,17 @@ export function OrderForm({
           error={errors.unit_id?.message}
           description={
             <>
-              На одно подразделение и дату начала — один приказ. Нет нужного
-              места учёта?{" "}
+              Необязательно: без подразделения приказ действует на всё
+              предприятие. На одну дату начала в рамках подразделения или всего
+              предприятия — один приказ. Нет нужного места учёта?{" "}
               <Link
                 to={routes.directories.units.list}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Открыть структуру.{" "}
+                Открыть структуру.
               </Link>
-              При незаполнении подразделения, приказ считается действительным
-              для всего предприятия.
             </>
           }
         >
@@ -122,12 +121,11 @@ export function OrderForm({
             name="unit_id"
             control={control}
             render={({ field }) => (
-              <UnitSelect
+              <UnitHierarchicalSelect
                 tenantId={activeTenantId}
                 value={field.value ?? ""}
-                disabled={pending}
-                placeholder="Выберите подразделение"
-                onChange={field.onChange}
+                isPod9={false}
+                onChange={(unit) => field.onChange(unit?.id ?? "")}
               />
             )}
           />
@@ -138,7 +136,7 @@ export function OrderForm({
           label="Дата начала действия"
           required
           error={errors.start_date?.message}
-          description="Документ бессрочный. Действующим считается приказ с максимальной датой начала, не позже сегодняшней, по подразделению."
+          description="Документ бессрочный. Действующим считается приказ с максимальной датой начала не позже сегодняшней (по подразделению или по предприятию)."
         >
           <Input
             id="start_date"

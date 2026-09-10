@@ -48,4 +48,14 @@ describe("toStandardWriteBody", () => {
       }),
     ).not.toHaveProperty("status");
   });
+
+  it("sends null unit_id when subdivision is empty", () => {
+    expect(
+      toStandardWriteBody({
+        start_date: "2026-01-15",
+        unit_id: "",
+        wastes: [],
+      }).unit_id,
+    ).toBeNull();
+  });
 });

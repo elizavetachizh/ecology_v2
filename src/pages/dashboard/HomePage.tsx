@@ -7,7 +7,6 @@ import {
   firstBurialPermitSelection,
   firstDashboardSelection,
   summarizeDashboardBalance,
-  todayIsoDate,
   useDashboardBalanceQuery,
   useDashboardBalanceStatQuery,
   useDashboardBurialPermitStatQuery,
@@ -31,6 +30,7 @@ import {
   PageContextBar,
   TenantRequiredGate,
 } from "../../shared/ui";
+import { todayIsoDate } from "../../shared/lib/format-date";
 
 export function HomePage() {
   const { activeTenantId } = useTenant();

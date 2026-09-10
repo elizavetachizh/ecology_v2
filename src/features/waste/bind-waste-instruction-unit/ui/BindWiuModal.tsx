@@ -253,6 +253,7 @@ function BindWiuModalForm({
           >
             <Input
               id="transport_unit"
+              autoComplete="off"
               inputMode="decimal"
               placeholder="0"
               aria-invalid={Boolean(errors.transport_unit)}

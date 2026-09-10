@@ -4,6 +4,7 @@ import {
   ContractTypeValues,
   TransferPurposeValues,
 } from "../../../../entities/waste/contracts";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 const isoDate = z
   .string()
@@ -87,14 +88,6 @@ export const contractFormSchema = z
 
 export type ContractFormValues = z.infer<typeof contractFormSchema>;
 export type ContractFormWaste = ContractFormValues["wastes"][number];
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export const emptyContractWasteRow: ContractFormWaste = {
   waste_id: "",

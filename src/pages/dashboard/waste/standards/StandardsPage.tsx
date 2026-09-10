@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -13,24 +12,13 @@ import {
 } from "../../../../entities/waste/standards";
 import { standardDeleteErrorMessage } from "../../../../features/waste/upsert-standard";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
 import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { standardsColumns } from "./standards-columns";
 import {
   StandardsFilters,
@@ -39,6 +27,7 @@ import {
 import { routes } from "../../../../shared/config/routes";
 
 function unitLabel(unit: Standard["unit"]) {
+  if (!unit) return "Все подразделения";
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
@@ -111,38 +100,22 @@ export function StandardsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить нормативы</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="нормативов">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Нормативы"
-              directoryTo={routes.directories.standards.list}
-            />
-          }
-          title="Нормативы"
-          description="Нормативы образования отходов: подразделение, дата начала и перечень отходов. Документ бессрочный."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.standards.new}>
-                <Plus className="size-3.5" />
-                Создать норматив
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="нормативов"
+      error={error}
+      errorTitle="Не удалось загрузить нормативы"
+      header={{
+        title: "Нормативы",
+        description:
+          "Нормативы образования отходов: подразделение, дата начала и перечень отходов. Документ бессрочный.",
+        directoryLabel: "Нормативы",
+        directoryTo: routes.directories.standards.list,
+        createTo: routes.directories.standards.new,
+        createLabel: "Создать норматив",
+      }}
+      toolbar={
         <StandardsFilters
           tenantId={activeTenantId}
           values={{
@@ -151,32 +124,25 @@ export function StandardsPage() {
           }}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as StandardSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Нормативов пока нет"
-          emptyDescription="Создайте первый норматив образования отходов."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle="Нормативов пока нет"
+      emptyDescription="Создайте первый норматив образования отходов."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as StandardSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -187,8 +153,8 @@ export function StandardsPage() {
           confirmLabel="Удалить"
           description={
             <>
-              Норматив подразделения «{deleting ? unitLabel(deleting.unit) : ""}
-              » от {deleting ? formatDate(deleting.start_date) : ""} и перечень
+              Норматив «{deleting ? unitLabel(deleting.unit) : ""}» от{" "}
+              {deleting ? formatDate(deleting.start_date) : ""} и перечень
               отходов будут удалены.
             </>
           }
@@ -196,7 +162,7 @@ export function StandardsPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

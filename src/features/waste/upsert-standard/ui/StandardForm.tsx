@@ -2,7 +2,7 @@ import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import type { Standard } from "../../../../entities/waste/standards";
 import { useTenant } from "../../../../entities/tenant";
-import { UnitSelect } from "../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
@@ -27,6 +27,7 @@ type StandardFormProps = {
 };
 
 function unitTitle(unit: Standard["unit"]) {
+  if (!unit) return "Все подразделения";
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
@@ -96,13 +97,13 @@ export function StandardForm({
         <FormField
           htmlFor="unit_id"
           label="Подразделение"
-          required
           className="md:col-span-2"
           error={errors.unit_id?.message}
           description={
             <>
-              На одно подразделение и дату начала — один норматив. Нет нужного
-              места учёта?{" "}
+              Необязательно. Без подразделения норматив относится ко всей
+              организации. На одну дату начала в рамках подразделения или всего
+              предприятия — один норматив. Нет нужного места учёта?{" "}
               <Link
                 to={routes.directories.units.list}
                 target="_blank"
@@ -118,12 +119,11 @@ export function StandardForm({
             name="unit_id"
             control={control}
             render={({ field }) => (
-              <UnitSelect
+              <UnitHierarchicalSelect
                 tenantId={activeTenantId}
-                value={field.value}
-                disabled={pending}
-                placeholder="Выберите подразделение"
-                onChange={field.onChange}
+                value={field.value ?? ""}
+                isPod9={false}
+                onChange={(unit) => field.onChange(unit?.id ?? "")}
               />
             )}
           />
@@ -134,7 +134,7 @@ export function StandardForm({
           label="Дата начала действия"
           required
           error={errors.start_date?.message}
-          description="Документ бессрочный. Действующим считается норматив с максимальной датой начала, не позже сегодняшней, по подразделению."
+          description="Документ бессрочный. Действующим считается норматив с максимальной датой начала не позже сегодняшней (по подразделению или, если оно не указано, по предприятию)."
         >
           <Input
             id="start_date"

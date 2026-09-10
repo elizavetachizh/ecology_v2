@@ -76,9 +76,9 @@ export function UnitIdentityFields({
           render={({ field }) => (
             <UnitHierarchicalSelect
               tenantId={tenantId}
-              is_pod9={false}
               value={field.value}
               excludeUnitId={unitId}
+              isPod9={false}
               required={isPod9}
               onChange={(unit) => {
                 field.onChange(unit?.id ?? "");

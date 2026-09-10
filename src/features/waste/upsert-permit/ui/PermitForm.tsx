@@ -2,7 +2,7 @@ import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import type { Permit } from "../../../../entities/waste/permits";
 import { useTenant } from "../../../../entities/tenant";
-import { UnitSelect } from "../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
@@ -14,6 +14,7 @@ import {
   PageContextBar,
 } from "../../../../shared/ui";
 import { useUpsertPermitForm } from "../model/use-upsert-permit-form";
+import { nextSyncedPermitEndDate } from "../model/permit-form.schema";
 import { PermitBurialWastesEditor } from "./PermitBurialWastesEditor";
 import { routes } from "../../../../shared/config/routes";
 
@@ -42,8 +43,11 @@ export function PermitForm({
   const {
     control,
     register,
+    setValue,
+    getValues,
     formState: { errors },
   } = form;
+  const startDateField = register("start_date");
 
   return (
     <form
@@ -103,12 +107,12 @@ export function PermitForm({
         <FormField
           htmlFor="unit_id"
           label="Подразделение"
-          required
           className="md:col-span-2"
           error={errors.unit_id?.message}
           description={
             <>
-              Нет нужного места учёта?{" "}
+              Необязательно. Без подразделения разрешение относится ко всей
+              организации. Нет нужного места учёта?{" "}
               <Link
                 target="_blank"
                 rel="noopener noreferrer"
@@ -124,12 +128,11 @@ export function PermitForm({
             name="unit_id"
             control={control}
             render={({ field }) => (
-              <UnitSelect
+              <UnitHierarchicalSelect
                 tenantId={activeTenantId}
-                value={field.value}
-                disabled={pending}
-                placeholder="Выберите подразделение"
-                onChange={field.onChange}
+                value={field.value ?? ""}
+                isPod9={false}
+                onChange={(unit) => field.onChange(unit?.id ?? "")}
               />
             )}
           />
@@ -144,9 +147,22 @@ export function PermitForm({
           <Input
             id="start_date"
             type="date"
-            {...register("start_date")}
+            {...startDateField}
             disabled={pending}
             aria-invalid={Boolean(errors.start_date)}
+            onChange={(event) => {
+              const previousStart = getValues("start_date");
+              const currentEnd = getValues("end_date");
+              void startDateField.onChange(event);
+              const nextEnd = nextSyncedPermitEndDate({
+                previousStart,
+                nextStart: event.target.value,
+                currentEnd,
+              });
+              if (nextEnd != null) {
+                setValue("end_date", nextEnd, { shouldValidate: true });
+              }
+            }}
           />
         </FormField>
 

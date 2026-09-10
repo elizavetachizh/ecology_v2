@@ -18,3 +18,25 @@ export function formatDateTime(value: string | null): string {
     minute: "2-digit",
   });
 }
+
+function toIsoDate(date: Date): string {
+  const yyyy = String(date.getFullYear());
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function todayIsoDate(): string {
+  return toIsoDate(new Date());
+}
+
+/** Calendar date plus `years`. Feb 29 becomes Mar 1 in a non-leap year. */
+export function addYearsIsoDate(isoDate: string, years: number): string {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day - 1));
+  date.setUTCFullYear(date.getUTCFullYear() + years);
+  const yyyy = String(date.getUTCFullYear());
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}

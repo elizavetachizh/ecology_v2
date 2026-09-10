@@ -3,7 +3,7 @@ import {
   OrderAllStatusValues,
   type OrderStatus,
 } from "../../../../../entities/waste/orders";
-import { UnitSelect } from "../../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../../entities/waste/units";
 import {
   ListSearchField,
   Tabs,
@@ -37,11 +37,11 @@ export function OrdersFilters({
           onSearch={(q) => onChange({ q: q || undefined })}
         />
         <div className="w-64">
-          <UnitSelect
+          <UnitHierarchicalSelect
             tenantId={tenantId}
             value={values.unit_id ?? ""}
-            placeholder="Все подразделения"
-            onChange={(id) => onChange({ unit_id: id || undefined })}
+            isPod9={false}
+            onChange={(unit) => onChange({ unit_id: unit?.id ?? undefined })}
           />
         </div>
       </div>

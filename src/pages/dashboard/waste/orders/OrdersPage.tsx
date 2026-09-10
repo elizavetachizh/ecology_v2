@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -13,24 +12,13 @@ import {
 } from "../../../../entities/waste/orders";
 import { orderDeleteErrorMessage } from "../../../../features/waste/upsert-order";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
 import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { ordersColumns } from "./orders-columns";
 import { OrdersFilters, type OrdersFiltersValue } from "./ui/orders-filters";
 import { routes } from "../../../../shared/config/routes";
@@ -104,38 +92,22 @@ export function OrdersPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить приказы</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="приказов">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Приказы"
-              directoryTo={routes.directories.orders.list}
-            />
-          }
-          title="Приказы"
-          description="Приказы по подразделениям: номер и дата начала действия. Документ бессрочный."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.orders.new}>
-                <Plus className="size-3.5" />
-                Создать приказ
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="приказов"
+      error={error}
+      errorTitle="Не удалось загрузить приказы"
+      header={{
+        title: "Приказы",
+        description:
+          "Приказы по подразделениям или на всё предприятие: номер и дата начала действия. Документ бессрочный.",
+        directoryLabel: "Приказы",
+        directoryTo: routes.directories.orders.list,
+        createTo: routes.directories.orders.new,
+        createLabel: "Создать приказ",
+      }}
+      toolbar={
         <OrdersFilters
           tenantId={activeTenantId}
           values={{
@@ -145,32 +117,25 @@ export function OrdersPage() {
           }}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as OrderSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Приказов пока нет"
-          emptyDescription="Создайте первый приказ."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle="Приказов пока нет"
+      emptyDescription="Создайте первый приказ."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as OrderSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -189,7 +154,7 @@ export function OrdersPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

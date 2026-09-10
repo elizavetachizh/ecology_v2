@@ -1,3 +1,5 @@
+import type { ReportFormat } from "../model/reports.types";
+
 export function filenameFromContentDisposition(
   header: string | null,
   fallback: string,
@@ -17,10 +19,11 @@ export function filenameFromContentDisposition(
   return fileNameMatch?.[1]?.trim() || fallback;
 }
 
-export function pod9FallbackFileName(
+export function reportFallbackFileName(
+  slug: string,
   startDate: string,
   endDate: string,
-  format: "xlsx" | "pdf" = "xlsx",
+  format: ReportFormat = "xlsx",
 ): string {
-  return `pod-9_${startDate}_${endDate}.${format}`;
+  return `${slug}_${startDate}_${endDate}.${format}`;
 }

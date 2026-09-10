@@ -41,11 +41,13 @@ export function PassportsFilters({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        <ListSearchField
-          value={values.q ?? ""}
-          placeholder="Поиск по номеру"
-          onSearch={(q) => onChange({ q: q || undefined })}
-        />
+        <div className="w-48">
+          <ListSearchField
+            value={values.q ?? ""}
+            placeholder="Поиск по номеру"
+            onSearch={(q) => onChange({ q: q || undefined })}
+          />
+        </div>
         <div className="w-64">
           <UnitSelect
             tenantId={tenantId}
@@ -72,8 +74,7 @@ export function PassportsFilters({
           onChange={(event) =>
             onChange({
               transport_type: (event.target.value || undefined) as
-                | PassportTransportType
-                | undefined,
+                PassportTransportType | undefined,
             })
           }
         >

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -18,19 +17,8 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { ttnsColumns } from "./ttns-columns";
 import { TtnsFilters, type TtnsFiltersValue } from "./ui/ttns-filters";
 import { routes } from "../../../../shared/config/routes";
@@ -108,69 +96,46 @@ export function TtnsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить ТТН</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="ТТН">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="ТТН"
-              directoryTo={routes.waste.ttns.list}
-            />
-          }
-          title="Товарно-транспортные накладные"
-          description="ТТН не связан с сопроводительным паспортом — документы ведутся отдельно."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.waste.ttns.new}>
-                <Plus className="size-3.5" />
-                Создать ТТН
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="ТТН"
+      error={error}
+      errorTitle="Не удалось загрузить ТТН"
+      header={{
+        title: "Товарно-транспортные накладные",
+        description:
+          "ТТН не связан с сопроводительным паспортом — документы ведутся отдельно.",
+        directoryLabel: "ТТН",
+        directoryTo: routes.waste.ttns.list,
+        createTo: routes.waste.ttns.new,
+        createLabel: "Создать ТТН",
+      }}
+      toolbar={
         <TtnsFilters
           tenantId={activeTenantId}
           values={search}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as TtnSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="ТТН пока нет"
-          emptyDescription="Создайте накладную: номер, дата перевозки, единица и действующий договор утилизации."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle="ТТН пока нет"
+      emptyDescription="Создайте накладную: номер, дата перевозки, единица и действующий договор утилизации."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as TtnSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -189,7 +154,7 @@ export function TtnsPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

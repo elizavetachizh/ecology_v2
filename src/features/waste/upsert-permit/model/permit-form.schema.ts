@@ -1,4 +1,31 @@
 import { z } from "zod";
+import {
+  addYearsIsoDate,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
+
+export const PERMIT_TERM_YEARS = 5;
+
+export function permitEndDateFromStart(startDate: string): string {
+  return addYearsIsoDate(startDate, PERMIT_TERM_YEARS);
+}
+
+/**
+ * Keep end_date at start+5 years until the user sets a different end.
+ * Returns null when the current end must be left as-is.
+ */
+export function nextSyncedPermitEndDate(params: {
+  previousStart: string;
+  nextStart: string;
+  currentEnd: string;
+}): string | null {
+  const { previousStart, nextStart, currentEnd } = params;
+  if (!nextStart) return null;
+  const stillLinked =
+    currentEnd === "" || currentEnd === permitEndDateFromStart(previousStart);
+  if (!stillLinked) return null;
+  return permitEndDateFromStart(nextStart);
+}
 
 const isoDate = z
   .string()
@@ -23,7 +50,13 @@ export const permitFormSchema = z
       .max(255, "Не более 255 символов"),
     start_date: isoDate,
     end_date: z.union([isoDate, z.literal("")]),
-    unit_id: z.uuid("Выберите подразделение"),
+    unit_id: z
+      .union([
+        z.uuid({ message: "Выберите корректное подразделение" }),
+        z.literal(""),
+        z.null(),
+      ])
+      .optional(),
     burial_wastes: z.array(
       z.object({
         waste_id: z.union([z.uuid(), z.literal("")]),
@@ -65,14 +98,6 @@ export const permitFormSchema = z
 export type PermitFormValues = z.infer<typeof permitFormSchema>;
 export type PermitFormBurialWaste = PermitFormValues["burial_wastes"][number];
 
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
 export const emptyPermitBurialWasteRow: PermitFormBurialWaste = {
   waste_id: "",
   amount: "",
@@ -80,10 +105,13 @@ export const emptyPermitBurialWasteRow: PermitFormBurialWaste = {
   uomLabel: "",
 };
 
+const startDate = todayIsoDate();
+const endDate = permitEndDateFromStart(startDate);
+
 export const permitFormDefaultValues: PermitFormValues = {
   number: "",
-  start_date: todayIsoDate(),
-  end_date: "",
+  start_date: startDate,
+  end_date: endDate,
   unit_id: "",
   burial_wastes: [{ ...emptyPermitBurialWasteRow }],
 };

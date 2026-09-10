@@ -12,6 +12,15 @@ describe("standardFormSchema", () => {
     expect(standardFormSchema.safeParse(valid).success).toBe(true);
   });
 
+  it("accepts missing unit_id", () => {
+    expect(
+      standardFormSchema.safeParse({ ...valid, unit_id: "" }).success,
+    ).toBe(true);
+    expect(
+      standardFormSchema.safeParse({ ...valid, unit_id: null }).success,
+    ).toBe(true);
+  });
+
   it("rejects invalid start_date", () => {
     const parsed = standardFormSchema.safeParse({
       ...valid,

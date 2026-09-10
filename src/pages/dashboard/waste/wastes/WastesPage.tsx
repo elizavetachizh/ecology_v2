@@ -1,16 +1,11 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 
 import { useTenant } from "../../../../entities/tenant";
 import {
   DEFAULT_WASTES_LIST_LIMIT,
   deleteWaste,
-  HAZARD_CLASS_LABEL,
-  HazardClassValues,
-  PHYSICAL_STATE_LABEL,
-  PhysicalStateValues,
   useWastesListQuery,
   wastesQueryKeys,
   type HazardClass,
@@ -24,23 +19,11 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  ListSearchField,
-  PageContextBar,
-  Select,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { wastesColumns } from "./wastes-columns";
 import { routes } from "../../../../shared/config/routes";
+import { WastesFilters } from "./ui/wastes-filters";
 
 export function WastesDirectoryPage() {
   const { activeTenantId } = useTenant();
@@ -115,109 +98,40 @@ export function WastesDirectoryPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить отходы</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="отходов">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Отходы"
-              directoryTo={routes.directories.wastes.list}
-            />
-          }
-          title="Отходы"
-          description="Создайте отход в справочнике, затем привяжите его к структурным единицам."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.wastes.new}>
-                <Plus className="size-3.5" />
-                Создать отход
-              </Link>
-            </Button>
-          }
-        />
-
-        <div className="flex flex-wrap items-center gap-2">
-          <ListSearchField
-            value={search.q ?? ""}
-            placeholder="Поиск по коду или названию"
-            onSearch={(q) => patchSearch({ q: q || undefined })}
-          />
-          <Select
-            aria-label="Фильтр по классу опасности"
-            className="w-56"
-            value={search.hazard_class ?? ""}
-            onChange={(e) =>
-              patchSearch({
-                hazard_class: (e.target.value || undefined) as
-                  | HazardClass
-                  | undefined,
-              })
-            }
-          >
-            <option value="">Все классы опасности</option>
-            {HazardClassValues.map((value) => (
-              <option key={value} value={value}>
-                {HAZARD_CLASS_LABEL[value]}
-              </option>
-            ))}
-          </Select>
-          <Select
-            aria-label="Фильтр по агрегатному состоянию"
-            className="w-48"
-            value={search.physical_state ?? ""}
-            onChange={(e) =>
-              patchSearch({
-                physical_state: (e.target.value || undefined) as
-                  | PhysicalState
-                  | undefined,
-              })
-            }
-          >
-            <option value="">Все состояния</option>
-            {PhysicalStateValues.map((value) => (
-              <option key={value} value={value}>
-                {PHYSICAL_STATE_LABEL[value]}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        <DataTable
-          columns={columns}
-          data={wastes}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as WasteSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Отходов пока нет"
-          emptyDescription="Создайте отход из классификатора — код и наименование подтянутся автоматически."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="отходов"
+      error={error}
+      errorTitle="Не удалось загрузить отходы"
+      header={{
+        title: "Отходы",
+        description:
+          "Создайте отход в справочнике, затем привяжите его к структурным единицам.",
+        directoryLabel: "Отходы",
+        directoryTo: routes.directories.wastes.list,
+        createTo: routes.directories.wastes.new,
+        createLabel: "Создать отход",
+      }}
+      toolbar={<WastesFilters values={search} onChange={patchSearch} />}
+      columns={columns}
+      data={wastes}
+      loading={loading}
+      emptyTitle="Отходов пока нет"
+      emptyDescription="Создайте отход из классификатора — код и наименование подтянутся автоматически."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as WasteSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deletingWaste !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -230,7 +144,7 @@ export function WastesDirectoryPage() {
             deletingWaste && void deleteMutation.mutateAsync(deletingWaste.id)
           }
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

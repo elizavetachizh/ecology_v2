@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -18,23 +17,12 @@ import {
   contractStatusErrorMessage,
 } from "../../../../features/waste/upsert-contract";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
 import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { contractsColumns } from "./contracts-columns";
 import { hasContractsListFilters } from "./ui/has-contracts-list-filters";
 import {
@@ -145,38 +133,22 @@ export function ContractsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить договоры</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="договоров">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Договоры"
-              directoryTo={routes.directories.contracts.list}
-            />
-          }
-          title="Договоры"
-          description="Сначала контрагент, затем договор утилизации с перечнем отходов. Договор перевозки — только если в паспорте способ «по договору перевозки»."
-          actions={
-            <Button asChild size="sm">
-              <Link to={routes.directories.contracts.new}>
-                <Plus className="size-3.5" />
-                Создать договор
-              </Link>
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="договоров"
+      error={error}
+      errorTitle="Не удалось загрузить договоры"
+      header={{
+        title: "Договоры",
+        description:
+          "Сначала контрагент, затем договор утилизации с перечнем отходов. Договор перевозки — только если в паспорте способ «по договору перевозки».",
+        directoryLabel: "Договоры",
+        directoryTo: routes.directories.contracts.list,
+        createTo: routes.directories.contracts.new,
+        createLabel: "Создать договор",
+      }}
+      toolbar={
         <ContractsFilters
           tenantId={activeTenantId}
           values={{
@@ -188,36 +160,29 @@ export function ContractsPage() {
           }}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as ContractSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle={hasFilters ? "Ничего не найдено" : "Договоров пока нет"}
-          emptyDescription={
-            hasFilters
-              ? "Измените фильтры или сбросьте поиск."
-              : "Создайте свой первый договор."
-          }
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle={hasFilters ? "Ничего не найдено" : "Договоров пока нет"}
+      emptyDescription={
+        hasFilters
+          ? "Измените фильтры или сбросьте поиск."
+          : "Создайте свой первый договор."
+      }
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as ContractSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -236,7 +201,7 @@ export function ContractsPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

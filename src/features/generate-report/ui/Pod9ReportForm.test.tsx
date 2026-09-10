@@ -61,7 +61,7 @@ vi.mock(
 
 const fetchMock = vi.fn();
 
-vi.mock("../api/fetchPod10Report", () => ({
+vi.mock("../../../entities/reports", () => ({
   fetchPod9Report: (...args: unknown[]) => fetchMock(...args),
 }));
 
@@ -104,7 +104,7 @@ function renderForm() {
 afterEach(cleanup);
 
 describe("Pod9ReportForm", () => {
-  it("renders params, PDF hint, and download actions", () => {
+  it("renders params and generate action", () => {
     renderForm();
 
     expect(screen.getByRole("heading", { name: "ПОД-9" })).toBeInTheDocument();
@@ -113,31 +113,15 @@ describe("Pod9ReportForm", () => {
     expect(screen.getByLabelText(/Начало периода/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Конец периода/)).toBeInTheDocument();
     expect(
-      screen.getByText("Предпросмотр — PDF; для работы в Excel скачайте xlsx."),
+      screen.getByRole("button", { name: "Сформировать" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Предпросмотр" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Скачать Excel" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Скачать PDF" }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("321")).not.toBeInTheDocument();
   });
 
   it("validates required params before calling the reports API", async () => {
     renderForm();
 
-    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сформировать" }));
 
-    await waitFor(() => {
-      expect(screen.getByText("Выберите место учёта")).toBeInTheDocument();
-    });
-    expect(fetchMock).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Скачать PDF" }));
     await waitFor(() => {
       expect(screen.getByText("Выберите место учёта")).toBeInTheDocument();
     });

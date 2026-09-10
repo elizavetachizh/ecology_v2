@@ -8,7 +8,6 @@ import {
   sumChartAmounts,
   summarizeDashboardBalance,
   toChartPoints,
-  todayIsoDate,
   unitTitle,
   wasteTitle,
   yearFromIsoDate,
@@ -17,6 +16,7 @@ import {
   dashboardBalanceFixture,
   dashboardBurialPermitFixture,
 } from "./dashboard.fixture";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 describe("todayIsoDate", () => {
   afterEach(() => {

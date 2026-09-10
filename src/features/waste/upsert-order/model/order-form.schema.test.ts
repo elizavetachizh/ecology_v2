@@ -33,8 +33,23 @@ describe("orderFormSchema", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("rejects missing unit_id", () => {
-    const parsed = orderFormSchema.safeParse({ ...valid, unit_id: "" });
+  it("accepts missing unit_id", () => {
+    expect(
+      orderFormSchema.safeParse({ ...valid, unit_id: "" }).success,
+    ).toBe(true);
+    expect(
+      orderFormSchema.safeParse({ ...valid, unit_id: null }).success,
+    ).toBe(true);
+    expect(
+      orderFormSchema.safeParse({
+        number: valid.number,
+        start_date: valid.start_date,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects invalid unit_id", () => {
+    const parsed = orderFormSchema.safeParse({ ...valid, unit_id: "not-uuid" });
     expect(parsed.success).toBe(false);
   });
 });

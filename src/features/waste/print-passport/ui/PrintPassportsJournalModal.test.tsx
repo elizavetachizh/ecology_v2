@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
   fireEvent,
@@ -6,11 +5,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { downloadPassports } from "../../../../entities/waste/passports";
+import { downloadBlob } from "../../../../shared/lib/download-blob";
 import { PrintPassportsJournalModal } from "./PrintPassportsJournalModal";
-import { downloadBlob } from "../../../../shared/lib/download-blob.ts";
 
 vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
   const actual =
@@ -23,28 +21,28 @@ vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
   };
 });
 
-vi.mock("../lib/download-blob", () => ({
+vi.mock("../../../../shared/lib/download-blob", () => ({
   downloadBlob: vi.fn(),
+}));
+
+vi.mock("../../../generate-report/ui/PdfJsPreview", () => ({
+  PdfJsPreview: () => <div data-testid="pdf-js-preview" />,
 }));
 
 const downloadMock = vi.mocked(downloadPassports);
 const downloadBlobMock = vi.mocked(downloadBlob);
 
-const file = {
+const pdfFile = {
+  blob: new Blob(["%PDF-1.4"], { type: "application/pdf" }),
+  contentType: "application/pdf",
+  fileName: "passports_2026-02-01_2026-02-28.pdf",
+};
+
+const xlsxFile = {
   blob: new Blob(["xlsx"], { type: "application/vnd.ms-excel" }),
   contentType: "application/vnd.ms-excel",
   fileName: "passports_2026-02-01_2026-02-28.xlsx",
 };
-
-function wrapper({ children }: { children: ReactNode }) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-}
 
 describe("PrintPassportsJournalModal", () => {
   afterEach(cleanup);
@@ -52,19 +50,17 @@ describe("PrintPassportsJournalModal", () => {
   beforeEach(() => {
     downloadMock.mockReset();
     downloadBlobMock.mockReset();
-    downloadMock.mockResolvedValue(file);
+    downloadMock.mockResolvedValue(pdfFile);
   });
 
-  it("prefills the period and downloads xlsx", async () => {
-    const onOpenChange = vi.fn();
+  it("prefills the period and opens a PDF preview on top", async () => {
     render(
       <PrintPassportsJournalModal
         open
-        onOpenChange={onOpenChange}
+        onOpenChange={vi.fn()}
         defaultStartDate="2026-02-01"
         defaultEndDate="2026-02-28"
       />,
-      { wrapper },
     );
 
     expect(screen.getByRole("dialog")).toHaveTextContent(
@@ -73,20 +69,65 @@ describe("PrintPassportsJournalModal", () => {
     expect(document.getElementById("start_date")).toHaveValue("2026-02-01");
     expect(document.getElementById("end_date")).toHaveValue("2026-02-28");
 
+    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+
+    await waitFor(() => {
+      expect(downloadMock).toHaveBeenCalledWith(
+        {
+          start_date: "2026-02-01",
+          end_date: "2026-02-28",
+          format: "pdf",
+        },
+        expect.any(AbortSignal),
+      );
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Предпросмотр журнала паспортов" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Скачать Excel" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Скачать PDF" })).toBeEnabled();
+  });
+
+  it("downloads excel from the preview without closing the period modal", async () => {
+    const onOpenChange = vi.fn();
+    downloadMock.mockResolvedValueOnce(pdfFile).mockResolvedValueOnce(xlsxFile);
+
+    render(
+      <PrintPassportsJournalModal
+        open
+        onOpenChange={onOpenChange}
+        defaultStartDate="2026-02-01"
+        defaultEndDate="2026-02-28"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "Скачать Excel" }));
 
     await waitFor(() => {
-      expect(downloadMock).toHaveBeenCalledWith({
-        start_date: "2026-02-01",
-        end_date: "2026-02-28",
-        format: "xlsx",
-      });
+      expect(downloadMock).toHaveBeenCalledWith(
+        {
+          start_date: "2026-02-01",
+          end_date: "2026-02-28",
+          format: "xlsx",
+        },
+        expect.any(AbortSignal),
+      );
     });
-    expect(downloadBlobMock).toHaveBeenCalledWith(file.blob, file.fileName);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(downloadBlobMock).toHaveBeenCalledWith(
+      xlsxFile.blob,
+      xlsxFile.fileName,
+    );
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  it("downloads pdf for the same period", async () => {
+  it("downloads the previewed pdf", async () => {
     render(
       <PrintPassportsJournalModal
         open
@@ -94,17 +135,18 @@ describe("PrintPassportsJournalModal", () => {
         defaultStartDate="2026-01-01"
         defaultEndDate="2026-12-31"
       />,
-      { wrapper },
     );
+
+    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Скачать PDF" }));
 
-    await waitFor(() => {
-      expect(downloadMock).toHaveBeenCalledWith({
-        start_date: "2026-01-01",
-        end_date: "2026-12-31",
-        format: "pdf",
-      });
-    });
+    expect(downloadBlobMock).toHaveBeenCalledWith(
+      pdfFile.blob,
+      pdfFile.fileName,
+    );
   });
 });

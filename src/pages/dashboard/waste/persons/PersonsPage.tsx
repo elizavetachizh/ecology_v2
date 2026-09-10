@@ -16,17 +16,9 @@ import {
 import { PersonFormModal } from "../../../../features/waste/upsert-person";
 import { queryClient } from "../../../../shared/lib/query-client";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
   Button,
   ConfirmDialog,
-  DataTable,
-  DataTablePagination,
   ListSearchField,
-  PageContextBar,
-  DirectoryBreadcrumb,
-  TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { personsColumns } from "./persons-columns";
@@ -34,6 +26,7 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 
 export function PersonsPage() {
   const { activeTenantId } = useTenant();
@@ -105,112 +98,95 @@ export function PersonsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить ответственных</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="ответственных">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Ответственные"
-              directoryTo={routes.directories.persons.list}
-            />
-          }
-          title="Ответственные"
-          description="Справочник ответственных за экологический мониторинг."
-          actions={
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                setEditing(null);
-                setModalMode("create");
-              }}
-            >
-              <Plus className="size-3.5" />
-              Добавить ответственного
-            </Button>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="ответственных"
+      error={error}
+      errorTitle="Не удалось загрузить ответственных"
+      header={{
+        title: "Ответственные",
+        description: "Справочник ответственных за экологический мониторинг.",
+        directoryLabel: "Ответственные",
+        directoryTo: routes.directories.persons.list,
+        actions: (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              setEditing(null);
+              setModalMode("create");
+            }}
+          >
+            <Plus className="size-3.5" />
+            Добавить ответственного
+          </Button>
+        ),
+      }}
+      toolbar={
         <ListSearchField
           value={search.q ?? ""}
           placeholder="Поиск по ФИО"
           onSearch={(q) => patchSearch({ q: q || undefined })}
         />
-
-        <DataTable
-          columns={columns}
-          data={persons}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as PersonSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Ответственных пока нет"
-          emptyDescription="Добавьте первого ответственного в справочник."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
-        <PersonFormModal
-          open={modalMode !== null}
-          mode={modalMode === "edit" ? "edit" : "create"}
-          personId={editing?.id}
-          initial={editing}
-          onOpenChange={(open) => {
-            if (!open) {
+      }
+      columns={columns}
+      data={persons}
+      loading={loading}
+      emptyTitle="Ответственных пока нет"
+      emptyDescription="Добавьте первого ответственного в справочник."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as PersonSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
+        <>
+          <PersonFormModal
+            open={modalMode !== null}
+            mode={modalMode === "edit" ? "edit" : "create"}
+            personId={editing?.id}
+            initial={editing}
+            onOpenChange={(open) => {
+              if (!open) {
+                setModalMode(null);
+                setEditing(null);
+              }
+            }}
+            onSaved={() => {
+              toast.success(
+                modalMode === "edit"
+                  ? "Ответственный успешно обновлён"
+                  : "Ответственный успешно создан",
+              );
               setModalMode(null);
               setEditing(null);
+            }}
+          />
+          <ConfirmDialog
+            open={deleting !== null}
+            confirmDisabled={deleteMutation.isPending}
+            onOpenChange={(open) => {
+              if (!open) setDeleting(null);
+            }}
+            title="Удалить ответственного?"
+            confirmLabel="Удалить"
+            description={
+              <>Ответственный «{deleting?.name}» будет удалён из справочника.</>
             }
-          }}
-          onSaved={() => {
-            toast.success(
-              modalMode === "edit"
-                ? "Ответственный успешно обновлён"
-                : "Ответственный успешно создан",
-            );
-            setModalMode(null);
-            setEditing(null);
-          }}
-        />
-
-        <ConfirmDialog
-          open={deleting !== null}
-          confirmDisabled={deleteMutation.isPending}
-          onOpenChange={(open) => {
-            if (!open) setDeleting(null);
-          }}
-          title="Удалить ответственного?"
-          confirmLabel="Удалить"
-          description={
-            <>Ответственный «{deleting?.name}» будет удалён из справочника.</>
-          }
-          onConfirm={() => {
-            if (deleting) void deleteMutation.mutateAsync(deleting.id);
-          }}
-        />
-      </div>
-    </TenantRequiredGate>
+            onConfirm={() => {
+              if (deleting) void deleteMutation.mutateAsync(deleting.id);
+            }}
+          />
+        </>
+      }
+    />
   );
 }

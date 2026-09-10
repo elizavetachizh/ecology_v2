@@ -53,8 +53,8 @@ export type Standard = {
   tenant_id: string;
   start_date: string;
   status: StandardStatus;
-  unit_id: string;
-  unit: UnitBrief;
+  unit_id: string | null;
+  unit: UnitBrief | null;
   wastes: StandardWaste[];
   created_at: string;
   updated_at: string;
@@ -69,14 +69,14 @@ export type StandardWasteWrite = {
 
 export type StandardCreate = {
   start_date: string;
-  unit_id: string;
+  unit_id?: string | null;
   wastes?: StandardWasteWrite[];
 };
 
 /** PATCH wastes: omit = не трогать; [] = очистить перечень. */
 export type StandardUpdate = {
   start_date?: string;
-  unit_id?: string;
+  unit_id?: string | null;
   wastes?: StandardWasteWrite[];
 };
 

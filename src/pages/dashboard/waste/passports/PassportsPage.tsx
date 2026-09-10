@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { PrintPassportsJournalButton } from "../../../../features/waste/print-passport";
-import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -24,19 +23,8 @@ import {
   sortingFromSearch,
   sortingToSearch,
 } from "../../../../shared/lib/sorting";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  ConfirmDialog,
-  DataTable,
-  DataTablePagination,
-  DirectoryBreadcrumb,
-  PageContextBar,
-  TenantRequiredGate,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, toast } from "../../../../shared/ui";
+import { DirectoryListChrome } from "../../../../widgets/directory-list";
 import { passportsColumns } from "./passports-columns";
 import {
   PassportsFilters,
@@ -147,75 +135,52 @@ export function PassportsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <Alert variant="error">
-        <AlertTitle>Не удалось загрузить паспорта</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
-    <TenantRequiredGate tenantId={activeTenantId} resourceLabel="паспортов">
-      <div className="space-y-4">
-        <PageContextBar
-          sticky={false}
-          eyebrow={
-            <DirectoryBreadcrumb
-              directoryLabel="Сопроводительные паспорта"
-              directoryTo={routes.waste.passports.list}
-            />
-          }
-          title="Сопроводительные паспорта"
-          description="Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан."
-          actions={
-            <>
-              <PrintPassportsJournalButton
-                defaultStartDate={search.date_from}
-                defaultEndDate={search.date_to}
-              />
-              <Button asChild size="sm">
-                <Link to={routes.waste.passports.new}>
-                  <Plus className="size-3.5" />
-                  Создать паспорт
-                </Link>
-              </Button>
-            </>
-          }
-        />
-
+    <DirectoryListChrome
+      tenantId={activeTenantId}
+      resourceLabel="паспортов"
+      error={error}
+      errorTitle="Не удалось загрузить паспорта"
+      header={{
+        title: "Сопроводительные паспорта",
+        description:
+          "Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан.",
+        directoryLabel: "Сопроводительные паспорта",
+        directoryTo: routes.waste.passports.list,
+        createTo: routes.waste.passports.new,
+        createLabel: "Создать паспорт",
+        actions: (
+          <PrintPassportsJournalButton
+            defaultStartDate={search.date_from}
+            defaultEndDate={search.date_to}
+          />
+        ),
+      }}
+      toolbar={
         <PassportsFilters
           tenantId={activeTenantId}
           values={search}
           onChange={patchSearch}
         />
-
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={loading}
-          getRowId={(row) => row.id}
-          manualSorting
-          sorting={sorting}
-          onSortingChange={(next) => {
-            const { sort, order } = sortingToSearch(next);
-            patchSearch({
-              sort: (sort as PassportSortField | undefined) ?? undefined,
-              order,
-            });
-          }}
-          emptyTitle="Паспортов пока нет"
-          emptyDescription="Создайте сопроводительный паспорт: реквизиты, договор утилизации, отходы из его перечня."
-        />
-        <DataTablePagination
-          total={total}
-          limit={limit}
-          offset={offset}
-          disabled={loading}
-          onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
-        />
-
+      }
+      columns={columns}
+      data={items}
+      loading={loading}
+      emptyTitle="Паспортов пока нет"
+      emptyDescription="Создайте сопроводительный паспорт: реквизиты, договор утилизации, отходы из его перечня."
+      sorting={sorting}
+      onSortingChange={(next) => {
+        const { sort, order } = sortingToSearch(next);
+        patchSearch({
+          sort: (sort as PassportSortField | undefined) ?? undefined,
+          order,
+        });
+      }}
+      total={total}
+      limit={limit}
+      offset={offset}
+      onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
+      footer={
         <ConfirmDialog
           open={deleting !== null}
           confirmDisabled={deleteMutation.isPending}
@@ -234,7 +199,7 @@ export function PassportsPage() {
             if (deleting) void deleteMutation.mutateAsync(deleting.id);
           }}
         />
-      </div>
-    </TenantRequiredGate>
+      }
+    />
   );
 }

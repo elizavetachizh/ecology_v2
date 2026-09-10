@@ -22,6 +22,7 @@ function formatAmount(value: string): string {
 }
 
 function unitLabel(unit: Standard["unit"]) {
+  if (!unit) return "Все подразделения";
   return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 

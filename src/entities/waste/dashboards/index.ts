@@ -43,7 +43,6 @@ export {
   sumChartAmounts,
   summarizeDashboardBalance,
   toChartPoints,
-  todayIsoDate,
   unitTitle,
   wasteTitle,
   yearFromIsoDate,

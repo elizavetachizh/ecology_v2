@@ -3,20 +3,20 @@ import { ApiError } from "../../../../shared/api/api-client";
 import { orderWriteErrorMessage } from "./order-write-error";
 
 describe("orderWriteErrorMessage", () => {
-  it("maps 404 to missing unit copy", () => {
+  it("maps 404 to missing order or unit copy", () => {
     expect(
       orderWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 404", 404, "http_error"),
       ),
-    ).toMatch(/Подразделение не найдено/);
+    ).toMatch(/Приказ или подразделение не найдено/);
   });
 
-  it("maps 409 to unit+start_date conflict copy", () => {
+  it("maps 409 to unit or tenant-wide start_date conflict copy", () => {
     expect(
       orderWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 409", 409, "http_error"),
       ),
-    ).toMatch(/уже есть приказ/);
+    ).toMatch(/приказ с такой датой начала/);
   });
 
   it("maps 422 to validation copy", () => {

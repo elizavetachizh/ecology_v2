@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import {
   OrderStatusBadge,
+  orderUnitLabel,
   type Order,
 } from "../../../../entities/waste/orders";
 import {
@@ -12,10 +13,6 @@ import {
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
 import { routes } from "../../../../shared/config/routes";
-
-function unitLabel(unit: Order["unit"]) {
-  return unit ? (unit.short_name ?? unit.name) : "-";
-}
 
 function ordersColumns(
   setDeleting: (order: Order) => void,
@@ -41,7 +38,7 @@ function ordersColumns(
       id: "unit",
       header: "Подразделение",
       enableSorting: false,
-      cell: ({ row }) => unitLabel(row.original.unit),
+      cell: ({ row }) => orderUnitLabel(row.original.unit),
     },
     {
       id: "start_date",

@@ -33,6 +33,14 @@ export const ORDER_STATUS_BADGE_VARIANT: Record<
   inactive: "secondary",
 };
 
+/** Приказ без unit_id действует на все подразделения тенанта. */
+export const ORDER_TENANT_WIDE_UNIT_LABEL = "Все подразделения";
+
+export function orderUnitLabel(unit: UnitBrief | null | undefined): string {
+  if (!unit) return ORDER_TENANT_WIDE_UNIT_LABEL;
+  return unit.short_name ?? unit.name;
+}
+
 /** OrderRead */
 export type Order = {
   id: string;
@@ -40,8 +48,8 @@ export type Order = {
   number: string;
   start_date: string;
   status: OrderStatus;
-  unit_id: string;
-  unit: UnitBrief;
+  unit_id: string | null;
+  unit: UnitBrief | null;
   created_at: string;
   updated_at: string;
   created_by: UserProfile;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { todayIsoDate } from "../../../../shared/lib/format-date";
 
 const isoDate = z
   .string()
@@ -20,14 +21,6 @@ export const journalPeriodSchema = z
   });
 
 export type JournalPeriodValues = z.infer<typeof journalPeriodSchema>;
-
-export function todayIsoDate(): string {
-  const now = new Date();
-  const yyyy = String(now.getFullYear());
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 export function yearStartIsoDate(): string {
   return `${new Date().getFullYear()}-01-01`;
