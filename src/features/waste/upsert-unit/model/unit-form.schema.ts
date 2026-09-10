@@ -14,7 +14,7 @@ export const unitFormSchema = z
       .max(255, "Не более 255 символов"),
     parent_id: z.union([
       z.literal(""),
-      z.string().uuid("Некорректный идентификатор родителя"),
+      z.uuid("Некорректный идентификатор родителя"),
     ]),
     region_id: z.number().optional(),
     district_id: z.number().optional(),

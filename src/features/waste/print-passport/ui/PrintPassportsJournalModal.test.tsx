@@ -9,8 +9,8 @@ import {
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { downloadPassports } from "../../../../entities/waste/passports";
-import { downloadBlob } from "../lib/download-blob";
 import { PrintPassportsJournalModal } from "./PrintPassportsJournalModal";
+import { downloadBlob } from "../../../../shared/lib/download-blob.ts";
 
 vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
   const actual =

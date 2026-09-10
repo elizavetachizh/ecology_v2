@@ -4,8 +4,8 @@ import {
   type PassportFileFormat,
 } from "../../../../entities/waste/passports";
 import { toast } from "../../../../shared/ui";
-import { downloadBlob } from "../lib/download-blob";
 import { passportDownloadErrorMessage } from "./passport-download-error";
+import { downloadBlob } from "../../../../shared/lib/download-blob.ts";
 
 export function usePrintPassport() {
   const mutation = useMutation({

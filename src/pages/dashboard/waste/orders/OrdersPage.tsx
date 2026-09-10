@@ -35,10 +35,6 @@ import { ordersColumns } from "./orders-columns";
 import { OrdersFilters, type OrdersFiltersValue } from "./ui/orders-filters";
 import { routes } from "../../../../shared/config/routes";
 
-function unitLabel(unit: Order["unit"]) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
-
 export function OrdersPage() {
   const { activeTenantId } = useTenant();
   const navigate = useNavigate({ from: routes.directories.orders.list });
@@ -185,8 +181,7 @@ export function OrdersPage() {
           confirmLabel="Удалить"
           description={
             <>
-              Приказ «{deleting?.number}» подразделения «
-              {deleting ? unitLabel(deleting.unit) : ""}» от{" "}
+              Приказ «{deleting?.number}» от{" "}
               {deleting ? formatDate(deleting.start_date) : ""} будет удалён.
             </>
           }

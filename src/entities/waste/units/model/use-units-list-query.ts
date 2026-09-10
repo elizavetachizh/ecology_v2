@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { GetUnitsParams } from "./units.types";
 import { getUnits } from "../api/get-units";
 import { unitsQueryKeys } from "./unit-query-keys";
+import { DEFAULT_STALE_TIME_MS } from "../../../../shared/lib/query-client.ts";
 
 type UseUnitsListQueryArgs = {
   tenantId: string | null;
@@ -19,6 +20,7 @@ export function useUnitsListQuery({
   const query = useQuery({
     queryKey: unitsQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getUnits(params, signal),
+    staleTime: DEFAULT_STALE_TIME_MS,
     enabled: canFetch,
   });
 

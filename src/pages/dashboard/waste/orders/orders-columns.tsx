@@ -14,10 +14,12 @@ import { formatDate } from "../../../../shared/lib/format-date";
 import { routes } from "../../../../shared/config/routes";
 
 function unitLabel(unit: Order["unit"]) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
+  return unit ? (unit.short_name ?? unit.name) : "-";
 }
 
-function ordersColumns(setDeleting: (order: Order) => void): ColumnDef<Order>[] {
+function ordersColumns(
+  setDeleting: (order: Order) => void,
+): ColumnDef<Order>[] {
   return [
     {
       id: "number",

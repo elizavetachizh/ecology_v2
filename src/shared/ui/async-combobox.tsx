@@ -9,6 +9,7 @@ export type AsyncComboboxOption = {
   label: string;
   disabled?: boolean;
   keywords?: string[];
+  labelStyles?: React.CSSProperties;
 };
 
 export type AsyncComboboxProps = {
@@ -237,7 +238,10 @@ export function AsyncCombobox({
                       selected && "bg-accent text-accent-foreground",
                     )}
                   >
-                    <span className="flex min-w-0 flex-1 items-center gap-2">
+                    <span
+                      style={option.labelStyles}
+                      className="flex min-w-0 flex-1 items-center gap-2"
+                    >
                       {renderOption ? (
                         renderOption(option, { selected })
                       ) : (

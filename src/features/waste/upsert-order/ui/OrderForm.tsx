@@ -99,7 +99,6 @@ export function OrderForm({
         <FormField
           htmlFor="unit_id"
           label="Подразделение"
-          required
           className="md:col-span-2"
           error={errors.unit_id?.message}
           description={
@@ -112,8 +111,10 @@ export function OrderForm({
                 rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Открыть структуру
+                Открыть структуру.{" "}
               </Link>
+              При незаполнении подразделения, приказ считается действительным
+              для всего предприятия.
             </>
           }
         >
@@ -123,7 +124,7 @@ export function OrderForm({
             render={({ field }) => (
               <UnitSelect
                 tenantId={activeTenantId}
-                value={field.value}
+                value={field.value ?? ""}
                 disabled={pending}
                 placeholder="Выберите подразделение"
                 onChange={field.onChange}

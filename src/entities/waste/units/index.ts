@@ -13,6 +13,7 @@ export {
 } from "./model/flatten-unit-tree-paths";
 export type { UnitTreePath } from "./model/flatten-unit-tree-paths";
 export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
+export { UnitHierarchicalSelect } from "./ui/UnitHierarchicalSelect.tsx";
 export { UnitSelect } from "./ui/UnitSelect";
 export type {
   Unit,

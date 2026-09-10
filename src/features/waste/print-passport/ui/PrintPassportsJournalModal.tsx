@@ -19,13 +19,13 @@ import {
   ModalHeader,
   ModalTitle,
 } from "../../../../shared/ui";
-import { downloadBlob } from "../lib/download-blob";
 import {
   journalPeriodDefaults,
   journalPeriodSchema,
   type JournalPeriodValues,
 } from "../model/journal-period.schema";
 import { passportDownloadErrorMessage } from "../model/passport-download-error";
+import { downloadBlob } from "../../../../shared/lib/download-blob.ts";
 
 type PrintPassportsJournalModalProps = {
   open: boolean;

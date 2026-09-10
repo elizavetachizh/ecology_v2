@@ -8,8 +8,12 @@ export type UnitTreePath = {
   path: Unit[];
 };
 
-export function formatUnitPathLabel(path: Pick<Unit, "name">[]): string {
-  return path.map((item) => item.name).join(UNIT_PATH_SEPARATOR);
+export function formatUnitPathLabel(
+  path: Pick<Unit, "name" | "short_name">[],
+): string {
+  return path
+    .map((item) => item.short_name ?? item.name)
+    .join(UNIT_PATH_SEPARATOR);
 }
 
 type FlattenUnitTreePathsOptions = {

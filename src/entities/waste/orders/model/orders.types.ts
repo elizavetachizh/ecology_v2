@@ -51,14 +51,10 @@ export type Order = {
 export type OrderCreate = {
   number: string;
   start_date: string;
-  unit_id: string;
+  unit_id?: string | null;
 };
 
-export type OrderUpdate = {
-  number?: string;
-  start_date?: string;
-  unit_id?: string;
-};
+export type OrderUpdate = Partial<OrderCreate>;
 
 export const OrderSortFields = [
   "number",

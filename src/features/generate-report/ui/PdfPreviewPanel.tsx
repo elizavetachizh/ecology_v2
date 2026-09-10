@@ -19,11 +19,13 @@ type PdfPreviewPanelProps = {
   periodLabel: string;
   preview: GeneratedReportFile | null;
   error: string | null;
+  downloadError?: string | null;
   isLoading: boolean;
   isDownloading: boolean;
   onRetry: () => void;
   onDownloadExcel: () => void;
   onDownloadPdf: () => void;
+  title?: string;
 };
 
 export function PdfPreviewPanel({
@@ -32,17 +34,19 @@ export function PdfPreviewPanel({
   periodLabel,
   preview,
   error,
+  downloadError,
   isLoading,
   isDownloading,
   onRetry,
   onDownloadExcel,
   onDownloadPdf,
+  title = "ПОД-9",
 }: PdfPreviewPanelProps) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent className="h-[min(90vh,860px)] max-h-[90vh] max-w-[min(96vw,1440px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden p-0">
         <ModalHeader className="border-b border-border px-6 py-5">
-          <ModalTitle>Предпросмотр PDF ПОД-9</ModalTitle>
+          <ModalTitle>Предпросмотр отчета {title}</ModalTitle>
           <ModalDescription>
             Период: {periodLabel}
             {preview ? ` · ${preview.fileName}` : ""}
@@ -76,6 +80,11 @@ export function PdfPreviewPanel({
                 Повторить
               </Button>
             </div>
+          ) : null}
+          {downloadError ? (
+            <Alert variant="error">
+              <AlertDescription>{downloadError}</AlertDescription>
+            </Alert>
           ) : null}
 
           {preview && !isLoading && !error ? (

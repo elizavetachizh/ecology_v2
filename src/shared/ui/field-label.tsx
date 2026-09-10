@@ -122,7 +122,7 @@ function FormSection({
   return (
     <section
       className={cn(
-        "grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2",
+        "grid gap-4 rounded-xl border items-start border-border bg-card p-4 md:grid-cols-2",
         className,
       )}
     >

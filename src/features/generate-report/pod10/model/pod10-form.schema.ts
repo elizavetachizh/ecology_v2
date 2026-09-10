@@ -4,12 +4,17 @@ const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
 
-export const pod9FormSchema = z
+export const pod10FormSchema = z
   .object({
-    unit_id: z.uuid("Выберите место учёта").min(1, "Выберите место учёта"),
-    instruction_id: z.uuid("Выберите инструкцию").min(1, "Выберите инструкцию"),
+    region_id: z.number("Выберите регион").int().positive(),
+    district_id: z.number().int().positive().optional(),
     start_date: isoDate,
     end_date: isoDate,
+    entry_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД")
+      .optional()
+      .or(z.literal("")),
   })
   .superRefine((values, ctx) => {
     if (values.end_date < values.start_date) {
@@ -21,7 +26,7 @@ export const pod9FormSchema = z
     }
   });
 
-export type Pod9FormValues = z.infer<typeof pod9FormSchema>;
+export type Pod10FormValues = z.infer<typeof pod10FormSchema>;
 
 export function todayIsoDate(): string {
   const now = new Date();
@@ -35,9 +40,10 @@ export function yearStartIsoDate(): string {
   return `${new Date().getFullYear()}-01-01`;
 }
 
-export const pod9FormDefaultValues: Pod9FormValues = {
-  unit_id: "",
-  instruction_id: "",
+export const pod10FormDefaultValues: Pod10FormValues = {
+  region_id: null,
+  district_id: undefined,
   start_date: yearStartIsoDate(),
   end_date: todayIsoDate(),
+  entry_date: "",
 };

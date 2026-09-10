@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { downloadPassport } from "../../../../entities/waste/passports";
 import { toast } from "../../../../shared/ui";
-import { downloadBlob } from "../lib/download-blob";
 import { usePrintPassport } from "./use-print-passport";
+import { downloadBlob } from "../../../../shared/lib/download-blob.ts";
 
 vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
   const actual =

@@ -107,6 +107,7 @@ import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/Cre
 import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
 import { PersonSortFields } from "../entities/waste/persons";
 import { routes } from "../shared/config/routes";
+import { Pod10ReportPage } from "../pages/dashboard/reports/pod10.tsx";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   validateSearch: parseRootSearch,
@@ -538,6 +539,12 @@ const pod9ReportRoute = createRoute({
   component: Pod9ReportPage,
 });
 
+const pod10ReportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.reports.pod10,
+  component: Pod10ReportPage,
+});
+
 const forbiddenRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.forbidden,
@@ -589,6 +596,7 @@ const routeTree = rootRoute.addChildren([
   directoriesCreateInstructionRoute,
   directoriesEditInstructionRoute,
   pod9ReportRoute,
+  pod10ReportRoute,
   forbiddenRoute,
   catchAllRoute,
 ]);

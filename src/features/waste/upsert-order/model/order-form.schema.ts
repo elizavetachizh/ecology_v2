@@ -11,7 +11,11 @@ export const orderFormSchema = z.object({
     .min(1, "Укажите номер приказа")
     .max(255, "Не более 255 символов"),
   start_date: isoDate,
-  unit_id: z.string().uuid("Выберите подразделение"),
+  unit_id: z
+    .uuid({ message: "Выберите корректное подразделение" })
+    .or(z.literal("")) // Разрешаем пустую строку
+    .transform((val) => (val === "" ? undefined : val)) // Превращаем в undefined для отправки
+    .optional(),
 });
 
 export type OrderFormValues = z.infer<typeof orderFormSchema>;

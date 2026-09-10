@@ -12,9 +12,9 @@ import {
   TenantContext,
   type Tenant,
   type TenantContextValue,
-} from "../../../entities/tenant";
-import { currentUser } from "../../../entities/user";
-import { Pod9ReportForm } from "./Pod9ReportForm";
+} from "../../../../entities/tenant";
+import { currentUser } from "../../../../entities/user";
+import { Pod10ReportForm } from "./Pod10ReportForm.tsx";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, ...rest }: { children: ReactNode }) => (
@@ -24,7 +24,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("../../../entities/waste/units", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../../../entities/waste/units")>();
+    await importOriginal<typeof import("../../../../entities/waste/units")>();
   return {
     ...actual,
     useUnitsTreeQuery: () => ({
@@ -40,7 +40,7 @@ vi.mock(
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import("../../../entities/waste/unit-instruction-waste")
+        typeof import("../../../../entities/waste/unit-instruction-waste")
       >();
     return {
       ...actual,
@@ -95,7 +95,7 @@ function renderForm() {
   return render(
     <QueryClientProvider client={client}>
       <TenantContext.Provider value={tenantValue}>
-        <Pod9ReportForm />
+        <Pod10ReportForm />
       </TenantContext.Provider>
     </QueryClientProvider>,
   );

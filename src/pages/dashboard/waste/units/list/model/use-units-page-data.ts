@@ -43,7 +43,7 @@ export function useUnitsPageData({
       limit: search.limit ?? DEFAULT_UNITS_LIST_LIMIT,
       offset: search.offset ?? 0,
     }),
-    [search.q, search.sort, search.order, search.limit, search.offset],
+    [search],
   );
 
   const treeQuery = useUnitsTreeQuery({

@@ -9,7 +9,7 @@ import {
   Input,
 } from "../../../../shared/ui";
 import type { UnitFormValues } from "../model/unit-form.schema";
-import { ParentUnitSelect } from "./ParentUnitSelect";
+import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 
 type UnitIdentityFieldsProps = {
   control: Control<UnitFormValues>;
@@ -74,8 +74,9 @@ export function UnitIdentityFields({
           name="parent_id"
           control={control}
           render={({ field }) => (
-            <ParentUnitSelect
+            <UnitHierarchicalSelect
               tenantId={tenantId}
+              is_pod9={false}
               value={field.value}
               excludeUnitId={unitId}
               required={isPod9}

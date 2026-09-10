@@ -23,7 +23,7 @@ export function PrintPassportsJournalButton({
         onClick={() => setOpen(true)}
       >
         <Printer />
-        Печать журнала
+        Сформировать журнал
       </Button>
       <PrintPassportsJournalModal
         open={open}

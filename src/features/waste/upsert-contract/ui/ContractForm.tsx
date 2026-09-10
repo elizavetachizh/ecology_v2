@@ -162,59 +162,50 @@ export function ContractForm({
             ))}
           </Select>
         </FormField>
+        <FormField
+          htmlFor="number"
+          className="md:col-span-2"
+          label="Номер договора"
+          required
+          error={errors.number?.message}
+        >
+          <Input
+            id="number"
+            {...register("number")}
+            placeholder="Д-001"
+            disabled={pending}
+            aria-invalid={Boolean(errors.number)}
+          />
+        </FormField>
 
-        {contractType === "recycling" ? (
-          <>
-            <FormField
-              htmlFor="transfer_purpose"
-              label="Цель передачи"
-              required
-              className="md:col-span-2"
-              error={errors.transfer_purpose?.message}
-              description="Обязательна для договора утилизации. Для перевозки не указывается."
-            >
-              <Select
-                id="transfer_purpose"
-                disabled={pending}
-                {...register("transfer_purpose")}
-                aria-invalid={Boolean(errors.transfer_purpose)}
-              >
-                <option value="">Выберите цель</option>
-                {TransferPurposeValues.map((value) => (
-                  <option key={value} value={value}>
-                    {TRANSFER_PURPOSE_LABEL[value]}
-                  </option>
-                ))}
-              </Select>
-            </FormField>
+        <FormField
+          htmlFor="start_date"
+          label="Дата заключения"
+          required
+          error={errors.start_date?.message}
+        >
+          <Input
+            id="start_date"
+            type="date"
+            {...register("start_date")}
+            disabled={pending}
+            aria-invalid={Boolean(errors.start_date)}
+          />
+        </FormField>
 
-            <Field className="md:col-span-2">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <FieldLabel htmlFor="with_ownership_transfer">
-                    С передачей права собственности
-                  </FieldLabel>
-                  <FieldDescription>
-                    Отходы передаются с переходом права собственности.
-                  </FieldDescription>
-                </div>
-                <Controller
-                  name="with_ownership_transfer"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      id="with_ownership_transfer"
-                      checked={field.value}
-                      disabled={pending}
-                      onCheckedChange={field.onChange}
-                      aria-label="С передачей права собственности"
-                    />
-                  )}
-                />
-              </div>
-            </Field>
-          </>
-        ) : null}
+        <FormField
+          htmlFor="end_date"
+          label="Дата окончания"
+          error={errors.end_date?.message}
+        >
+          <Input
+            id="end_date"
+            type="date"
+            {...register("end_date")}
+            disabled={pending}
+            aria-invalid={Boolean(errors.end_date)}
+          />
+        </FormField>
 
         <FormField
           htmlFor="counterparty_id"
@@ -290,64 +281,74 @@ export function ContractForm({
             aria-invalid={Boolean(errors.counterparty_contact)}
           />
         </FormField>
-        <FormField
-          htmlFor="start_date"
-          label="Дата заключения"
-          required
-          error={errors.start_date?.message}
-        >
-          <Input
-            id="start_date"
-            type="date"
-            {...register("start_date")}
-            disabled={pending}
-            aria-invalid={Boolean(errors.start_date)}
-          />
-        </FormField>
 
-        <FormField
-          htmlFor="end_date"
-          label="Дата окончания"
-          error={errors.end_date?.message}
-        >
-          <Input
-            id="end_date"
-            type="date"
-            {...register("end_date")}
-            disabled={pending}
-            aria-invalid={Boolean(errors.end_date)}
-          />
-        </FormField>
-        <FormField
-          htmlFor="number"
-          label="Номер договора"
-          required
-          error={errors.number?.message}
-        >
-          <Input
-            id="number"
-            {...register("number")}
-            placeholder="Д-001"
-            disabled={pending}
-            aria-invalid={Boolean(errors.number)}
-          />
-        </FormField>
+        {contractType === "recycling" ? (
+          <>
+            <FormField
+              htmlFor="transfer_purpose"
+              label="Цель передачи"
+              required
+              className="md:col-span-2"
+              error={errors.transfer_purpose?.message}
+              description="Обязательна для договора утилизации. Для перевозки не указывается."
+            >
+              <Select
+                id="transfer_purpose"
+                disabled={pending}
+                {...register("transfer_purpose")}
+                aria-invalid={Boolean(errors.transfer_purpose)}
+              >
+                <option value="">Выберите цель</option>
+                {TransferPurposeValues.map((value) => (
+                  <option key={value} value={value}>
+                    {TRANSFER_PURPOSE_LABEL[value]}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
 
-        <FormField
-          htmlFor="amount"
-          label="Сумма вывоза отходов по договору"
-          className="md:col-span-2"
-          error={errors.amount?.message}
-        >
-          <Input
-            id="amount"
-            {...register("amount")}
-            inputMode="decimal"
-            placeholder="необязательно"
-            disabled={pending}
-            aria-invalid={Boolean(errors.amount)}
-          />
-        </FormField>
+            <Field className="md:col-span-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <FieldLabel htmlFor="with_ownership_transfer">
+                    С передачей права собственности
+                  </FieldLabel>
+                  <FieldDescription>
+                    Отходы передаются с переходом права собственности.
+                  </FieldDescription>
+                </div>
+                <Controller
+                  name="with_ownership_transfer"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      id="with_ownership_transfer"
+                      checked={field.value}
+                      disabled={pending}
+                      onCheckedChange={field.onChange}
+                      aria-label="С передачей права собственности"
+                    />
+                  )}
+                />
+              </div>
+            </Field>
+            <FormField
+              htmlFor="amount"
+              label="Сумма вывоза отходов по договору"
+              className="md:col-span-2"
+              error={errors.amount?.message}
+            >
+              <Input
+                id="amount"
+                {...register("amount")}
+                inputMode="decimal"
+                placeholder="необязательно"
+                disabled={pending}
+                aria-invalid={Boolean(errors.amount)}
+              />
+            </FormField>
+          </>
+        ) : null}
       </div>
       {contractType === "recycling" ? (
         <section className="space-y-3 rounded-xl border border-border bg-card p-4">

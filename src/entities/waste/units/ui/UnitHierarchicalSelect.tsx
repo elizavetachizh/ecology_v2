@@ -1,24 +1,61 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   getUnit,
-  useUnitsOptions,
   unitsQueryKeys,
   type Unit,
+  useUnitsTreeQuery,
+  type UnitTree,
 } from "../../../../entities/waste/units";
 import { AsyncCombobox, Badge } from "../../../../shared/ui";
+import { useMemo, useState } from "react";
+import { useDebounce } from "../../../../shared/hooks";
+
+export function flattenTree(
+  nodes: UnitTree[],
+  parentPath: string[] = [],
+): {
+  id: string;
+  name: string;
+  short_name: string | null;
+  is_pod9?: boolean;
+  path: string[];
+}[] {
+  let result: {
+    id: string;
+    name: string;
+    short_name: string | null;
+    is_pod9?: boolean;
+    path: string[];
+  }[] = [];
+  for (const node of nodes) {
+    const path = [...parentPath, node.name];
+    result.push({
+      id: node.id,
+      name: node.name,
+      short_name: node.short_name,
+      is_pod9: node.is_pod9,
+      path,
+    });
+    if (node.children && node.children.length) {
+      result = result.concat(flattenTree(node.children, path));
+    }
+  }
+  return result;
+}
 
 type ParentUnitSelectProps = {
   tenantId: string | null;
   value: string;
   /** Текущая единица (edit) — нельзя выбрать себя родителем. */
   excludeUnitId?: string;
+  is_pod9?: boolean;
   /** Для ПОД-9 родитель обязателен — меняем placeholder. */
   required?: boolean;
   onChange: (unit: Unit | null) => void;
 };
 
 function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
+  return unit.short_name ?? unit.name;
 }
 
 function renderUnitOption(
@@ -37,17 +74,34 @@ function renderUnitOption(
   );
 }
 
-export function ParentUnitSelect({
+export function UnitHierarchicalSelect({
   tenantId,
   value,
   excludeUnitId,
+  is_pod9 = false,
   required = false,
   onChange,
 }: ParentUnitSelectProps) {
-  const { options, loading, search, setSearch } = useUnitsOptions({
-    tenantId,
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+  const listParams = {
+    search: debouncedSearch || undefined,
     limit: 20,
+    offset: 0,
+    is_pod9,
+  };
+
+  const { tree, loading } = useUnitsTreeQuery({
+    tenantId,
+    enabled: Boolean(tenantId),
+    params: listParams,
   });
+
+  // Плоский список всех узлов с путями
+  const flatItems = useMemo(() => {
+    if (!tree) return [];
+    return flattenTree(tree);
+  }, [tree]);
 
   const parentDetailQuery = useQuery({
     queryKey: unitsQueryKeys.detail(tenantId ?? "none", value || "none"),
@@ -55,7 +109,7 @@ export function ParentUnitSelect({
     enabled: Boolean(tenantId && value),
   });
 
-  const filtered = options.filter((unit) => unit.id !== excludeUnitId);
+  const filtered = flatItems.filter((unit) => unit.id !== excludeUnitId);
   const selectedUnit =
     filtered.find((unit) => unit.id === value) ??
     (parentDetailQuery.data?.id === value ? parentDetailQuery.data : null);
@@ -72,6 +126,7 @@ export function ParentUnitSelect({
       options={filtered.map((unit) => ({
         value: unit.id,
         label: unitLabel(unit),
+        labelStyles: { marginLeft: `${unit.path.length}rem` },
       }))}
       value={value}
       selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
