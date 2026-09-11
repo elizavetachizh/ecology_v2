@@ -108,16 +108,13 @@ describe("UnitHierarchicalSelect", () => {
     ).toBeInTheDocument();
   });
 
-  it("requests and lists only POD-9 units", () => {
+  it("shows the org tree the same way as non-POD-9 mode", () => {
     renderSelect({ isPod9: true });
 
     expect(lastTreeParams().is_pod9).toBe(true);
-    expect(
-      screen.queryByRole("option", { name: "Цех" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("option", { name: /Цех -> Участок -> ЖурналПОД-9/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Цех" })).toBeEnabled();
+    expect(screen.getByRole("option", { name: "Участок" })).toBeEnabled();
+    expect(screen.getByRole("option", { name: /ЖурналПОД-9/ })).toBeEnabled();
   });
 
   it("requests the tree without POD-9 units", () => {

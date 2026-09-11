@@ -223,17 +223,7 @@ export function OperationCard({
               </Button>{" "}
               <Button
                 type="button"
-                variant="secondary"
-                disabled={actionPending}
-                onClick={() =>
-                  void form.handleSubmit((values) => onSubmit(true, values))()
-                }
-              >
-                Сохранить и закрыть
-              </Button>
-              <Button
-                type="button"
-                size="sm"
+
                 variant="destructive"
                 disabled={actionPending}
                 onClick={() => setDeleting(true)}

@@ -5,7 +5,6 @@ import { useDebounce } from "../../../../shared/hooks";
 import { getUnit } from "../api/get-unit";
 import {
   flattenUnitTreePaths,
-  formatUnitPathLabel,
   unitTreeDepth,
   unitTreeDepthStyle,
 } from "../model/flatten-unit-tree-paths";
@@ -75,8 +74,8 @@ export function UnitHierarchicalSelect({
   });
 
   const items = useMemo(
-    () => flattenUnitTreePaths(tree, { pod9Only, excludePod9 }),
-    [tree, pod9Only, excludePod9],
+    () => flattenUnitTreePaths(tree, { excludePod9 }),
+    [tree, excludePod9],
   );
 
   const parentDetailQuery = useQuery({
@@ -101,20 +100,12 @@ export function UnitHierarchicalSelect({
     <AsyncCombobox
       options={items.map((item) => ({
         value: item.unit.id,
-        label: pod9Only ? formatUnitPathLabel(item.path) : unitLabel(item.unit),
+        label: unitLabel(item.unit),
         disabled: item.unit.id === excludeUnitId,
-        labelStyles: pod9Only
-          ? undefined
-          : unitTreeDepthStyle(unitTreeDepth(item.path)),
+        labelStyles: unitTreeDepthStyle(unitTreeDepth(item.path)),
       }))}
       value={value}
-      selectedLabel={
-        selectedUnit
-          ? pod9Only && selectedFromTree
-            ? formatUnitPathLabel(selectedFromTree.path)
-            : unitLabel(selectedUnit)
-          : undefined
-      }
+      selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
       renderOption={(option) =>
         renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
       }
