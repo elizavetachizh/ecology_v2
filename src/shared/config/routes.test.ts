@@ -23,5 +23,6 @@ describe("routes", () => {
       "/waste/operations/$operationId",
     );
     expect(routes.reports.pod9).toBe("/reports/pod-9");
+    expect(routes.reports.stat1Waste).toBe("/reports/1-waste");
   });
 });

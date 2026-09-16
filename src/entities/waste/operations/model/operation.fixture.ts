@@ -40,6 +40,7 @@ export const operationFixture: Operation = {
   ttn_id: null,
   ttn: null,
   amount: "10.000000",
+  is_import: false,
   balance: {
     id: "bal-1",
     date: "2026-03-01",

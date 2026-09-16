@@ -384,6 +384,10 @@ function TypeSpecificSummary({
               : "—"
           }
         />
+        <SummaryItem
+          label="По импорту"
+          value={operation.is_import ? "Да" : "Нет"}
+        />
       </>
     );
   }

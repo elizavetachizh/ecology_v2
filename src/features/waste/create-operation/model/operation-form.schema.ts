@@ -79,6 +79,7 @@ export const operationFormSchema = z
     document_kind: emptyOrEnum(OperationDocumentKindValues),
     passport_id: z.string(),
     ttn_id: z.string(),
+    is_import: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const type = values.operation_type;
@@ -189,6 +190,7 @@ export const EMPTY_TYPE_SPECIFIC_VALUES: Pick<
   | "document_kind"
   | "passport_id"
   | "ttn_id"
+  | "is_import"
 > = {
   waste_source_id: "",
   use_purpose: "",
@@ -199,6 +201,7 @@ export const EMPTY_TYPE_SPECIFIC_VALUES: Pick<
   document_kind: "",
   passport_id: "",
   ttn_id: "",
+  is_import: false,
 };
 
 export function createEmptyOperationFormValues(): OperationFormValues {

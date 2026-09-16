@@ -34,6 +34,7 @@ export function toOperationWriteBody(
         ? values.transfer_receipt_purpose
         : null,
     counterparty_id: type === "received_out" ? values.counterparty_id : null,
+    is_import: type === "received_out" ? values.is_import : false,
     passport_id:
       type === "transferred_out" && values.document_kind === "passport"
         ? values.passport_id

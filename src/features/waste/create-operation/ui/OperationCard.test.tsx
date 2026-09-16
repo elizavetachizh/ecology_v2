@@ -128,6 +128,26 @@ describe("OperationCard", () => {
     expect(screen.getByText("Цель использования")).toBeInTheDocument();
   });
 
+  it("shows the import flag for received_out", () => {
+    renderCard(
+      makeOperation({
+        operation_type: "received_out",
+        waste_source_id: null,
+        waste_source: null,
+        transfer_receipt_purpose: "use",
+        counterparty: {
+          id: "cp-1",
+          name: "ООО Импорт",
+        },
+        is_import: true,
+      }),
+    );
+
+    expect(screen.getAllByText("ООО Импорт").length).toBeGreaterThan(0);
+    expect(screen.getByText("По импорту")).toBeInTheDocument();
+    expect(screen.getByText("Да")).toBeInTheDocument();
+  });
+
   it("shows review actions when confirmation is required", () => {
     renderCard(
       makeOperation({

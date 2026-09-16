@@ -1,10 +1,10 @@
 import { routes } from "./routes";
 
-export type ReportId = "pod9" | "pod10";
+export type ReportId = "pod9" | "pod10" | "stat1Waste";
 
 export type ReportDefinition = {
   id: ReportId;
-  slug: "pod-9" | "pod-10";
+  slug: "pod-9" | "pod-10" | "1-waste";
   title: string;
   to: string;
   pageDescription: string;
@@ -36,6 +36,18 @@ export const REPORTS: Record<ReportId, ReportDefinition> = {
       "Регион и район необязательны и фильтруют подразделения. Период обязателен. Дата внесения — только в таблицу, на выборку не влияет.",
     tenantGateDescription:
       "Формирование отчёта ПОД-10 доступно после выбора организации в верхней панели.",
+  },
+  stat1Waste: {
+    id: "stat1Waste",
+    slug: "1-waste",
+    title: "1-отходы",
+    to: routes.reports.stat1Waste,
+    pageDescription:
+      "Статистическая отчётность 1-отходы за календарный год по всей организации.",
+    formDescription:
+      "Укажите отчётный год. Фильтра по подразделениям и территории нет — в отчёт входят все единицы организации.",
+    tenantGateDescription:
+      "Формирование отчёта 1-отходы доступно после выбора организации в верхней панели.",
   },
 };
 

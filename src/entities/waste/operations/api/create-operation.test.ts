@@ -17,6 +17,7 @@ const unusedTypeFields = {
   counterparty_id: null,
   passport_id: null,
   ttn_id: null,
+  is_import: false,
 };
 
 describe("createOperation", () => {

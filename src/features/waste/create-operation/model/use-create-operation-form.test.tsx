@@ -50,6 +50,7 @@ const formedWriteBody = {
   counterparty_id: null,
   passport_id: null,
   ttn_id: null,
+  is_import: false,
 };
 
 function wrapper({ children }: { children: ReactNode }) {

@@ -9,3 +9,7 @@ export function pod9ReportPath(): string {
 export function pod10ReportPath(): string {
   return `${reportsCollectionPath()}/pod-10`;
 }
+
+export function statReportPath(): string {
+  return `${reportsCollectionPath()}/stat`;
+}

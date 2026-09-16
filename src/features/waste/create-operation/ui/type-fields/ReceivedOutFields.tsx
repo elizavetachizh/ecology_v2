@@ -7,6 +7,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  Switch,
 } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 import { TransferReceiptPurposeField } from "./TransferReceiptPurposeField";
@@ -61,6 +62,30 @@ export function ReceivedOutFields({
         <FieldError>{errors.counterparty_id?.message}</FieldError>
       </Field>
       <TransferReceiptPurposeField pending={pending} />
+      <Field>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <FieldLabel htmlFor="is_import">По импорту</FieldLabel>
+            <FieldDescription>
+              В отчёте 1-отходы попадает в колонку «поступило… из них по
+              импорту».
+            </FieldDescription>
+          </div>
+          <Controller
+            name="is_import"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                id="is_import"
+                checked={field.value}
+                disabled={pending}
+                onCheckedChange={field.onChange}
+                aria-label="По импорту"
+              />
+            )}
+          />
+        </div>
+      </Field>
     </>
   );
 }

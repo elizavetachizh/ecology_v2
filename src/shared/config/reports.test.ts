@@ -6,6 +6,11 @@ describe("REPORTS", () => {
   it("maps catalog entries to routes", () => {
     expect(REPORTS.pod9.to).toBe(routes.reports.pod9);
     expect(REPORTS.pod10.to).toBe(routes.reports.pod10);
-    expect(REPORT_NAV_ITEMS.map((item) => item.id)).toEqual(["pod-9", "pod-10"]);
+    expect(REPORTS.stat1Waste.to).toBe(routes.reports.stat1Waste);
+    expect(REPORT_NAV_ITEMS.map((item) => item.id)).toEqual([
+      "pod-9",
+      "pod-10",
+      "1-waste",
+    ]);
   });
 });

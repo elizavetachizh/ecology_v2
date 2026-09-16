@@ -25,6 +25,7 @@ const formedNulls = {
   counterparty_id: null,
   passport_id: null,
   ttn_id: null,
+  is_import: false,
 };
 
 describe("map-operation-form", () => {
@@ -62,8 +63,23 @@ describe("map-operation-form", () => {
     });
     expect(body.passport_id).toBe("passport-1");
     expect(body.ttn_id).toBeNull();
-    expect(body.transfer_receipt_purpose).toBe("disposal");
+    expect(body.transfer_receipt_purpose).toBeNull();
     expect(body.counterparty_id).toBeNull();
+  });
+
+  it("sends is_import only for received_out", () => {
+    expect(toOperationWriteBody(formedValues).is_import).toBe(false);
+
+    const body = toOperationWriteBody({
+      ...formedValues,
+      operation_type: "received_out",
+      waste_source_id: "",
+      transfer_receipt_purpose: "use",
+      counterparty_id: "cp-1",
+      is_import: true,
+    });
+    expect(body.counterparty_id).toBe("cp-1");
+    expect(body.is_import).toBe(true);
   });
 
   it("starts create form with empty operation_type and instruction", () => {

@@ -135,6 +135,8 @@ export type Operation = {
   ttn_id: string | null;
   ttn: TtnBrief | null;
   amount: string;
+  /** Для `received_out` — колонка 1-отходы «поступило… из них по импорту». Иначе всегда false. */
+  is_import: boolean;
   balance: BalanceBrief | null;
   created_at: string;
   updated_at: string;
@@ -157,6 +159,7 @@ export type OperationCreate = Pick<
   | "passport_id"
   | "ttn_id"
   | "amount"
+  | "is_import"
 >;
 
 export type OperationUpdate = Partial<OperationCreate>;

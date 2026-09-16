@@ -19,6 +19,7 @@ const emptySpecific = {
   document_kind: "" as const,
   passport_id: "",
   ttn_id: "",
+  is_import: false,
 };
 
 const base = {
@@ -119,6 +120,7 @@ describe("operationFormSchema", () => {
       operation_type: "received_out" as const,
       transfer_receipt_purpose: "use",
       counterparty_id: COUNTERPARTY_ID,
+      is_import: true,
     };
     expect(operationFormSchema.parse(values)).toEqual(values);
   });

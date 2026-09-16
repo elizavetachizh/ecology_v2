@@ -75,13 +75,6 @@ export const navigationGroups: NavGroup[] = [
     id: "reports",
     title: "Отчеты",
     icon: BookOpen,
-    children: [
-      ...REPORT_NAV_ITEMS,
-      {
-        id: "stat-1-waste",
-        title: "Статистика 1-отходы",
-        to: routes.reports.stat1Waste,
-      },
-    ],
+    children: REPORT_NAV_ITEMS,
   },
 ];

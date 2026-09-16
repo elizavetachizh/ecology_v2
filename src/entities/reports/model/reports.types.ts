@@ -26,3 +26,13 @@ export type Pod10ReportParams = {
   entry_date?: string | null;
   format?: ReportFormat;
 };
+
+/** Bounds for GET /api/v1/reports/stat `year`. */
+export const STAT_REPORT_YEAR_MIN = 1900;
+export const STAT_REPORT_YEAR_MAX = 2100;
+
+/** Query params for GET /api/v1/reports/stat. tenant_id is X-Tenant-Id. */
+export type StatReportParams = {
+  year: number;
+  format?: ReportFormat;
+};
