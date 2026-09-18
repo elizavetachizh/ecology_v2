@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import {
   StandardStatusBadge,
+  standardUnitLabel,
   type Standard,
 } from "../../../../entities/waste/standards";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
@@ -21,37 +22,27 @@ function formatAmount(value: string): string {
   return n.toLocaleString("ru-RU", { maximumFractionDigits: 6 });
 }
 
-function unitLabel(unit: Standard["unit"]) {
-  if (!unit) return "Все подразделения";
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
-
 function standardsColumns(
   setDeleting: (standard: Standard) => void,
 ): ColumnDef<Standard>[] {
   return [
-    {
-      id: "unit",
-      header: "Подразделение",
-      enableSorting: false,
-      cell: ({ row }) => (
-        <Link
-          to={routes.directories.standards.detail}
-          params={{ standardId: row.original.id }}
-          className="font-medium hover:underline"
-        >
-          {unitLabel(row.original.unit)}
-        </Link>
-      ),
-    },
     {
       id: "start_date",
       accessorKey: "start_date",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Начало" />
       ),
-      cell: ({ row }) => formatDate(row.original.start_date),
+      cell: ({ row }) => (
+        <Link
+          to={routes.directories.standards.detail}
+          params={{ standardId: row.original.id }}
+          className="font-medium hover:underline"
+        >
+          {formatDate(row.original.start_date)}
+        </Link>
+      ),
     },
+
     {
       id: "status",
       accessorKey: "status",
@@ -63,13 +54,22 @@ function standardsColumns(
     {
       id: "wastes",
       header: "Отходы",
+      size: 300,
       enableSorting: false,
       cell: ({ row }) => (
         <div className="flex max-w-xs flex-wrap gap-1">
-          {row.original.wastes.map((item) => (
-            <Badge key={item.id} variant="secondary">
-              {`${item.waste.waste_classifier.code} — ${formatAmount(item.amount)} ${UOM_LABEL[item.waste.uom]}`}
-            </Badge>
+          {row.original.units.flatMap((unit) => (
+            <>
+              <Badge key={unit.id} variant="secondary">
+                {unit.unit.short_name ?? unit.unit.name}
+              </Badge>
+              (
+              {unit.wastes.map(
+                (item) =>
+                  `${item.waste.waste_classifier.code} — ${formatAmount(item.amount)} ${UOM_LABEL[item.waste.uom]}`,
+              )}
+              )<br />
+            </>
           ))}
         </div>
       ),

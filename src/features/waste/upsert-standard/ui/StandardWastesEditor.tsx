@@ -18,21 +18,24 @@ import {
 
 type StandardWastesEditorProps = {
   form: UseFormReturn<StandardFormValues>;
+  unitIndex: number;
   tenantId: string | null;
   pending: boolean;
 };
 
 export function StandardWastesEditor({
   form,
+  unitIndex,
   tenantId,
   pending,
 }: StandardWastesEditorProps) {
   const { control, register, setValue, watch, formState } = form;
+  const wastesName = `units.${unitIndex}.wastes` as const;
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "wastes",
+    name: wastesName,
   });
-  const rows = watch("wastes");
+  const rows = watch(wastesName) ?? [];
   const wastes = useWastesOptions({
     tenantId,
     enabled: Boolean(tenantId),
@@ -52,12 +55,14 @@ export function StandardWastesEditor({
 
   const setRowWaste = (index: number, wasteId: string) => {
     const selected = wastes.options.find((item) => item.id === wasteId);
-    setValue(`wastes.${index}.waste_id`, wasteId, { shouldDirty: true });
-    setValue(`wastes.${index}.label`, selected ? wasteLabel(selected) : "", {
-      shouldDirty: true,
-    });
+    setValue(`${wastesName}.${index}.waste_id`, wasteId, { shouldDirty: true });
     setValue(
-      `wastes.${index}.uomLabel`,
+      `${wastesName}.${index}.label`,
+      selected ? wasteLabel(selected) : "",
+      { shouldDirty: true },
+    );
+    setValue(
+      `${wastesName}.${index}.uomLabel`,
       selected ? UOM_LABEL[selected.uom] : "",
       { shouldDirty: true },
     );
@@ -69,14 +74,16 @@ export function StandardWastesEditor({
 
   const removeRow = (index: number) => {
     if (fields.length === 1) {
-      setValue("wastes.0.waste_id", "", { shouldDirty: true });
-      setValue("wastes.0.label", "", { shouldDirty: true });
-      setValue("wastes.0.amount", "", { shouldDirty: true });
-      setValue("wastes.0.uomLabel", "", { shouldDirty: true });
+      setValue(`${wastesName}.0.waste_id`, "", { shouldDirty: true });
+      setValue(`${wastesName}.0.label`, "", { shouldDirty: true });
+      setValue(`${wastesName}.0.amount`, "", { shouldDirty: true });
+      setValue(`${wastesName}.0.uomLabel`, "", { shouldDirty: true });
       return;
     }
     remove(index);
   };
+
+  const wasteErrors = formState.errors.units?.[unitIndex]?.wastes;
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
@@ -98,16 +105,19 @@ export function StandardWastesEditor({
                 <td className="px-3 py-2">
                   <input
                     type="hidden"
-                    {...register(`wastes.${index}.waste_id`)}
+                    {...register(`${wastesName}.${index}.waste_id`)}
                   />
-                  <input type="hidden" {...register(`wastes.${index}.label`)} />
                   <input
                     type="hidden"
-                    {...register(`wastes.${index}.uomLabel`)}
+                    {...register(`${wastesName}.${index}.label`)}
+                  />
+                  <input
+                    type="hidden"
+                    {...register(`${wastesName}.${index}.uomLabel`)}
                   />
                   <div className="flex items-center gap-2">
                     <Input
-                      {...register(`wastes.${index}.amount`)}
+                      {...register(`${wastesName}.${index}.amount`)}
                       inputMode="decimal"
                       disabled={pending}
                       aria-label={`Норматив, ${row.label}`}
@@ -119,7 +129,7 @@ export function StandardWastesEditor({
                     ) : null}
                   </div>
                   <FieldError>
-                    {formState.errors.wastes?.[index]?.amount?.message}
+                    {wasteErrors?.[index]?.amount?.message}
                   </FieldError>
                 </td>
                 <td className="px-3 py-2 text-right">
@@ -153,12 +163,15 @@ export function StandardWastesEditor({
                 <td className="min-w-64 px-3 py-2">
                   <input
                     type="hidden"
-                    {...register(`wastes.${index}.waste_id`)}
+                    {...register(`${wastesName}.${index}.waste_id`)}
                   />
-                  <input type="hidden" {...register(`wastes.${index}.label`)} />
                   <input
                     type="hidden"
-                    {...register(`wastes.${index}.uomLabel`)}
+                    {...register(`${wastesName}.${index}.label`)}
+                  />
+                  <input
+                    type="hidden"
+                    {...register(`${wastesName}.${index}.uomLabel`)}
                   />
                   <AsyncCombobox
                     options={addable.map((option) => ({
@@ -185,19 +198,19 @@ export function StandardWastesEditor({
                     refreshing={wastes.refreshing}
                   />
                   <FieldError>
-                    {formState.errors.wastes?.[index]?.waste_id?.message}
+                    {wasteErrors?.[index]?.waste_id?.message}
                   </FieldError>
                 </td>
                 <td className="px-3 py-2">
                   <Input
-                    {...register(`wastes.${index}.amount`)}
+                    {...register(`${wastesName}.${index}.amount`)}
                     inputMode="decimal"
                     placeholder="норматив > 0"
                     disabled={pending}
                     aria-label="Норматив образования нового отхода"
                   />
                   <FieldError>
-                    {formState.errors.wastes?.[index]?.amount?.message}
+                    {wasteErrors?.[index]?.amount?.message}
                   </FieldError>
                 </td>
                 <td className="px-3 py-2 text-right">

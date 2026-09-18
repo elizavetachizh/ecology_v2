@@ -16,7 +16,7 @@ import {
   ModalTitle,
   Select,
 } from "../../../../../shared/ui";
-import { Plus } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useState } from "react";
 import { Pod9ReportForm } from "../../../../../features/generate-report";
 
@@ -75,6 +75,7 @@ export function OperationsFilters({
         <div className="w-64">
           <WasteSelect
             tenantId={tenantId}
+            placeholder="Выберите отход"
             aria-label="Фильтр по отходу"
             value={values.waste_id ?? ""}
             onChange={(id) => onChange({ waste_id: id || undefined })}
@@ -100,7 +101,7 @@ export function OperationsFilters({
           ))}
         </Select>
         <Button type="button" size="sm" onClick={() => setPod9Open(true)}>
-          <Plus className="size-3.5" />
+          <FileText className="size-3.5" />
           ПОД-9
         </Button>
       </div>

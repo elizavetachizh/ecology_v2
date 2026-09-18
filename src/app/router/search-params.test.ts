@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { OperationTypeValues } from "../../entities/waste/operations";
+import {
+  OperationSortFields,
+  OperationTypeValues,
+} from "../../entities/waste/operations";
 import { PassportTransportTypeValues } from "../../entities/waste/passports";
 import { TtnStatusValues } from "../../entities/waste/ttns";
 import { PermitStatusValues } from "../../entities/waste/permits";
@@ -113,6 +116,13 @@ describe("operations search params", () => {
     expect(parseSearchEnum("export", OperationTypeValues)).toBeUndefined();
     expect(parseSearchQuery("unit-1")).toBe("unit-1");
     expect(parseSearchQuery("  ")).toBeUndefined();
+  });
+
+  it("parses list sort fields from the operations API", () => {
+    expect(parseSearchEnum("date", OperationSortFields)).toBe("date");
+    expect(parseSearchEnum("waste", OperationSortFields)).toBe("waste");
+    expect(parseSearchEnum("unit", OperationSortFields)).toBe("unit");
+    expect(parseSearchEnum("created_at", OperationSortFields)).toBeUndefined();
   });
 });
 

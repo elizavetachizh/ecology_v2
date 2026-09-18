@@ -29,7 +29,7 @@ export function StandardsFilters({
           <UnitHierarchicalSelect
             tenantId={tenantId}
             value={values.unit_id ?? ""}
-            isPod9={false}
+            isPod9={true}
             onChange={(unit) => onChange({ unit_id: unit?.id ?? undefined })}
           />
         </div>

@@ -1,7 +1,8 @@
-import type {
-  Standard,
-  StandardCreate,
-  StandardUpdate,
+import {
+  standardUnitLabel,
+  type Standard,
+  type StandardCreate,
+  type StandardUpdate,
 } from "../../../../entities/waste/standards";
 import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 import {
@@ -14,17 +15,19 @@ export function toStandardWriteBody(
 ): StandardCreate {
   return {
     start_date: values.start_date,
-    unit_id: values.unit_id ? values.unit_id : null,
-    wastes: values.wastes
-      .filter((item) => item.waste_id)
-      .map((item) => ({
-        waste_id: item.waste_id,
-        amount: item.amount.trim(),
-      })),
+    units: values.units.map((unit) => ({
+      unit_id: unit.unit_id,
+      wastes: unit.wastes
+        .filter((item) => item.waste_id)
+        .map((item) => ({
+          waste_id: item.waste_id,
+          amount: item.amount.trim(),
+        })),
+    })),
   };
 }
 
-/** PATCH всегда шлёт wastes — полная замена перечня. */
+/** PATCH всегда шлёт units — полная замена дерева. */
 export function toStandardUpdateBody(
   values: StandardFormValues,
 ): StandardUpdate {
@@ -34,15 +37,18 @@ export function toStandardUpdateBody(
 export function toStandardFormValues(standard: Standard): StandardFormValues {
   return {
     start_date: standard.start_date,
-    unit_id: standard.unit_id ?? "",
-    wastes: [
-      ...standard.wastes.map((item) => ({
-        waste_id: item.waste_id,
-        amount: item.amount,
-        label: wasteLabel(item.waste),
-        uomLabel: UOM_LABEL[item.waste.uom],
-      })),
-      { ...emptyStandardWasteRow },
-    ],
+    units: standard.units.map((unit) => ({
+      unit_id: unit.unit_id,
+      unit_label: standardUnitLabel(unit.unit),
+      wastes: [
+        ...unit.wastes.map((item) => ({
+          waste_id: item.waste_id,
+          amount: item.amount,
+          label: wasteLabel(item.waste),
+          uomLabel: UOM_LABEL[item.waste.uom],
+        })),
+        { ...emptyStandardWasteRow },
+      ],
+    })),
   };
 }

@@ -15,7 +15,7 @@ describe("updateStandard", () => {
   });
 
   it("patches by id, tenant-scoped", async () => {
-    const body = { start_date: "2026-02-01", wastes: [] };
+    const body = { start_date: "2026-02-01", units: [] };
     await expect(updateStandard("standard-1", body)).resolves.toEqual(
       standardFixture,
     );
@@ -33,13 +33,17 @@ describe("updateStandard", () => {
 
   it("forwards abort signal", async () => {
     const signal = new AbortController().signal;
-    await updateStandard("standard-1", { unit_id: "unit-2" }, signal);
+    await updateStandard(
+      "standard-1",
+      { units: [{ unit_id: "unit-2" }] },
+      signal,
+    );
 
     expect(apiSendJsonMock).toHaveBeenCalledWith(
       "/api/v1/mdm/standards/standard-1",
       {
         method: "PATCH",
-        body: { unit_id: "unit-2" },
+        body: { units: [{ unit_id: "unit-2" }] },
         tenantScoped: true,
         signal,
       },

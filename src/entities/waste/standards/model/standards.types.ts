@@ -2,6 +2,12 @@ import type { UserProfile } from "../../../user";
 import type { UnitBrief } from "../../units";
 import type { WasteBrief } from "../../wastes";
 
+export function standardUnitLabel(
+  unit: Pick<UnitBrief, "name" | "short_name">,
+): string {
+  return unit.short_name ?? unit.name;
+}
+
 export const STANDARD_STATUS_LABEL = {
   active: "Действует",
   inactive: "Не действует",
@@ -33,14 +39,28 @@ export const STANDARD_STATUS_BADGE_VARIANT: Record<
   inactive: "secondary",
 };
 
-/** StandardWasteRead */
-export type StandardWaste = {
+/** StandardUnitWasteRead */
+export type StandardUnitWaste = {
   id: string;
   tenant_id: string;
-  standard_id: string;
+  standard_unit_id: string;
   waste_id: string;
   waste: WasteBrief;
   amount: string;
+  created_at: string;
+  updated_at: string;
+  created_by: UserProfile;
+  updated_by: UserProfile;
+};
+
+/** StandardUnitRead */
+export type StandardUnit = {
+  id: string;
+  tenant_id: string;
+  standard_id: string;
+  unit_id: string;
+  unit: UnitBrief;
+  wastes: StandardUnitWaste[];
   created_at: string;
   updated_at: string;
   created_by: UserProfile;
@@ -53,31 +73,32 @@ export type Standard = {
   tenant_id: string;
   start_date: string;
   status: StandardStatus;
-  unit_id: string | null;
-  unit: UnitBrief | null;
-  wastes: StandardWaste[];
+  units: StandardUnit[];
   created_at: string;
   updated_at: string;
   created_by: UserProfile;
   updated_by: UserProfile;
 };
 
-export type StandardWasteWrite = {
+export type StandardUnitWasteWrite = {
   waste_id: string;
   amount: string;
 };
 
-export type StandardCreate = {
-  start_date: string;
-  unit_id?: string | null;
-  wastes?: StandardWasteWrite[];
+export type StandardUnitWrite = {
+  unit_id: string;
+  wastes?: StandardUnitWasteWrite[];
 };
 
-/** PATCH wastes: omit = не трогать; [] = очистить перечень. */
+export type StandardCreate = {
+  start_date: string;
+  units?: StandardUnitWrite[];
+};
+
+/** PATCH units: omit = не трогать; [] / [...] = replace-all дерева. */
 export type StandardUpdate = {
   start_date?: string;
-  unit_id?: string | null;
-  wastes?: StandardWasteWrite[];
+  units?: StandardUnitWrite[];
 };
 
 export const StandardSortFields = [

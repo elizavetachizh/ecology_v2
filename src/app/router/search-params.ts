@@ -17,7 +17,10 @@ import type {
   InstructionSortField,
   InstructionStatus,
 } from "../../entities/waste/instructions";
-import type { OperationType } from "../../entities/waste/operations";
+import type {
+  OperationType,
+  OperationSortField,
+} from "../../entities/waste/operations";
 import type {
   PassportSortField,
   PassportStatus,
@@ -146,13 +149,15 @@ export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
   };
 }
 
-/** Журнал операций: API не сортирует и не ищет, только фильтры + пагинация. */
+/** Журнал операций: фильтры, серверная сортировка, пагинация. */
 export type OperationsSearch = {
   unit_id?: string;
   waste_id?: string;
   operation_type?: OperationType;
   date_from?: string;
   date_to?: string;
+  sort?: OperationSortField;
+  order?: "asc" | "desc";
   limit?: number;
   offset?: number;
 };

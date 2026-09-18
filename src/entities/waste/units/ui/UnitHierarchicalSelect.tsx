@@ -17,6 +17,8 @@ type UnitHierarchicalSelectProps = {
   value: string;
   /** Текущая единица (edit) — нельзя выбрать себя родителем. */
   excludeUnitId?: string;
+  /** Уже выбранные единицы — нельзя добавить повторно. */
+  excludeUnitIds?: readonly string[];
   /**
    * Фильтр как query `is_pod9` у GET /mdm/units:
    * не задан — всё дерево;
@@ -26,6 +28,7 @@ type UnitHierarchicalSelectProps = {
   isPod9?: boolean;
   /** Для ПОД-9 родитель обязателен — меняем placeholder. */
   required?: boolean;
+  "aria-label"?: string;
   onChange: (unit: Unit | null) => void;
 };
 
@@ -53,8 +56,10 @@ export function UnitHierarchicalSelect({
   tenantId,
   value,
   excludeUnitId,
+  excludeUnitIds,
   isPod9,
   required = false,
+  "aria-label": ariaLabel = "Родительская структурная единица",
   onChange,
 }: UnitHierarchicalSelectProps) {
   const [search, setSearch] = useState("");
@@ -96,12 +101,17 @@ export function UnitHierarchicalSelect({
     isPod9ById.set(selectedUnit.id, selectedUnit.is_pod9);
   }
 
+  const excludedIds = new Set([
+    ...(excludeUnitId ? [excludeUnitId] : []),
+    ...(excludeUnitIds ?? []),
+  ]);
+
   return (
     <AsyncCombobox
       options={items.map((item) => ({
         value: item.unit.id,
         label: unitLabel(item.unit),
-        disabled: item.unit.id === excludeUnitId,
+        disabled: excludedIds.has(item.unit.id),
         labelStyles: unitTreeDepthStyle(unitTreeDepth(item.path)),
       }))}
       value={value}
@@ -141,7 +151,7 @@ export function UnitHierarchicalSelect({
       contentClassName="w-full"
       search={search}
       setSearch={setSearch}
-      aria-label="Родительская структурная единица"
+      aria-label={ariaLabel}
     />
   );
 }

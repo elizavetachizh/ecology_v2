@@ -1,5 +1,9 @@
 import type { UserProfile } from "../../../user";
-import type { Standard, StandardWaste } from "./standards.types";
+import type {
+  Standard,
+  StandardUnit,
+  StandardUnitWaste,
+} from "./standards.types";
 
 const profile: UserProfile = {
   id: "u1",
@@ -9,10 +13,10 @@ const profile: UserProfile = {
   last_name: null,
 };
 
-export const standardWasteFixture: StandardWaste = {
-  id: "sw-1",
+export const standardUnitWasteFixture: StandardUnitWaste = {
+  id: "suw-1",
   tenant_id: "tenant-1",
-  standard_id: "standard-1",
+  standard_unit_id: "su-1",
   waste_id: "waste-1",
   waste: {
     id: "waste-1",
@@ -28,14 +32,25 @@ export const standardWasteFixture: StandardWaste = {
   updated_by: profile,
 };
 
+export const standardUnitFixture: StandardUnit = {
+  id: "su-1",
+  tenant_id: "tenant-1",
+  standard_id: "standard-1",
+  unit_id: "unit-1",
+  unit: { id: "unit-1", name: "Цех №1", short_name: "Ц1" },
+  wastes: [standardUnitWasteFixture],
+  created_at: "2026-01-01T00:00:00Z",
+  updated_at: "2026-01-02T00:00:00Z",
+  created_by: profile,
+  updated_by: profile,
+};
+
 export const standardFixture: Standard = {
   id: "standard-1",
   tenant_id: "tenant-1",
   start_date: "2026-01-15",
   status: "active",
-  unit_id: "unit-1",
-  unit: { id: "unit-1", name: "Цех №1", short_name: "Ц1" },
-  wastes: [standardWasteFixture],
+  units: [standardUnitFixture],
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
   created_by: profile,

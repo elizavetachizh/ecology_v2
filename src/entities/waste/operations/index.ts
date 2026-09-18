@@ -18,6 +18,8 @@ export type {
   NeutralizationMethod,
   Operation,
   OperationCreate,
+  OperationSortField,
+  OperationSortOrder,
   OperationListResponse,
   OperationStatus,
   OperationType,
@@ -27,6 +29,7 @@ export type {
 } from "./model/operations.types";
 export {
   DEFAULT_OPERATIONS_LIST_LIMIT,
+  OperationSortFields,
   NEUTRALIZATION_METHOD_LABEL,
   NeutralizationMethodValues,
   OPERATION_STATUS_LABEL,

@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -16,7 +15,6 @@ describe("Table", () => {
   it("renders caption, headers and cells", () => {
     render(
       <Table>
-        <TableCaption>Список отходов</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Код</TableHead>

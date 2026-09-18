@@ -12,10 +12,15 @@ import {
   rejectOperation,
   useOperationsListQuery,
   type Operation,
+  type OperationSortField,
 } from "../../../../entities/waste/operations";
 import { CreateOperationModal } from "../../../../features/waste/create-operation";
 import { queryClient } from "../../../../shared/lib/query-client";
 import { formatDate } from "../../../../shared/lib/format-date";
+import {
+  sortingFromSearch,
+  sortingToSearch,
+} from "../../../../shared/lib/sorting";
 import {
   Alert,
   AlertDescription,
@@ -75,10 +80,17 @@ export function WasteOperationsPage() {
       operation_type: search.operation_type,
       date_from: search.date_from,
       date_to: search.date_to,
+      sort: search.sort ?? ("date" as const),
+      order: search.order ?? ("desc" as const),
       limit: search.limit ?? DEFAULT_OPERATIONS_LIST_LIMIT,
       offset: search.offset ?? 0,
     }),
     [search],
+  );
+
+  const sorting = useMemo(
+    () => sortingFromSearch(search.sort ?? "date", search.order ?? "desc"),
+    [search.sort, search.order],
   );
 
   const {
@@ -123,7 +135,13 @@ export function WasteOperationsPage() {
     onError: (err) => toast.error(err.message),
   });
 
-  const patchSearch = (patch: OperationsFiltersValue & { offset?: number }) => {
+  const patchSearch = (
+    patch: OperationsFiltersValue & {
+      sort?: OperationSortField | undefined;
+      order?: "asc" | "desc" | undefined;
+      offset?: number;
+    },
+  ) => {
     void navigate({
       search: (prev) => {
         const next = { ...prev, ...patch };
@@ -132,7 +150,9 @@ export function WasteOperationsPage() {
           "waste_id" in patch ||
           "operation_type" in patch ||
           "date_from" in patch ||
-          "date_to" in patch
+          "date_to" in patch ||
+          "sort" in patch ||
+          "order" in patch
         ) {
           next.offset = patch.offset ?? 0;
         }
@@ -178,6 +198,15 @@ export function WasteOperationsPage() {
           getRowId={(row) => row.id}
           emptyTitle="Пока нет операций"
           emptyDescription="Создайте первую операцию, чтобы начать учет отходов."
+          manualSorting
+          sorting={sorting}
+          onSortingChange={(next) => {
+            const { sort, order } = sortingToSearch(next);
+            patchSearch({
+              sort: (sort as OperationSortField | undefined) ?? undefined,
+              order,
+            });
+          }}
           onRowClick={(row) => {
             void navigate({
               to: routes.waste.operations.detail,

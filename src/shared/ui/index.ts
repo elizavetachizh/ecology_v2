@@ -41,7 +41,6 @@ export {
 } from "./alert";
 export {
   Modal,
-  ModalTrigger,
   ModalPortal,
   ModalOverlay,
   ModalClose,
@@ -59,7 +58,6 @@ export {
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 } from "./table";
 export {
   DataTable,

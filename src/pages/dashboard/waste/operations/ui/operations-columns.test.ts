@@ -22,5 +22,10 @@ describe("operationsColumns", () => {
       "created_at",
       "actions",
     ]);
+    expect(
+      columns
+        .filter((column) => column.enableSorting !== false)
+        .map((column) => column.id),
+    ).toEqual(["date", "unit", "waste", "operation_type", "status", "amount"]);
   });
 });

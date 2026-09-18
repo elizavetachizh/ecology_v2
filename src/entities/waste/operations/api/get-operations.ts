@@ -18,6 +18,8 @@ export function getOperations(
     searchParams.set("operation_type", params.operation_type);
   if (params.date_from) searchParams.set("date_from", params.date_from);
   if (params.date_to) searchParams.set("date_to", params.date_to);
+  if (params.sort) searchParams.set("sort", params.sort);
+  if (params.order) searchParams.set("order", params.order);
   return apiJson<OperationListResponse>(
     `/api/v1/operations/operations?${searchParams}`,
     {

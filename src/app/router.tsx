@@ -45,7 +45,10 @@ import { StatReportPage } from "../pages/dashboard/reports/stat";
 import { ForbiddenPage } from "../pages/system/ForbiddenPage";
 import { NotFoundPage } from "../pages/system/NotFoundPage";
 import { InstructionSortFields } from "../entities/waste/instructions";
-import { OperationTypeValues } from "../entities/waste/operations";
+import {
+  OperationSortFields,
+  OperationTypeValues,
+} from "../entities/waste/operations";
 import { UnitSortFields } from "../entities/waste/units";
 import {
   HazardClassValues,
@@ -138,6 +141,8 @@ const wasteOperationsRoute = createRoute({
     operation_type: parseSearchEnum(search.operation_type, OperationTypeValues),
     date_from: parseSearchIsoDate(search.date_from),
     date_to: parseSearchIsoDate(search.date_to),
+    sort: parseSearchEnum(search.sort, OperationSortFields),
+    order: parseSearchOrder(search.order),
     limit: parseSearchLimit(search.limit),
     offset: parseSearchOffset(search.offset),
   }),

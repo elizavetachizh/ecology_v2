@@ -26,11 +26,6 @@ import {
 } from "./ui/standards-filters";
 import { routes } from "../../../../shared/config/routes";
 
-function unitLabel(unit: Standard["unit"]) {
-  if (!unit) return "Все подразделения";
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
-
 export function StandardsPage() {
   const { activeTenantId } = useTenant();
   const navigate = useNavigate({ from: routes.directories.standards.list });
@@ -109,7 +104,7 @@ export function StandardsPage() {
       header={{
         title: "Нормативы",
         description:
-          "Нормативы образования отходов: подразделение, дата начала и перечень отходов. Документ бессрочный.",
+          "Нормативы образования отходов: дата начала и перечень по местам учёта ПОД-9. Документ бессрочный. На одну дату — один норматив.",
         directoryLabel: "Нормативы",
         directoryTo: routes.directories.standards.list,
         createTo: routes.directories.standards.new,
@@ -153,9 +148,8 @@ export function StandardsPage() {
           confirmLabel="Удалить"
           description={
             <>
-              Норматив «{deleting ? unitLabel(deleting.unit) : ""}» от{" "}
-              {deleting ? formatDate(deleting.start_date) : ""} и перечень
-              отходов будут удалены.
+              Норматив от {deleting ? formatDate(deleting.start_date) : ""} и
+              перечень отходов будут удалены.
             </>
           }
           onConfirm={() => {

@@ -1,8 +1,6 @@
-import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import type { Standard } from "../../../../entities/waste/standards";
 import { useTenant } from "../../../../entities/tenant";
-import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 import {
   Alert,
   AlertDescription,
@@ -15,7 +13,7 @@ import {
 } from "../../../../shared/ui";
 import { formatDate } from "../../../../shared/lib/format-date";
 import { useUpsertStandardForm } from "../model/use-upsert-standard-form";
-import { StandardWastesEditor } from "./StandardWastesEditor";
+import { StandardUnitsEditor } from "./StandardUnitsEditor";
 import { routes } from "../../../../shared/config/routes";
 
 type StandardFormProps = {
@@ -25,11 +23,6 @@ type StandardFormProps = {
   onSaved: (standard: Standard, meta: { close: boolean }) => void;
   onCancel: () => void;
 };
-
-function unitTitle(unit: Standard["unit"]) {
-  if (!unit) return "Все подразделения";
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
 
 export function StandardForm({
   mode,
@@ -46,10 +39,16 @@ export function StandardForm({
     onSaved,
   });
   const {
-    control,
     register,
     formState: { errors },
   } = form;
+
+  const title =
+    mode === "create"
+      ? "Новый норматив"
+      : initial
+        ? `Норматив с ${formatDate(initial.start_date)}`
+        : "Норматив";
 
   return (
     <form
@@ -61,22 +60,10 @@ export function StandardForm({
           <DirectoryBreadcrumb
             directoryLabel="Нормативы"
             directoryTo={routes.directories.standards.list}
-            current={
-              mode === "create"
-                ? "Новый норматив"
-                : initial
-                  ? `${unitTitle(initial.unit)} · с ${formatDate(initial.start_date)}`
-                  : "Норматив"
-            }
+            current={title}
           />
         }
-        title={
-          mode === "create"
-            ? "Новый норматив"
-            : initial
-              ? `${unitTitle(initial.unit)} · с ${formatDate(initial.start_date)}`
-              : "Норматив"
-        }
+        title={title}
         actions={
           mode === "edit" &&
           (initial?.status === "active" ? (
@@ -95,46 +82,11 @@ export function StandardForm({
 
       <div className="grid items-start gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         <FormField
-          htmlFor="unit_id"
-          label="Подразделение"
-          className="md:col-span-2"
-          error={errors.unit_id?.message}
-          description={
-            <>
-              Необязательно. Без подразделения норматив относится ко всей
-              организации. На одну дату начала в рамках подразделения или всего
-              предприятия — один норматив. Нет нужного места учёта?{" "}
-              <Link
-                to={routes.directories.units.list}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Открыть структуру
-              </Link>
-            </>
-          }
-        >
-          <Controller
-            name="unit_id"
-            control={control}
-            render={({ field }) => (
-              <UnitHierarchicalSelect
-                tenantId={activeTenantId}
-                value={field.value ?? ""}
-                isPod9={false}
-                onChange={(unit) => field.onChange(unit?.id ?? "")}
-              />
-            )}
-          />
-        </FormField>
-
-        <FormField
           htmlFor="start_date"
           label="Дата начала действия"
           required
           error={errors.start_date?.message}
-          description="Документ бессрочный. Действующим считается норматив с максимальной датой начала не позже сегодняшней (по подразделению или, если оно не указано, по предприятию)."
+          description="Документ бессрочный. Действующим считается норматив с максимальной датой начала не позже сегодняшней. На одну дату начала в организации — один норматив."
         >
           <Input
             id="start_date"
@@ -149,7 +101,7 @@ export function StandardForm({
       <section className="space-y-3 rounded-xl border border-border bg-card p-4">
         <div className="space-y-1">
           <h2 className="text-sm font-semibold text-foreground">
-            Нормативы по отходам
+            Места учёта и нормативы по отходам
           </h2>
           <p className="text-sm text-muted-foreground">
             Не нашли нужного отхода?{" "}
@@ -163,7 +115,7 @@ export function StandardForm({
             </Link>
           </p>
         </div>
-        <StandardWastesEditor
+        <StandardUnitsEditor
           form={form}
           tenantId={activeTenantId}
           pending={pending}

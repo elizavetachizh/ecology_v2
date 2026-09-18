@@ -164,12 +164,27 @@ export type OperationCreate = Pick<
 
 export type OperationUpdate = Partial<OperationCreate>;
 
+/** Поля sort из GET /api/v1/operations/operations. waste — по WasteClassifier.code, unit — по Unit.name. */
+export const OperationSortFields = [
+  "id",
+  "date",
+  "operation_type",
+  "status",
+  "waste",
+  "amount",
+  "unit",
+] as const;
+export type OperationSortField = (typeof OperationSortFields)[number];
+export type OperationSortOrder = "asc" | "desc";
+
 export type GetOperationsParams = {
   unit_id?: string;
   waste_id?: string;
   operation_type?: OperationType;
   date_from?: string;
   date_to?: string;
+  sort?: OperationSortField;
+  order?: OperationSortOrder;
   limit: number;
   offset: number;
 };

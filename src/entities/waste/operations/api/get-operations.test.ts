@@ -40,12 +40,14 @@ describe("getOperations", () => {
       operation_type: "formed",
       date_from: "2026-01-01",
       date_to: "2026-03-31",
+      sort: "amount",
+      order: "asc",
       limit: 20,
       offset: 10,
     });
 
     expect(apiJsonMock).toHaveBeenCalledWith(
-      "/api/v1/operations/operations?limit=20&offset=10&unit_id=unit-1&waste_id=waste-1&operation_type=formed&date_from=2026-01-01&date_to=2026-03-31",
+      "/api/v1/operations/operations?limit=20&offset=10&unit_id=unit-1&waste_id=waste-1&operation_type=formed&date_from=2026-01-01&date_to=2026-03-31&sort=amount&order=asc",
       { signal: undefined, tenantScoped: true },
     );
   });

@@ -17,8 +17,12 @@ describe("createStandard", () => {
   it("posts create body, tenant-scoped", async () => {
     const body = {
       start_date: "2026-01-15",
-      unit_id: "unit-1",
-      wastes: [{ waste_id: "waste-1", amount: "12.5" }],
+      units: [
+        {
+          unit_id: "unit-1",
+          wastes: [{ waste_id: "waste-1", amount: "12.5" }],
+        },
+      ],
     };
     await expect(createStandard(body)).resolves.toEqual(standardFixture);
 
@@ -33,7 +37,7 @@ describe("createStandard", () => {
   it("forwards abort signal", async () => {
     const signal = new AbortController().signal;
     await createStandard(
-      { start_date: "2026-01-15", unit_id: "unit-1" },
+      { start_date: "2026-01-15", units: [{ unit_id: "unit-1" }] },
       signal,
     );
 
@@ -41,7 +45,7 @@ describe("createStandard", () => {
       method: "POST",
       body: {
         start_date: "2026-01-15",
-        unit_id: "unit-1",
+        units: [{ unit_id: "unit-1" }],
       },
       tenantScoped: true,
       signal,

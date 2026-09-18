@@ -36,7 +36,7 @@ function operationsColumns({
     {
       id: "date",
       accessorKey: "date",
-      enableSorting: false,
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Дата" />
       ),
@@ -45,7 +45,7 @@ function operationsColumns({
     {
       id: "unit",
       accessorFn: (row) => row.unit.name,
-      enableSorting: false,
+      size: 170,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Структурная единица" />
       ),
@@ -54,7 +54,7 @@ function operationsColumns({
     {
       id: "waste",
       accessorFn: (row) => row.waste.waste_classifier.name,
-      enableSorting: false,
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Отход" />
       ),
@@ -70,16 +70,25 @@ function operationsColumns({
     {
       id: "operation_type",
       accessorKey: "operation_type",
-      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Тип операции" />
       ),
-      cell: ({ row }) => OPERATION_TYPE_LABEL[row.original.operation_type],
+      cell: ({ row }) => (
+        <>
+          {OPERATION_TYPE_LABEL[row.original.operation_type]}
+          <span className="text-muted-foreground text-xs block">
+            {row.original.unit_side
+              ? row.original.unit_side.name
+              : row.original.counterparty
+                ? row.original.counterparty.name
+                : ""}
+          </span>
+        </>
+      ),
     },
     {
       id: "status",
       accessorKey: "status",
-      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Статус" />
       ),
@@ -88,7 +97,6 @@ function operationsColumns({
     {
       id: "amount",
       accessorKey: "amount",
-      enableSorting: false,
       size: 120,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Количество" />
@@ -109,10 +117,14 @@ function operationsColumns({
     {
       id: "balance",
       accessorFn: (row) => row.balance?.amount,
-      size: 180,
+      size: 120,
       enableSorting: false,
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Остаток после операции" />
+        <DataTableColumnHeader
+          className="break-normal"
+          column={column}
+          title="Остаток после операции"
+        />
       ),
       cell: ({ row }) =>
         row.original.balance
@@ -130,8 +142,7 @@ function operationsColumns({
       cell: ({ row }) => (
         <>
           {row.original.created_by.username}
-          <br />
-          <span className="text-muted-foreground">
+          <span className="text-muted-foreground block text-xs">
             {formatDate(row.original.created_at.slice(0, 10))}
           </span>
         </>
@@ -139,7 +150,8 @@ function operationsColumns({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Действия</div>,
+      header: () => <></>,
+      size: 50,
       enableSorting: false,
       cell: ({ row }) => {
         const operation = row.original;

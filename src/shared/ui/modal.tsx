@@ -9,12 +9,6 @@ function Modal({
   return <DialogPrimitive.Root data-slot="modal" {...props} />;
 }
 
-function ModalTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="modal-trigger" {...props} />;
-}
-
 function ModalPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
@@ -143,7 +137,6 @@ function ModalDescription({
 
 export {
   Modal,
-  ModalTrigger,
   ModalPortal,
   ModalOverlay,
   ModalClose,

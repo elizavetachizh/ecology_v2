@@ -8,10 +8,10 @@ describe("standardWriteErrorMessage", () => {
       standardWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 404", 404, "http_error"),
       ),
-    ).toMatch(/Подразделение или отход/);
+    ).toMatch(/Место учёта или отход/);
   });
 
-  it("maps 409 to unit+start_date conflict copy", () => {
+  it("maps 409 to start_date conflict copy", () => {
     expect(
       standardWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 409", 409, "http_error"),
