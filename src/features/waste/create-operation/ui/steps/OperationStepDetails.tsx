@@ -15,6 +15,7 @@ import {
   UOM_LABEL,
   wasteLabel,
 } from "../../../../../entities/waste/wastes";
+import { formatDate } from "../../../../../shared/lib/format-date";
 import { FormField, Input, Select } from "../../../../../shared/ui";
 import type { OperationFormValues } from "../../model/operation-form.schema";
 import {
@@ -36,6 +37,7 @@ export function OperationStepDetails({ pending }: OperationStepDetailsProps) {
     setValue,
     formState: { errors },
   } = useFormContext<OperationFormValues>();
+  const date = useWatch<OperationFormValues, "date">({ name: "date" });
   const unitId = useWatch<OperationFormValues, "unit_id">({ name: "unit_id" });
   const wasteId = useWatch<OperationFormValues, "waste_id">({
     name: "waste_id",
@@ -79,6 +81,7 @@ export function OperationStepDetails({ pending }: OperationStepDetailsProps) {
   return (
     <>
       <OperationSelectionSummary
+        dateLabel={date ? formatDate(date) : undefined}
         unitLabel={selectedUnitLabel}
         wasteLabel={selectedWaste ? wasteLabel(selectedWaste) : undefined}
         wasteMeta={

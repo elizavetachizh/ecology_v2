@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   addYearsIsoDate,
+  isoDateZodSchema,
   todayIsoDate,
 } from "../../../../shared/lib/format-date";
 
@@ -27,9 +28,7 @@ export function nextSyncedPermitEndDate(params: {
   return permitEndDateFromStart(nextStart);
 }
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+const isoDate = isoDateZodSchema();
 
 const burialAmount = z
   .string()

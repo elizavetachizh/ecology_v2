@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { PassportTransportTypeValues } from "../../../../entities/waste/passports";
-import { todayIsoDate } from "../../../../shared/lib/format-date";
+import {
+  isoDateZodSchema,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
 
 export const PASSPORT_WASTE_PRODUCER_TYPE_LABEL = {
   self: "Самостоятельно",
@@ -14,9 +17,7 @@ export const PassportWasteProducerTypeValues = Object.keys(
   PASSPORT_WASTE_PRODUCER_TYPE_LABEL,
 ) as [PassportWasteProducerType, ...PassportWasteProducerType[]];
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+const isoDate = isoDateZodSchema();
 
 const optionalUuid = z.union([z.uuid(), z.literal("")]);
 

@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import {
   StandardStatusBadge,
-  standardUnitLabel,
   type Standard,
 } from "../../../../entities/waste/standards";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";

@@ -1,9 +1,7 @@
 import { z } from "zod";
+import { isoDateZodSchema } from "../../../../shared/lib/format-date";
 
-const optionalDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД")
-  .or(z.literal(""));
+const optionalDate = isoDateZodSchema().or(z.literal(""));
 
 export const instructionFormSchema = z
   .object({

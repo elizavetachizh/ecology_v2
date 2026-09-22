@@ -17,12 +17,9 @@ import { useCreateOperationForm } from "../model/use-create-operation-form";
 import {
   STEP_TRIGGER_FIELDS,
   UPSERT_OPERATION_STEPS,
-  resetAfterUnitChange,
 } from "../model/operation-wizard";
-import { OperationStepBinding } from "./steps/OperationStepBinding";
-import { OperationStepDate } from "./steps/OperationStepDate";
+import { OperationStepContext } from "./steps/OperationStepContext";
 import { OperationStepDetails } from "./steps/OperationStepDetails";
-import { OperationStepUnit } from "./steps/OperationStepUnit";
 
 type CreateOperationModalProps = {
   open: boolean;
@@ -147,15 +144,8 @@ function CreateOperationModalForm({
               </Alert>
             ) : null}
 
-            {step === 1 ? <OperationStepDate pending={pending} /> : null}
-            {step === 2 ? (
-              <OperationStepUnit
-                pending={pending}
-                onUnitChange={() => resetAfterUnitChange(form.setValue)}
-              />
-            ) : null}
-            {step === 3 ? <OperationStepBinding pending={pending} /> : null}
-            {step === 4 ? <OperationStepDetails pending={pending} /> : null}
+            {step === 1 ? <OperationStepContext pending={pending} /> : null}
+            {step === 2 ? <OperationStepDetails pending={pending} /> : null}
           </div>
 
           <ModalFooter>

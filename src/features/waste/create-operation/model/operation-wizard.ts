@@ -8,10 +8,8 @@ import { typeSpecificFieldNames } from "./map-operation-form";
 import type { UseFormSetValue } from "react-hook-form";
 
 export const UPSERT_OPERATION_STEPS = [
-  { id: 1, title: "Дата" },
-  { id: 2, title: "Место учёта" },
-  { id: 3, title: "Инструкция и отход" },
-  { id: 4, title: "Данные операции" },
+  { id: 1, title: "Контекст" },
+  { id: 2, title: "Событие" },
 ] as const;
 
 export const UNIT_INSTRUCTION_PARAMS = {
@@ -27,9 +25,7 @@ export const UIW_LIST_PARAMS = {
 };
 
 export const STEP_TRIGGER_FIELDS = {
-  1: ["date"],
-  2: ["unit_id"],
-  3: ["waste_id"],
+  1: ["date", "unit_id", "waste_id"],
 } as const;
 
 export function resetWasteDependentFields(

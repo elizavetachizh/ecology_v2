@@ -8,16 +8,21 @@ describe("OperationSelectionSummary", () => {
   it("renders selected unit and waste", () => {
     render(
       <OperationSelectionSummary
+        dateLabel="22.09.2026"
         unitLabel="Организация -> Цех №1"
         wasteLabel="12345678901 — Отход тестовый"
         wasteMeta="4 класс опасности · кг"
       />,
     );
 
+    expect(screen.getByText("Дата")).toBeInTheDocument();
+    expect(screen.getByText("22.09.2026")).toBeInTheDocument();
     expect(screen.getByText("Место учёта")).toBeInTheDocument();
     expect(screen.getByText("Организация -> Цех №1")).toBeInTheDocument();
     expect(screen.getByText("Отход")).toBeInTheDocument();
-    expect(screen.getByText("12345678901 — Отход тестовый")).toBeInTheDocument();
+    expect(
+      screen.getByText("12345678901 — Отход тестовый"),
+    ).toBeInTheDocument();
     expect(screen.getByText("4 класс опасности · кг")).toBeInTheDocument();
   });
 

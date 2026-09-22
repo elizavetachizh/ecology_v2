@@ -17,7 +17,7 @@ export function OperationStepDate({ pending }: OperationStepDateProps) {
       error={errors.date?.message}
       htmlFor="operation-date"
       required
-      label={"Дата создания операции"}
+      label={"Дата проведения операции"}
     >
       <Input
         id="operation-date"

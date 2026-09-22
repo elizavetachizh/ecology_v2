@@ -16,8 +16,12 @@ const { hookState } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("./steps/OperationStepUnit", () => ({
-  OperationStepUnit: () => null,
+vi.mock("./steps/OperationStepContext", () => ({
+  OperationStepContext: () => null,
+}));
+
+vi.mock("./steps/OperationStepDetails", () => ({
+  OperationStepDetails: () => null,
 }));
 
 vi.mock("../model/use-create-operation-form", async () => {
@@ -94,7 +98,7 @@ describe("CreateOperationModal", () => {
       <CreateOperationModal open onOpenChange={vi.fn()} onSaved={vi.fn()} />,
     );
 
-    expect(screen.getByText("Шаг 1 из 4: Дата")).toBeInTheDocument();
+    expect(screen.getByText("Шаг 1 из 2: Контекст")).toBeInTheDocument();
     expect(screen.queryByText("Не удалось сохранить")).not.toBeInTheDocument();
     expect(screen.queryByText("Недостаточно остатка")).not.toBeInTheDocument();
   });
@@ -107,14 +111,14 @@ describe("CreateOperationModal", () => {
     fireEvent.click(screen.getByRole("button", { name: "Далее" }));
 
     await waitFor(() =>
-      expect(screen.getByText("Шаг 2 из 4: Место учёта")).toBeInTheDocument(),
+      expect(screen.getByText("Шаг 2 из 2: Событие")).toBeInTheDocument(),
     );
     expect(hookState.clearError).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Назад" }));
 
     await waitFor(() =>
-      expect(screen.getByText("Шаг 1 из 4: Дата")).toBeInTheDocument(),
+      expect(screen.getByText("Шаг 1 из 2: Контекст")).toBeInTheDocument(),
     );
     expect(hookState.clearError).toHaveBeenCalledTimes(2);
   });

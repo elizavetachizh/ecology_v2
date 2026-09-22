@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export function formatDate(value: string | null): string {
   if (!value) return "—";
   const [year, month, day] = value.split("-");
@@ -28,6 +30,14 @@ function toIsoDate(date: Date): string {
 
 export function todayIsoDate(): string {
   return toIsoDate(new Date());
+}
+
+export function yearStartIsoDate(): string {
+  return toIsoDate(new Date(new Date().getFullYear(), 0, 1));
+}
+
+export function isoDateZodSchema() {
+  return z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
 }
 
 /** Calendar date plus `years`. Feb 29 becomes Mar 1 in a non-leap year. */

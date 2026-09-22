@@ -1,14 +1,9 @@
 import { z } from "zod";
+import { isoDateZodSchema } from "../../../shared/lib/format-date";
 
-export const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+export const isoDate = isoDateZodSchema();
 
 export const optionalIsoDate = z.union([isoDate, z.literal("")]).optional();
-
-export function yearStartIsoDate(): string {
-  return `${new Date().getFullYear()}-01-01`;
-}
 
 export function refinePeriodOrder(
   values: { start_date: string; end_date: string },

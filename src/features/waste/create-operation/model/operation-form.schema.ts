@@ -6,12 +6,15 @@ import {
   UsePurposeValues,
   type OperationType,
 } from "../../../../entities/waste/operations";
-import { todayIsoDate } from "../../../../shared/lib/format-date";
+import {
+  isoDateZodSchema,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
 
-export const operationDateSchema = z
-  .string()
-  .min(1, "Укажите дату операции")
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+export const operationDateSchema = isoDateZodSchema().min(
+  1,
+  "Укажите дату операции",
+);
 
 function normalizeDecimalSeparator(value: string): string {
   return value.replace(",", ".");

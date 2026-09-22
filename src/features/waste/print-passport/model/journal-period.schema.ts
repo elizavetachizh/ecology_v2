@@ -1,9 +1,11 @@
 import { z } from "zod";
-import { todayIsoDate } from "../../../../shared/lib/format-date";
+import {
+  isoDateZodSchema,
+  todayIsoDate,
+  yearStartIsoDate,
+} from "../../../../shared/lib/format-date";
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+const isoDate = isoDateZodSchema();
 
 export const journalPeriodSchema = z
   .object({
@@ -21,10 +23,6 @@ export const journalPeriodSchema = z
   });
 
 export type JournalPeriodValues = z.infer<typeof journalPeriodSchema>;
-
-export function yearStartIsoDate(): string {
-  return `${new Date().getFullYear()}-01-01`;
-}
 
 export function journalPeriodDefaults(
   startDate?: string,

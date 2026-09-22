@@ -143,8 +143,7 @@ export function PassportsPage() {
       errorTitle="Не удалось загрузить паспорта"
       header={{
         title: "Сопроводительные паспорта",
-        description:
-          "Сначала договор утилизации с перечнем отходов, затем паспорт. К операциям вывоза паспорт пока не привязан.",
+        description: "Сопроводительные паспорта организации.",
         directoryLabel: "Сопроводительные паспорта",
         directoryTo: routes.waste.passports.list,
         createTo: routes.waste.passports.new,

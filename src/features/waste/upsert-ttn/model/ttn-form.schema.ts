@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { todayIsoDate } from "../../../../shared/lib/format-date";
+import {
+  isoDateZodSchema,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+const isoDate = isoDateZodSchema();
 
 export const ttnFormSchema = z.object({
   number: z
@@ -12,10 +13,8 @@ export const ttnFormSchema = z.object({
     .min(1, "Укажите номер ТТН")
     .max(255, "Не более 255 символов"),
   date: isoDate.min(1, "Укажите дату перевозки"),
-  unit_id: z.string().uuid("Выберите структурную единицу"),
-  recycling_contract_id: z
-    .string()
-    .uuid("Выберите действующий договор утилизации"),
+  unit_id: z.uuid("Выберите структурную единицу"),
+  recycling_contract_id: z.uuid("Выберите действующий договор утилизации"),
 });
 
 export type TtnFormValues = z.infer<typeof ttnFormSchema>;

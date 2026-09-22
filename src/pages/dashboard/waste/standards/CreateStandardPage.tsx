@@ -8,7 +8,7 @@ export function CreateStandardPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
 
-  return ( 
+  return (
     <TenantRequiredGate
       tenantId={activeTenantId}
       description="Создание норматива доступно после выбора организации в верхней панели."
@@ -17,7 +17,7 @@ export function CreateStandardPage() {
         mode="create"
         onSaved={(standard, { close }) => {
           toast.success("Норматив успешно создан");
-          if(close){
+          if (close) {
             void navigate({ to: routes.directories.standards.list });
             return;
           }
@@ -27,7 +27,9 @@ export function CreateStandardPage() {
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: routes.directories.standards.list })}
+        onCancel={() =>
+          void navigate({ to: routes.directories.standards.list })
+        }
       />
     </TenantRequiredGate>
   );

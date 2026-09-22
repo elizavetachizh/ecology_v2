@@ -7,7 +7,10 @@ import {
   type Operation,
 } from "../../../../../entities/waste/operations";
 import { UOM_LABEL } from "../../../../../entities/waste/wastes";
-import { formatDate } from "../../../../../shared/lib/format-date";
+import {
+  formatDate,
+  formatDateTime,
+} from "../../../../../shared/lib/format-date";
 import {
   DataTableColumnHeader,
   DataTableRowAction,
@@ -81,7 +84,7 @@ function operationsColumns({
               ? row.original.unit_side.name
               : row.original.counterparty
                 ? row.original.counterparty.name
-                : ""}
+                : (row.original.waste_source?.name ?? "")}
           </span>
         </>
       ),
@@ -103,16 +106,6 @@ function operationsColumns({
       ),
       cell: ({ row }) =>
         `${formatAmount(row.original.amount)} ${UOM_LABEL[row.original.waste.uom]}`,
-    },
-    {
-      id: "waste_source",
-      accessorFn: (row) => row.waste_source?.name,
-      enableSorting: false,
-      size: 180,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Источник образования" />
-      ),
-      cell: ({ row }) => row.original.waste_source?.name ?? "—",
     },
     {
       id: "balance",
@@ -143,7 +136,7 @@ function operationsColumns({
         <>
           {row.original.created_by.username}
           <span className="text-muted-foreground block text-xs">
-            {formatDate(row.original.created_at.slice(0, 10))}
+            {formatDateTime(row.original.created_at)}
           </span>
         </>
       ),

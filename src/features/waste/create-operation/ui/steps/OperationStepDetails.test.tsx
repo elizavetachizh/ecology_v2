@@ -123,6 +123,7 @@ function renderStep() {
     const form = useForm<OperationFormValues>({
       defaultValues: {
         ...createEmptyOperationFormValues(),
+        date: "2026-09-22",
         unit_id: "unit-1",
         instruction_id: "ins-1",
         waste_id: "waste-1",
@@ -162,6 +163,8 @@ describe("OperationStepDetails", () => {
   it("shows the selected unit and waste from previous steps", () => {
     renderStep();
 
+    expect(screen.getByText("Дата")).toBeInTheDocument();
+    expect(screen.getByText("22.09.2026")).toBeInTheDocument();
     expect(screen.getByText("Место учёта")).toBeInTheDocument();
     expect(screen.getByText("Цех №1 (Ц1)")).toBeInTheDocument();
     expect(screen.getByText("Отход")).toBeInTheDocument();

@@ -4,11 +4,12 @@ import {
   ContractTypeValues,
   TransferPurposeValues,
 } from "../../../../entities/waste/contracts";
-import { todayIsoDate } from "../../../../shared/lib/format-date";
+import {
+  isoDateZodSchema,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
 
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД");
+const isoDate = isoDateZodSchema();
 
 const optionalPositiveDecimal = z
   .string()
