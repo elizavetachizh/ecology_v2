@@ -28,12 +28,15 @@ type ContractsFiltersProps = {
   tenantId: string | null;
   values: ContractsFiltersValue;
   onChange: (patch: ContractsFiltersValue) => void;
+  /** На карточке контрагента выбор контрагента не нужен. */
+  hideCounterparty?: boolean;
 };
 
 export function ContractsFilters({
   tenantId,
   values,
   onChange,
+  hideCounterparty = false,
 }: ContractsFiltersProps) {
   return (
     <>
@@ -50,8 +53,7 @@ export function ContractsFilters({
           onChange={(event) =>
             onChange({
               contract_type: (event.target.value || undefined) as
-                | ContractType
-                | undefined,
+                ContractType | undefined,
             })
           }
         >
@@ -63,14 +65,16 @@ export function ContractsFilters({
           ))}
         </Select>
 
-        <div className="w-64">
-          <CounterpartySelect
-            tenantId={tenantId}
-            value={values.counterparty_id ?? ""}
-            placeholder="Все контрагенты"
-            onChange={(id) => onChange({ counterparty_id: id || undefined })}
-          />
-        </div>
+        {hideCounterparty ? null : (
+          <div className="w-64">
+            <CounterpartySelect
+              tenantId={tenantId}
+              value={values.counterparty_id ?? ""}
+              placeholder="Все контрагенты"
+              onChange={(id) => onChange({ counterparty_id: id || undefined })}
+            />
+          </div>
+        )}
         <div className="w-64">
           <WasteSelect
             tenantId={tenantId}

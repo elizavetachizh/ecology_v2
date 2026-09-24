@@ -63,7 +63,7 @@ export function ReceivedOutFields({
       </Field>
       <TransferReceiptPurposeField pending={pending} />
       <Field>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
             <FieldLabel htmlFor="is_import">По импорту</FieldLabel>
             <FieldDescription>

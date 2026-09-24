@@ -1,4 +1,4 @@
-export const REPORT_FORMATS = ["xlsx", "pdf"] as const;
+export const REPORT_FORMATS = ["xlsx", "pdf", "docx"] as const;
 export type ReportFormat = (typeof REPORT_FORMATS)[number];
 
 /** Blob returned by GET /api/v1/reports/* */
@@ -11,7 +11,6 @@ export type GeneratedReportFile = {
 /** Query params for GET /api/v1/reports/pod-9. tenant_id is X-Tenant-Id. */
 export type Pod9ReportParams = {
   unit_id: string;
-  instruction_id: string;
   start_date: string;
   end_date: string;
   format?: ReportFormat;

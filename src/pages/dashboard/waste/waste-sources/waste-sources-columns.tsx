@@ -6,6 +6,7 @@ import {
   DataTableRowActions,
   type ColumnDef,
 } from "../../../../shared/ui";
+import { formatDateTime } from "../../../../shared/lib/format-date";
 
 function wasteSourcesColumns(
   setDeleting: (wasteSource: WasteSource) => void,
@@ -21,6 +22,22 @@ function wasteSourcesColumns(
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.name}</span>
+      ),
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => `${row.created_at} ${row.created_by.username}`,
+      enableSorting: false,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Cоздано" />
+      ),
+      cell: ({ row }) => (
+        <>
+          {row.original.created_by.username}
+          <span className="text-muted-foreground block text-xs">
+            {formatDateTime(row.original.created_at)}
+          </span>
+        </>
       ),
     },
     {

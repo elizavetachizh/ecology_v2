@@ -13,7 +13,7 @@ import {
   type StatFormValues,
 } from "../model/stat-form.schema";
 import { statReportErrorMessage } from "../model/stat-report-error";
-import { useGenerateReport } from "../model/use-generate-report";
+import { useGenerateReport } from "../../../shared/hooks";
 import { ReportGenerateForm } from "./ReportGenerateForm";
 
 export function StatReportForm() {
@@ -50,6 +50,7 @@ export function StatReportForm() {
         onOpenChange: generate.handlePreviewOpenChange,
         periodLabel: Number.isInteger(year) ? `${year} год` : "—",
         file: generate.preview,
+        previewKey: generate.previewKey,
         error: generate.previewError,
         isLoading: generate.isPreviewLoading,
         isDownloading: generate.isDownloading,

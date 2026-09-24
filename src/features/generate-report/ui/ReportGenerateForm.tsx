@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
 import { FileText } from "lucide-react";
-import type { GeneratedReportFile } from "../../../entities/reports";
 import type { ReportDefinition } from "../../../shared/config/reports";
+import type { PreviewFile } from "../../../shared/hooks";
 import {
   Alert,
   AlertDescription,
   Button,
   FormSection,
   PageContextBar,
+  PdfPreviewPanel,
 } from "../../../shared/ui";
-import { PdfPreviewPanel } from "./PdfPreviewPanel";
 
 type ReportGenerateFormProps = {
   report: ReportDefinition;
@@ -23,7 +23,8 @@ type ReportGenerateFormProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     periodLabel: string;
-    file: GeneratedReportFile | null;
+    file: PreviewFile | null;
+    previewKey: number;
     error: string | null;
     isLoading: boolean;
     isDownloading: boolean;
@@ -81,12 +82,13 @@ export function ReportGenerateForm({
         title={`отчета ${report.title}`}
         periodLabel={preview.periodLabel}
         preview={preview.file}
+        previewKey={preview.previewKey}
         error={preview.error}
         downloadError={downloadError}
         isLoading={preview.isLoading}
         isDownloading={preview.isDownloading}
         onRetry={preview.onRetry}
-        onDownloadExcel={preview.onDownloadExcel}
+        onDownload={preview.onDownloadExcel}
         onDownloadPdf={preview.onDownloadPdf}
       />
     </form>

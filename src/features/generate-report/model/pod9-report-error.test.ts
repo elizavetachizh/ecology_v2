@@ -3,12 +3,12 @@ import { ApiError } from "../../../shared/api/api-client";
 import { pod9ReportErrorMessage } from "./pod9-report-error";
 
 describe("pod9ReportErrorMessage", () => {
-  it("maps 404 to unit/instruction copy", () => {
+  it("maps 404 to a missing unit", () => {
     expect(
       pod9ReportErrorMessage(
         new ApiError("Сервер вернул ошибку 404", 404, "http_error"),
       ),
-    ).toMatch(/Место учёта или инструкция/);
+    ).toMatch(/Место учёта не найдено/);
   });
 
   it("maps 400 to period copy", () => {
@@ -29,9 +29,7 @@ describe("pod9ReportErrorMessage", () => {
       pod9ReportErrorMessage(
         new ApiError("Сервер вернул ошибку 502", 502, "http_error"),
       ),
-    ).toBe(
-      "Не удалось сформировать PDF. Попробуйте позже или скачайте Excel.",
-    );
+    ).toBe("Не удалось сформировать PDF. Попробуйте позже или скачайте Excel.");
   });
 
   it("keeps generic Error message", () => {

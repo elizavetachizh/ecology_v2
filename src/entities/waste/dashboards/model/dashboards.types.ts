@@ -55,12 +55,6 @@ export type DashboardChartPoint = {
   amount: number;
 };
 
-export type DashboardBalanceSummary = {
-  unitCount: number;
-  wasteCount: number;
-  nonZeroCount: number;
-};
-
 /** Permit brief nested in burial-permits dashboard reads. */
 export type DashboardPermitBrief = {
   id: string;

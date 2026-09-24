@@ -88,6 +88,10 @@ export { Switch } from "./switch";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Toaster, toast } from "./toaster";
 export {
+  PdfPreviewPanel,
+  type PdfPreviewPanelProps,
+} from "./pdf-preview/PdfPreviewPanel";
+export {
   InstructionScopedBindingsSection,
   type InstructionScopedBindingsSectionProps,
 } from "./instruction-scoped-bindings-section";

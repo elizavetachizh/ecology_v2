@@ -2,38 +2,45 @@ import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { Alert, AlertDescription } from "../../../shared/ui";
+import { Alert, AlertDescription } from "../alert";
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const PAGE_SCALE = 1.35;
+const PREVIEW_ERROR = "Не удалось отобразить PDF";
 
 type PdfJsPreviewProps = {
   blob: Blob;
+  label: string;
 };
 
-export function PdfJsPreview({ blob }: PdfJsPreviewProps) {
+export function PdfJsPreview({ blob, label }: PdfJsPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
     let cancelled = false;
-    let loadingTask: ReturnType<typeof getDocument> | null = null;
+    const loadingTaskRef: {
+      current: ReturnType<typeof getDocument> | null;
+    } = { current: null };
 
     void (async () => {
       try {
         const data = new Uint8Array(await blob.arrayBuffer());
-        loadingTask = getDocument({ data });
+        if (cancelled) return;
+
+        const loadingTask = getDocument({ data });
+        loadingTaskRef.current = loadingTask;
         const pdf = await loadingTask.promise;
         if (cancelled) return;
 
         for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+          if (cancelled) return;
           const page = await pdf.getPage(pageNumber);
           if (cancelled) return;
           const viewport = page.getViewport({ scale: PAGE_SCALE });
@@ -47,20 +54,15 @@ export function PdfJsPreview({ blob }: PdfJsPreviewProps) {
         }
 
         setStatus("ready");
-      } catch (renderError) {
+      } catch {
         if (cancelled) return;
-        setError(
-          renderError instanceof Error
-            ? renderError.message
-            : "Не удалось отобразить PDF",
-        );
         setStatus("error");
       }
     })();
 
     return () => {
       cancelled = true;
-      void loadingTask?.destroy();
+      void loadingTaskRef.current?.destroy();
       host.replaceChildren();
     };
   }, [blob]);
@@ -77,9 +79,9 @@ export function PdfJsPreview({ blob }: PdfJsPreviewProps) {
         </div>
       ) : null}
 
-      {status === "error" && error ? (
+      {status === "error" ? (
         <Alert variant="error">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{PREVIEW_ERROR}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -87,7 +89,7 @@ export function PdfJsPreview({ blob }: PdfJsPreviewProps) {
         ref={hostRef}
         className="min-h-0 flex-1 overflow-auto"
         role="document"
-        aria-label="Предпросмотр PDF ПОД-9"
+        aria-label={label}
       />
     </div>
   );

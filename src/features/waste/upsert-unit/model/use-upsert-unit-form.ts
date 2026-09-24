@@ -8,6 +8,7 @@ import {
   unitsQueryKeys,
   updateUnit,
   type Unit,
+  type UnitDetail,
 } from "../../../../entities/waste/units";
 import {
   unitFormDefaultValues,
@@ -74,9 +75,14 @@ export function useUpsertUnitForm({
     mutationFn: (vars: { values: UnitFormValues; close: boolean }) =>
       updateUnit(unitId!, toUnitWriteBody(vars.values)),
     onSuccess: (updated, vars) => {
-      queryClient.setQueryData(
+      queryClient.setQueryData<Unit | UnitDetail>(
         unitsQueryKeys.detail(updated.tenant_id, updated.id),
-        updated,
+        (current) => {
+          if (current && "children" in current) {
+            return { ...updated, children: current.children };
+          }
+          return updated;
+        },
       );
       void queryClient.invalidateQueries({
         queryKey: unitsQueryKeys.lists(),

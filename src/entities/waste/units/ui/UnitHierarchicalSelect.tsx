@@ -30,6 +30,7 @@ type UnitHierarchicalSelectProps = {
   required?: boolean;
   "aria-label"?: string;
   onChange: (unit: Unit | null) => void;
+  placeholder?: string;
 };
 
 function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
@@ -61,6 +62,7 @@ export function UnitHierarchicalSelect({
   required = false,
   "aria-label": ariaLabel = "Родительская структурная единица",
   onChange,
+  placeholder,
 }: UnitHierarchicalSelectProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -137,7 +139,9 @@ export function UnitHierarchicalSelect({
           ? "Выберите место учёта…"
           : required
             ? "Выберите родительскую единицу…"
-            : "Все структурные единицы"
+            : placeholder
+              ? placeholder
+              : "Все структурные единицы"
       }
       searchPlaceholder="Поиск по названию или краткому"
       emptyMessage={

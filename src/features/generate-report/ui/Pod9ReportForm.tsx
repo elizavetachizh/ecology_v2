@@ -1,15 +1,8 @@
-import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetchPod9Report } from "../../../entities/reports";
 import { useTenant } from "../../../entities/tenant";
 import { useUnitsTreeQuery } from "../../../entities/waste/units";
-import {
-  DEFAULT_UIW_LIST_LIMIT,
-  DEFAULT_UNIT_INSTRUCTIONS_LIMIT,
-  useUnitInstructionWastesListQuery,
-  useUnitInstructionsListQuery,
-} from "../../../entities/waste/unit-instruction-waste";
 import { REPORTS } from "../../../shared/config/reports";
 import { formatDate } from "../../../shared/lib/format-date";
 import {
@@ -18,11 +11,8 @@ import {
   type Pod9FormValues,
 } from "../model/pod9-form.schema";
 import { pod9ReportErrorMessage } from "../model/pod9-report-error";
-import { resolveReportInstructionId } from "../model/resolve-instruction-id";
-import { useGenerateReport } from "../model/use-generate-report";
-import { Pod9InstructionField } from "./Pod9InstructionField";
+import { useGenerateReport } from "../../../shared/hooks";
 import { Pod9UnitField } from "./Pod9UnitField";
-import { Pod9WastesHint } from "./Pod9WastesHint";
 import { ReportGenerateForm } from "./ReportGenerateForm";
 import { ReportPeriodFields } from "./ReportPeriodFields";
 
@@ -39,19 +29,10 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
   const {
     control,
     register,
-    setValue,
     handleSubmit,
     formState: { errors },
   } = form;
 
-  const unitId = useWatch<Pod9FormValues, "unit_id">({
-    control,
-    name: "unit_id",
-  });
-  const instructionId = useWatch<Pod9FormValues, "instruction_id">({
-    control,
-    name: "instruction_id",
-  });
   const startDate = useWatch<Pod9FormValues, "start_date">({
     control,
     name: "start_date",
@@ -65,48 +46,6 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
     tenantId: activeTenantId,
     params: { sort: "name", order: "asc" },
   });
-
-  const instructionsQuery = useUnitInstructionsListQuery({
-    tenantId: activeTenantId,
-    unitId,
-    params: {
-      limit: DEFAULT_UNIT_INSTRUCTIONS_LIMIT,
-      offset: 0,
-      sort: "name",
-      order: "asc",
-    },
-    enabled: Boolean(unitId),
-  });
-
-  const uiwQuery = useUnitInstructionWastesListQuery({
-    tenantId: activeTenantId,
-    scope: { unitId, instructionId },
-    params: { limit: DEFAULT_UIW_LIST_LIMIT, offset: 0 },
-    enabled: Boolean(unitId && instructionId),
-  });
-
-  const instructionListKey = instructionsQuery.items
-    .map((item) => `${item.id}:${item.status}`)
-    .join("|");
-
-  useEffect(() => {
-    if (!unitId) return;
-    const next = resolveReportInstructionId(
-      instructionId,
-      instructionsQuery.items,
-      instructionsQuery.loading,
-    );
-    if (next !== instructionId) {
-      setValue("instruction_id", next);
-    }
-  }, [
-    unitId,
-    instructionId,
-    instructionListKey,
-    instructionsQuery.items,
-    instructionsQuery.loading,
-    setValue,
-  ]);
 
   const generate = useGenerateReport<Pod9FormValues>({
     fetchFile: (values, format, signal) =>
@@ -126,6 +65,7 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
         onOpenChange: generate.handlePreviewOpenChange,
         periodLabel: `${formatDate(startDate)} — ${formatDate(endDate)}`,
         file: generate.preview,
+        previewKey: generate.previewKey,
         error: generate.previewError,
         isLoading: generate.isPreviewLoading,
         isDownloading: generate.isDownloading,
@@ -133,16 +73,6 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
         onDownloadExcel: () => void handleSubmit(generate.runDownloadXlsx)(),
         onDownloadPdf: generate.downloadPreviewPdf,
       }}
-      afterSection={
-        <Pod9WastesHint
-          unitId={unitId}
-          instructionId={instructionId}
-          items={uiwQuery.items}
-          total={uiwQuery.total}
-          loading={uiwQuery.loading}
-          error={uiwQuery.error}
-        />
-      }
     >
       <Controller
         name="unit_id"
@@ -153,31 +83,9 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
             loading={units.loading}
             error={units.error}
             value={field.value}
-            onChange={(next) => {
-              if (next !== field.value) {
-                setValue("instruction_id", "");
-              }
-              field.onChange(next);
-            }}
-            disabled={generate.pending}
-            errorMessage={errors.unit_id?.message}
-          />
-        )}
-      />
-
-      <Controller
-        name="instruction_id"
-        control={control}
-        render={({ field }) => (
-          <Pod9InstructionField
-            unitId={unitId}
-            instructions={instructionsQuery.items}
-            loading={instructionsQuery.loading}
-            error={instructionsQuery.error}
-            value={field.value}
             onChange={field.onChange}
             disabled={generate.pending}
-            errorMessage={errors.instruction_id?.message}
+            errorMessage={errors.unit_id?.message}
           />
         )}
       />

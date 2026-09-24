@@ -5,9 +5,13 @@ import type { GeneratedReportFile, ReportFormat } from "../model/reports.types";
 const XLSX_MEDIA =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const PDF_MEDIA = "application/pdf";
+const DOCX_MEDIA =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 function expectedMedia(format: ReportFormat): string {
-  return format === "pdf" ? PDF_MEDIA : XLSX_MEDIA;
+  if (format === "pdf") return PDF_MEDIA;
+  if (format === "docx") return DOCX_MEDIA;
+  return XLSX_MEDIA;
 }
 
 export function appendReportQuery(

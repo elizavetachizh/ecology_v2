@@ -6,6 +6,7 @@ import {
   updateUnit,
   unitsQueryKeys,
   type Unit,
+  type UnitDetail,
 } from "../../../../entities/waste/units";
 import { queryClient } from "../../../../shared/lib/query-client";
 import { useUpsertUnitForm } from "./use-upsert-unit-form";
@@ -111,5 +112,39 @@ describe("useUpsertUnitForm", () => {
     expect(
       queryClient.getQueryData(unitsQueryKeys.detail(unit.tenant_id, unit.id)),
     ).toEqual(updated);
+  });
+
+  it("keeps detail children when the patch response has none", async () => {
+    const child: Unit = {
+      ...unit,
+      id: "22222222-2222-2222-2222-222222222222",
+      name: "Участок",
+      parent_id: unit.id,
+    };
+    const detail: UnitDetail = { ...unit, children: [child] };
+    queryClient.setQueryData(
+      unitsQueryKeys.detail(unit.tenant_id, unit.id),
+      detail,
+    );
+    const onSaved = vi.fn();
+    const { result } = renderHook(
+      () =>
+        useUpsertUnitForm({
+          mode: "edit",
+          unitId: unit.id,
+          initial: detail,
+          onSaved,
+        }),
+      { wrapper },
+    );
+
+    await act(() =>
+      result.current.onSubmit(false, { ...values, name: updated.name }),
+    );
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(
+      queryClient.getQueryData(unitsQueryKeys.detail(unit.tenant_id, unit.id)),
+    ).toEqual({ ...updated, children: [child] });
   });
 });

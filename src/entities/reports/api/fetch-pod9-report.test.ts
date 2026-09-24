@@ -13,7 +13,6 @@ const XLSX_TYPE =
 
 const params = {
   unit_id: "550e8400-e29b-41d4-a716-446655440000",
-  instruction_id: "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
   start_date: "2026-01-01",
   end_date: "2026-03-01",
 };
@@ -50,7 +49,7 @@ describe("fetchPod9Report", () => {
     const file = await fetchPod9Report(params);
 
     expect(apiFetchMock).toHaveBeenCalledWith(
-      "/api/v1/reports/pod-9?unit_id=550e8400-e29b-41d4-a716-446655440000&instruction_id=6ba7b810-9dad-41d1-80b4-00c04fd430c8&start_date=2026-01-01&end_date=2026-03-01&format=xlsx",
+      "/api/v1/reports/pod-9?unit_id=550e8400-e29b-41d4-a716-446655440000&start_date=2026-01-01&end_date=2026-03-01&format=xlsx",
       { tenantScoped: true, signal: undefined },
     );
     expect(file.fileName).toBe("pod-9_2026-01-01_2026-03-01.xlsx");
@@ -104,7 +103,7 @@ describe("fetchPod9Report", () => {
     const file = await fetchPod9Report({ ...params, format: "pdf" });
 
     expect(apiFetchMock).toHaveBeenCalledWith(
-      "/api/v1/reports/pod-9?unit_id=550e8400-e29b-41d4-a716-446655440000&instruction_id=6ba7b810-9dad-41d1-80b4-00c04fd430c8&start_date=2026-01-01&end_date=2026-03-01&format=pdf",
+      "/api/v1/reports/pod-9?unit_id=550e8400-e29b-41d4-a716-446655440000&start_date=2026-01-01&end_date=2026-03-01&format=pdf",
       { tenantScoped: true, signal: undefined },
     );
     expect(file.fileName).toBe("pod-9_2026-01-01_2026-03-01.pdf");

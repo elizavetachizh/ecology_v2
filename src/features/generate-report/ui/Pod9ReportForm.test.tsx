@@ -109,7 +109,6 @@ describe("Pod9ReportForm", () => {
 
     expect(screen.getByRole("heading", { name: "ПОД-9" })).toBeInTheDocument();
     expect(screen.getByText("Место учёта")).toBeInTheDocument();
-    expect(screen.getByText("Инструкция")).toBeInTheDocument();
     expect(screen.getByLabelText(/Начало периода/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Конец периода/)).toBeInTheDocument();
     expect(

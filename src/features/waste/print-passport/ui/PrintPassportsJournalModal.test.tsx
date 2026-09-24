@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   cleanup,
   fireEvent,
@@ -25,7 +26,7 @@ vi.mock("../../../../shared/lib/download-blob", () => ({
   downloadBlob: vi.fn(),
 }));
 
-vi.mock("../../../generate-report/ui/PdfJsPreview", () => ({
+vi.mock("../../../../shared/ui/pdf-preview/PdfJsPreview", () => ({
   PdfJsPreview: () => <div data-testid="pdf-js-preview" />,
 }));
 
@@ -44,6 +45,33 @@ const xlsxFile = {
   fileName: "passports_2026-02-01_2026-02-28.xlsx",
 };
 
+function renderJournal(
+  dates: { start: string; end: string } = {
+    start: "2026-02-01",
+    end: "2026-02-28",
+  },
+) {
+  const onOpenChange = vi.fn();
+
+  function Harness() {
+    const [open, setOpen] = useState(true);
+    return (
+      <PrintPassportsJournalModal
+        open={open}
+        onOpenChange={(next) => {
+          onOpenChange(next);
+          setOpen(next);
+        }}
+        defaultStartDate={dates.start}
+        defaultEndDate={dates.end}
+      />
+    );
+  }
+
+  render(<Harness />);
+  return { onOpenChange };
+}
+
 describe("PrintPassportsJournalModal", () => {
   afterEach(cleanup);
 
@@ -53,15 +81,8 @@ describe("PrintPassportsJournalModal", () => {
     downloadMock.mockResolvedValue(pdfFile);
   });
 
-  it("prefills the period and opens a PDF preview on top", async () => {
-    render(
-      <PrintPassportsJournalModal
-        open
-        onOpenChange={vi.fn()}
-        defaultStartDate="2026-02-01"
-        defaultEndDate="2026-02-28"
-      />,
-    );
+  it("closes the period dialog and opens a PDF preview", async () => {
+    const { onOpenChange } = renderJournal();
 
     expect(screen.getByRole("dialog")).toHaveTextContent(
       "Печать журнала паспортов",
@@ -69,7 +90,7 @@ describe("PrintPassportsJournalModal", () => {
     expect(document.getElementById("start_date")).toHaveValue("2026-02-01");
     expect(document.getElementById("end_date")).toHaveValue("2026-02-28");
 
-    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сформировать" }));
 
     await waitFor(() => {
       expect(downloadMock).toHaveBeenCalledWith(
@@ -82,31 +103,30 @@ describe("PrintPassportsJournalModal", () => {
       );
     });
 
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(
+      screen.queryByText("Печать журнала паспортов"),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Предпросмотр журнала паспортов" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Период: 01\.02\.2026 — 28\.02\.2026/),
     ).toBeInTheDocument();
     expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Скачать Excel" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Скачать PDF" })).toBeEnabled();
   });
 
-  it("downloads excel from the preview without closing the period modal", async () => {
-    const onOpenChange = vi.fn();
+  it("downloads excel from the preview after the period dialog closes", async () => {
+    const { onOpenChange } = renderJournal();
     downloadMock.mockResolvedValueOnce(pdfFile).mockResolvedValueOnce(xlsxFile);
 
-    render(
-      <PrintPassportsJournalModal
-        open
-        onOpenChange={onOpenChange}
-        defaultStartDate="2026-02-01"
-        defaultEndDate="2026-02-28"
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сформировать" }));
     await waitFor(() => {
       expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
     });
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Скачать Excel" }));
 
@@ -124,20 +144,13 @@ describe("PrintPassportsJournalModal", () => {
       xlsxFile.blob,
       xlsxFile.fileName,
     );
-    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
   });
 
   it("downloads the previewed pdf", async () => {
-    render(
-      <PrintPassportsJournalModal
-        open
-        onOpenChange={vi.fn()}
-        defaultStartDate="2026-01-01"
-        defaultEndDate="2026-12-31"
-      />,
-    );
+    renderJournal({ start: "2026-01-01", end: "2026-12-31" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сформировать" }));
     await waitFor(() => {
       expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
     });

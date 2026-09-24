@@ -19,6 +19,11 @@ export type Unit = {
 
 export type UnitBrief = Pick<Unit, "id" | "name" | "short_name">;
 
+/** GET /api/v1/mdm/units/{id}. children — прямые потомки, без внуков. */
+export type UnitDetail = Unit & {
+  children: Unit[];
+};
+
 /** Hierarchical read: Unit + children (GET ?hierarchical=true). */
 export type UnitTree = Unit & {
   children: UnitTree[];

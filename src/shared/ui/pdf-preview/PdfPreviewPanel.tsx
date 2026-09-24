@@ -1,47 +1,68 @@
 import { Download, LoaderCircle } from "lucide-react";
-import type { GeneratedReportFile } from "../../../entities/reports";
+import type {
+  PreviewFile,
+  PreviewFileFormat,
+} from "../../hooks/use-generate-report";
+import { Alert, AlertDescription } from "../alert";
+import { Button } from "../button";
 import {
-  Alert,
-  AlertDescription,
-  Button,
   Modal,
   ModalContent,
   ModalDescription,
   ModalFooter,
   ModalHeader,
   ModalTitle,
-} from "../../../shared/ui";
+} from "../modal";
 import { PdfJsPreview } from "./PdfJsPreview";
 
-type PdfPreviewPanelProps = {
+export type PdfPreviewPanelProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  periodLabel: string;
-  preview: GeneratedReportFile | null;
+  periodLabel?: string;
+  subtitle?: string;
+  preview: PreviewFile | null;
+  previewKey: number;
   error: string | null;
   downloadError?: string | null;
   isLoading: boolean;
   isDownloading: boolean;
   onRetry: () => void;
-  onDownloadExcel: () => void;
+  onDownload: () => void;
   onDownloadPdf: () => void;
   title: string;
+  format?: PreviewFileFormat;
 };
 
 export function PdfPreviewPanel({
   open,
   onOpenChange,
   periodLabel,
+  subtitle,
   preview,
+  previewKey,
   error,
   downloadError,
   isLoading,
   isDownloading,
   onRetry,
-  onDownloadExcel,
+  onDownload,
   onDownloadPdf,
   title,
+  format = "xlsx",
 }: PdfPreviewPanelProps) {
+  const formatLabel =
+    format === "xlsx" ? "Excel" : format === "docx" ? "Word" : "PDF";
+
+  const description = [
+    periodLabel ? `Период: ${periodLabel}` : null,
+    subtitle,
+    preview ? preview.fileName : null,
+  ]
+    .filter((part) => Boolean(part))
+    .join(" · ");
+  const canDownloadOffice =
+    !isLoading && !isDownloading && (Boolean(preview) || Boolean(error));
+
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent
@@ -50,9 +71,8 @@ export function PdfPreviewPanel({
       >
         <ModalHeader className="border-b border-border px-6 py-5">
           <ModalTitle>Предпросмотр {title}</ModalTitle>
-          <ModalDescription>
-            Период: {periodLabel}
-            {preview ? ` · ${preview.fileName}` : ""}
+          <ModalDescription className={description ? undefined : "sr-only"}>
+            {description || `Предпросмотр ${title}`}
           </ModalDescription>
         </ModalHeader>
 
@@ -92,8 +112,9 @@ export function PdfPreviewPanel({
 
           {preview && !isLoading && !error ? (
             <PdfJsPreview
-              key={`${preview.fileName}-${preview.blob.size}`}
+              key={previewKey}
               blob={preview.blob}
+              label={`Предпросмотр ${title}`}
             />
           ) : null}
         </div>
@@ -109,16 +130,16 @@ export function PdfPreviewPanel({
           <Button
             type="button"
             variant="outline"
-            disabled={isDownloading}
-            onClick={onDownloadExcel}
+            disabled={!canDownloadOffice}
+            onClick={onDownload}
           >
             {isDownloading ? <LoaderCircle className="animate-spin" /> : null}
-            Скачать Excel
+            Скачать {formatLabel}
           </Button>
           <Button
             type="button"
             onClick={onDownloadPdf}
-            disabled={!preview || isDownloading}
+            disabled={!preview || isLoading || isDownloading}
           >
             <Download />
             Скачать PDF

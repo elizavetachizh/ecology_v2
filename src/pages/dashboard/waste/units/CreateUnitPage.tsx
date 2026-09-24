@@ -33,7 +33,7 @@ export function CreateUnitPage() {
 
   const parent = parentQuery.data;
   const currentLabel = isPod9
-    ? "Новая единица ПОД-9"
+    ? "Новое место учёта"
     : "Новая структурная единица";
 
   let content;

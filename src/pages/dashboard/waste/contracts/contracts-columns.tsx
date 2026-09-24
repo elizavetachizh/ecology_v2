@@ -20,11 +20,13 @@ import { routes } from "../../../../shared/config/routes";
 function contractsColumns(
   setDeleting: (contract: Contract) => void,
   onStatusChange: (contract: Contract, status: ContractStatus) => void,
+  options?: { hideCounterparty?: boolean },
 ): ColumnDef<Contract>[] {
-  return [
+  const columns: ColumnDef<Contract>[] = [
     {
       id: "number",
       accessorKey: "number",
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Номер" />
       ),
@@ -40,6 +42,7 @@ function contractsColumns(
     },
     {
       id: "contract_type",
+      size: 120,
       accessorKey: "contract_type",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Тип" />
@@ -49,6 +52,7 @@ function contractsColumns(
     {
       id: "transfer_purpose",
       accessorKey: "transfer_purpose",
+      size: 120,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Цель передачи" />
       ),
@@ -74,6 +78,7 @@ function contractsColumns(
     {
       id: "start_date",
       accessorKey: "start_date",
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Заключён" />
       ),
@@ -82,6 +87,7 @@ function contractsColumns(
     {
       id: "end_date",
       accessorKey: "end_date",
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Окончание" />
       ),
@@ -90,6 +96,7 @@ function contractsColumns(
     {
       id: "status",
       accessorKey: "status",
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Статус" />
       ),
@@ -115,6 +122,7 @@ function contractsColumns(
     },
     {
       id: "actions",
+      size: 100,
       header: () => <div className="text-right">Действия</div>,
       enableSorting: false,
       cell: ({ row }) => (
@@ -156,6 +164,9 @@ function contractsColumns(
       ),
     },
   ];
+
+  if (!options?.hideCounterparty) return columns;
+  return columns.filter((column) => column.id !== "counterparty");
 }
 
 export { contractsColumns };

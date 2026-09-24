@@ -1,5 +1,5 @@
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import type { Unit } from "../../../../entities/waste/units";
 import {
   Field,
@@ -19,9 +19,12 @@ type UnitIdentityFieldsProps = {
   unitId?: string;
   isPod9: boolean;
   onParentChange: (unit: Unit | null) => void;
+  mode: "create" | "edit";
+  parentId?: string;
 };
 
 export function UnitIdentityFields({
+  mode,
   control,
   register,
   errors,
@@ -29,6 +32,7 @@ export function UnitIdentityFields({
   unitId,
   isPod9,
   onParentChange,
+  parentId,
 }: UnitIdentityFieldsProps) {
   return (
     <>
@@ -76,6 +80,11 @@ export function UnitIdentityFields({
           render={({ field }) => (
             <UnitHierarchicalSelect
               tenantId={tenantId}
+              placeholder={
+                mode === "edit" && !isPod9 && !parentId
+                  ? "Является родительской единицей"
+                  : undefined
+              }
               value={field.value}
               excludeUnitId={unitId}
               isPod9={false}

@@ -1,35 +1,115 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { downloadPassport } from "../../../../entities/waste/passports";
+import { downloadBlob } from "../../../../shared/lib/download-blob";
 import { PrintPassportButton } from "./PrintPassportButton";
-import { usePrintPassport } from "../model/use-print-passport";
 
-vi.mock("../model/use-print-passport", () => ({
-  usePrintPassport: vi.fn(),
+vi.mock("../../../../entities/waste/passports", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("../../../../entities/waste/passports")
+    >();
+  return {
+    ...actual,
+    downloadPassport: vi.fn(),
+  };
+});
+
+vi.mock("../../../../shared/lib/download-blob", () => ({
+  downloadBlob: vi.fn(),
 }));
 
-const usePrintPassportMock = vi.mocked(usePrintPassport);
+vi.mock("../../../../shared/ui/pdf-preview/PdfJsPreview", () => ({
+  PdfJsPreview: () => <div data-testid="pdf-js-preview" />,
+}));
 
-function openPrintMenu() {
-  const trigger = screen.getByRole("button", { name: /Печать/ });
-  fireEvent.pointerDown(trigger, { button: 0, pointerType: "mouse" });
-  fireEvent.pointerUp(trigger, { button: 0, pointerType: "mouse" });
-}
+const downloadMock = vi.mocked(downloadPassport);
+const downloadBlobMock = vi.mocked(downloadBlob);
+
+const pdfFile = {
+  blob: new Blob(["%PDF-1.4"], { type: "application/pdf" }),
+  contentType: "application/pdf",
+  fileName: "passport_СП-001.pdf",
+};
+
+const docxFile = {
+  blob: new Blob(["docx"], {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  }),
+  contentType:
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  fileName: "passport_СП-001.docx",
+};
 
 describe("PrintPassportButton", () => {
   afterEach(cleanup);
 
-  it("offers Word and PDF and prints the chosen format", () => {
-    const print = vi.fn();
-    usePrintPassportMock.mockReturnValue({ print, pending: false });
+  beforeEach(() => {
+    downloadMock.mockReset();
+    downloadBlobMock.mockReset();
+  });
+
+  it("opens a pdf preview and downloads word and pdf from it", async () => {
+    downloadMock.mockImplementation(async (_id, options) =>
+      options?.format === "docx" ? docxFile : pdfFile,
+    );
 
     render(<PrintPassportButton passportId="p-1" number="СП-001" />);
 
-    openPrintMenu();
-    fireEvent.click(screen.getByRole("menuitem", { name: "Word" }));
-    expect(print).toHaveBeenCalledWith("p-1", "СП-001", "docx");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Сформировать паспорт" }),
+    );
 
-    openPrintMenu();
-    fireEvent.click(screen.getByRole("menuitem", { name: "PDF" }));
-    expect(print).toHaveBeenCalledWith("p-1", "СП-001", "pdf");
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-js-preview")).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Предпросмотр паспорта" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/СП-001/)).toBeInTheDocument();
+    expect(screen.queryByText(/Период:/)).not.toBeInTheDocument();
+    expect(downloadMock).toHaveBeenCalledWith(
+      "p-1",
+      { format: "pdf", number: "СП-001" },
+      expect.any(AbortSignal),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать Word" }));
+    await waitFor(() => {
+      expect(downloadBlobMock).toHaveBeenCalledWith(
+        docxFile.blob,
+        docxFile.fileName,
+      );
+    });
+    expect(downloadMock).toHaveBeenCalledWith(
+      "p-1",
+      { format: "docx", number: "СП-001" },
+      expect.any(AbortSignal),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать PDF" }));
+    expect(downloadBlobMock).toHaveBeenCalledWith(
+      pdfFile.blob,
+      pdfFile.fileName,
+    );
+  });
+
+  it("keeps download actions disabled until the preview finishes", () => {
+    downloadMock.mockReturnValue(new Promise(() => {}));
+
+    render(<PrintPassportButton passportId="p-1" number="СП-001" />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Сформировать паспорт" }),
+    );
+
+    expect(screen.getByRole("button", { name: "Скачать Word" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Скачать PDF" })).toBeDisabled();
   });
 });

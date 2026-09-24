@@ -93,6 +93,13 @@ export type ContractsSearch = ListSearchParams<ContractSortField> & {
   waste_id?: string;
 };
 
+/** Фильтры договоров на карточке контрагента. Контрагент задан маршрутом. */
+export type CounterpartyDetailSearch = ListSearchParams<ContractSortField> & {
+  status?: ContractStatus;
+  contract_type?: ContractType;
+  waste_id?: string;
+};
+
 export type CreateContractSearch = {
   counterparty_id?: string;
   contract_type?: ContractType;

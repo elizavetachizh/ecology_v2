@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { FileText } from "lucide-react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { downloadPassports } from "../../../../entities/waste/passports";
+import { useGenerateReport } from "../../../../shared/hooks";
+import { formatDate } from "../../../../shared/lib/format-date";
 import {
-  Alert,
-  AlertDescription,
   Button,
   FormField,
   Input,
@@ -14,9 +15,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalTitle,
+  PdfPreviewPanel,
 } from "../../../../shared/ui";
-import { formatDate } from "../../../../shared/lib/format-date";
-import { PdfPreviewPanel, useGenerateReport } from "../../../generate-report";
 import {
   journalPeriodDefaults,
   journalPeriodSchema,
@@ -37,144 +37,141 @@ export function PrintPassportsJournalModal({
   defaultStartDate,
   defaultEndDate,
 }: PrintPassportsJournalModalProps) {
+  const [submitted, setSubmitted] = useState<JournalPeriodValues | null>(null);
+  const generate = useGenerateReport<JournalPeriodValues>({
+    fetchFile: (values, format, signal) =>
+      downloadPassports(
+        { ...values, format: format === "pdf" ? "pdf" : "xlsx" },
+        signal,
+      ),
+    mapError: passportDownloadErrorMessage,
+  });
+
+  const startPreview = (values: JournalPeriodValues) => {
+    setSubmitted(values);
+    void generate.runPreview(values);
+    onOpenChange(false);
+  };
+
+  const periodLabel = submitted
+    ? `${formatDate(submitted.start_date)} — ${formatDate(submitted.end_date)}`
+    : undefined;
+
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
-      {open ? (
-        <PrintPassportsJournalForm
-          defaultStartDate={defaultStartDate}
-          defaultEndDate={defaultEndDate}
-          onOpenChange={onOpenChange}
-        />
-      ) : null}
-    </Modal>
+    <>
+      <Modal open={open} onOpenChange={onOpenChange}>
+        {open ? (
+          <PrintPassportsJournalForm
+            defaultStartDate={defaultStartDate}
+            defaultEndDate={defaultEndDate}
+            onCancel={() => onOpenChange(false)}
+            onSubmit={startPreview}
+          />
+        ) : null}
+      </Modal>
+
+      <PdfPreviewPanel
+        open={generate.previewOpen}
+        onOpenChange={generate.handlePreviewOpenChange}
+        title="журнала паспортов"
+        periodLabel={periodLabel}
+        preview={generate.preview}
+        previewKey={generate.previewKey}
+        error={generate.previewError}
+        downloadError={generate.downloadError}
+        isLoading={generate.isPreviewLoading}
+        isDownloading={generate.isDownloading}
+        onRetry={() => {
+          if (submitted) void generate.runPreview(submitted);
+        }}
+        onDownload={() => {
+          if (submitted) void generate.runDownloadXlsx(submitted);
+        }}
+        onDownloadPdf={generate.downloadPreviewPdf}
+      />
+    </>
   );
 }
 
 type PrintPassportsJournalFormProps = {
   defaultStartDate?: string;
   defaultEndDate?: string;
-  onOpenChange: (open: boolean) => void;
+  onCancel: () => void;
+  onSubmit: (values: JournalPeriodValues) => void;
 };
 
 function PrintPassportsJournalForm({
   defaultStartDate,
   defaultEndDate,
-  onOpenChange,
+  onCancel,
+  onSubmit,
 }: PrintPassportsJournalFormProps) {
   const form = useForm<JournalPeriodValues>({
     resolver: zodResolver(journalPeriodSchema),
     defaultValues: journalPeriodDefaults(defaultStartDate, defaultEndDate),
   });
   const {
-    control,
     register,
     handleSubmit,
     formState: { errors },
   } = form;
 
-  const startDate = useWatch<JournalPeriodValues, "start_date">({
-    control,
-    name: "start_date",
-  });
-  const endDate = useWatch<JournalPeriodValues, "end_date">({
-    control,
-    name: "end_date",
-  });
-
-  const generate = useGenerateReport<JournalPeriodValues>({
-    fetchFile: (values, format, signal) =>
-      downloadPassports({ ...values, format }, signal),
-    mapError: passportDownloadErrorMessage,
-  });
-
-  const onPreview = () => void handleSubmit(generate.runPreview)();
-
   return (
-    <>
-      <ModalContent className="max-w-md">
-        <form
-          className="min-w-0"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onPreview();
-          }}
-        >
-          <ModalHeader>
-            <ModalTitle>Печать журнала паспортов</ModalTitle>
-            <ModalDescription>
-              Выберите период по дате вывоза и откройте предпросмотр PDF. Excel
-              и PDF можно скачать из окна предпросмотра.
-            </ModalDescription>
-          </ModalHeader>
+    <ModalContent className="max-w-md">
+      <form
+        className="min-w-0"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleSubmit(onSubmit)();
+        }}
+      >
+        <ModalHeader>
+          <ModalTitle>Печать журнала паспортов</ModalTitle>
+          <ModalDescription>
+            Выберите период по дате вывоза и откройте предпросмотр PDF. Excel и
+            PDF можно скачать из окна предпросмотра.
+          </ModalDescription>
+        </ModalHeader>
 
-          <div className="grid gap-4 py-2">
-            {generate.downloadError ? (
-              <Alert variant="error">
-                <AlertDescription>{generate.downloadError}</AlertDescription>
-              </Alert>
-            ) : null}
+        <div className="grid gap-4 py-2">
+          <FormField
+            htmlFor="start_date"
+            label="Начало периода"
+            required
+            error={errors.start_date?.message}
+          >
+            <Input
+              id="start_date"
+              type="date"
+              {...register("start_date")}
+              aria-invalid={Boolean(errors.start_date)}
+            />
+          </FormField>
+          <FormField
+            htmlFor="end_date"
+            label="Конец периода"
+            required
+            error={errors.end_date?.message}
+          >
+            <Input
+              id="end_date"
+              type="date"
+              {...register("end_date")}
+              aria-invalid={Boolean(errors.end_date)}
+            />
+          </FormField>
+        </div>
 
-            <FormField
-              htmlFor="start_date"
-              label="Начало периода"
-              required
-              error={errors.start_date?.message}
-            >
-              <Input
-                id="start_date"
-                type="date"
-                {...register("start_date")}
-                disabled={generate.pending}
-                aria-invalid={Boolean(errors.start_date)}
-              />
-            </FormField>
-            <FormField
-              htmlFor="end_date"
-              label="Конец периода"
-              required
-              error={errors.end_date?.message}
-            >
-              <Input
-                id="end_date"
-                type="date"
-                {...register("end_date")}
-                disabled={generate.pending}
-                aria-invalid={Boolean(errors.end_date)}
-              />
-            </FormField>
-          </div>
-
-          <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={generate.pending}
-              onClick={() => onOpenChange(false)}
-            >
-              Отмена
-            </Button>
-            <Button type="submit" disabled={generate.pending}>
-              <FileText />
-              {generate.isPreviewLoading ? "Формируем…" : "Предпросмотр"}
-            </Button>
-          </ModalFooter>
-        </form>
-      </ModalContent>
-
-      <PdfPreviewPanel
-        open={generate.previewOpen}
-        onOpenChange={generate.handlePreviewOpenChange}
-        title="журнала паспортов"
-        periodLabel={`${formatDate(startDate)} — ${formatDate(endDate)}`}
-        preview={generate.preview}
-        error={generate.previewError}
-        downloadError={generate.downloadError}
-        isLoading={generate.isPreviewLoading}
-        isDownloading={generate.isDownloading}
-        onRetry={onPreview}
-        onDownloadExcel={() => void handleSubmit(generate.runDownloadXlsx)()}
-        onDownloadPdf={generate.downloadPreviewPdf}
-      />
-    </>
+        <ModalFooter>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">
+            <FileText />
+            Сформировать
+          </Button>
+        </ModalFooter>
+      </form>
+    </ModalContent>
   );
 }

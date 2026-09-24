@@ -6,7 +6,6 @@ import {
   DEFAULT_DASHBOARD_MONTHS,
   firstBurialPermitSelection,
   firstDashboardSelection,
-  summarizeDashboardBalance,
   useDashboardBalanceQuery,
   useDashboardBalanceStatQuery,
   useDashboardBurialPermitStatQuery,
@@ -20,7 +19,6 @@ import {
   DashboardBurialPermitChart,
   DashboardBurialPermitTable,
   DashboardFilters,
-  DashboardSummary,
 } from "../../features/waste/view-dashboard";
 import { routes } from "../../shared/config/routes";
 import {
@@ -84,8 +82,6 @@ export function HomePage() {
     enabled: burialSelected,
   });
 
-  const summary = summarizeDashboardBalance(groups);
-
   const patchSearch = (patch: {
     on_date?: string;
     unit_id?: string;
@@ -125,8 +121,6 @@ export function HomePage() {
                 />
               }
             />
-
-            {!loading ? <DashboardSummary summary={summary} /> : null}
 
             <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
               <DashboardBalanceTable

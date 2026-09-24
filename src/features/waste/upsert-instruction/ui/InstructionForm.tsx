@@ -91,11 +91,24 @@ export function InstructionForm({
             {...register("name")}
           />
         </FormField>
+        <FormField
+          htmlFor="short_name"
+          label="Краткое название"
+
+          error={errors.short_name?.message}
+        >
+          <Input
+            id="short_name"
+            placeholder="Например: ИООС-1"
+            {...register("short_name")}
+          />
+        </FormField>
 
         <FormField
           htmlFor="status"
           label="Статус"
           required
+          className="md:col-span-2"
           error={errors.status?.message}
         >
           <Select id="status" disabled={pending} {...register("status")}>
@@ -105,19 +118,6 @@ export function InstructionForm({
               </option>
             ))}
           </Select>
-        </FormField>
-
-        <FormField
-          htmlFor="short_name"
-          label="Короткое название"
-          className="md:col-span-2"
-          error={errors.short_name?.message}
-        >
-          <Input
-            id="short_name"
-            placeholder="Например: ИООС-1"
-            {...register("short_name")}
-          />
         </FormField>
 
         <FormField

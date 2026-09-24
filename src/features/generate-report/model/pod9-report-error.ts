@@ -10,10 +10,10 @@ export function pod9ReportErrorMessage(error: unknown): string {
   const period = reportPeriodErrorMessage(error);
   if (period) return period;
   if (error instanceof ApiError && error.status === 404) {
-    return "Место учёта или инструкция не найдены в текущей организации.";
+    return "Место учёта не найдено в текущей организации.";
   }
   if (error instanceof ApiError && error.status === 422) {
-    return "Проверьте параметры отчёта: место учёта, инструкция и период.";
+    return "Проверьте параметры отчёта: место учёта и период.";
   }
   return error instanceof Error
     ? error.message

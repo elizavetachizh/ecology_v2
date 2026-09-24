@@ -36,7 +36,7 @@ export function unitsColumns(
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Название" />
       ),
-      size: 176,
+      size: 200,
       cell: ({ row }) => {
         const link = (
           <Link

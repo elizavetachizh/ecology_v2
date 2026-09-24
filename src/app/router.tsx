@@ -97,6 +97,7 @@ import {
   type RouterContext,
   type StructureSearch,
   type CounterpartiesSearch,
+  type CounterpartyDetailSearch,
   type ContractsSearch,
   type PermitsSearch,
   type StandardsSearch,
@@ -379,6 +380,20 @@ const directoriesCreateCounterpartyRoute = createRoute({
 const directoriesEditCounterpartyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.directories.counterparties.detail,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): CounterpartyDetailSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      status: parseSearchEnum(search.status, ContractStatusValues),
+      contract_type: parseSearchEnum(search.contract_type, ContractTypeValues),
+      waste_id: parseSearchQuery(search.waste_id),
+      sort: parseSearchEnum(search.sort, ContractSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
   component: EditCounterpartyPage,
 });
 

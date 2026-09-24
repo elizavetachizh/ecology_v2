@@ -1,3 +1,7 @@
+import {
+  useUnitAncestorChain,
+  type Unit,
+} from "../../../../entities/waste/units";
 import { useUpsertUnitForm } from "../model/use-upsert-unit-form";
 import { useUnitTerritoryFields } from "../model/use-unit-territory-fields";
 import type { UnitFormFieldsProps } from "./unit-form.types";
@@ -42,7 +46,17 @@ export function UnitFormFields({
 
   const regionId = watch("region_id");
   const isPod9 = watch("is_pod9");
-
+  const parentId = watch("parent_id");
+  const ancestors = useUnitAncestorChain({
+    tenantId: activeTenantId,
+    unit: mode === "edit" ? initial : null,
+    enabled: mode === "edit" && Boolean(initial?.parent_id),
+  });
+  const parentName =
+    ancestors.items.length >= 2
+      ? ancestors.items[ancestors.items.length - 2]?.name
+      : null;
+  const childCounts = directChildCounts(initial);
   const territory = useUnitTerritoryFields({
     setValue,
     defaultParentId,
@@ -66,6 +80,12 @@ export function UnitFormFields({
         defaultIsPod9={defaultIsPod9}
         isPod9={isPod9}
         unitName={initial?.name}
+        parentId={initial?.parent_id}
+        parentName={parentName}
+        regionName={initial?.region?.name}
+        districtName={initial?.district?.name}
+        structuralCount={childCounts?.structural}
+        accountingCount={childCounts?.accounting}
         eyebrow={eyebrow}
         actions={actions}
         error={error}
@@ -73,11 +93,13 @@ export function UnitFormFields({
 
       <div className="grid gap-4 items-start rounded-xl border border-border bg-card p-4 md:grid-cols-2">
         <UnitIdentityFields
+          mode={mode}
           control={control}
           register={register}
           errors={errors}
           tenantId={activeTenantId}
           unitId={unitId}
+          parentId={parentId}
           isPod9={isPod9}
           onParentChange={territory.inheritFromParent}
         />
@@ -101,4 +123,21 @@ export function UnitFormFields({
       />
     </form>
   );
+}
+
+function directChildCounts(unit: Unit | null | undefined): {
+  structural: number;
+  accounting: number;
+} | null {
+  if (!unit || !("children" in unit) || !Array.isArray(unit.children)) {
+    return null;
+  }
+
+  let structural = 0;
+  let accounting = 0;
+  for (const child of unit.children) {
+    if (child.is_pod9) accounting += 1;
+    else structural += 1;
+  }
+  return { structural, accounting };
 }

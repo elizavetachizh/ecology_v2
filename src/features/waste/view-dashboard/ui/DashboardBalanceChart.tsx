@@ -59,7 +59,7 @@ function ChartHeader({
   onMonthsChange: (months: number) => void;
 }) {
   return (
-    <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+    <div className="mb-3 flex flex-col items-start justify-between gap-2">
       <div className="min-w-0 space-y-1">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         {description ? (
@@ -173,32 +173,15 @@ export function DashboardBalanceChart({
     );
   }
 
-  if (loading && !stat) {
-    return (
-      <ChartFrame>
-        <ChartHeader
-          title="Динамика остатка"
-          months={months}
-          onMonthsChange={onMonthsChange}
-        />
-        <ChartEmpty>Загрузка…</ChartEmpty>
-      </ChartFrame>
-    );
-  }
-
   return (
     <ChartFrame>
       <ChartHeader
         title="Динамика остатка"
         description={
-          stat
-            ? `${unitTitle(stat.unit)} · ${wasteTitle(stat.waste)}`
-            : undefined
+          stat ? `${unitTitle(stat.unit)} · ${wasteTitle(stat.waste)}` : "-"
         }
         amount={
-          last
-            ? `${formatBalanceAmount(String(last.amount))} ${uom}`
-            : undefined
+          last ? `${formatBalanceAmount(String(last.amount))} ${uom}` : "-"
         }
         months={months}
         onMonthsChange={onMonthsChange}
@@ -208,58 +191,62 @@ export function DashboardBalanceChart({
         role="img"
         aria-label="Динамика остатка по месяцам"
       >
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={points}
-            margin={{ top: 8, right: 8, left: 4, bottom: 0 }}
-          >
-            <CartesianGrid
-              stroke="var(--border)"
-              strokeDasharray="3 3"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="date"
-              tickFormatter={(value: string) => formatDate(value)}
-              minTickGap={28}
-              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-              tickLine={false}
-              axisLine={{ stroke: "var(--border)" }}
-            />
-            <YAxis
-              dataKey="amount"
-              tickFormatter={(value: number) =>
-                formatBalanceAmount(String(value))
-              }
-              width={48}
-              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip
-              cursor={{ stroke: "var(--chart-3)", strokeDasharray: "3 3" }}
-              content={(props) => (
-                <BalanceTooltip
-                  active={props.active}
-                  label={props.label}
-                  payload={props.payload}
-                  uom={uom}
-                />
-              )}
-            />
-            <Area
-              type="monotone"
-              dataKey="amount"
-              stroke="var(--chart-3)"
-              fill="var(--chart-1)"
-              fillOpacity={0.35}
-              strokeWidth={2}
-              dot={{ r: 3, fill: "var(--chart-3)", strokeWidth: 0 }}
-              activeDot={{ r: 5 }}
-              isAnimationActive={false}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <ChartEmpty>Загрузка…</ChartEmpty>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={points}
+              margin={{ top: 8, right: 8, left: 4, bottom: 0 }}
+            >
+              <CartesianGrid
+                stroke="var(--border)"
+                strokeDasharray="3 3"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                tickFormatter={(value: string) => formatDate(value)}
+                minTickGap={28}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                tickLine={false}
+                axisLine={{ stroke: "var(--border)" }}
+              />
+              <YAxis
+                dataKey="amount"
+                tickFormatter={(value: number) =>
+                  formatBalanceAmount(String(value))
+                }
+                width={48}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                cursor={{ stroke: "var(--chart-3)", strokeDasharray: "3 3" }}
+                content={(props) => (
+                  <BalanceTooltip
+                    active={props.active}
+                    label={props.label}
+                    payload={props.payload}
+                    uom={uom}
+                  />
+                )}
+              />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke="var(--chart-3)"
+                fill="var(--chart-1)"
+                fillOpacity={0.35}
+                strokeWidth={2}
+                dot={{ r: 3, fill: "var(--chart-3)", strokeWidth: 0 }}
+                activeDot={{ r: 5 }}
+                isAnimationActive={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </ChartFrame>
   );

@@ -15,6 +15,12 @@ type UnitFormHeaderProps = {
   defaultIsPod9?: boolean;
   isPod9: boolean;
   unitName?: string | null;
+  parentId?: string | null;
+  parentName?: string | null;
+  regionName?: string | null;
+  districtName?: string | null;
+  structuralCount?: number;
+  accountingCount?: number;
   eyebrow?: ReactNode;
   actions?: ReactNode;
   error?: string | null;
@@ -25,6 +31,12 @@ export function UnitFormHeader({
   defaultIsPod9,
   isPod9,
   unitName,
+  parentId,
+  parentName,
+  regionName,
+  districtName,
+  structuralCount,
+  accountingCount,
   eyebrow = (
     <DirectoryBreadcrumb
       directoryLabel="Структура организации"
@@ -39,6 +51,12 @@ export function UnitFormHeader({
     defaultIsPod9,
     isPod9,
     unitName,
+    parentId,
+    parentName,
+    regionName,
+    districtName,
+    structuralCount,
+    accountingCount,
   });
 
   return (

@@ -20,7 +20,7 @@ import {
   type Pod10FormValues,
 } from "../model/pod10-form.schema";
 import { pod10ReportErrorMessage } from "../model/pod10-report-error";
-import { useGenerateReport } from "../model/use-generate-report";
+import { useGenerateReport } from "../../../shared/hooks";
 import { ReportGenerateForm } from "./ReportGenerateForm";
 import { ReportPeriodFields } from "./ReportPeriodFields";
 
@@ -70,6 +70,7 @@ export function Pod10ReportForm() {
         onOpenChange: generate.handlePreviewOpenChange,
         periodLabel: `${formatDate(startDate)} — ${formatDate(endDate)}`,
         file: generate.preview,
+        previewKey: generate.previewKey,
         error: generate.previewError,
         isLoading: generate.isPreviewLoading,
         isDownloading: generate.isDownloading,

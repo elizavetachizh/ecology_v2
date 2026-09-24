@@ -8,7 +8,6 @@ import {
 import { routes } from "../../../../shared/config/routes";
 import { useUpsertCounterpartyForm } from "../model/use-upsert-counterparty-form";
 import { CounterpartyFormFields } from "./CounterpartyFormFields";
-import { CounterpartyNextStepCta } from "./CounterpartyNextStepCta";
 
 type CounterpartyFormProps = {
   mode: "create" | "edit";
@@ -63,9 +62,7 @@ export function CounterpartyForm({
         }
       />
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <CounterpartyFormFields form={form} pending={pending} error={error} />
-      </div>
+      <CounterpartyFormFields form={form} pending={pending} error={error} />
 
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
@@ -94,9 +91,6 @@ export function CounterpartyForm({
           Закрыть
         </Button>
       </div>
-      {mode === "edit" && (
-        <CounterpartyNextStepCta counterpartyId={counterpartyId} />
-      )}
     </form>
   );
 }

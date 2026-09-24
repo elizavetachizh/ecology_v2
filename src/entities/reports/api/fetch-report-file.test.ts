@@ -79,4 +79,34 @@ describe("fetchReportFile", () => {
       { tenantScoped: true, signal: undefined },
     );
   });
+
+  it("accepts a docx payload and rejects an excel body for that format", async () => {
+    const docxType =
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    apiFetchMock.mockResolvedValueOnce(xlsxResponse());
+    await expect(
+      fetchReportFile({
+        path: "/api/v1/reports/pod-9",
+        query: {},
+        format: "docx",
+        fallbackFileName: "report.docx",
+      }),
+    ).rejects.toThrow(/неподдерживаемом формате/);
+
+    apiFetchMock.mockResolvedValueOnce(
+      new Response(new Blob(["docx-bytes"], { type: docxType }), {
+        status: 200,
+        headers: new Headers({ "Content-Type": docxType }),
+      }),
+    );
+    const file = await fetchReportFile({
+      path: "/api/v1/reports/pod-9",
+      query: {},
+      format: "docx",
+      fallbackFileName: "report.docx",
+    });
+    expect(file.contentType).toContain(docxType);
+    expect(file.fileName).toBe("report.docx");
+  });
 });

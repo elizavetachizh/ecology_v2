@@ -6,7 +6,6 @@ import {
   flattenDashboardBalance,
   formatBalanceAmount,
   sumChartAmounts,
-  summarizeDashboardBalance,
   toChartPoints,
   unitTitle,
   wasteTitle,
@@ -63,24 +62,6 @@ describe("flattenDashboardBalance", () => {
       amount: "15.000000",
       unit: dashboardBalanceFixture.unit,
       waste: dashboardBalanceFixture.wastes[0]!.waste,
-    });
-  });
-});
-
-describe("summarizeDashboardBalance", () => {
-  it("counts units, wastes and non-zero positions without summing UOMs", () => {
-    expect(summarizeDashboardBalance([dashboardBalanceFixture])).toEqual({
-      unitCount: 1,
-      wasteCount: 2,
-      nonZeroCount: 1,
-    });
-  });
-
-  it("returns zeros for an empty snapshot", () => {
-    expect(summarizeDashboardBalance([])).toEqual({
-      unitCount: 0,
-      wasteCount: 0,
-      nonZeroCount: 0,
     });
   });
 });

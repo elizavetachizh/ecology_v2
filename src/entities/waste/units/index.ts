@@ -20,6 +20,7 @@ export { UnitSelect } from "./ui/UnitSelect";
 export type {
   Unit,
   UnitBrief,
+  UnitDetail,
   UnitTree,
   UnitListResponse,
   UnitCreate,

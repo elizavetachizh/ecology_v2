@@ -1,22 +1,16 @@
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearch,
-} from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 import { UnitForm } from "../../../../features/waste/upsert-unit";
 import { UnitInstructionWastesSection } from "../../../../features/waste/bind-unit-instruction-waste";
 import { useTenant } from "../../../../entities/tenant";
 import { getUnit, unitsQueryKeys } from "../../../../entities/waste/units";
 import {
   AlertDetailPageError,
-  Button,
   TenantRequiredGate,
   toast,
 } from "../../../../shared/ui";
 import { UnitHierarchyBreadcrumb } from "./create/ui/UnitHierarchyBreadcrumb";
+import { UnitDirectChildren } from "./detail/ui/UnitDirectChildren";
 import { routes } from "../../../../shared/config/routes";
 
 export function EditUnitPage() {
@@ -90,26 +84,7 @@ export function EditUnitPage() {
             }}
           />
         ) : (
-          <section className="mx-auto max-w-4xl space-y-3 rounded-xl border border-border bg-card p-4">
-            <div className="space-y-1">
-              <h2 className="text-sm font-semibold text-foreground">
-                Журнал ПОД-9
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Создайте журнал учёта отходов ПОД-9 в контексте этой структурной
-                единицы.
-              </p>
-            </div>
-            <Button asChild size="sm">
-              <Link
-                to={routes.directories.units.new}
-                search={{ parentId: unitId, isPod9: true }}
-              >
-                <Plus className="size-3.5" />
-                Создать журнал ПОД-9
-              </Link>
-            </Button>
-          </section>
+          <UnitDirectChildren parentId={unitId} units={unit.children} />
         )}
       </div>
     );

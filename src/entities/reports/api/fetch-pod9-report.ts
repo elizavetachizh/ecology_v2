@@ -16,7 +16,6 @@ export function fetchPod9Report(
     path: pod9ReportPath(),
     query: {
       unit_id: params.unit_id,
-      instruction_id: params.instruction_id,
       start_date: params.start_date,
       end_date: params.end_date,
     },

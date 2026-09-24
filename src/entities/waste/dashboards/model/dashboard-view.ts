@@ -4,7 +4,6 @@ import type {
   DashboardBalance,
   DashboardBalancePoint,
   DashboardBalanceRow,
-  DashboardBalanceSummary,
   DashboardBurialPermit,
   DashboardChartPoint,
 } from "./dashboards.types";
@@ -43,22 +42,6 @@ export function flattenDashboardBalance(
       amount: item.amount,
     })),
   );
-}
-
-export function summarizeDashboardBalance(
-  groups: DashboardBalance[],
-): DashboardBalanceSummary {
-  const wasteCount = groups.reduce((n, group) => n + group.wastes.length, 0);
-  const nonZeroCount = groups.reduce(
-    (n, group) =>
-      n + group.wastes.filter((item) => isNonZeroAmount(item.amount)).length,
-    0,
-  );
-  return {
-    unitCount: groups.length,
-    wasteCount,
-    nonZeroCount,
-  };
 }
 
 export function toChartPoints(

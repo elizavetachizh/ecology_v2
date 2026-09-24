@@ -32,7 +32,7 @@ export function CounterpartyFormFields({
   } = form;
 
   return (
-    <div className="grid gap-3 py-2">
+    <div className="grid gap-4 rounded-xl border border-border bg-card p-4 md:grid-cols-2">
       {error ? (
         <Alert variant="error">
           <AlertDescription>{error}</AlertDescription>
@@ -70,10 +70,11 @@ export function CounterpartyFormFields({
       </FormField>
 
       <FormField
+        className="md:col-span-2"
         htmlFor="unp"
         label="УНП"
         error={errors.unp?.message}
-        description="УНП — ровно 9 цифр. Можно не указывать."
+        description="УНП — ровно 9 цифр."
       >
         <Controller
           name="unp"
@@ -127,7 +128,7 @@ export function CounterpartyFormFields({
         />
       </FormField>
 
-      <Field>
+      <Field className="md:col-span-2">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <FieldLabel htmlFor="is_individual">Физлицо</FieldLabel>
@@ -151,13 +152,13 @@ export function CounterpartyFormFields({
         </div>
       </Field>
 
-      <Field>
+      <Field className="md:col-span-2">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <FieldLabel htmlFor="is_active">Активен</FieldLabel>
             <FieldDescription>
-              Неактивные скрыты в селектах договоров и сопроводительных по
-              умолчанию.
+              Неактивные скрыты для выбора в договорах и сопроводительных
+              паспортах.
             </FieldDescription>
           </div>
           <Controller

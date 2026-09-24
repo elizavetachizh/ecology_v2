@@ -12,6 +12,7 @@ import {
   toast,
 } from "../../../../shared/ui";
 import { routes } from "../../../../shared/config/routes";
+import { CounterpartyContractsSection } from "./ui/CounterpartyContractsSection";
 
 export function EditCounterpartyPage() {
   const { counterpartyId } = useParams({
@@ -50,19 +51,22 @@ export function EditCounterpartyPage() {
       tenantId={activeTenantId}
       description="Чтобы открыть контрагента, выберите организацию в верхней панели."
     >
-      <CounterpartyForm
-        mode="edit"
-        counterpartyId={counterpartyId}
-        initial={counterpartyQuery.data}
-        onSaved={(_counterparty, { close }) => {
-          toast.success("Контрагент успешно обновлён");
-          if (close)
-            void navigate({ to: routes.directories.counterparties.list });
-        }}
-        onCancel={() =>
-          void navigate({ to: routes.directories.counterparties.list })
-        }
-      />
+      <div className="space-y-6">
+        <CounterpartyForm
+          mode="edit"
+          counterpartyId={counterpartyId}
+          initial={counterpartyQuery.data}
+          onSaved={(_counterparty, { close }) => {
+            toast.success("Контрагент успешно обновлён");
+            if (close)
+              void navigate({ to: routes.directories.counterparties.list });
+          }}
+          onCancel={() =>
+            void navigate({ to: routes.directories.counterparties.list })
+          }
+        />
+        <CounterpartyContractsSection counterpartyId={counterpartyId} />
+      </div>
     </TenantRequiredGate>
   );
 }
