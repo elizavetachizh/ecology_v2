@@ -74,7 +74,7 @@ export function Pod9UnitField({
 
   if (error) {
     return (
-      <Alert variant="error">
+      <Alert variant="error" className="md:col-span-2">
         <AlertTitle>Не удалось загрузить структуру</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>

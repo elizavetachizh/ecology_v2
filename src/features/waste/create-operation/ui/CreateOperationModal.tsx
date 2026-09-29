@@ -117,26 +117,25 @@ function CreateOperationModalForm({
                 }
           }
         >
-          <ModalHeader>
+          <ModalHeader className={"border-b border-border pb-4"}>
             <ModalTitle>Создание операции</ModalTitle>
             <ModalDescription>
               Шаг {step} из {UPSERT_OPERATION_STEPS.length}:{" "}
               {UPSERT_OPERATION_STEPS[step - 1]?.title}
+              <div className="flex gap-2">
+                {UPSERT_OPERATION_STEPS.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`h-1.5 flex-1 rounded-full ${
+                      item.id <= step ? "bg-primary" : "bg-muted"
+                    }`}
+                  />
+                ))}
+              </div>
             </ModalDescription>
           </ModalHeader>
 
-          <div className="flex gap-2">
-            {UPSERT_OPERATION_STEPS.map((item) => (
-              <div
-                key={item.id}
-                className={`h-1.5 flex-1 rounded-full ${
-                  item.id <= step ? "bg-primary" : "bg-muted"
-                }`}
-              />
-            ))}
-          </div>
-
-          <div className="grid gap-4 py-2">
+          <div className="grid gap-4 py-4">
             {lastStep && error ? (
               <Alert variant="error">
                 <AlertTitle>Не удалось сохранить</AlertTitle>
@@ -148,7 +147,7 @@ function CreateOperationModalForm({
             {step === 2 ? <OperationStepDetails pending={pending} /> : null}
           </div>
 
-          <ModalFooter>
+          <ModalFooter className={"border-t border-border pt-4"}>
             <Button
               type="button"
               variant="outline"

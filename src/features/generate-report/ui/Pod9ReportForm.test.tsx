@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -14,6 +15,7 @@ import {
   type TenantContextValue,
 } from "../../../entities/tenant";
 import { currentUser } from "../../../entities/user";
+import { Modal } from "../../../shared/ui";
 import { Pod9ReportForm } from "./Pod9ReportForm";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -85,7 +87,7 @@ const tenantValue: TenantContextValue = {
   selectTenant: vi.fn(),
 };
 
-function renderForm() {
+function renderForm(ui: ReactNode = <Pod9ReportForm />) {
   const client = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -94,9 +96,7 @@ function renderForm() {
   });
   return render(
     <QueryClientProvider client={client}>
-      <TenantContext.Provider value={tenantValue}>
-        <Pod9ReportForm />
-      </TenantContext.Provider>
+      <TenantContext.Provider value={tenantValue}>{ui}</TenantContext.Provider>
     </QueryClientProvider>,
   );
 }
@@ -125,5 +125,30 @@ describe("Pod9ReportForm", () => {
       expect(screen.getByText("Выберите место учёта")).toBeInTheDocument();
     });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("renders dialog fields with both actions in the footer", () => {
+    const onClose = vi.fn();
+    renderForm(
+      <Modal open>
+        <Pod9ReportForm variant="dialog" onClose={onClose} />
+      </Modal>,
+    );
+
+    expect(screen.getByRole("heading", { name: "ПОД-9" })).toBeInTheDocument();
+    expect(screen.queryByText("Параметры отчёта")).not.toBeInTheDocument();
+    expect(screen.getByText("Место учёта")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Начало периода/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Конец периода/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Сформировать" }),
+    ).toBeInTheDocument();
+
+    const footer = document.querySelector("[data-slot=modal-footer]");
+    expect(footer).not.toBeNull();
+    fireEvent.click(
+      within(footer as HTMLElement).getByRole("button", { name: "Закрыть" }),
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

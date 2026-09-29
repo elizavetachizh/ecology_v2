@@ -6,6 +6,7 @@ import {
   type ColumnDef,
 } from "../../../../shared/ui";
 import type { Person } from "../../../../entities/waste/persons";
+import { formatDateTime } from "../../../../shared/lib/format-date";
 
 function personsColumns(
   setDeleting: (person: Person) => void,
@@ -21,6 +22,20 @@ function personsColumns(
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.name}</span>
+      ),
+    },
+    {
+      id: "last_seen_at",
+      accessorKey: "last_seen_at",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Последнее посещение" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.user.last_seen_at
+            ? formatDateTime(row.original.user.last_seen_at)
+            : "-"}
+        </span>
       ),
     },
     {

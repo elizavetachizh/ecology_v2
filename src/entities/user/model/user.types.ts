@@ -20,4 +20,5 @@ export type UserProfile = {
   email: string | null;
   first_name: string | null;
   last_name: string | null;
+  last_seen_at: string | null;
 };

@@ -14,25 +14,20 @@ export function OperationSelectionSummary({
   if (!dateLabel && !unitLabel && !wasteLabel) return null;
 
   return (
-    <dl className="grid gap-3 rounded-xl border border-border bg-muted/40 p-3 sm:grid-cols-2">
+    <dl className="grid gap-3 rounded-xl border border-border bg-muted/40 p-3">
       {dateLabel ? (
-        <div className="grid gap-1">
-          <dt className="text-xs font-medium text-muted-foreground">Дата</dt>
-          <dd className="text-sm text-foreground">{dateLabel}</dd>
+        <div>
+          <dd className="text-sm text-muted-foreground font-medium">
+            {dateLabel} · {unitLabel}
+          </dd>
         </div>
       ) : null}
-      {unitLabel ? (
-        <div className="grid gap-1">
-          <dt className="text-xs font-medium text-muted-foreground">
-            Место учёта
-          </dt>
-          <dd className="text-sm text-foreground">{unitLabel}</dd>
-        </div>
-      ) : null}
+
       {wasteLabel ? (
-        <div className="grid gap-1">
-          <dt className="text-xs font-medium text-muted-foreground">Отход</dt>
-          <dd className="text-sm text-foreground">{wasteLabel}</dd>
+        <div className="grid">
+          <dd className="text-base text-foreground font-medium">
+            {wasteLabel}
+          </dd>
           {wasteMeta ? (
             <dd className="text-xs text-muted-foreground">{wasteMeta}</dd>
           ) : null}

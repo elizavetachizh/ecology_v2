@@ -17,10 +17,16 @@ import { ReportGenerateForm } from "./ReportGenerateForm";
 import { ReportPeriodFields } from "./ReportPeriodFields";
 
 type Pod9ReportFormProps = {
+  variant?: "page" | "dialog";
   showPageHeader?: boolean;
+  onClose?: () => void;
 };
 
-export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
+export function Pod9ReportForm({
+  variant = "page",
+  showPageHeader = true,
+  onClose,
+}: Pod9ReportFormProps) {
   const { activeTenantId } = useTenant();
   const form = useForm<Pod9FormValues>({
     resolver: zodResolver(pod9FormSchema),
@@ -56,7 +62,9 @@ export function Pod9ReportForm({ showPageHeader = true }: Pod9ReportFormProps) {
   return (
     <ReportGenerateForm
       report={REPORTS.pod9}
+      variant={variant}
       showPageHeader={showPageHeader}
+      onClose={onClose}
       pending={generate.pending}
       downloadError={generate.downloadError}
       onGenerate={() => void handleSubmit(generate.runPreview)()}

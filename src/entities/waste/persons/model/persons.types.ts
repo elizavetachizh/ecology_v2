@@ -12,6 +12,7 @@ export type Person = {
   user_id: string | null;
   created_at: string;
   updated_at: string;
+  user: UserProfile;
   created_by: UserProfile;
   updated_by: UserProfile;
 };

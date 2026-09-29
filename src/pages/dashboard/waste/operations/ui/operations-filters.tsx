@@ -9,11 +9,6 @@ import {
   Button,
   DateFilterInput,
   Modal,
-  ModalContent,
-  ModalDescription,
-  ModalFooter,
-  ModalHeader,
-  ModalTitle,
   Select,
 } from "../../../../../shared/ui";
 import { FileText } from "lucide-react";
@@ -40,10 +35,6 @@ export function OperationsFilters({
   onChange,
 }: OperationsFiltersProps) {
   const [pod9Open, setPod9Open] = useState(false);
-
-  const handlePod9OpenChange = (nextOpen: boolean) => {
-    setPod9Open(nextOpen);
-  };
 
   return (
     <>
@@ -106,26 +97,14 @@ export function OperationsFilters({
         </Button>
       </div>
 
-      <Modal open={pod9Open} onOpenChange={handlePod9OpenChange}>
-        <ModalContent className="max-w-5xl ">
-          <ModalHeader>
-            <ModalTitle>ПОД-9</ModalTitle>
-            <ModalDescription>
-              Сформируйте ПОД-9 отчет для выбранного периода и единицы.
-            </ModalDescription>
-          </ModalHeader>
-          <Pod9ReportForm key={tenantId} showPageHeader={false} />
-
-          <ModalFooter className="border-t border-border px-6 py-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPod9Open(false)}
-            >
-              Закрыть
-            </Button>
-          </ModalFooter>
-        </ModalContent>
+      <Modal open={pod9Open} onOpenChange={setPod9Open}>
+        {pod9Open ? (
+          <Pod9ReportForm
+            key={tenantId}
+            variant="dialog"
+            onClose={() => setPod9Open(false)}
+          />
+        ) : null}
       </Modal>
     </>
   );
