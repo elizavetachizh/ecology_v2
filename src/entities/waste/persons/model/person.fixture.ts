@@ -1,12 +1,13 @@
 import type { UserProfile } from "../../../user";
 import type { Person, PersonBrief } from "./persons.types";
 
-const profile: UserProfile = {
+export const userProfileFixture: UserProfile = {
   id: "u1",
   username: "tester",
   email: null,
   first_name: null,
   last_name: null,
+  last_seen_at: null,
 };
 
 export const personFixture: Person = {
@@ -20,8 +21,11 @@ export const personFixture: Person = {
   user_id: null,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  user: null,
+  units: [],
+  unit_ids: [],
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export const personBriefFixture: PersonBrief = {

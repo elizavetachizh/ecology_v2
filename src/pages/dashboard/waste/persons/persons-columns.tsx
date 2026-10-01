@@ -1,5 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import {
+  Badge,
   DataTableColumnHeader,
   DataTableRowAction,
   DataTableRowActions,
@@ -7,11 +9,10 @@ import {
 } from "../../../../shared/ui";
 import type { Person } from "../../../../entities/waste/persons";
 import { formatDateTime } from "../../../../shared/lib/format-date";
+import { routes } from "../../../../shared/config/routes";
 
 function personsColumns(
   setDeleting: (person: Person) => void,
-  setModalMode: (mode: "edit" | "create") => void,
-  setEditing: (person: Person) => void,
 ): ColumnDef<Person>[] {
   return [
     {
@@ -21,7 +22,13 @@ function personsColumns(
         <DataTableColumnHeader column={column} title="Наименование" />
       ),
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.name}</span>
+        <Link
+          to={routes.directories.persons.detail}
+          params={{ personId: row.original.id }}
+          className="font-medium hover:underline"
+        >
+          {row.original.name}
+        </Link>
       ),
     },
     {
@@ -30,13 +37,38 @@ function personsColumns(
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Последнее посещение" />
       ),
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {row.original.user.last_seen_at
-            ? formatDateTime(row.original.user.last_seen_at)
-            : "-"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const lastSeenAt = row.original.user?.last_seen_at;
+        return (
+          <span className="text-muted-foreground">
+            {lastSeenAt ? formatDateTime(lastSeenAt) : "—"}
+          </span>
+        );
+      },
+    },
+    {
+      id: "units",
+      header: "Подразделения",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const units = row.original.units;
+        if (units.length === 0) {
+          return <span className="text-muted-foreground">—</span>;
+        }
+        return (
+          <div className="flex max-w-xs flex-wrap gap-1">
+            {units.map((unit) => (
+              <Badge
+                key={unit.id}
+                variant="secondary"
+                title={unit.short_name || undefined}
+              >
+                {unit.name}
+              </Badge>
+            ))}
+          </div>
+        );
+      },
     },
     {
       id: "actions",
@@ -44,15 +76,14 @@ function personsColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
-          <DataTableRowAction
-            label="Изменить ответственного"
-            onClick={() => {
-              setEditing(row.original);
-              setModalMode("edit");
-            }}
-          >
-            <Pencil />
-            Изменить
+          <DataTableRowAction asChild label="Изменить ответственного">
+            <Link
+              to={routes.directories.persons.detail}
+              params={{ personId: row.original.id }}
+            >
+              <Pencil />
+              Изменить
+            </Link>
           </DataTableRowAction>
           <DataTableRowAction
             label="Удалить ответственного"

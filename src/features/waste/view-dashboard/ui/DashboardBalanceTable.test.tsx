@@ -14,9 +14,7 @@ afterEach(cleanup);
 
 describe("DashboardBalanceTable", () => {
   it("shows loading state", () => {
-    render(
-      <DashboardBalanceTable groups={[]} loading onSelect={vi.fn()} />,
-    );
+    render(<DashboardBalanceTable groups={[]} loading onSelect={vi.fn()} />);
     expect(screen.getByText("Загрузка…")).toBeInTheDocument();
   });
 
@@ -41,7 +39,7 @@ describe("DashboardBalanceTable", () => {
       />,
     );
 
-    expect(screen.getAllByText("Цех А (А)").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("А").length).toBeGreaterThan(0);
     expect(screen.getByText("Test waste")).toBeInTheDocument();
     expect(screen.getByText(/15\s*кг/)).toBeInTheDocument();
 

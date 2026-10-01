@@ -21,3 +21,4 @@ export {
 export { personsQueryKeys } from "./model/persons-query-keys";
 export { usePersonsListQuery } from "./model/use-persons-list-query";
 export { usePersonsOptions } from "./model/use-persons-query";
+export { userProfileFixture } from "./model/person.fixture";

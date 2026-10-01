@@ -4,6 +4,7 @@ import {
   StandardStatusBadge,
   type Standard,
 } from "../../../../entities/waste/standards";
+import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import {
   Badge,
@@ -60,7 +61,7 @@ function standardsColumns(
           {row.original.units.flatMap((unit) => (
             <>
               <Badge key={unit.id} variant="secondary">
-                {unit.unit.short_name ?? unit.unit.name}
+                {unitLabel(unit.unit)}
               </Badge>
               (
               {unit.wastes.map(

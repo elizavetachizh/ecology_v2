@@ -2,12 +2,6 @@ import type { UserProfile } from "../../../user";
 import type { UnitBrief } from "../../units";
 import type { WasteBrief } from "../../wastes";
 
-export function standardUnitLabel(
-  unit: Pick<UnitBrief, "name" | "short_name">,
-): string {
-  return unit.short_name ?? unit.name;
-}
-
 export const STANDARD_STATUS_LABEL = {
   active: "Действует",
   inactive: "Не действует",

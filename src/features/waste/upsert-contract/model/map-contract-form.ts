@@ -8,6 +8,7 @@ import {
   emptyContractWasteRow,
   type ContractFormValues,
 } from "./contract-form.schema";
+import { facilityKind, normalizeOwnership } from "./contract-form-rules";
 
 function emptyToNull(value: string): string | null {
   return value.trim() || null;
@@ -17,6 +18,9 @@ export function toContractWriteBody(
   values: ContractFormValues,
 ): ContractCreate {
   const isRecycling = values.contract_type === "recycling";
+  const kind = isRecycling
+    ? facilityKind(values.transfer_purpose, values.with_ownership_transfer)
+    : null;
   return {
     number: values.number.trim(),
     start_date: values.start_date,
@@ -28,9 +32,21 @@ export function toContractWriteBody(
     counterparty_contact: emptyToNull(values.counterparty_contact),
     amount: emptyToNull(values.amount),
     with_ownership_transfer: isRecycling
-      ? values.with_ownership_transfer
+      ? normalizeOwnership(
+          values.contract_type,
+          values.transfer_purpose,
+          values.with_ownership_transfer,
+        )
       : false,
     transfer_purpose: isRecycling ? values.transfer_purpose || null : null,
+    storage_facility_type:
+      kind === "storage" && values.storage_facility_type
+        ? values.storage_facility_type
+        : null,
+    disposal_facility_type:
+      kind === "disposal" && values.disposal_facility_type
+        ? values.disposal_facility_type
+        : null,
     wastes: isRecycling
       ? values.wastes
           .filter((item) => item.waste_id)
@@ -60,8 +76,14 @@ export function toContractFormValues(contract: Contract): ContractFormValues {
     counterparty_address: contract.counterparty_address ?? "",
     counterparty_contact: contract.counterparty_contact ?? "",
     amount: contract.amount ?? "",
-    with_ownership_transfer: contract.with_ownership_transfer,
     transfer_purpose: contract.transfer_purpose ?? "",
+    with_ownership_transfer: normalizeOwnership(
+      contract.contract_type,
+      contract.transfer_purpose ?? "",
+      contract.with_ownership_transfer,
+    ),
+    storage_facility_type: contract.storage_facility_type ?? "",
+    disposal_facility_type: contract.disposal_facility_type ?? "",
     wastes: [
       ...contract.wastes.map((item) => ({
         waste_id: item.waste_id,

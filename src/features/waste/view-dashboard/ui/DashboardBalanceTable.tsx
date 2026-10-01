@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 import {
   formatBalanceAmount,
   isNonZeroAmount,
-  unitTitle,
   type DashboardBalance,
 } from "../../../../entities/waste/dashboards";
+import { unitLabel } from "../../../../entities/waste/units";
 import {
   HAZARD_CLASS_LABEL,
   UOM_LABEL,
@@ -95,7 +95,7 @@ export function DashboardBalanceTable({
                   colSpan={4}
                   className="py-2 text-sm font-medium text-foreground"
                 >
-                  {unitTitle(group.unit)}
+                  {unitLabel(group.unit)}
                   <span className="ml-2 font-normal text-muted-foreground">
                     {group.wastes.length}
                   </span>

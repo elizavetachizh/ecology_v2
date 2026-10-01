@@ -7,7 +7,6 @@ import {
   formatBalanceAmount,
   sumChartAmounts,
   toChartPoints,
-  unitTitle,
   wasteTitle,
   yearFromIsoDate,
 } from "./dashboard-view";
@@ -40,12 +39,7 @@ describe("formatBalanceAmount", () => {
   });
 });
 
-describe("unitTitle / wasteTitle", () => {
-  it("includes short name when present", () => {
-    expect(unitTitle({ name: "Цех А", short_name: "А" })).toBe("Цех А (А)");
-    expect(unitTitle({ name: "Цех А", short_name: null })).toBe("Цех А");
-  });
-
+describe("wasteTitle", () => {
   it("joins classifier code and name", () => {
     expect(wasteTitle(dashboardBalanceFixture.wastes[0]!.waste)).toBe(
       "1010100 — Test waste",

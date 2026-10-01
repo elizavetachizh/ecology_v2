@@ -1,5 +1,5 @@
 import type { UserProfile } from "../../../user";
-import type { UnitBrief } from "../../units";
+import { unitLabel, type UnitBrief } from "../../units";
 
 export const ORDER_STATUS_LABEL = {
   active: "Действует",
@@ -38,7 +38,7 @@ export const ORDER_TENANT_WIDE_UNIT_LABEL = "Все подразделения";
 
 export function orderUnitLabel(unit: UnitBrief | null | undefined): string {
   if (!unit) return ORDER_TENANT_WIDE_UNIT_LABEL;
-  return unit.short_name ?? unit.name;
+  return unitLabel(unit);
 }
 
 /** OrderRead */

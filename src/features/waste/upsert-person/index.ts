@@ -1,1 +1,1 @@
-export { PersonFormModal } from "./ui/PersonFormModal";
+export { PersonForm } from "./ui/PersonForm";

@@ -1,7 +1,6 @@
 import { routes } from "../../../../shared/config/routes";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -13,14 +12,8 @@ import {
   type PersonSortField,
   type PersonSortOrder,
 } from "../../../../entities/waste/persons";
-import { PersonFormModal } from "../../../../features/waste/upsert-person";
 import { queryClient } from "../../../../shared/lib/query-client";
-import {
-  Button,
-  ConfirmDialog,
-  ListSearchField,
-  toast,
-} from "../../../../shared/ui";
+import { ConfirmDialog, ListSearchField, toast } from "../../../../shared/ui";
 import { personsColumns } from "./persons-columns";
 import {
   sortingFromSearch,
@@ -32,14 +25,9 @@ export function PersonsPage() {
   const { activeTenantId } = useTenant();
   const navigate = useNavigate({ from: routes.directories.persons.list });
   const search = useSearch({ from: routes.directories.persons.list });
-  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
-  const [editing, setEditing] = useState<Person | null>(null);
   const [deleting, setDeleting] = useState<Person | null>(null);
 
-  const columns = useMemo(
-    () => personsColumns(setDeleting, setModalMode, setEditing),
-    [],
-  );
+  const columns = useMemo(() => personsColumns(setDeleting), []);
 
   const listParams = useMemo(
     () => ({
@@ -109,19 +97,8 @@ export function PersonsPage() {
         description: "Справочник ответственных за экологический мониторинг.",
         directoryLabel: "Ответственные",
         directoryTo: routes.directories.persons.list,
-        actions: (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              setEditing(null);
-              setModalMode("create");
-            }}
-          >
-            <Plus className="size-3.5" />
-            Добавить ответственного
-          </Button>
-        ),
+        createTo: routes.directories.persons.new,
+        createLabel: "Добавить ответственного",
       }}
       toolbar={
         <ListSearchField
@@ -148,44 +125,21 @@ export function PersonsPage() {
       offset={offset}
       onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
       footer={
-        <>
-          <PersonFormModal
-            open={modalMode !== null}
-            mode={modalMode === "edit" ? "edit" : "create"}
-            personId={editing?.id}
-            initial={editing}
-            onOpenChange={(open) => {
-              if (!open) {
-                setModalMode(null);
-                setEditing(null);
-              }
-            }}
-            onSaved={() => {
-              toast.success(
-                modalMode === "edit"
-                  ? "Ответственный успешно обновлён"
-                  : "Ответственный успешно создан",
-              );
-              setModalMode(null);
-              setEditing(null);
-            }}
-          />
-          <ConfirmDialog
-            open={deleting !== null}
-            confirmDisabled={deleteMutation.isPending}
-            onOpenChange={(open) => {
-              if (!open) setDeleting(null);
-            }}
-            title="Удалить ответственного?"
-            confirmLabel="Удалить"
-            description={
-              <>Ответственный «{deleting?.name}» будет удалён из справочника.</>
-            }
-            onConfirm={() => {
-              if (deleting) void deleteMutation.mutateAsync(deleting.id);
-            }}
-          />
-        </>
+        <ConfirmDialog
+          open={deleting !== null}
+          confirmDisabled={deleteMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) setDeleting(null);
+          }}
+          title="Удалить ответственного?"
+          confirmLabel="Удалить"
+          description={
+            <>Ответственный «{deleting?.name}» будет удалён из справочника.</>
+          }
+          onConfirm={() => {
+            if (deleting) void deleteMutation.mutateAsync(deleting.id);
+          }}
+        />
       }
     />
   );

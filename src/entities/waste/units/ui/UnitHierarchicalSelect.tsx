@@ -8,6 +8,7 @@ import {
   unitTreeDepth,
   unitTreeDepthStyle,
 } from "../model/flatten-unit-tree-paths";
+import { unitLabel } from "../model/unit-label";
 import { unitsQueryKeys } from "../model/unit-query-keys";
 import type { Unit } from "../model/units.types";
 import { useUnitsTreeQuery } from "../model/use-units-tree-query";
@@ -32,10 +33,6 @@ type UnitHierarchicalSelectProps = {
   onChange: (unit: Unit | null) => void;
   placeholder?: string;
 };
-
-function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
-  return unit.short_name ?? unit.name;
-}
 
 function renderUnitOption(
   option: { value: string; label: string },

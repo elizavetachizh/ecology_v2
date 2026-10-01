@@ -1,13 +1,5 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { Instruction } from "./instructions.types";
-
-const profile: UserProfile = {
-  id: "u1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const instructionFixture: Instruction = {
   id: "ins-1",
@@ -19,8 +11,8 @@ export const instructionFixture: Instruction = {
   status: "active",
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export function makeInstruction(

@@ -13,6 +13,8 @@ const valid = {
   amount: "",
   with_ownership_transfer: false,
   transfer_purpose: "use" as const,
+  storage_facility_type: "" as const,
+  disposal_facility_type: "" as const,
   wastes: [],
 };
 
@@ -69,6 +71,80 @@ describe("contractFormSchema", () => {
         contract_type: "transport",
         transfer_purpose: "",
         with_ownership_transfer: false,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("requires a storage facility type when ownership stays with the producer", () => {
+    const parsed = contractFormSchema.safeParse({
+      ...valid,
+      transfer_purpose: "storage",
+      with_ownership_transfer: false,
+      storage_facility_type: "",
+    });
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues.map((issue) => issue.path[0])).toContain(
+        "storage_facility_type",
+      );
+    }
+  });
+
+  it("requires a disposal facility type when ownership stays with the producer", () => {
+    const parsed = contractFormSchema.safeParse({
+      ...valid,
+      transfer_purpose: "disposal",
+      with_ownership_transfer: false,
+      disposal_facility_type: "",
+    });
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues.map((issue) => issue.path[0])).toContain(
+        "disposal_facility_type",
+      );
+    }
+  });
+
+  it("does not require a facility type when ownership is transferred", () => {
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        transfer_purpose: "storage",
+        with_ownership_transfer: true,
+        storage_facility_type: "",
+        disposal_facility_type: "",
+      }).success,
+    ).toBe(true);
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        transfer_purpose: "disposal",
+        with_ownership_transfer: true,
+        storage_facility_type: "",
+        disposal_facility_type: "",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("does not require a facility type for purposes other than storage and disposal", () => {
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        transfer_purpose: "use",
+        with_ownership_transfer: false,
+        storage_facility_type: "",
+        disposal_facility_type: "",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts storage without ownership when the facility type is set", () => {
+    expect(
+      contractFormSchema.safeParse({
+        ...valid,
+        transfer_purpose: "storage",
+        with_ownership_transfer: false,
+        storage_facility_type: "undeground_tank",
       }).success,
     ).toBe(true);
   });

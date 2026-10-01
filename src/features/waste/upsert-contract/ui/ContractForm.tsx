@@ -1,22 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   CONTRACT_TYPE_LABEL,
   ContractStatusBadge,
   ContractTypeValues,
-  TRANSFER_PURPOSE_LABEL,
-  TransferPurposeValues,
   type Contract,
   type ContractType,
 } from "../../../../entities/waste/contracts";
 import { useTenant } from "../../../../entities/tenant";
-import {
-  CounterpartySelect,
-  counterpartiesQueryKeys,
-  getCounterparty,
-} from "../../../../entities/waste/counterparties";
+import { CounterpartySelect } from "../../../../entities/waste/counterparties";
 import { CounterpartyFormModal } from "../../upsert-counterparty";
 import { applyCounterpartySnapshot } from "../model/counterparty-snapshot";
 import {
@@ -24,19 +17,17 @@ import {
   AlertDescription,
   Button,
   DirectoryBreadcrumb,
-  Field,
-  FieldDescription,
-  FieldLabel,
   FormField,
   Input,
   PageContextBar,
   Select,
-  Switch,
 } from "../../../../shared/ui";
 import { useUpsertContractForm } from "../model/use-upsert-contract-form";
+import { applyContractTypeChange } from "../model/apply-contract-form-rules";
+import { usePrefillCounterparty } from "../model/use-prefill-counterparty";
 import { ContractNextStepCta } from "./ContractNextStepCta";
+import { ContractRecyclingFields } from "./ContractRecyclingFields";
 import { ContractWastesEditor } from "./ContractWastesEditor";
-import { emptyContractWasteRow } from "../model/contract-form.schema";
 import { routes } from "../../../../shared/config/routes";
 
 type ContractFormProps = {
@@ -79,26 +70,14 @@ export function ContractForm({
   const contractType = watch("contract_type");
   const status = watch("status");
   const wastes = watch("wastes");
-  const prefillCounterpartyId =
-    mode === "create" ? defaultCounterpartyId : undefined;
-  const prefillCounterparty = useQuery({
-    queryKey: counterpartiesQueryKeys.detail(
-      activeTenantId ?? "none",
-      prefillCounterpartyId || "none",
-    ),
-    queryFn: ({ signal }) => getCounterparty(prefillCounterpartyId!, signal),
-    enabled: Boolean(activeTenantId && prefillCounterpartyId),
-  });
-  const appliedPrefillId = useRef<string | null>(null);
 
-  useEffect(() => {
-    const item = prefillCounterparty.data;
-    if (!item) return;
-    if (appliedPrefillId.current === item.id) return;
-    if (getValues("counterparty_id") !== item.id) return;
-    appliedPrefillId.current = item.id;
-    applyCounterpartySnapshot(setValue, item);
-  }, [prefillCounterparty.data, getValues, setValue]);
+  usePrefillCounterparty({
+    enabled: mode === "create",
+    counterpartyId: defaultCounterpartyId,
+    tenantId: activeTenantId,
+    getValues,
+    setValue,
+  });
 
   const title =
     mode === "create" ? "Новый договор" : `Договор ${initial?.number ?? ""}`;
@@ -147,11 +126,7 @@ export function ContractForm({
             disabled={pending}
             {...register("contract_type", {
               onChange: (event) => {
-                if (event.target.value === "transport") {
-                  setValue("transfer_purpose", "");
-                  setValue("with_ownership_transfer", false);
-                  setValue("wastes", [{ ...emptyContractWasteRow }]);
-                }
+                applyContractTypeChange(setValue, event.target.value);
               },
             })}
           >
@@ -283,71 +258,7 @@ export function ContractForm({
         </FormField>
 
         {contractType === "recycling" ? (
-          <>
-            <FormField
-              htmlFor="transfer_purpose"
-              label="Цель передачи"
-              required
-              className="md:col-span-2"
-              error={errors.transfer_purpose?.message}
-              description="Обязательна для договора утилизации. Для перевозки не указывается."
-            >
-              <Select
-                id="transfer_purpose"
-                disabled={pending}
-                {...register("transfer_purpose")}
-                aria-invalid={Boolean(errors.transfer_purpose)}
-              >
-                <option value="">Выберите цель</option>
-                {TransferPurposeValues.map((value) => (
-                  <option key={value} value={value}>
-                    {TRANSFER_PURPOSE_LABEL[value]}
-                  </option>
-                ))}
-              </Select>
-            </FormField>
-
-            <Field className="md:col-span-2">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <FieldLabel htmlFor="with_ownership_transfer">
-                    С передачей права собственности
-                  </FieldLabel>
-                  <FieldDescription>
-                    Отходы передаются с переходом права собственности.
-                  </FieldDescription>
-                </div>
-                <Controller
-                  name="with_ownership_transfer"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      id="with_ownership_transfer"
-                      checked={field.value}
-                      disabled={pending}
-                      onCheckedChange={field.onChange}
-                      aria-label="С передачей права собственности"
-                    />
-                  )}
-                />
-              </div>
-            </Field>
-            <FormField
-              htmlFor="amount"
-              label="Сумма вывоза отходов по договору"
-              className="md:col-span-2"
-              error={errors.amount?.message}
-            >
-              <Input
-                id="amount"
-                {...register("amount")}
-                inputMode="decimal"
-                placeholder="необязательно"
-                disabled={pending}
-                aria-invalid={Boolean(errors.amount)}
-              />
-            </FormField>
-          </>
+          <ContractRecyclingFields form={form} pending={pending} />
         ) : null}
       </div>
       {contractType === "recycling" ? (

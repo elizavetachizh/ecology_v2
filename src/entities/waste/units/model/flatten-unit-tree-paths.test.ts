@@ -6,6 +6,7 @@ import {
   unitTreeDepthStyle,
 } from "./flatten-unit-tree-paths";
 import type { Unit, UnitTree } from "./units.types";
+import { userProfileFixture } from "../../persons";
 
 function stubUnit(
   id: string,
@@ -24,20 +25,8 @@ function stubUnit(
     district: null,
     created_at: "",
     updated_at: "",
-    created_by: {
-      id: "u",
-      username: "u",
-      email: null,
-      first_name: null,
-      last_name: null,
-    },
-    updated_by: {
-      id: "u",
-      username: "u",
-      email: null,
-      first_name: null,
-      last_name: null,
-    },
+    created_by: userProfileFixture,
+    updated_by: userProfileFixture,
   };
 }
 
@@ -66,6 +55,15 @@ describe("formatUnitPathLabel", () => {
     expect(formatUnitPathLabel([{ name: "корень", short_name: null }])).toBe(
       "корень",
     );
+  });
+
+  it("uses the short name of each segment and skips an empty one", () => {
+    expect(
+      formatUnitPathLabel([
+        { name: "Цех №1", short_name: "Ц1" },
+        { name: "Участок", short_name: "" },
+      ]),
+    ).toBe("Ц1 -> Участок");
   });
 });
 

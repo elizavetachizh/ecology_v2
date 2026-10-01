@@ -86,7 +86,7 @@ describe("toStandardFormValues", () => {
     expect(values.start_date).toBe("2026-01-15");
     expect(values.units).toHaveLength(1);
     expect(values.units[0]?.unit_id).toBe("unit-1");
-    expect(values.units[0]?.unit_label).toBe("Цех №1 (Ц1)");
+    expect(values.units[0]?.unit_label).toBe("Ц1");
     expect(values.units[0]?.wastes).toHaveLength(2);
     expect(values.units[0]?.wastes[1]?.waste_id).toBe("");
   });

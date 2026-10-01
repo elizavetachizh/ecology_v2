@@ -8,11 +8,13 @@ import {
 
 describe("contractWriteErrorMessage", () => {
   it("maps 400 to date/waste copy", () => {
-    expect(
-      contractWriteErrorMessage(
-        new ApiError("Сервер вернул ошибку 400", 400, "http_error"),
-      ),
-    ).toMatch(/цель обязательна/i);
+    const message = contractWriteErrorMessage(
+      new ApiError("Сервер вернул ошибку 400", 400, "http_error"),
+    );
+    expect(message).toMatch(/цель обязательна/i);
+    expect(message).toMatch(
+      /без права собственности для хранения и захоронения нужен тип объекта/i,
+    );
   });
 });
 

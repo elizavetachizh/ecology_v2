@@ -40,7 +40,7 @@ describe("DashboardBurialPermitChart", () => {
     );
 
     expect(
-      screen.getByText(/Р-001 · Цех А \(А\) · 1010100 — Test waste/),
+      screen.getByText(/Р-001 · А · 1010100 — Test waste/),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: "Вывоз на захоронение по месяцам" }),

@@ -9,12 +9,13 @@ import {
   type Person,
 } from "../../../../entities/waste/persons";
 import { queryClient } from "../../../../shared/lib/query-client";
-import { toPersonWriteBody } from "./map-person-form";
+import { toPersonFormValues, toPersonWriteBody } from "./map-person-form";
 import {
   createEmptyPersonFormValues,
   personFormSchema,
   type PersonFormValues,
 } from "./person-form.schema";
+import { personWriteErrorMessage } from "./person-write-error";
 
 type UseUpsertPersonFormParams = {
   mode: "create" | "edit";
@@ -22,22 +23,6 @@ type UseUpsertPersonFormParams = {
   initial?: Person | null;
   onSaved: (person: Person, meta: { close: boolean }) => void;
 };
-
-function getPersonFormValues(
-  mode: "create" | "edit",
-  initial?: Person | null,
-): PersonFormValues {
-  if (mode === "edit" && initial) {
-    return {
-      name: initial.name,
-      first_name: initial.first_name ?? "",
-      last_name: initial.last_name ?? "",
-      middle_name: initial.middle_name ?? "",
-      beltopgas_uuid: initial.beltopgas_uuid ?? "",
-    };
-  }
-  return createEmptyPersonFormValues;
-}
 
 export function useUpsertPersonForm({
   mode,
@@ -48,7 +33,10 @@ export function useUpsertPersonForm({
   const [error, setError] = useState<string | null>(null);
   const form = useForm<PersonFormValues>({
     resolver: zodResolver(personFormSchema),
-    defaultValues: getPersonFormValues(mode, initial),
+    defaultValues:
+      mode === "edit" && initial
+        ? toPersonFormValues(initial)
+        : createEmptyPersonFormValues,
   });
 
   const createMutation = useMutation({
@@ -60,7 +48,7 @@ export function useUpsertPersonForm({
       });
       onSaved(created, { close: vars.close });
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(personWriteErrorMessage(err)),
   });
 
   const updateMutation = useMutation({
@@ -76,12 +64,12 @@ export function useUpsertPersonForm({
       });
       onSaved(updated, { close: vars.close });
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(personWriteErrorMessage(err)),
   });
 
-  const onSubmit = (values: PersonFormValues) => {
+  const onSubmit = (close: boolean, values: PersonFormValues) => {
     setError(null);
-    const payload = { values, close: true };
+    const payload = { values, close };
     if (mode === "edit") updateMutation.mutate(payload);
     else createMutation.mutate(payload);
   };

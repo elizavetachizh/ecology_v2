@@ -1,5 +1,5 @@
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller, useWatch } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import type { Unit } from "../../../../entities/waste/units";
 import {
   Field,

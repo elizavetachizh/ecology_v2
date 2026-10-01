@@ -1,4 +1,5 @@
 import type { UserProfile } from "../../../user";
+import type { UnitBrief } from "../../units";
 
 /** PersonRead — ответ backend */
 export type Person = {
@@ -12,7 +13,9 @@ export type Person = {
   user_id: string | null;
   created_at: string;
   updated_at: string;
-  user: UserProfile;
+  user: UserProfile | null;
+  units: UnitBrief[];
+  unit_ids: string[];
   created_by: UserProfile;
   updated_by: UserProfile;
 };
@@ -29,6 +32,7 @@ export type PersonCreate = {
   last_name?: string | null;
   middle_name?: string | null;
   beltopgas_uuid?: string | null;
+  unit_ids?: string[];
 };
 
 export type PersonUpdate = Partial<PersonCreate>;

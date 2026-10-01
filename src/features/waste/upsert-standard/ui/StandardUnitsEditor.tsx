@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { ChevronRight, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { standardUnitLabel } from "../../../../entities/waste/standards";
-import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
+import {
+  unitLabel,
+  UnitHierarchicalSelect,
+} from "../../../../entities/waste/units";
 import { cn } from "../../../../shared/lib/cn";
 import { Button, FieldError, FormField } from "../../../../shared/ui";
 import { routes } from "../../../../shared/config/routes";
@@ -69,7 +71,7 @@ export function StandardUnitsEditor({
             if (!unit || selectedIds.includes(unit.id)) return;
             append({
               unit_id: unit.id,
-              unit_label: standardUnitLabel(unit),
+              unit_label: unitLabel(unit),
               wastes: [{ ...emptyStandardWasteRow }],
             });
           }}

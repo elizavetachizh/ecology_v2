@@ -13,6 +13,11 @@ describe("routes", () => {
       new: "/directories/orders/new",
       detail: "/directories/orders/$orderId",
     });
+    expect(routes.directories.persons).toEqual({
+      list: "/directories/persons",
+      new: "/directories/persons/new",
+      detail: "/directories/persons/$personId",
+    });
   });
 
   it("keeps domain key independent of URL slug shape", () => {

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { AsyncCombobox } from "../../../../shared/ui";
 import { getUnit } from "../api/get-unit";
+import { unitLabel } from "../model/unit-label";
 import { unitsQueryKeys } from "../model/unit-query-keys";
-import type { Unit } from "../model/units.types";
 import { useUnitsOptions } from "../model/use-units-query";
 
 type UnitSelectProps = {
@@ -13,10 +13,6 @@ type UnitSelectProps = {
   "aria-label"?: string;
   onChange: (id: string) => void;
 };
-
-function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
 
 export function UnitSelect({
   tenantId,

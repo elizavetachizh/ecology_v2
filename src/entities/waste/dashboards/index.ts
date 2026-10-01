@@ -40,7 +40,6 @@ export {
   isNonZeroAmount,
   sumChartAmounts,
   toChartPoints,
-  unitTitle,
   wasteTitle,
   yearFromIsoDate,
 } from "./model/dashboard-view";

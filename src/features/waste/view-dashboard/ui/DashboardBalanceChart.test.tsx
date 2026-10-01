@@ -58,9 +58,7 @@ describe("DashboardBalanceChart", () => {
       />,
     );
 
-    expect(
-      screen.getByText(/Цех А \(А\) · 1010100 — Test waste/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/А · 1010100 — Test waste/)).toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: "Динамика остатка по месяцам" }),
     ).toBeInTheDocument();

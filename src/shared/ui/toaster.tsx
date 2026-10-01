@@ -37,5 +37,3 @@ export function Toaster() {
     </div>
   );
 }
-
-export { toast } from "./toast-store";

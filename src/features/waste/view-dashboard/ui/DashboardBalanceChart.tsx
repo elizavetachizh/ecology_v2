@@ -12,10 +12,10 @@ import {
   DASHBOARD_MONTHS_PRESETS,
   formatBalanceAmount,
   toChartPoints,
-  unitTitle,
   wasteTitle,
   type DashboardBalanceStat,
 } from "../../../../entities/waste/dashboards";
+import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
@@ -178,7 +178,7 @@ export function DashboardBalanceChart({
       <ChartHeader
         title="Динамика остатка"
         description={
-          stat ? `${unitTitle(stat.unit)} · ${wasteTitle(stat.waste)}` : "-"
+          stat ? `${unitLabel(stat.unit)} · ${wasteTitle(stat.waste)}` : "-"
         }
         amount={
           last ? `${formatBalanceAmount(String(last.amount))} ${uom}` : "-"

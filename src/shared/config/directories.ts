@@ -34,19 +34,7 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     description: "Источники образования отходов предприятия",
     to: routes.directories.wasteSources.list,
   },
-  {
-    id: "counterparties",
-    title: "Контрагенты",
-    description: "Юрлица и физлица организации: УНП, адрес, активность",
-    to: routes.directories.counterparties.list,
-  },
-  {
-    id: "contracts",
-    title: "Договоры",
-    description:
-      "Договоры утилизации и перевозки: контрагент, сроки, перечень отходов",
-    to: routes.directories.contracts.list,
-  },
+
   {
     id: "permits",
     title: "Разрешения",
@@ -79,5 +67,18 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     title: "Ответственные",
     description: "Ответственные за экологическое мониторинг",
     to: routes.directories.persons.list,
+  },
+  {
+    id: "counterparties",
+    title: "Контрагенты",
+    description: "Юрлица и физлица организации: УНП, адрес, активность",
+    to: routes.directories.counterparties.list,
+  },
+  {
+    id: "contracts",
+    title: "Договоры",
+    description:
+      "Договоры утилизации и перевозки: контрагент, сроки, перечень отходов",
+    to: routes.directories.contracts.list,
   },
 ];

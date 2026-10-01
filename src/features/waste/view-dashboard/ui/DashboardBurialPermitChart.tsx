@@ -12,10 +12,10 @@ import {
   formatBalanceAmount,
   sumChartAmounts,
   toChartPoints,
-  unitTitle,
   wasteTitle,
   type DashboardBurialPermitStat,
 } from "../../../../entities/waste/dashboards";
+import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
@@ -149,7 +149,7 @@ export function DashboardBurialPermitChart({
         title="Вывоз на захоронение"
         description={
           stat
-            ? `${stat.permit.number} · ${unitTitle(stat.permit.unit)} · ${wasteTitle(stat.waste)}`
+            ? `${stat.permit.number} · ${unitLabel(stat.permit.unit)} · ${wasteTitle(stat.waste)}`
             : undefined
         }
         amount={

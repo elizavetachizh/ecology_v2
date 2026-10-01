@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 import {
   formatBalanceAmount,
   isNonZeroAmount,
-  unitTitle,
   type DashboardBurialPermit,
 } from "../../../../entities/waste/dashboards";
+import { unitLabel } from "../../../../entities/waste/units";
 import { PermitStatusBadge } from "../../../../entities/waste/permits";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { routes } from "../../../../shared/config/routes";
@@ -102,7 +102,7 @@ export function DashboardBurialPermitTable({
                 >
                   <span className="mr-2">{group.permit.number}</span>
                   <span className="font-normal text-muted-foreground">
-                    {unitTitle(group.permit.unit)}
+                    {unitLabel(group.permit.unit)}
                     {" · "}
                     {permitPeriod(
                       group.permit.start_date,

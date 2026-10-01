@@ -1,6 +1,7 @@
 import { routes } from "../../../../shared/config/routes";
 import { Link } from "@tanstack/react-router";
 import { Pencil, Unlink } from "lucide-react";
+import { unitLabel } from "../../../../entities/waste/units";
 import type { WasteInstructionUnit } from "../../../../entities/waste/waste-instruction-units";
 import {
   DataTableRowAction,
@@ -24,9 +25,7 @@ function wiuColumns(
           search={{ instructionId: undefined }}
           className="font-medium hover:underline"
         >
-          {row.original.unit.short_name
-            ? `${row.original.unit.name} (${row.original.unit.short_name})`
-            : row.original.unit.name}
+          {unitLabel(row.original.unit)}
         </Link>
       ),
     },

@@ -5,6 +5,7 @@ import {
   type Permit,
   type PermitStatus,
 } from "../../../../entities/waste/permits";
+import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import {
   Badge,
@@ -20,11 +21,6 @@ function formatAmount(value: string): string {
   const n = Number(value);
   if (!Number.isFinite(n)) return value;
   return n.toLocaleString("ru-RU", { maximumFractionDigits: 6 });
-}
-
-function unitLabel(unit: Permit["unit"]) {
-  if (!unit) return "Все подразделения";
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
 function permitsColumns(
@@ -52,7 +48,8 @@ function permitsColumns(
       id: "unit",
       header: "Подразделение",
       enableSorting: false,
-      cell: ({ row }) => unitLabel(row.original.unit),
+      cell: ({ row }) =>
+        row.original.unit ? unitLabel(row.original.unit) : "Все подразделения",
     },
     {
       id: "start_date",

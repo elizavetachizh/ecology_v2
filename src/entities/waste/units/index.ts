@@ -13,6 +13,7 @@ export {
   unitTreeDepth,
   unitTreeDepthStyle,
 } from "./model/flatten-unit-tree-paths";
+export { unitLabel } from "./model/unit-label";
 export type { UnitTreePath } from "./model/flatten-unit-tree-paths";
 export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
 export { UnitHierarchicalSelect } from "./ui/UnitHierarchicalSelect";

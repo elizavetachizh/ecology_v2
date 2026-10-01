@@ -19,6 +19,8 @@ export const TRANSFER_PURPOSE_LABEL = {
   neutralization: "Обезвреживание",
   storage: "Хранение",
   disposal: "Захоронение",
+  sorting: "Сортировка",
+  procurement: "Заготовка",
 } as const;
 
 export type TransferPurpose = keyof typeof TRANSFER_PURPOSE_LABEL;
@@ -27,6 +29,35 @@ export const TransferPurposeValues = Object.keys(TRANSFER_PURPOSE_LABEL) as [
   TransferPurpose,
   ...TransferPurpose[],
 ];
+
+export const STORAGE_FACILITY_TYPE_LABEL = {
+  sludge: "Шламохранилище (шламонакопитель)",
+  landfill_toxic: "Полигон токсичных промышленных отходов",
+  dump: "Отвал",
+  insulation: "Объект хранения или активного  очистных сооружений",
+  undeground_tank: "Подземный резервуар",
+  temporary: "Место временного хранения",
+  other: "Другое",
+} as const;
+
+export type StorageFacilityType = keyof typeof STORAGE_FACILITY_TYPE_LABEL;
+
+export const StorageFacilityTypeValues = Object.keys(
+  STORAGE_FACILITY_TYPE_LABEL,
+) as [StorageFacilityType, ...StorageFacilityType[]];
+
+export const DISPOSAL_FACILITY_TYPE_LABEL = {
+  landfill_industrial: "Полигон промышленных отходов",
+  landfill_toxic: "Полигон токсичных промышленных отходов",
+  landfill_msw: "Полигон твёрдых коммунальных отходов",
+  other: "Другое",
+} as const;
+
+export type DisposalFacilityType = keyof typeof DISPOSAL_FACILITY_TYPE_LABEL;
+
+export const DisposalFacilityTypeValues = Object.keys(
+  DISPOSAL_FACILITY_TYPE_LABEL,
+) as [DisposalFacilityType, ...DisposalFacilityType[]];
 
 export const CONTRACT_STATUS_LABEL = {
   active: "Действует",
@@ -95,6 +126,8 @@ export type Contract = {
   amount: string | null;
   with_ownership_transfer: boolean;
   transfer_purpose: TransferPurpose | null;
+  storage_facility_type: StorageFacilityType | null;
+  disposal_facility_type: DisposalFacilityType | null;
   wastes: ContractWaste[];
   created_at: string;
   updated_at: string;
@@ -126,6 +159,8 @@ export type ContractCreate = {
   amount?: string | null;
   with_ownership_transfer?: boolean;
   transfer_purpose?: TransferPurpose | null;
+  storage_facility_type?: StorageFacilityType | null;
+  disposal_facility_type?: DisposalFacilityType | null;
   wastes?: ContractWasteWrite[];
 };
 

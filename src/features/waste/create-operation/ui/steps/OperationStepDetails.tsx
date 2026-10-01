@@ -8,6 +8,7 @@ import { useUnitInstructionWastesListQuery } from "../../../../../entities/waste
 import {
   flattenUnitTreePaths,
   formatUnitPathLabel,
+  unitLabel,
   useUnitsTreeQuery,
 } from "../../../../../entities/waste/units";
 import {
@@ -73,9 +74,7 @@ export function OperationStepDetails({ pending }: OperationStepDetailsProps) {
   const selectedUnitLabel = selectedFromTree
     ? formatUnitPathLabel(selectedFromTree.path)
     : brief
-      ? brief.short_name
-        ? `${brief.name} (${brief.short_name})`
-        : brief.name
+      ? unitLabel(brief)
       : undefined;
 
   return (

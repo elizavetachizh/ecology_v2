@@ -8,9 +8,12 @@ describe("orderUnitLabel", () => {
   });
 
   it("falls back to name", () => {
-    expect(
-      orderUnitLabel({ ...orderUnitBriefFixture, short_name: null }),
-    ).toBe("Цех №1");
+    expect(orderUnitLabel({ ...orderUnitBriefFixture, short_name: null })).toBe(
+      "Цех №1",
+    );
+    expect(orderUnitLabel({ ...orderUnitBriefFixture, short_name: "" })).toBe(
+      "Цех №1",
+    );
   });
 
   it("labels tenant-wide orders", () => {

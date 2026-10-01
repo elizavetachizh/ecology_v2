@@ -1,5 +1,6 @@
-import type { Unit, UnitTree } from "./units.types";
 import { MAX_ANCESTOR_DEPTH, toUnit } from "./find-unit-ancestor-chain";
+import { unitLabel } from "./unit-label";
+import type { Unit, UnitTree } from "./units.types";
 
 export const UNIT_PATH_SEPARATOR = " -> ";
 export const UNIT_TREE_INDENT_REM = 0.75;
@@ -21,9 +22,7 @@ export function unitTreeDepthStyle(depth: number): { paddingLeft: string } {
 export function formatUnitPathLabel(
   path: Pick<Unit, "name" | "short_name">[],
 ): string {
-  return path
-    .map((item) => item.short_name ?? item.name)
-    .join(UNIT_PATH_SEPARATOR);
+  return path.map((item) => unitLabel(item)).join(UNIT_PATH_SEPARATOR);
 }
 
 type FlattenUnitTreePathsOptions = {

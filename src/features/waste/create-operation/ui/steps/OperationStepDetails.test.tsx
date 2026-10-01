@@ -12,6 +12,7 @@ import {
   type OperationFormValues,
 } from "../../model/operation-form.schema";
 import { OperationStepDetails } from "./OperationStepDetails";
+import { userProfileFixture } from "../../../../../entities/waste/persons";
 
 vi.mock("../../../../../entities/tenant", () => ({
   useTenant: () => ({ activeTenantId: "tenant-1" }),
@@ -61,14 +62,6 @@ vi.mock("../../../../../entities/waste/operations", async (importOriginal) => {
 const useUnitsTreeQueryMock = vi.mocked(useUnitsTreeQuery);
 const useUiwListQueryMock = vi.mocked(useUnitInstructionWastesListQuery);
 
-const profile = {
-  id: "u",
-  username: "u",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
-
 const binding: UnitInstructionWaste = {
   id: "uiw-1",
   tenant_id: "tenant-1",
@@ -90,8 +83,8 @@ const binding: UnitInstructionWaste = {
   transport_unit: "0",
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 function treeNode(
@@ -112,8 +105,8 @@ function treeNode(
     district: null,
     created_at: "",
     updated_at: "",
-    created_by: profile,
-    updated_by: profile,
+    created_by: userProfileFixture,
+    updated_by: userProfileFixture,
     children,
   };
 }
@@ -163,11 +156,7 @@ describe("OperationStepDetails", () => {
   it("shows the selected unit and waste from previous steps", () => {
     renderStep();
 
-    expect(screen.getByText("Дата")).toBeInTheDocument();
-    expect(screen.getByText("22.09.2026")).toBeInTheDocument();
-    expect(screen.getByText("Место учёта")).toBeInTheDocument();
-    expect(screen.getByText("Цех №1 (Ц1)")).toBeInTheDocument();
-    expect(screen.getByText("Отход")).toBeInTheDocument();
+    expect(screen.getByText("22.09.2026 · Ц1")).toBeInTheDocument();
     expect(
       screen.getByText("12345678901 — Отход тестовый"),
     ).toBeInTheDocument();
@@ -194,7 +183,9 @@ describe("OperationStepDetails", () => {
 
     renderStep();
 
-    expect(screen.getByText("Организация -> Цех №1")).toBeInTheDocument();
-    expect(screen.queryByText("Цех №1 (Ц1)")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("22.09.2026 · Организация -> Цех №1"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Ц1/)).not.toBeInTheDocument();
   });
 });

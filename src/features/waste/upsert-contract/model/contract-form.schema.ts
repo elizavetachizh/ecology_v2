@@ -2,12 +2,15 @@ import { z } from "zod";
 import {
   ContractStatusValues,
   ContractTypeValues,
+  DisposalFacilityTypeValues,
+  StorageFacilityTypeValues,
   TransferPurposeValues,
 } from "../../../../entities/waste/contracts";
 import {
   isoDateZodSchema,
   todayIsoDate,
 } from "../../../../shared/lib/format-date";
+import { facilityKind } from "./contract-form-rules";
 
 const isoDate = isoDateZodSchema();
 
@@ -50,6 +53,14 @@ export const contractFormSchema = z
     amount: optionalPositiveDecimal,
     with_ownership_transfer: z.boolean(),
     transfer_purpose: z.union([z.enum(TransferPurposeValues), z.literal("")]),
+    storage_facility_type: z.union([
+      z.enum(StorageFacilityTypeValues),
+      z.literal(""),
+    ]),
+    disposal_facility_type: z.union([
+      z.enum(DisposalFacilityTypeValues),
+      z.literal(""),
+    ]),
     wastes: z.array(
       z.object({
         waste_id: z.union([z.uuid(), z.literal("")]),
@@ -72,6 +83,26 @@ export const contractFormSchema = z
         path: ["transfer_purpose"],
         message: "Укажите цель передачи",
       });
+    }
+    if (values.contract_type === "recycling") {
+      const kind = facilityKind(
+        values.transfer_purpose,
+        values.with_ownership_transfer,
+      );
+      if (kind === "storage" && !values.storage_facility_type) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["storage_facility_type"],
+          message: "Укажите тип объекта хранения",
+        });
+      }
+      if (kind === "disposal" && !values.disposal_facility_type) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["disposal_facility_type"],
+          message: "Укажите тип объекта захоронения",
+        });
+      }
     }
     const seen = new Set<string>();
     values.wastes.forEach((item, index) => {
@@ -106,7 +137,9 @@ export const contractFormDefaultValues: ContractFormValues = {
   counterparty_address: "",
   counterparty_contact: "",
   amount: "",
-  with_ownership_transfer: false,
+  with_ownership_transfer: true,
   transfer_purpose: "",
+  storage_facility_type: "",
+  disposal_facility_type: "",
   wastes: [{ ...emptyContractWasteRow }],
 };

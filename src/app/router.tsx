@@ -111,6 +111,8 @@ import { CreateUnitPage } from "../pages/dashboard/waste/units/CreateUnitPage";
 import { CreateWastePage } from "../pages/dashboard/waste/wastes/CreateWastePage";
 import { CreateInstructionPage } from "../pages/dashboard/waste/instructions/CreateInstructionPage";
 import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
+import { CreatePersonPage } from "../pages/dashboard/waste/persons/CreatePersonPage";
+import { EditPersonPage } from "../pages/dashboard/waste/persons/EditPersonPage";
 import { PersonSortFields } from "../entities/waste/persons";
 import { routes } from "../shared/config/routes";
 
@@ -352,6 +354,18 @@ const directoriesPersonsRoute = createRoute({
     };
   },
   component: PersonsPage,
+});
+
+const directoriesCreatePersonRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.persons.new,
+  component: CreatePersonPage,
+});
+
+const directoriesEditPersonRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.persons.detail,
+  component: EditPersonPage,
 });
 
 const directoriesCounterpartiesRoute = createRoute({
@@ -603,6 +617,8 @@ const routeTree = rootRoute.addChildren([
   directoriesWasteEditRoute,
   directoriesWasteSourcesRoute,
   directoriesPersonsRoute,
+  directoriesCreatePersonRoute,
+  directoriesEditPersonRoute,
   directoriesCounterpartiesRoute,
   directoriesCreateCounterpartyRoute,
   directoriesEditCounterpartyRoute,

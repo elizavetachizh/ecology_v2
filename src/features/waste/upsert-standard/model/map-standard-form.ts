@@ -1,9 +1,9 @@
-import {
-  standardUnitLabel,
-  type Standard,
-  type StandardCreate,
-  type StandardUpdate,
+import type {
+  Standard,
+  StandardCreate,
+  StandardUpdate,
 } from "../../../../entities/waste/standards";
+import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL, wasteLabel } from "../../../../entities/waste/wastes";
 import {
   emptyStandardWasteRow,
@@ -39,7 +39,7 @@ export function toStandardFormValues(standard: Standard): StandardFormValues {
     start_date: standard.start_date,
     units: standard.units.map((unit) => ({
       unit_id: unit.unit_id,
-      unit_label: standardUnitLabel(unit.unit),
+      unit_label: unitLabel(unit.unit),
       wastes: [
         ...unit.wastes.map((item) => ({
           waste_id: item.waste_id,

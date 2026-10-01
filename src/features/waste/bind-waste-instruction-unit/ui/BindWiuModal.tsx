@@ -1,6 +1,6 @@
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
-import { useUnitsOptions, type Unit } from "../../../../entities/waste/units";
+import { unitLabel, useUnitsOptions } from "../../../../entities/waste/units";
 import { useWasteSourcesOptions } from "../../../../entities/waste/waste-sources";
 import type {
   WasteInstructionUnit,
@@ -35,10 +35,6 @@ type BindWiuModalProps = {
   onOpenChange: (open: boolean) => void;
   onSaved: (binding: WasteInstructionUnit) => void;
 };
-
-function unitLabel(unit: Pick<Unit, "name" | "short_name">) {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
-}
 
 function renderPod9UnitOption(option: { value: string; label: string }) {
   return (

@@ -11,6 +11,7 @@ import {
 import { queryClient } from "../../../../shared/lib/query-client";
 import { useUpsertUnitForm } from "./use-upsert-unit-form";
 import type { UnitFormValues } from "./unit-form.schema";
+import { userProfileFixture } from "../../../../entities/waste/persons";
 
 vi.mock("../../../../entities/waste/units", async (importOriginal) => {
   const actual =
@@ -24,14 +25,6 @@ vi.mock("../../../../entities/waste/units", async (importOriginal) => {
 
 const updateMock = vi.mocked(updateUnit);
 
-const profile = {
-  id: "u1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
-
 const unit: Unit = {
   id: "11111111-1111-1111-1111-111111111111",
   tenant_id: "tenant-1",
@@ -43,8 +36,8 @@ const unit: Unit = {
   district: null,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 const updated: Unit = {

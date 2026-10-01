@@ -3,6 +3,8 @@ import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
   CONTRACT_TYPE_LABEL,
   ContractStatusBadge,
+  DISPOSAL_FACILITY_TYPE_LABEL,
+  STORAGE_FACILITY_TYPE_LABEL,
   TRANSFER_PURPOSE_LABEL,
   type Contract,
   type ContractStatus,
@@ -59,11 +61,23 @@ function contractsColumns(
       enableSorting: false,
       cell: ({ row }) => {
         const purpose = row.original.transfer_purpose;
+        const storage = row.original.storage_facility_type;
+        const disposal = row.original.disposal_facility_type;
         return (
           <div className="flex max-w-xs flex-wrap items-center gap-1">
             {purpose ? TRANSFER_PURPOSE_LABEL[purpose] : "—"}
             {row.original.with_ownership_transfer ? (
               <Badge variant="secondary">С передачей права</Badge>
+            ) : null}
+            {storage ? (
+              <Badge variant="secondary">
+                {STORAGE_FACILITY_TYPE_LABEL[storage]}
+              </Badge>
+            ) : null}
+            {disposal ? (
+              <Badge variant="secondary">
+                {DISPOSAL_FACILITY_TYPE_LABEL[disposal]}
+              </Badge>
             ) : null}
           </div>
         );

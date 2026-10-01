@@ -17,6 +17,8 @@ export type {
   ContractType,
   ContractAllStatus,
   TransferPurpose,
+  StorageFacilityType,
+  DisposalFacilityType,
   GetContractsParams,
 } from "./model/contracts.types";
 export {
@@ -25,11 +27,15 @@ export {
   CONTRACT_ALL_STATUS_LABEL,
   CONTRACT_TYPE_LABEL,
   TRANSFER_PURPOSE_LABEL,
+  STORAGE_FACILITY_TYPE_LABEL,
+  DISPOSAL_FACILITY_TYPE_LABEL,
   ContractSortFields,
   ContractStatusValues,
   ContractTypeValues,
   ContractAllStatusValues,
   TransferPurposeValues,
+  StorageFacilityTypeValues,
+  DisposalFacilityTypeValues,
   DEFAULT_CONTRACTS_LIST_LIMIT,
   DEFAULT_CONTRACTS_OPTIONS_LIMIT,
 } from "./model/contracts.types";

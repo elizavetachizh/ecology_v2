@@ -1,13 +1,5 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { Permit, PermitBurialWaste } from "./permits.types";
-
-const profile: UserProfile = {
-  id: "u1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const permitBurialWasteFixture: PermitBurialWaste = {
   id: "pbw-1",
@@ -24,8 +16,8 @@ export const permitBurialWasteFixture: PermitBurialWaste = {
   amount: "12.500000",
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export const permitFixture: Permit = {
@@ -40,8 +32,8 @@ export const permitFixture: Permit = {
   burial_wastes: [permitBurialWasteFixture],
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export function makePermit(overrides: Partial<Permit> = {}): Permit {

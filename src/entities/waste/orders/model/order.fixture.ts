@@ -1,14 +1,6 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { UnitBrief } from "../../units";
 import type { Order } from "./orders.types";
-
-const profile: UserProfile = {
-  id: "u1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const orderUnitBriefFixture: UnitBrief = {
   id: "unit-1",
@@ -26,8 +18,8 @@ export const orderFixture: Order = {
   unit: orderUnitBriefFixture,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export function makeOrder(overrides: Partial<Order> = {}): Order {

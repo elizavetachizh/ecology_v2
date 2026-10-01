@@ -1,13 +1,5 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { Balance, BalanceCurrent, Operation } from "./operations.types";
-
-const profile: UserProfile = {
-  id: "u1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const operationFixture: Operation = {
   id: "op-1",
@@ -49,8 +41,8 @@ export const operationFixture: Operation = {
   },
   created_at: "2026-03-01T00:00:00Z",
   updated_at: "2026-03-01T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
 
 export const balanceFixture: Balance = {

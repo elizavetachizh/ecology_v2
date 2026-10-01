@@ -1,4 +1,3 @@
-import type { UnitBrief } from "../../units";
 import { wasteLabel, type WasteBrief } from "../../wastes";
 import type {
   DashboardBalance,
@@ -17,12 +16,6 @@ export function formatBalanceAmount(value: string): string {
 export function isNonZeroAmount(amount: string): boolean {
   const n = Number(amount);
   return Number.isFinite(n) && n !== 0;
-}
-
-export function unitTitle(
-  unit: Pick<UnitBrief, "name" | "short_name">,
-): string {
-  return unit.short_name ? `${unit.name} (${unit.short_name})` : unit.name;
 }
 
 export function wasteTitle(
