@@ -217,10 +217,17 @@ function BindWiuModalForm({
               control={control}
               render={({ field }) => (
                 <MultipleCombobox
+                  id="waste_source_ids"
                   options={sources.options.map((source) => ({
                     value: source.id,
                     label: source.name,
                   }))}
+                  selectedOptions={(initial?.waste_sources ?? []).map(
+                    (source) => ({
+                      value: source.id,
+                      label: source.name,
+                    }),
+                  )}
                   value={field.value}
                   onValueChange={field.onChange}
                   search={sources.search}

@@ -67,15 +67,17 @@ export function OperationUnitPicker({
 
   const entries = useMemo(() => {
     const all = flattenUnitTreePaths(tree, { pod9Only: true });
+
     return excludeUnitId
       ? all.filter((item) => item.unit.id !== excludeUnitId)
       : all;
   }, [tree, excludeUnitId]);
 
   const query = search.trim().toLowerCase();
-
+  console.log(entries);
   // логика обсуждаема, т.к. пока не понятно что именно необходимо развернуть
   // вернуться к этой логике после обсуждения
+  //используется для локального поиска,  наприме,  когда мы хотим по родителю выбрать всех детей (ПОД-9).
   const filtered = useMemo(() => {
     if (!query) return entries;
     return entries.filter((item) => {

@@ -1,36 +1,17 @@
 import { Printer } from "lucide-react";
 import { DataTableRowAction } from "../../../../shared/ui";
-import { usePrintPassport } from "../model/use-print-passport";
 
 type PrintPassportRowActionProps = {
-  passportId: string;
-  number: string;
+  onSelect: () => void;
 };
 
 export function PrintPassportRowAction({
-  passportId,
-  number,
+  onSelect,
 }: PrintPassportRowActionProps) {
-  const { print, pending } = usePrintPassport();
-
   return (
-    <>
-      <DataTableRowAction
-        label="Печать Word"
-        disabled={pending}
-        onClick={() => print(passportId, number, "docx")}
-      >
-        <Printer />
-        Word
-      </DataTableRowAction>
-      <DataTableRowAction
-        label="Печать PDF"
-        disabled={pending}
-        onClick={() => print(passportId, number, "pdf")}
-      >
-        <Printer />
-        PDF
-      </DataTableRowAction>
-    </>
+    <DataTableRowAction label="Сформировать паспорт" onSelect={onSelect}>
+      <Printer />
+      Сформировать паспорт
+    </DataTableRowAction>
   );
 }

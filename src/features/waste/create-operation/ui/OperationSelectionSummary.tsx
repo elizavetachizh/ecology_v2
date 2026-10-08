@@ -25,9 +25,7 @@ export function OperationSelectionSummary({
 
       {wasteLabel ? (
         <div className="grid">
-          <dd className="text-base text-foreground font-medium">
-            {wasteLabel}
-          </dd>
+          <dd className="text-sm text-foreground font-medium">{wasteLabel}</dd>
           {wasteMeta ? (
             <dd className="text-xs text-muted-foreground">{wasteMeta}</dd>
           ) : null}

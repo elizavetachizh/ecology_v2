@@ -11,7 +11,10 @@ export type MultipleComboboxOption = {
 };
 
 export type MultipleComboboxProps = {
+  id?: string;
   options: MultipleComboboxOption[];
+  /** Selected records that may be absent from the current search results. */
+  selectedOptions?: MultipleComboboxOption[];
   value: string[];
   onValueChange: (value: string[]) => void;
   placeholder?: string;
@@ -29,7 +32,9 @@ export type MultipleComboboxProps = {
 };
 
 export function MultipleCombobox({
+  id,
   options,
+  selectedOptions: providedSelectedOptions = [],
   value,
   onValueChange,
   placeholder = "Выберите значения",
@@ -46,15 +51,39 @@ export function MultipleCombobox({
   "aria-label": ariaLabel,
 }: MultipleComboboxProps) {
   const [open, setOpen] = React.useState(false);
+  const [selectedLabelCache, setSelectedLabelCache] = React.useState<
+    Map<string, string>
+  >(() => new Map());
   const listboxId = React.useId();
 
   const selectedOptions = React.useMemo(() => {
-    const selected = new Set(value);
-    return options.filter((option) => selected.has(option.value));
-  }, [options, value]);
+    const byValue = new Map<string, MultipleComboboxOption>();
+
+    for (const [optionValue, label] of selectedLabelCache) {
+      byValue.set(optionValue, { value: optionValue, label });
+    }
+    for (const option of providedSelectedOptions) {
+      byValue.set(option.value, option);
+    }
+    for (const option of options) {
+      byValue.set(option.value, option);
+    }
+
+    return value.flatMap((optionValue) => {
+      const option = byValue.get(optionValue);
+      return option ? [option] : [];
+    });
+  }, [options, providedSelectedOptions, selectedLabelCache, value]);
 
   const toggleOption = (option: MultipleComboboxOption) => {
     if (option.disabled) return;
+
+    setSelectedLabelCache((current) => {
+      if (current.get(option.value) === option.label) return current;
+      const next = new Map(current);
+      next.set(option.value, option.label);
+      return next;
+    });
 
     onValueChange(
       value.includes(option.value)
@@ -69,12 +98,13 @@ export function MultipleCombobox({
   };
 
   const visibleValues = selectedOptions.slice(0, maxVisibleValues);
-  const hiddenValuesCount = selectedOptions.length - visibleValues.length;
+  const hiddenValuesCount = value.length - visibleValues.length;
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={handleOpenChange}>
       <PopoverPrimitive.Trigger asChild>
         <button
+          id={id}
           type="button"
           role="combobox"
           aria-label={ariaLabel}
@@ -92,7 +122,7 @@ export function MultipleCombobox({
           )}
         >
           <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-            {selectedOptions.length === 0 ? (
+            {value.length === 0 ? (
               <span className="truncate text-muted-foreground">
                 {placeholder}
               </span>
@@ -108,7 +138,9 @@ export function MultipleCombobox({
                 ))}
                 {hiddenValuesCount > 0 && (
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    +{hiddenValuesCount}
+                    {visibleValues.length > 0
+                      ? `+${hiddenValuesCount}`
+                      : `Выбрано: ${value.length}`}
                   </span>
                 )}
               </>

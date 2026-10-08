@@ -67,12 +67,14 @@ function CreateOperationModalForm({
       onSaved,
     },
   );
+
   useLayoutEffect(() => {
     pendingRef.current = pending;
     return () => {
       pendingRef.current = false;
     };
   }, [pending, pendingRef]);
+
   const lastStep = step >= UPSERT_OPERATION_STEPS.length;
 
   const changeStep = (updater: (prev: number) => number) => {

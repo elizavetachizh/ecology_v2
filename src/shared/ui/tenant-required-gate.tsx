@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "./alert";
 
-export type TenantRequiredGateProps = {
+type TenantRequiredGateProps = {
   /** Активный tenant с page/feature; `null`/`undefined` → empty-state. */
   tenantId: string | null | undefined;
   children: ReactNode;

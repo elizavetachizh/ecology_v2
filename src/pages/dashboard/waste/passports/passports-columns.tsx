@@ -20,6 +20,7 @@ import { routes } from "../../../../shared/config/routes";
 function passportsColumns(
   setDeleting: (passport: Passport) => void,
   onStatusChange: (passport: Passport, status: PassportStatus) => void,
+  onPreview: (passport: Passport) => void,
 ): ColumnDef<Passport>[] {
   return [
     {
@@ -95,10 +96,8 @@ function passportsColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <DataTableRowActions>
-          <PrintPassportRowAction
-            passportId={row.original.id}
-            number={row.original.number}
-          />
+          <PrintPassportRowAction onSelect={() => onPreview(row.original)} />
+
           {row.original.status === "active" ? (
             <DataTableRowAction
               label="Пометить как недействующий"

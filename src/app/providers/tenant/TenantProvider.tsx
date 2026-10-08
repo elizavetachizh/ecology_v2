@@ -37,6 +37,8 @@ async function wipeTenantScopedQueries(
   queryClient.removeQueries({ queryKey: ["operations"] });
   await queryClient.cancelQueries({ queryKey: ["dashboards"] });
   queryClient.removeQueries({ queryKey: ["dashboards"] });
+  await queryClient.cancelQueries({ queryKey: ["notifications"] });
+  queryClient.removeQueries({ queryKey: ["notifications"] });
 }
 
 function withTenantSearch<T extends { tenant?: string }>(

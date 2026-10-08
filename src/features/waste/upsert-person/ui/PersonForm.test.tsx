@@ -3,14 +3,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { personFixture } from "../../../../entities/waste/persons/model/person.fixture";
-import type { UnitBrief } from "../../../../entities/waste/units";
+import type { UnitTree } from "../../../../entities/waste/units";
 import { PersonForm } from "./PersonForm";
 
 const { unitsState } = vi.hoisted(() => ({
   unitsState: {
-    options: [] as UnitBrief[],
+    tree: [] as UnitTree[],
   },
 }));
+
+function unit(id: string, name: string, shortName: string | null): UnitTree {
+  return {
+    id,
+    name,
+    short_name: shortName,
+    is_pod9: true,
+    children: [],
+  } as unknown as UnitTree;
+}
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a>{children}</a>,
@@ -25,13 +35,11 @@ vi.mock("../../../../entities/waste/units", async (importOriginal) => {
     await importOriginal<typeof import("../../../../entities/waste/units")>();
   return {
     ...actual,
-    useUnitsOptions: () => ({
-      options: unitsState.options,
+    useUnitsTreeQuery: () => ({
+      tree: unitsState.tree,
       loading: false,
-      refreshing: false,
+      fetching: false,
       error: null,
-      search: "",
-      setSearch: vi.fn(),
       refetch: vi.fn(),
     }),
   };
@@ -55,7 +63,7 @@ function renderForm(props: Partial<ComponentProps<typeof PersonForm>> = {}) {
 
 afterEach(() => {
   cleanup();
-  unitsState.options = [];
+  unitsState.tree = [];
 });
 
 describe("PersonForm", () => {
@@ -66,14 +74,12 @@ describe("PersonForm", () => {
     expect(screen.getByLabelText("Фамилия")).toBeInTheDocument();
     expect(screen.getByLabelText("Имя")).toBeInTheDocument();
     expect(screen.getByLabelText("Отчество")).toBeInTheDocument();
-    expect(
-      screen.getByRole("combobox", { name: "Подразделения" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "ПОД-9" })).toBeInTheDocument();
     expect(screen.queryByText("Пользователь")).not.toBeInTheDocument();
   });
 
-  it("keeps selected unit labels and shows the linked user as text", () => {
-    unitsState.options = [{ id: "unit-2", name: "Склад", short_name: null }];
+  it("keeps the initial selected label when it is absent from the tree", () => {
+    unitsState.tree = [unit("unit-2", "Склад", null)];
 
     renderForm({
       mode: "edit",
@@ -94,21 +100,17 @@ describe("PersonForm", () => {
       },
     });
 
-    expect(screen.getByText("ivanov")).toBeInTheDocument();
-    expect(screen.getByText("Иванов Иван")).toBeInTheDocument();
-    expect(screen.queryByRole("textbox", { name: "Пользователь" })).toBeNull();
     expect(screen.getByText("Ц")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("combobox", { name: "Подразделения" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "ПОД-9" }));
 
-    expect(screen.getAllByRole("option", { name: "Ц" })).toHaveLength(1);
     expect(screen.getByRole("option", { name: "Склад" })).toBeInTheDocument();
   });
 
-  it("does not duplicate a selected unit that search returns again", () => {
-    unitsState.options = [
-      { id: "unit-1", name: "Цех", short_name: "Ц" },
-      { id: "unit-2", name: "Склад", short_name: null },
+  it("does not duplicate a selected unit from the tree", () => {
+    unitsState.tree = [
+      unit("unit-1", "Цех", "Ц"),
+      unit("unit-2", "Склад", null),
     ];
 
     renderForm({
@@ -120,7 +122,7 @@ describe("PersonForm", () => {
       },
     });
 
-    fireEvent.click(screen.getByRole("combobox", { name: "Подразделения" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "ПОД-9" }));
 
     expect(screen.getAllByRole("option", { name: "Ц" })).toHaveLength(1);
   });

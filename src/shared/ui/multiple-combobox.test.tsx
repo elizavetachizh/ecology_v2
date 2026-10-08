@@ -91,6 +91,41 @@ describe("MultipleCombobox", () => {
     expect(screen.getByText("Источники не найдены")).toBeInTheDocument();
   });
 
+  it("shows selected records that are absent from the current options", () => {
+    render(
+      <Harness
+        options={[]}
+        selectedOptions={[options[0]]}
+        initialValue={["a"]}
+      />,
+    );
+
+    expect(
+      screen.getByRole("combobox", { name: "Источники" }),
+    ).toHaveTextContent("Альфа");
+  });
+
+  it("keeps a selected label after the options change", () => {
+    const { rerender } = render(<Harness options={[options[0]]} />);
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Источники" }));
+    fireEvent.click(screen.getByRole("option", { name: "Альфа" }));
+
+    rerender(<Harness options={[options[1]]} />);
+
+    expect(
+      screen.getByRole("combobox", { name: "Источники" }),
+    ).toHaveTextContent("Альфа");
+  });
+
+  it("does not show the placeholder when selected labels are unknown", () => {
+    render(<Harness options={[]} initialValue={["unknown"]} />);
+
+    const combobox = screen.getByRole("combobox", { name: "Источники" });
+    expect(combobox).toHaveTextContent("Выбрано: 1");
+    expect(combobox).not.toHaveTextContent("Выберите источники");
+  });
+
   it("hides the refresh button without onRefresh", () => {
     render(<Harness />);
 

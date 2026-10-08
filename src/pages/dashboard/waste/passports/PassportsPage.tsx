@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { PrintPassportsJournalButton } from "../../../../features/waste/print-passport";
+import {
+  PrintPassportPreview,
+  PrintPassportsJournalButton,
+} from "../../../../features/waste/print-passport";
 import { useMutation } from "@tanstack/react-query";
 import { useTenant } from "../../../../entities/tenant";
 import {
@@ -38,6 +41,7 @@ export function PassportsPage() {
   const search = useSearch({ from: routes.waste.passports.list });
 
   const [deleting, setDeleting] = useState<Passport | null>(null);
+  const [previewing, setPreviewing] = useState<Passport | null>(null);
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: PassportStatus }) =>
@@ -60,9 +64,13 @@ export function PassportsPage() {
 
   const columns = useMemo(
     () =>
-      passportsColumns(setDeleting, (passport, status) => {
-        statusMutation.mutate({ id: passport.id, status });
-      }),
+      passportsColumns(
+        setDeleting,
+        (passport, status) => {
+          statusMutation.mutate({ id: passport.id, status });
+        },
+        setPreviewing,
+      ),
     [statusMutation],
   );
 
@@ -180,24 +188,30 @@ export function PassportsPage() {
       offset={offset}
       onOffsetChange={(nextOffset) => patchSearch({ offset: nextOffset })}
       footer={
-        <ConfirmDialog
-          open={deleting !== null}
-          confirmDisabled={deleteMutation.isPending}
-          onOpenChange={(open) => {
-            if (!open) setDeleting(null);
-          }}
-          title="Удалить паспорт?"
-          confirmLabel="Удалить"
-          description={
-            <>
-              Сопроводительный паспорт «{deleting?.number}» от{" "}
-              {formatDate(deleting?.date ?? null)} будет удалён.
-            </>
-          }
-          onConfirm={() => {
-            if (deleting) void deleteMutation.mutateAsync(deleting.id);
-          }}
-        />
+        <>
+          <PrintPassportPreview
+            passport={previewing}
+            onClose={() => setPreviewing(null)}
+          />
+          <ConfirmDialog
+            open={deleting !== null}
+            confirmDisabled={deleteMutation.isPending}
+            onOpenChange={(open) => {
+              if (!open) setDeleting(null);
+            }}
+            title="Удалить паспорт?"
+            confirmLabel="Удалить"
+            description={
+              <>
+                Сопроводительный паспорт «{deleting?.number}» от{" "}
+                {formatDate(deleting?.date ?? null)} будет удалён.
+              </>
+            }
+            onConfirm={() => {
+              if (deleting) void deleteMutation.mutateAsync(deleting.id);
+            }}
+          />
+        </>
       }
     />
   );

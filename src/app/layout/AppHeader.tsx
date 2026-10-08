@@ -1,7 +1,8 @@
-import { Bell, LogOut, PanelLeft } from "lucide-react";
+import { LogOut, PanelLeft } from "lucide-react";
 import { useTenant } from "../../entities/tenant";
 import { TenantSwitcher } from "../../features/select-tenant";
 import { useLogout } from "../../features/auth/logout";
+import { NotificationBell } from "../../features/notifications/notification-panel";
 import { Button } from "../../shared/ui";
 
 type AppHeaderProps = {
@@ -47,14 +48,7 @@ export default function AppHeader({
       <div className="flex min-w-0 items-center gap-2">
         <TenantSwitcher />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="Уведомления"
-        >
-          <Bell />
-        </Button>
+        <NotificationBell />
 
         <div className="flex items-center">
           <div className="flex h-auto gap-2 px-2 py-1.5">
