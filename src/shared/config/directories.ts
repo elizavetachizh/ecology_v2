@@ -69,6 +69,12 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: routes.directories.persons.list,
   },
   {
+    id: "vehicles",
+    title: "Транспортные средства",
+    description: "Транспорт организации для перевозки отходов",
+    to: routes.directories.vehicles.list,
+  },
+  {
     id: "counterparties",
     title: "Контрагенты",
     description: "Юрлица и физлица организации: УНП, адрес, активность",

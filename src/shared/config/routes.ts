@@ -63,6 +63,7 @@ export const routes = {
     standards: crud(directoryPath("standards"), "standardId"),
     orders: crud(directoryPath("orders"), "orderId"),
     persons: crud(directoryPath("persons"), "personId"),
+    vehicles: crud(directoryPath("vehicles"), "vehicleId"),
   },
   waste: {
     operations: listDetail(wastePath("operations"), "operationId"),

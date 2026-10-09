@@ -105,6 +105,7 @@ import {
   type WasteSourcesSearch,
   type WastesSearch,
   type PersonsSearch,
+  type VehiclesSearch,
   type CreateContractSearch,
 } from "./router/search-params";
 import { CreateUnitPage } from "../pages/dashboard/waste/units/CreateUnitPage";
@@ -114,6 +115,13 @@ import { PersonsPage } from "../pages/dashboard/waste/persons/PersonsPage";
 import { CreatePersonPage } from "../pages/dashboard/waste/persons/CreatePersonPage";
 import { EditPersonPage } from "../pages/dashboard/waste/persons/EditPersonPage";
 import { PersonSortFields } from "../entities/waste/persons";
+import { VehiclesPage } from "../pages/dashboard/waste/vehicles/VehiclesPage";
+import { CreateVehiclePage } from "../pages/dashboard/waste/vehicles/CreateVehiclePage";
+import { EditVehiclePage } from "../pages/dashboard/waste/vehicles/EditVehiclePage";
+import {
+  VehicleSortFields,
+  VehicleStatusValues,
+} from "../entities/waste/vehicles";
 import { routes } from "../shared/config/routes";
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -368,6 +376,34 @@ const directoriesEditPersonRoute = createRoute({
   component: EditPersonPage,
 });
 
+const directoriesVehiclesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.vehicles.list,
+  validateSearch: (search: Record<string, unknown>): VehiclesSearch => {
+    return {
+      q: parseSearchQuery(search.q),
+      status: parseSearchEnum(search.status, VehicleStatusValues),
+      sort: parseSearchEnum(search.sort, VehicleSortFields),
+      order: parseSearchOrder(search.order),
+      limit: parseSearchLimit(search.limit),
+      offset: parseSearchOffset(search.offset),
+    };
+  },
+  component: VehiclesPage,
+});
+
+const directoriesCreateVehicleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.vehicles.new,
+  component: CreateVehiclePage,
+});
+
+const directoriesEditVehicleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: routes.directories.vehicles.detail,
+  component: EditVehiclePage,
+});
+
 const directoriesCounterpartiesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: routes.directories.counterparties.list,
@@ -619,6 +655,9 @@ const routeTree = rootRoute.addChildren([
   directoriesPersonsRoute,
   directoriesCreatePersonRoute,
   directoriesEditPersonRoute,
+  directoriesVehiclesRoute,
+  directoriesCreateVehicleRoute,
+  directoriesEditVehicleRoute,
   directoriesCounterpartiesRoute,
   directoriesCreateCounterpartyRoute,
   directoriesEditCounterpartyRoute,
