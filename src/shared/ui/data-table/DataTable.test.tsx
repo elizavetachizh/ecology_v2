@@ -1,5 +1,13 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ExpandedState } from "./types";
 import type { ColumnDef } from "./types";
 import { DataTable } from "./DataTable";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
@@ -162,6 +170,64 @@ describe("DataTable", () => {
     fireEvent.click(screen.getByRole("button", { name: "Развернуть" }));
     expect(screen.getByText("Участок")).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "Свернуть" }));
+    expect(screen.queryByText("Участок")).not.toBeInTheDocument();
+  });
+
+  it("keeps controlled expanded rows open when data is replaced", async () => {
+    const tree: Row[] = [
+      {
+        id: "p",
+        name: "Цех",
+        children: [{ id: "c", name: "Участок" }],
+      },
+    ];
+    const treeColumns: ColumnDef<Row>[] = [
+      {
+        accessorKey: "name",
+        header: "Название",
+        cell: ({ row }) => (
+          <DataTableExpandCell row={row}>
+            {row.original.name}
+          </DataTableExpandCell>
+        ),
+      },
+    ];
+
+    function ControlledTree({ data }: { data: Row[] }) {
+      const [expanded, setExpanded] = useState<ExpandedState>({ p: true });
+      return (
+        <DataTable
+          columns={treeColumns}
+          data={data}
+          getRowId={(row) => row.id}
+          getSubRows={(row) => row.children}
+          expanded={expanded}
+          onExpandedChange={setExpanded}
+        />
+      );
+    }
+
+    const { rerender } = render(<ControlledTree data={tree} />);
+    expect(screen.getByText("Участок")).toBeInTheDocument();
+
+    rerender(
+      <ControlledTree
+        data={[
+          {
+            id: "p",
+            name: "Цех",
+            children: [{ id: "c", name: "Участок" }],
+          },
+        ]}
+      />,
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByText("Участок")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Свернуть" }));
     expect(screen.queryByText("Участок")).not.toBeInTheDocument();
   });

@@ -1,13 +1,5 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { Passport } from "./passports.types";
-
-const profile: UserProfile = {
-  id: "99999999-9999-4999-8999-999999999999",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const passportFixture: Passport = {
   id: "22222222-2222-4222-8222-222222222222",
@@ -36,6 +28,17 @@ export const passportFixture: Passport = {
   transport_type: "self",
   transport_contract_id: null,
   transport_contract: null,
+  vehicle_id: "55555555-5555-4555-8555-555555555555",
+  vehicle: {
+    id: "55555555-5555-4555-8555-555555555555",
+    make: "МАЗ",
+    model: "5551",
+    license_plate: "1234 AB-7",
+    weight: 12000,
+    status: "active",
+    beltopgas_id: 1001,
+  },
+  driver: "Иванов И.И.",
   status: "active",
   waste_producer_id: null,
   waste_producer: null,
@@ -54,12 +57,12 @@ export const passportFixture: Passport = {
       },
       created_at: "2026-03-15T00:00:00Z",
       updated_at: "2026-03-15T00:00:00Z",
-      created_by: profile,
-      updated_by: profile,
+      created_by: userProfileFixture,
+      updated_by: userProfileFixture,
     },
   ],
   created_at: "2026-03-15T00:00:00Z",
   updated_at: "2026-03-15T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };

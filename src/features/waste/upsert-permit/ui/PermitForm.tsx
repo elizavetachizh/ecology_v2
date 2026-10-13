@@ -103,41 +103,6 @@ export function PermitForm({
             aria-invalid={Boolean(errors.number)}
           />
         </FormField>
-
-        <FormField
-          htmlFor="unit_id"
-          label="Подразделение"
-          className="md:col-span-2"
-          error={errors.unit_id?.message}
-          description={
-            <>
-              Необязательно. Без подразделения разрешение относится ко всей
-              организации. Нет нужного места учёта?{" "}
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                to={routes.directories.units.list}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Открыть структуру
-              </Link>
-            </>
-          }
-        >
-          <Controller
-            name="unit_id"
-            control={control}
-            render={({ field }) => (
-              <UnitHierarchicalSelect
-                tenantId={activeTenantId}
-                value={field.value ?? ""}
-                isPod9={false}
-                onChange={(unit) => field.onChange(unit?.id ?? "")}
-              />
-            )}
-          />
-        </FormField>
-
         <FormField
           htmlFor="start_date"
           label="Дата начала действия"
@@ -177,6 +142,39 @@ export function PermitForm({
             {...register("end_date")}
             disabled={pending}
             aria-invalid={Boolean(errors.end_date)}
+          />
+        </FormField>
+        <FormField
+          htmlFor="unit_id"
+          label="Подразделение"
+          className="md:col-span-2"
+          error={errors.unit_id?.message}
+          description={
+            <>
+              Необязательно. Без подразделения разрешение относится ко всей
+              организации. Нет нужного места учёта?{" "}
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to={routes.directories.units.list}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Открыть структуру
+              </Link>
+            </>
+          }
+        >
+          <Controller
+            name="unit_id"
+            control={control}
+            render={({ field }) => (
+              <UnitHierarchicalSelect
+                tenantId={activeTenantId}
+                value={field.value ?? ""}
+                isPod9={false}
+                onChange={(unit) => field.onChange(unit?.id ?? "")}
+              />
+            )}
           />
         </FormField>
       </div>

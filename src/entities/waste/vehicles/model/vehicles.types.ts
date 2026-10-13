@@ -100,3 +100,4 @@ export type GetVehiclesParams = {
 };
 
 export const DEFAULT_VEHICLES_LIST_LIMIT = 50;
+export const DEFAULT_VEHICLES_OPTIONS_LIMIT = 20;

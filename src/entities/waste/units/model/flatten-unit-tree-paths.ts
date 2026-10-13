@@ -25,6 +25,33 @@ export function formatUnitPathLabel(
   return path.map((item) => unitLabel(item)).join(UNIT_PATH_SEPARATOR);
 }
 
+export type UnitComboboxOption = {
+  value: string;
+  label: string;
+  isPod9: boolean;
+  /** Только режим `tree`: отступ по глубине узла. */
+  labelStyles?: { paddingLeft: string };
+};
+
+/** Пункты комбобокса из уже собранных путей: дерево с отступом или полный путь. */
+export function unitComboboxOptions(
+  entries: UnitTreePath[],
+  mode: "tree" | "path",
+): UnitComboboxOption[] {
+  return entries.map((item) => {
+    const option: UnitComboboxOption = {
+      value: item.unit.id,
+      label:
+        mode === "tree" ? unitLabel(item.unit) : formatUnitPathLabel(item.path),
+      isPod9: item.unit.is_pod9,
+    };
+    if (mode === "tree") {
+      option.labelStyles = unitTreeDepthStyle(unitTreeDepth(item.path));
+    }
+    return option;
+  });
+}
+
 type FlattenUnitTreePathsOptions = {
   /** Emit only POD-9 nodes. Every child is still walked so the path is complete. */
   pod9Only?: boolean;

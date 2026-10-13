@@ -22,6 +22,8 @@ function toPassportFields(
     transport_contract_id: useTransportContract
       ? values.transport_contract_id
       : null,
+    vehicle_id: emptyToNull(values.vehicle_id),
+    driver: emptyToNull(values.driver),
     waste_producer_id:
       values.waste_producer_type === "counterparty"
         ? emptyToNull(values.waste_producer_id)
@@ -52,6 +54,8 @@ export function toPassportFormValues(passport: Passport): PassportFormValues {
     waste_ids: passport.wastes.map((item) => item.waste_id),
     transport_type: passport.transport_type,
     transport_contract_id: passport.transport_contract_id ?? "",
+    vehicle_id: passport.vehicle_id ?? "",
+    driver: passport.driver ?? "",
     waste_producer_type: passport.waste_producer_id ? "counterparty" : "self",
     waste_producer_id: passport.waste_producer_id ?? "",
   };

@@ -9,6 +9,8 @@ const valid = {
   waste_ids: ["7ba7b810-9dad-41d1-80b4-00c04fd430c8"],
   transport_type: "self" as const,
   transport_contract_id: "",
+  vehicle_id: "",
+  driver: "",
   waste_producer_type: "self" as const,
   waste_producer_id: "",
 };
@@ -58,6 +60,24 @@ describe("passportFormSchema", () => {
       waste_producer_id: "",
     });
     expect(parsed.success).toBe(false);
+  });
+
+  it("rejects a driver longer than 255 characters", () => {
+    const parsed = passportFormSchema.safeParse({
+      ...valid,
+      driver: "а".repeat(256),
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("accepts an empty driver and vehicle", () => {
+    expect(
+      passportFormSchema.safeParse({
+        ...valid,
+        driver: "   ",
+        vehicle_id: "",
+      }).success,
+    ).toBe(true);
   });
 
   it("accepts counterparty producer with an id", () => {

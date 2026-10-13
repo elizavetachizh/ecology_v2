@@ -126,7 +126,6 @@ export function VehicleForm({
           htmlFor="weight"
           label="Масса"
           error={errors.weight?.message}
-          description="Целое число больше 0, кг. Можно не заполнять."
         >
           <Input
             id="weight"
@@ -157,7 +156,6 @@ export function VehicleForm({
           htmlFor="beltopgas_id"
           label="ID Белтопгаз"
           error={errors.beltopgas_id?.message}
-          description="Целое число. Можно не заполнять."
         >
           <Input
             id="beltopgas_id"

@@ -109,6 +109,9 @@ export function DataTable<TData extends RowData>({
     state: { sorting, expanded },
     onSortingChange: handleSortingChange,
     onExpandedChange: handleExpandedChange,
+    // Смена data сбрасывает expanded в {}. В контролируемом режиме это
+    // чужое состояние: страница сама решает, какие узлы открыты.
+    autoResetExpanded: !isExpandedControlled,
     manualSorting,
   });
 

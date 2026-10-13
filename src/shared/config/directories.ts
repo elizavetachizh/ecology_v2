@@ -43,12 +43,6 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: routes.directories.permits.list,
   },
   {
-    id: "limits",
-    title: "Лимиты накопления",
-    description: "Лимиты по местам хранения",
-    to: routes.directories.limits.list,
-  },
-  {
     id: "standards",
     title: "Нормативы",
     description:

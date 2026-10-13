@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Unit } from "../../../../../../entities/waste/units";
 import { UnitDirectChildren } from "./UnitDirectChildren";
+import { userProfileFixture } from "../../../../../../entities/waste/persons";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -22,14 +23,6 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-const profile = {
-  id: "user-1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
-
 function unit(
   partial: Partial<Unit> & Pick<Unit, "id" | "name" | "is_pod9">,
 ): Unit {
@@ -41,8 +34,8 @@ function unit(
     district: null,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
-    created_by: profile,
-    updated_by: profile,
+    created_by: userProfileFixture,
+    updated_by: userProfileFixture,
     ...partial,
   };
 }

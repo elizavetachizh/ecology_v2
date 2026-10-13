@@ -20,6 +20,7 @@ export function UnitsPage() {
   const {
     search,
     pod9Only,
+    hierarchicalOnly,
     sorting,
     focusId,
     patchSearch,
@@ -32,6 +33,7 @@ export function UnitsPage() {
       tenantId: activeTenantId,
       search,
       pod9Only,
+      hierarchicalOnly,
     });
 
   const deleteUnit = useDeleteUnit();

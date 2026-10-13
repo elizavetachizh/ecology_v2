@@ -3,6 +3,7 @@ import type { WasteBrief } from "../../wastes";
 import type { UnitBrief } from "../../units";
 import type { ContractBrief } from "../../contracts";
 import type { CounterpartyBrief } from "../../counterparties";
+import type { VehicleBrief } from "../../vehicles";
 
 export const PASSPORT_TRANSPORT_TYPE_LABEL = {
   self: "Самостоятельно",
@@ -73,6 +74,9 @@ export type Passport = {
   transport_type: PassportTransportType;
   transport_contract_id: string | null;
   transport_contract: ContractBrief | null;
+  vehicle_id: string | null;
+  vehicle: VehicleBrief | null;
+  driver: string | null;
   status: PassportStatus;
   waste_producer_id: string | null;
   waste_producer: CounterpartyBrief | null;
@@ -96,6 +100,8 @@ export type PassportCreate = {
   recycling_contract_id: string;
   transport_type: PassportTransportType;
   transport_contract_id?: string | null;
+  vehicle_id?: string | null;
+  driver?: string | null;
   status?: PassportStatus;
   waste_producer_id?: string | null;
   wastes: PassportWasteWrite[];

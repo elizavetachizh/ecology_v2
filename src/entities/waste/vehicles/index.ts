@@ -17,6 +17,7 @@ export type {
 } from "./model/vehicles.types";
 export {
   DEFAULT_VEHICLES_LIST_LIMIT,
+  DEFAULT_VEHICLES_OPTIONS_LIMIT,
   VEHICLE_ALL_STATUS_LABEL,
   VEHICLE_STATUS_BADGE_VARIANT,
   VEHICLE_STATUS_LABEL,
@@ -26,4 +27,6 @@ export {
 } from "./model/vehicles.types";
 export { vehiclesQueryKeys } from "./model/vehicles-query-keys";
 export { useVehiclesListQuery } from "./model/use-vehicles-list-query";
+export { useVehiclesOptions } from "./model/use-vehicles-query";
+export { VehicleSelect } from "./ui/VehicleSelect";
 export { VehicleStatusBadge } from "./ui/VehicleStatusBadge";

@@ -85,6 +85,7 @@ export function StandardForm({
           htmlFor="start_date"
           label="Дата начала действия"
           required
+          className="col-span-2"
           error={errors.start_date?.message}
           description="Документ бессрочный. Действующим считается норматив с максимальной датой начала не позже сегодняшней. На одну дату начала в организации — один норматив."
         >

@@ -52,6 +52,8 @@ export {
   DataTableRowAction,
   DataTableRowActions,
   type ColumnDef,
+  type ExpandedState,
+  type SortingState,
 } from "./data-table";
 export {
   Field,

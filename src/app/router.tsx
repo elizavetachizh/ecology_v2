@@ -18,7 +18,6 @@ import { EditTtnPage } from "../pages/dashboard/waste/ttns/EditTtnPage";
 import { DirectoriesHubPage } from "../pages/dashboard/directories";
 import { UnitsPage } from "../pages/dashboard/waste/units/unitsPage";
 import { EditUnitPage } from "../pages/dashboard/waste/units/EditUnitPage";
-import { DirectoryStubPage } from "../pages/dashboard/directories/DirectoryStubPage";
 import { InstructionsPage } from "../pages/dashboard/waste/instructions/InstructionsPage";
 import { EditInstructionPage } from "../pages/dashboard/waste/instructions/EditInstructionPage";
 import { WastesDirectoryPage } from "../pages/dashboard/waste/wastes/WastesPage";
@@ -252,6 +251,8 @@ const directoriesStructureRoute = createRoute({
     sort: parseSearchEnum(search.sort, UnitSortFields),
     order: parseSearchOrder(search.order),
     is_pod9: parseSearchBoolean(search.is_pod9) === true ? true : undefined,
+    hierarchical:
+      parseSearchBoolean(search.is_pod9) === true ? undefined : true,
     limit: parseSearchLimit(search.limit),
     offset: parseSearchOffset(search.offset),
   }),
@@ -321,17 +322,6 @@ const directoriesWasteEditRoute = createRoute({
         : undefined,
   }),
   component: EditWastePage,
-});
-
-const directoriesLimitsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: routes.directories.limits.list,
-  component: () => (
-    <DirectoryStubPage
-      title="Лимиты накопления"
-      directoryTo={routes.directories.limits.list}
-    />
-  ),
 });
 
 const directoriesWasteSourcesRoute = createRoute({
@@ -667,7 +657,6 @@ const routeTree = rootRoute.addChildren([
   directoriesPermitsRoute,
   directoriesCreatePermitRoute,
   directoriesEditPermitRoute,
-  directoriesLimitsRoute,
   directoriesStandardsRoute,
   directoriesCreateStandardRoute,
   directoriesEditStandardRoute,

@@ -213,6 +213,7 @@ export type StructureSearch = {
   /** true = только журналы ПОД-9 (flat list) */
   is_pod9?: boolean;
   limit?: number;
+  hierarchical?: boolean;
   offset?: number;
   focusId?: string;
   expandId?: string;

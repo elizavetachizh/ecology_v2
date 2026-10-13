@@ -38,6 +38,8 @@ export const passportFormSchema = z
       error: "Выберите, кто перевозит",
     }),
     transport_contract_id: optionalUuid,
+    vehicle_id: optionalUuid,
+    driver: z.string().trim().max(255, "Не более 255 символов"),
     waste_producer_type: z.enum(PassportWasteProducerTypeValues, {
       error: "Выберите производителя отходов",
     }),
@@ -87,6 +89,8 @@ export const passportFormDefaultValues: PassportFormValues = {
   waste_ids: [],
   transport_type: "self",
   transport_contract_id: "",
+  vehicle_id: "",
+  driver: "",
   waste_producer_type: "self",
   waste_producer_id: "",
 };
