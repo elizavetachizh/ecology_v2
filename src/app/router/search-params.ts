@@ -36,6 +36,10 @@ import type {
 } from "../../entities/waste/wastes";
 import type { AuthContextValue } from "../../shared/auth/auth.types";
 import type { PersonSortField } from "../../entities/waste/persons";
+import type {
+  VehicleSortField,
+  VehicleStatus,
+} from "../../entities/waste/vehicles";
 import {
   DASHBOARD_MONTHS_MAX,
   DASHBOARD_MONTHS_MIN,
@@ -79,6 +83,10 @@ export type WastesSearch = ListSearchParams<WasteSortField> & {
 export type WasteSourcesSearch = ListSearchParams<WasteSourceSortField>;
 
 export type PersonsSearch = ListSearchParams<PersonSortField>;
+
+export type VehiclesSearch = ListSearchParams<VehicleSortField> & {
+  status?: VehicleStatus;
+};
 
 export type CounterpartiesSearch = ListSearchParams<CounterpartySortField> & {
   is_individual?: boolean;
@@ -205,6 +213,7 @@ export type StructureSearch = {
   /** true = только журналы ПОД-9 (flat list) */
   is_pod9?: boolean;
   limit?: number;
+  hierarchical?: boolean;
   offset?: number;
   focusId?: string;
   expandId?: string;

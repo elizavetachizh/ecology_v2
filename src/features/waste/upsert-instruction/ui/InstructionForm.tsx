@@ -70,7 +70,7 @@ export function InstructionForm({
         }
       />
 
-      <InstructionFormHint mode={mode} status={status} />
+      <InstructionFormHint status={status} />
 
       {error ? (
         <Alert variant="error">

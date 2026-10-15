@@ -18,12 +18,14 @@ type UseUnitsPageDataArgs = {
   tenantId: string | null;
   search: StructureSearch;
   pod9Only: boolean;
+  hierarchicalOnly: boolean;
 };
 
 export function useUnitsPageData({
   tenantId,
   search,
   pod9Only,
+  hierarchicalOnly,
 }: UseUnitsPageDataArgs) {
   const treeParams = useMemo(
     () => ({
@@ -75,7 +77,11 @@ export function useUnitsPageData({
   };
 
   return {
-    mode: pod9Only ? ("flat" as const) : ("tree" as const),
+    mode: hierarchicalOnly
+      ? ("tree" as const)
+      : pod9Only
+        ? ("flat" as const)
+        : ("tree" as const),
     rows,
     loading: pod9Only ? listQuery.loading : treeQuery.loading,
     error: pod9Only ? listQuery.error : treeQuery.error,

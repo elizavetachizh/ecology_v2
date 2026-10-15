@@ -4,6 +4,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getUnit, type UnitDetail } from "../../../../entities/waste/units";
 import { EditUnitPage } from "./EditUnitPage";
+import { userProfileFixture } from "../../../../entities/waste/persons";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a>{children}</a>,
@@ -35,14 +36,6 @@ vi.mock("../../../../features/waste/bind-unit-instruction-waste", () => ({
 
 const getUnitMock = vi.mocked(getUnit);
 
-const profile = {
-  id: "user-1",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
-
 function detail(isPod9: boolean): UnitDetail {
   return {
     id: "unit-1",
@@ -55,8 +48,8 @@ function detail(isPod9: boolean): UnitDetail {
     district: null,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
-    created_by: profile,
-    updated_by: profile,
+    created_by: userProfileFixture,
+    updated_by: userProfileFixture,
     children: [],
   };
 }

@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AsyncCombobox, Badge } from "../../../../shared/ui";
+import { AsyncCombobox } from "../../../../shared/ui";
 import { useDebounce } from "../../../../shared/hooks";
 import { getUnit } from "../api/get-unit";
 import {
   flattenUnitTreePaths,
-  unitTreeDepth,
-  unitTreeDepthStyle,
+  unitComboboxOptions,
 } from "../model/flatten-unit-tree-paths";
 import { unitLabel } from "../model/unit-label";
 import { unitsQueryKeys } from "../model/unit-query-keys";
 import type { Unit } from "../model/units.types";
 import { useUnitsTreeQuery } from "../model/use-units-tree-query";
+import { UnitOptionContent } from "./UnitOptionContent";
 
 type UnitHierarchicalSelectProps = {
   tenantId: string | null;
@@ -33,22 +33,6 @@ type UnitHierarchicalSelectProps = {
   onChange: (unit: Unit | null) => void;
   placeholder?: string;
 };
-
-function renderUnitOption(
-  option: { value: string; label: string },
-  isPod9: boolean,
-) {
-  return (
-    <>
-      <span className="min-w-0 flex-1 truncate">{option.label}</span>
-      {isPod9 ? (
-        <Badge variant="info" className="shrink-0">
-          ПОД-9
-        </Badge>
-      ) : null}
-    </>
-  );
-}
 
 export function UnitHierarchicalSelect({
   tenantId,
@@ -81,6 +65,10 @@ export function UnitHierarchicalSelect({
     () => flattenUnitTreePaths(tree, { excludePod9 }),
     [tree, excludePod9],
   );
+  const unitOptions = useMemo(
+    () => unitComboboxOptions(items, "tree"),
+    [items],
+  );
 
   const parentDetailQuery = useQuery({
     queryKey: unitsQueryKeys.detail(tenantId ?? "none", value || "none"),
@@ -94,7 +82,7 @@ export function UnitHierarchicalSelect({
     (parentDetailQuery.data?.id === value ? parentDetailQuery.data : null);
 
   const isPod9ById = new Map(
-    items.map((item) => [item.unit.id, item.unit.is_pod9] as const),
+    unitOptions.map((option) => [option.value, option.isPod9] as const),
   );
   if (selectedUnit) {
     isPod9ById.set(selectedUnit.id, selectedUnit.is_pod9);
@@ -107,20 +95,26 @@ export function UnitHierarchicalSelect({
 
   return (
     <AsyncCombobox
-      options={items.map((item) => ({
-        value: item.unit.id,
-        label: unitLabel(item.unit),
-        disabled: excludedIds.has(item.unit.id),
-        labelStyles: unitTreeDepthStyle(unitTreeDepth(item.path)),
+      options={unitOptions.map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled: excludedIds.has(option.value),
+        labelStyles: option.labelStyles,
       }))}
       value={value}
       selectedLabel={selectedUnit ? unitLabel(selectedUnit) : undefined}
-      renderOption={(option) =>
-        renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
-      }
-      renderValue={(option) =>
-        renderUnitOption(option, Boolean(isPod9ById.get(option.value)))
-      }
+      renderOption={(option) => (
+        <UnitOptionContent
+          option={option}
+          isPod9={Boolean(isPod9ById.get(option.value))}
+        />
+      )}
+      renderValue={(option) => (
+        <UnitOptionContent
+          option={option}
+          isPod9={Boolean(isPod9ById.get(option.value))}
+        />
+      )}
       onValueChange={(id) => {
         if (!id) {
           onChange(null);

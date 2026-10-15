@@ -2,24 +2,12 @@ import type { InstructionStatus } from "../../../../entities/waste/instructions"
 import { Alert, AlertDescription, AlertTitle } from "../../../../shared/ui";
 
 type InstructionFormHintProps = {
-  mode: "create" | "edit";
   status: InstructionStatus;
 };
 
-export function InstructionFormHint({
-  mode,
-  status,
-}: InstructionFormHintProps) {
+export function InstructionFormHint({ status }: InstructionFormHintProps) {
   if (status === "active") {
-    if (mode === "edit") return null;
-    return (
-      <Alert variant="info">
-        <AlertTitle>Документ сразу действует</AlertTitle>
-        <AlertDescription>
-          Укажите название, дату начала и окончания.
-        </AlertDescription>
-      </Alert>
-    );
+    return null;
   }
 
   return (

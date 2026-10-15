@@ -160,7 +160,23 @@ export function InstructionsPage() {
               </TabsList>
             </Tabs>
           </div>
-          {!loading && instructions.length === 0 ? (
+          {search.status === "draft" ? (
+            <Alert variant="info">
+              <AlertTitle>Инструкции на согласовании</AlertTitle>
+              <AlertDescription>
+                В черновиках лежат инструкции, которые находятся на
+                согласовании. Когда инструкция вступит в силу, смените статус на
+                «Действует».
+              </AlertDescription>
+            </Alert>
+          ) : search.status === "inactive" ? (
+            <Alert variant="info">
+              <AlertTitle>Инструкции не действуют</AlertTitle>
+              <AlertDescription>
+                Хранятся инструкции, утратившие силу.
+              </AlertDescription>
+            </Alert>
+          ) : !loading && instructions.length === 0 ? (
             <Alert variant="info">
               <AlertTitle>Начните с инструкции</AlertTitle>
               <AlertDescription>

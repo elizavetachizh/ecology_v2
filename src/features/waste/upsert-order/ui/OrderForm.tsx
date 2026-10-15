@@ -95,6 +95,22 @@ export function OrderForm({
             aria-invalid={Boolean(errors.number)}
           />
         </FormField>
+        <FormField
+          htmlFor="start_date"
+          label="Дата начала действия"
+          required
+          className="md:col-span-2"
+          error={errors.start_date?.message}
+          description="Документ бессрочный. Действующим считается приказ с максимальной датой начала не позже сегодняшней (по подразделению или по предприятию)."
+        >
+          <Input
+            id="start_date"
+            type="date"
+            {...register("start_date")}
+            disabled={pending}
+            aria-invalid={Boolean(errors.start_date)}
+          />
+        </FormField>
 
         <FormField
           htmlFor="unit_id"
@@ -128,22 +144,6 @@ export function OrderForm({
                 onChange={(unit) => field.onChange(unit?.id ?? "")}
               />
             )}
-          />
-        </FormField>
-
-        <FormField
-          htmlFor="start_date"
-          label="Дата начала действия"
-          required
-          error={errors.start_date?.message}
-          description="Документ бессрочный. Действующим считается приказ с максимальной датой начала не позже сегодняшней (по подразделению или по предприятию)."
-        >
-          <Input
-            id="start_date"
-            type="date"
-            {...register("start_date")}
-            disabled={pending}
-            aria-invalid={Boolean(errors.start_date)}
           />
         </FormField>
       </div>

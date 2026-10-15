@@ -5,8 +5,9 @@ import type { Person } from "../../../../entities/waste/persons";
 import { useTenant } from "../../../../entities/tenant";
 import {
   flattenUnitTreePaths,
-  formatUnitPathLabel,
+  unitComboboxOptions,
   unitLabel,
+  UnitOptionContent,
   useUnitsTreeQuery,
 } from "../../../../entities/waste/units";
 import {
@@ -69,11 +70,7 @@ export function PersonForm({
   }, [units.tree]);
 
   const unitOptions = useMemo(
-    () =>
-      entries.map((item) => ({
-        value: item.unit.id,
-        label: formatUnitPathLabel(item.path),
-      })),
+    () => unitComboboxOptions(entries, "path"),
     [entries],
   );
 
@@ -91,13 +88,17 @@ export function PersonForm({
   const filteredOptions = useMemo(() => {
     if (!query) return unitOptions;
     return entries.flatMap((item, index) => {
-      const pathLabel = formatUnitPathLabel(item.path).toLowerCase();
+      const pathLabel = unitOptions[index].label.toLowerCase();
       const shortName = item.unit.short_name?.toLowerCase() ?? "";
       return pathLabel.includes(query) || shortName.includes(query)
         ? [unitOptions[index]]
         : [];
     });
   }, [entries, query, unitOptions]);
+
+  const isPod9ById = new Map(
+    unitOptions.map((option) => [option.value, option.isPod9] as const),
+  );
 
   return (
     <form
@@ -224,6 +225,12 @@ export function PersonForm({
                 onRefresh={() => {
                   void units.refetch();
                 }}
+                renderOption={(option) => (
+                  <UnitOptionContent
+                    option={option}
+                    isPod9={Boolean(isPod9ById.get(option.value))}
+                  />
+                )}
                 refreshing={units.fetching}
                 disabled={pending}
                 maxVisibleValues={4}

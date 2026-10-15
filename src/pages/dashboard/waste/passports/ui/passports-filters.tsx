@@ -48,6 +48,22 @@ export function PassportsFilters({
             onSearch={(q) => onChange({ q: q || undefined })}
           />
         </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-muted-foreground">с</span>
+          <DateFilterInput
+            aria-label="Дата с"
+            value={values.date_from}
+            onValueChange={(date_from) => onChange({ date_from })}
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-muted-foreground">по</span>
+          <DateFilterInput
+            aria-label="Дата по"
+            value={values.date_to}
+            onValueChange={(date_to) => onChange({ date_to })}
+          />
+        </div>
         <div className="w-64">
           <UnitSelect
             tenantId={tenantId}
@@ -85,23 +101,6 @@ export function PassportsFilters({
             </option>
           ))}
         </Select>
-
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm text-muted-foreground">с</span>
-          <DateFilterInput
-            aria-label="Дата с"
-            value={values.date_from}
-            onValueChange={(date_from) => onChange({ date_from })}
-          />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm text-muted-foreground">по</span>
-          <DateFilterInput
-            aria-label="Дата по"
-            value={values.date_to}
-            onValueChange={(date_to) => onChange({ date_to })}
-          />
-        </div>
       </div>
       <Tabs
         value={values.status ?? "all"}

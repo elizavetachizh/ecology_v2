@@ -16,6 +16,6 @@ describe("passportWriteErrorMessage", () => {
       passportWriteErrorMessage(
         new ApiError("Сервер вернул ошибку 404", 404, "http_error"),
       ),
-    ).toMatch(/не найден/);
+    ).toMatch(/транспорт/);
   });
 });

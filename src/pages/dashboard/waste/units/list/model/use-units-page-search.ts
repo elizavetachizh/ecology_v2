@@ -18,12 +18,14 @@ export type UnitsPageSearchPatch = {
   is_pod9?: boolean | undefined;
   limit?: number | undefined;
   offset?: number | undefined;
+  hierarchical?: boolean | undefined;
 };
 
 export function useUnitsPageSearch() {
   const navigate = useNavigate({ from: routes.directories.units.list });
   const search = useSearch({ from: routes.directories.units.list });
   const pod9Only = search.is_pod9 === true;
+  const hierarchicalOnly = search.hierarchical === true;
 
   const sorting = useMemo(
     () => sortingFromSearch(search.sort ?? "name", search.order ?? "asc"),
@@ -38,7 +40,8 @@ export function useUnitsPageSearch() {
           "q" in patch ||
           "sort" in patch ||
           "order" in patch ||
-          "is_pod9" in patch
+          "is_pod9" in patch ||
+          "hierarchical" in patch
         ) {
           next.offset = patch.offset ?? 0;
         }
@@ -75,6 +78,7 @@ export function useUnitsPageSearch() {
   return {
     search,
     pod9Only,
+    hierarchicalOnly,
     sorting,
     focusId: search.focusId ?? null,
     patchSearch,

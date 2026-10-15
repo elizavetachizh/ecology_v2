@@ -10,14 +10,19 @@ export { useUnitsOptions } from "./model/use-units-query";
 export {
   flattenUnitTreePaths,
   formatUnitPathLabel,
+  unitComboboxOptions,
   unitTreeDepth,
   unitTreeDepthStyle,
 } from "./model/flatten-unit-tree-paths";
 export { unitLabel } from "./model/unit-label";
-export type { UnitTreePath } from "./model/flatten-unit-tree-paths";
+export type {
+  UnitComboboxOption,
+  UnitTreePath,
+} from "./model/flatten-unit-tree-paths";
 export { useUnitAncestorChain } from "./model/use-unit-ancestor-chain";
 export { UnitHierarchicalSelect } from "./ui/UnitHierarchicalSelect";
 export { UnitSelect } from "./ui/UnitSelect";
+export { UnitOptionContent } from "./ui/UnitOptionContent";
 export type {
   Unit,
   UnitBrief,

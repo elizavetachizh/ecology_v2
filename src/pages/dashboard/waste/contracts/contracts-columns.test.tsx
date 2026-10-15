@@ -2,22 +2,13 @@ import type { ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Contract } from "../../../../entities/waste/contracts";
-import type { UserProfile } from "../../../../entities/user";
 import { DataTable } from "../../../../shared/ui";
 import { contractsColumns } from "./contracts-columns";
+import { userProfileFixture } from "../../../../entities/waste/persons";
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/">{children}</a>,
 }));
-
-const profile: UserProfile = {
-  id: "99999999-9999-4999-8999-999999999999",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-  last_seen_at: null,
-};
 
 function contract(overrides: Partial<Contract> = {}): Contract {
   return {
@@ -43,8 +34,8 @@ function contract(overrides: Partial<Contract> = {}): Contract {
     wastes: [],
     created_at: "2026-01-15T00:00:00Z",
     updated_at: "2026-01-15T00:00:00Z",
-    created_by: profile,
-    updated_by: profile,
+    created_by: userProfileFixture,
+    updated_by: userProfileFixture,
     ...overrides,
   };
 }

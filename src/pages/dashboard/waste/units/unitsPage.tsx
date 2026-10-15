@@ -20,6 +20,7 @@ export function UnitsPage() {
   const {
     search,
     pod9Only,
+    hierarchicalOnly,
     sorting,
     focusId,
     patchSearch,
@@ -32,6 +33,7 @@ export function UnitsPage() {
       tenantId: activeTenantId,
       search,
       pod9Only,
+      hierarchicalOnly,
     });
 
   const deleteUnit = useDeleteUnit();
@@ -44,9 +46,9 @@ export function UnitsPage() {
           onCreatePod9: (unitId) => openCreateUnit(unitId, { isPod9: true }),
           onDelete: deleteUnit.setDeletingUnit,
         },
-        { hierarchical: mode === "tree" },
+        { hierarchical: hierarchicalOnly },
       ),
-    [openCreateUnit, deleteUnit.setDeletingUnit, mode],
+    [openCreateUnit, deleteUnit.setDeletingUnit, hierarchicalOnly],
   );
 
   if (error) {

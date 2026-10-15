@@ -1,17 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Contract } from "../../../../entities/waste/contracts";
-import type { UserProfile } from "../../../../entities/user";
 import type { ContractFormValues } from "./contract-form.schema";
 import { toContractFormValues, toContractWriteBody } from "./map-contract-form";
-
-const profile: UserProfile = {
-  id: "99999999-9999-4999-8999-999999999999",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-  last_seen_at: null,
-};
+import { userProfileFixture } from "../../../../entities/waste/persons";
 
 const formValues = (
   overrides: Partial<ContractFormValues> = {},
@@ -218,8 +209,8 @@ describe("toContractFormValues", () => {
       wastes: [],
       created_at: "2026-01-15T00:00:00Z",
       updated_at: "2026-01-15T00:00:00Z",
-      created_by: profile,
-      updated_by: profile,
+      created_by: userProfileFixture,
+      updated_by: userProfileFixture,
     };
     const values = toContractFormValues(contract);
 

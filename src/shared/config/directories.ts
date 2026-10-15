@@ -43,12 +43,6 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     to: routes.directories.permits.list,
   },
   {
-    id: "limits",
-    title: "Лимиты накопления",
-    description: "Лимиты по местам хранения",
-    to: routes.directories.limits.list,
-  },
-  {
     id: "standards",
     title: "Нормативы",
     description:
@@ -67,6 +61,12 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     title: "Ответственные",
     description: "Ответственные за экологическое мониторинг",
     to: routes.directories.persons.list,
+  },
+  {
+    id: "vehicles",
+    title: "Транспортные средства",
+    description: "Транспорт организации для перевозки отходов",
+    to: routes.directories.vehicles.list,
   },
   {
     id: "counterparties",

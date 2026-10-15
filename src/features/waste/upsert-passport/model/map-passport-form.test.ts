@@ -15,6 +15,8 @@ const values: PassportFormValues = {
   waste_ids: ["7ba7b810-9dad-41d1-80b4-00c04fd430c8"],
   transport_type: "self",
   transport_contract_id: "8ba7b810-9dad-41d1-80b4-00c04fd430c8",
+  vehicle_id: "",
+  driver: "  ",
   waste_producer_type: "self",
   waste_producer_id: "  ",
 };
@@ -39,11 +41,26 @@ describe("toPassportWriteBody", () => {
     ).toBe("8ba7b810-9dad-41d1-80b4-00c04fd430c8");
   });
 
-  it("trims number, nulls empty producer, maps wastes", () => {
+  it("trims number, nulls empty producer, driver and vehicle, maps wastes", () => {
     expect(toPassportWriteBody(values)).toMatchObject({
       number: "СП-001",
       waste_producer_id: null,
+      driver: null,
+      vehicle_id: null,
       wastes: [{ waste_id: "7ba7b810-9dad-41d1-80b4-00c04fd430c8" }],
+    });
+  });
+
+  it("keeps a trimmed driver and vehicle id", () => {
+    expect(
+      toPassportWriteBody({
+        ...values,
+        driver: "  Иванов И.И.  ",
+        vehicle_id: "55555555-5555-4555-8555-555555555555",
+      }),
+    ).toMatchObject({
+      driver: "Иванов И.И.",
+      vehicle_id: "55555555-5555-4555-8555-555555555555",
     });
   });
 
@@ -73,16 +90,41 @@ describe("toPassportWriteBody", () => {
 });
 
 describe("toPassportUpdateBody", () => {
-  it("omits status so PATCH does not change it", () => {
-    expect(toPassportUpdateBody(values)).not.toHaveProperty("status");
+  it("omits status and still sends driver and vehicle", () => {
+    const body = toPassportUpdateBody({
+      ...values,
+      driver: "  Иванов И.И.  ",
+      vehicle_id: "55555555-5555-4555-8555-555555555555",
+    });
+    expect(body).not.toHaveProperty("status");
+    expect(body).toMatchObject({
+      driver: "Иванов И.И.",
+      vehicle_id: "55555555-5555-4555-8555-555555555555",
+    });
   });
 });
 
 describe("toPassportFormValues", () => {
-  it("maps missing producer to self", () => {
+  it("maps missing producer to self and keeps driver and vehicle", () => {
     expect(toPassportFormValues(passportFixture)).toMatchObject({
       waste_producer_type: "self",
       waste_producer_id: "",
+      driver: "Иванов И.И.",
+      vehicle_id: "55555555-5555-4555-8555-555555555555",
+    });
+  });
+
+  it("maps a missing driver and vehicle to empty fields", () => {
+    expect(
+      toPassportFormValues({
+        ...passportFixture,
+        driver: null,
+        vehicle_id: null,
+        vehicle: null,
+      }),
+    ).toMatchObject({
+      driver: "",
+      vehicle_id: "",
     });
   });
 

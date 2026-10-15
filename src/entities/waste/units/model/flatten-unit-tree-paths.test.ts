@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   flattenUnitTreePaths,
   formatUnitPathLabel,
+  unitComboboxOptions,
   unitTreeDepth,
   unitTreeDepthStyle,
 } from "./flatten-unit-tree-paths";
@@ -122,6 +123,52 @@ describe("flattenUnitTreePaths", () => {
 
   it("returns an empty list for an empty forest", () => {
     expect(flattenUnitTreePaths([])).toEqual([]);
+  });
+
+  it("builds tree options with a short label, depth indent and pod9 flag", () => {
+    const options = unitComboboxOptions(flattenUnitTreePaths(forest), "tree");
+
+    expect(options.map((option) => option.label)).toEqual([
+      "подразделение 1",
+      "подразделение 1.1",
+      "подразделение 1.1.1",
+      "журнал A",
+      "подразделение 2",
+    ]);
+    expect(options.map((option) => option.labelStyles)).toEqual([
+      { paddingLeft: "0rem" },
+      { paddingLeft: "0.75rem" },
+      { paddingLeft: "1.5rem" },
+      { paddingLeft: "1.5rem" },
+      { paddingLeft: "0rem" },
+    ]);
+    expect(options.map((option) => option.isPod9)).toEqual([
+      false,
+      false,
+      true,
+      true,
+      false,
+    ]);
+  });
+
+  it("builds path options without indent", () => {
+    expect(
+      unitComboboxOptions(
+        flattenUnitTreePaths(forest, { pod9Only: true }),
+        "path",
+      ),
+    ).toEqual([
+      {
+        value: "dept-1.1.1",
+        label: "подразделение 1 -> подразделение 1.1 -> подразделение 1.1.1",
+        isPod9: true,
+      },
+      {
+        value: "journal-a",
+        label: "подразделение 1 -> подразделение 1.1 -> журнал A",
+        isPod9: true,
+      },
+    ]);
   });
 
   it("indents children relative to the root", () => {

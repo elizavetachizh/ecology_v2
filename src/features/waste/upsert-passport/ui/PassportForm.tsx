@@ -15,7 +15,11 @@ import {
   type Passport,
 } from "../../../../entities/waste/passports";
 import { useTenant } from "../../../../entities/tenant";
-import { UnitSelect } from "../../../../entities/waste/units";
+import {
+  UnitHierarchicalSelect,
+  UnitSelect,
+} from "../../../../entities/waste/units";
+import { VehicleSelect } from "../../../../entities/waste/vehicles";
 import {
   Alert,
   AlertDescription,
@@ -35,13 +39,6 @@ import { syncPassportWastes } from "../model/keep-wastes-allowed";
 import { useUpsertPassportForm } from "../model/use-upsert-passport-form";
 import { PassportWastesSelect } from "./PassportWastesSelect";
 import { routes } from "../../../../shared/config/routes";
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isUuid(value: string) {
-  return UUID_RE.test(value);
-}
 
 type PassportFormProps = {
   mode: "create" | "edit";
@@ -89,7 +86,7 @@ export function PassportForm({
       recyclingContractId || "none",
     ),
     queryFn: ({ signal }) => getContract(recyclingContractId, signal),
-    enabled: Boolean(activeTenantId && isUuid(recyclingContractId)),
+    enabled: Boolean(activeTenantId),
   });
 
   const recyclingWastes = recyclingQuery.data?.wastes ?? [];
@@ -179,11 +176,11 @@ export function PassportForm({
             name="unit_id"
             control={control}
             render={({ field }) => (
-              <UnitSelect
+              <UnitHierarchicalSelect
                 tenantId={activeTenantId}
                 value={field.value}
-                disabled={pending}
-                onChange={field.onChange}
+                isPod9={true}
+                onChange={(unit) => field.onChange(unit?.id ?? "")}
               />
             )}
           />
@@ -342,6 +339,55 @@ export function PassportForm({
               : "Организация вывозит отходы самостоятельно."}
           </p>
         )}
+        <div className="grid items-start gap-4 md:grid-cols-2">
+          <FormField
+            htmlFor="vehicle_id"
+            label="Транспорт"
+            error={errors.vehicle_id?.message}
+            description={
+              <>
+                Нет в списке нужного?{" "}
+                <Link
+                  to={routes.directories.vehicles.new}
+                  search={
+                    activeTenantId ? { tenant: activeTenantId } : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Создать в справочнике
+                </Link>
+              </>
+            }
+          >
+            <Controller
+              name="vehicle_id"
+              control={control}
+              render={({ field }) => (
+                <VehicleSelect
+                  tenantId={activeTenantId}
+                  value={field.value}
+                  disabled={pending}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </FormField>
+          <FormField
+            htmlFor="driver"
+            label="Водитель"
+            error={errors.driver?.message}
+          >
+            <Input
+              id="driver"
+              {...register("driver")}
+              placeholder="ФИО водителя"
+              disabled={pending}
+              aria-invalid={Boolean(errors.driver)}
+            />
+          </FormField>
+        </div>
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-4">

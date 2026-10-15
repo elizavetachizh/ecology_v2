@@ -2,7 +2,7 @@ import { ApiError } from "../../../../shared/api/api-client";
 
 export function passportWriteErrorMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 404) {
-    return "Структурная единица, договор, отход или производитель не найдены.";
+    return "Структурная единица, договор, отход, производитель или транспорт не найдены.";
   }
   if (error instanceof ApiError && error.status === 400) {
     return "Проверьте договор и отходы: договор утилизации с перечнем, отходы только из него, без дублей. Договор перевозки обязателен только при способе «по договору перевозки».";

@@ -27,7 +27,11 @@ export type MultipleComboboxProps = {
   search: string;
   setSearch: (value: string) => void;
   onRefresh?: () => void;
-  refreshing?: boolean;
+  refreshing?: boolean; /** Кастомный рендер пункта списка. По умолчанию — `option.label`. */
+  renderOption?: (
+    option: MultipleComboboxOption,
+    state: { selected: boolean },
+  ) => React.ReactNode;
   "aria-label"?: string;
 };
 
@@ -47,6 +51,7 @@ export function MultipleCombobox({
   search,
   setSearch,
   onRefresh,
+  renderOption,
   refreshing = false,
   "aria-label": ariaLabel,
 }: MultipleComboboxProps) {
@@ -255,9 +260,13 @@ export function MultipleCombobox({
                     >
                       <Check aria-hidden className="size-3" />
                     </span>
-                    <span className="min-w-0 flex-1 truncate">
-                      {option.label}
-                    </span>
+                    {renderOption ? (
+                      renderOption(option, { selected })
+                    ) : (
+                      <span className="min-w-0 flex-1 truncate">
+                        {option.label}
+                      </span>
+                    )}
                   </button>
                 );
               })

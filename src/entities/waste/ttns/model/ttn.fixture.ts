@@ -1,13 +1,5 @@
-import type { UserProfile } from "../../../user";
+import { userProfileFixture } from "../../persons";
 import type { Ttn } from "./ttns.types";
-
-const profile: UserProfile = {
-  id: "99999999-9999-4999-8999-999999999999",
-  username: "tester",
-  email: null,
-  first_name: null,
-  last_name: null,
-};
 
 export const ttnFixture: Ttn = {
   id: "22222222-2222-4222-8222-222222222222",
@@ -36,6 +28,6 @@ export const ttnFixture: Ttn = {
   },
   created_at: "2026-03-15T00:00:00Z",
   updated_at: "2026-03-15T00:00:00Z",
-  created_by: profile,
-  updated_by: profile,
+  created_by: userProfileFixture,
+  updated_by: userProfileFixture,
 };
