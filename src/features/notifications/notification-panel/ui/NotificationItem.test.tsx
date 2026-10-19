@@ -59,7 +59,7 @@ describe("NotificationItem", () => {
     const operations = screen.getByRole("link", {
       name: "Операции по этой паре",
     });
-    expect(operations).toHaveAttribute("href", routes.waste.operations.list);
+    expect(operations).toHaveAttribute("href", routes.operations.list);
     expect(operations).toHaveAttribute(
       "data-search",
       JSON.stringify({ unit_id: "unit-1", waste_id: "waste-1" }),

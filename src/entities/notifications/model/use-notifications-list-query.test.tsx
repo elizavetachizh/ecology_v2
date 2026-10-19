@@ -5,10 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_STALE_TIME_MS } from "../../../shared/lib/query-client";
 import { getNotifications } from "../api/get-notifications";
 import { notificationFixture } from "./notification.fixture";
-import {
-  NOTIFICATIONS_REFETCH_INTERVAL_MS,
-  notificationsQueryKeys,
-} from "./notifications-query-keys";
+import { notificationsQueryKeys } from "./notifications-query-keys";
 import {
   DEFAULT_NOTIFICATIONS_LIST_PARAMS,
   type NotificationListResponse,
@@ -107,7 +104,7 @@ describe("useNotificationsListQuery", () => {
     });
     const options = query?.observers[0]?.options;
     expect(options?.staleTime).toBe(DEFAULT_STALE_TIME_MS);
-    expect(options?.refetchInterval).toBe(NOTIFICATIONS_REFETCH_INTERVAL_MS);
+    expect(options?.refetchInterval).toBe(5 * DEFAULT_STALE_TIME_MS);
     expect(options?.refetchOnWindowFocus).toBe(true);
   });
 });

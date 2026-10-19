@@ -1,9 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getNotifications } from "../api/get-notifications";
-import {
-  NOTIFICATIONS_REFETCH_INTERVAL_MS,
-  notificationsQueryKeys,
-} from "./notifications-query-keys";
+import { notificationsQueryKeys } from "./notifications-query-keys";
 import type { GetNotificationsParams } from "./notifications.types";
 import { DEFAULT_STALE_TIME_MS } from "../../../shared/lib/query-client";
 
@@ -25,8 +22,8 @@ export function useNotificationsListQuery({
     queryKey: notificationsQueryKeys.list(tenantId ?? "none", params),
     queryFn: ({ signal }) => getNotifications(params, signal),
     enabled: canFetch,
-    staleTime: DEFAULT_STALE_TIME_MS,
-    refetchInterval: NOTIFICATIONS_REFETCH_INTERVAL_MS,
+    staleTime: 5 * DEFAULT_STALE_TIME_MS,
+    refetchInterval: 5 * DEFAULT_STALE_TIME_MS,
     refetchOnWindowFocus: true,
   });
 

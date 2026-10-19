@@ -8,7 +8,7 @@ import { routes } from "../../../../shared/config/routes";
 export type NotificationOperationsLink = {
   kind: "operations";
   label: "Операции по этой паре";
-  to: typeof routes.waste.operations.list;
+  to: typeof routes.operations.list;
   search: {
     unit_id: string;
     waste_id: string;
@@ -53,7 +53,7 @@ export function notificationLinks(
     links.push({
       kind: "operations",
       label: "Операции по этой паре",
-      to: routes.waste.operations.list,
+      to: routes.operations.list,
       search: { unit_id: unitId, waste_id: wasteId },
     });
   }

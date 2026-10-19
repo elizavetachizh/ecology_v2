@@ -114,7 +114,7 @@ export function TransferredOutFields({ pending }: TransferredOutFieldsProps) {
             Действующий паспорт с этим отходом на выбранном месте учёта. Нет
             нужного?{" "}
             <Link
-              to={routes.waste.passports.new}
+              to={routes.passports.new}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"
@@ -148,7 +148,7 @@ export function TransferredOutFields({ pending }: TransferredOutFieldsProps) {
             Действующая ТТН на этом месте учёта. Состав отходов договора
             проверяет сервер. Нет нужной?{" "}
             <Link
-              to={routes.waste.ttns.new}
+              to={routes.ttns.new}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-primary underline-offset-4 hover:underline"

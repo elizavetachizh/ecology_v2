@@ -77,7 +77,7 @@ export function DashboardBalanceTable({
                     Проведите первую операцию, чтобы увидеть снимок остатков.
                   </p>
                   <Link
-                    to={routes.waste.operations.list}
+                    to={routes.operations.list}
                     className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
                     Открыть журнал операций

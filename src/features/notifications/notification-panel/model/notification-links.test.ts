@@ -13,7 +13,7 @@ describe("notificationLinks", () => {
       {
         kind: "operations",
         label: "Операции по этой паре",
-        to: routes.waste.operations.list,
+        to: routes.operations.list,
         search: { unit_id: "unit-1", waste_id: "waste-1" },
       },
       {

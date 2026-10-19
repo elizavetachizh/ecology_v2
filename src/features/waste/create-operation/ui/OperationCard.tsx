@@ -190,7 +190,7 @@ export function OperationCard({
             <dd className="text-sm text-foreground">
               {operation.linked_operation_id ? (
                 <Link
-                  to={routes.waste.operations.detail}
+                  to={routes.operations.detail}
                   params={{ operationId: operation.linked_operation_id }}
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
