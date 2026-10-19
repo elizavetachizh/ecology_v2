@@ -25,8 +25,8 @@ import { routes } from "../../../../shared/config/routes";
 
 export function TtnsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: routes.waste.ttns.list });
-  const search = useSearch({ from: routes.waste.ttns.list });
+  const navigate = useNavigate({ from: routes.ttns.list });
+  const search = useSearch({ from: routes.ttns.list });
 
   const [deleting, setDeleting] = useState<Ttn | null>(null);
   const columns = useMemo(() => ttnsColumns(setDeleting), []);
@@ -107,8 +107,8 @@ export function TtnsPage() {
         description:
           "ТТН не связан с сопроводительным паспортом — документы ведутся отдельно.",
         directoryLabel: "ТТН",
-        directoryTo: routes.waste.ttns.list,
-        createTo: routes.waste.ttns.new,
+        directoryTo: routes.ttns.list,
+        createTo: routes.ttns.new,
         createLabel: "Создать ТТН",
       }}
       toolbar={

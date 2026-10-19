@@ -3,6 +3,7 @@ import { Check, Pencil, Trash2, Undo2 } from "lucide-react";
 import {
   PermitStatusBadge,
   type Permit,
+  type PermitLimitWaste,
   type PermitStatus,
 } from "../../../../entities/waste/permits";
 import { unitLabel } from "../../../../entities/waste/units";
@@ -21,6 +22,18 @@ function formatAmount(value: string): string {
   const n = Number(value);
   if (!Number.isFinite(n)) return value;
   return n.toLocaleString("ru-RU", { maximumFractionDigits: 6 });
+}
+
+function limitBadges(items: PermitLimitWaste[]) {
+  return (
+    <div className="flex max-w-xs flex-wrap gap-1">
+      {items.map((item) => (
+        <Badge key={item.id} variant="secondary">
+          {`${item.waste.waste_classifier.code} — ${formatAmount(item.amount)} ${UOM_LABEL[item.waste.uom]}`}
+        </Badge>
+      ))}
+    </div>
+  );
 }
 
 function permitsColumns(
@@ -67,6 +80,19 @@ function permitsColumns(
       ),
       cell: ({ row }) => formatDate(row.original.end_date),
     },
+
+    {
+      id: "burial_wastes",
+      header: "Захоронение",
+      enableSorting: false,
+      cell: ({ row }) => limitBadges(row.original.burial_wastes),
+    },
+    {
+      id: "storage_wastes",
+      header: "Хранение",
+      enableSorting: false,
+      cell: ({ row }) => limitBadges(row.original.storage_wastes ?? []),
+    },
     {
       id: "status",
       accessorKey: "status",
@@ -74,20 +100,6 @@ function permitsColumns(
         <DataTableColumnHeader column={column} title="Статус" />
       ),
       cell: ({ row }) => <PermitStatusBadge status={row.original.status} />,
-    },
-    {
-      id: "burial_wastes",
-      header: "Захоронение",
-      enableSorting: false,
-      cell: ({ row }) => (
-        <div className="flex max-w-xs flex-wrap gap-1">
-          {row.original.burial_wastes.map((item) => (
-            <Badge key={item.id} variant="secondary">
-              {`${item.waste.waste_classifier.code} — ${formatAmount(item.amount)} ${UOM_LABEL[item.waste.uom]}`}
-            </Badge>
-          ))}
-        </div>
-      ),
     },
     {
       id: "actions",

@@ -1,7 +1,35 @@
 import { z } from "zod";
-import { isoDateZodSchema } from "../../../../shared/lib/format-date";
+import {
+  addYearsIsoDate,
+  isoDateZodSchema,
+  todayIsoDate,
+} from "../../../../shared/lib/format-date";
 
 const optionalDate = isoDateZodSchema().or(z.literal(""));
+
+export const INSTRUCTION_TERM_YEARS = 5;
+
+export function instructionEndDateFromStart(startDate: string): string {
+  return addYearsIsoDate(startDate, INSTRUCTION_TERM_YEARS);
+}
+
+/**
+ * Keep end_date at start+5 years until the user sets a different end.
+ * Returns null when the current end must be left as-is.
+ */
+export function nextSyncedInstructionEndDate(params: {
+  previousStart: string;
+  nextStart: string;
+  currentEnd: string;
+}): string | null {
+  const { previousStart, nextStart, currentEnd } = params;
+  if (!nextStart) return null;
+  const stillLinked =
+    currentEnd === "" ||
+    currentEnd === instructionEndDateFromStart(previousStart);
+  if (!stillLinked) return null;
+  return instructionEndDateFromStart(nextStart);
+}
 
 export const instructionFormSchema = z
   .object({
@@ -48,10 +76,13 @@ export const instructionFormSchema = z
 
 export type InstructionFormValues = z.infer<typeof instructionFormSchema>;
 
+const startDate = todayIsoDate();
+const endDate = instructionEndDateFromStart(startDate);
+
 export const instructionFormDefaultValues: InstructionFormValues = {
   name: "",
   short_name: "",
-  start_date: "",
-  end_date: "",
+  start_date: startDate,
+  end_date: endDate,
   status: "active",
 };

@@ -128,10 +128,10 @@ export function PermitsPage() {
       error={error}
       errorTitle="Не удалось загрузить разрешения"
       header={{
-        title: "Разрешения",
+        title: "Разрешения на хранение и захоронение отходов",
         description:
           "Разрешения на захоронение отходов: номер, подразделение, сроки и лимиты по отходам.",
-        directoryLabel: "Разрешения",
+        directoryLabel: "Разрешения на хранение и захоронение отходов",
         directoryTo: routes.directories.permits.list,
         createTo: routes.directories.permits.new,
         createLabel: "Создать разрешение",

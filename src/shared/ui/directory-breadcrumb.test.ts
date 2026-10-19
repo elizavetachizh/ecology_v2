@@ -6,25 +6,28 @@ describe("directoryBreadcrumbItems", () => {
   it("on a list page keeps the directory as the current crumb", () => {
     expect(
       directoryBreadcrumbItems({
-        directoryLabel: "Нормативы",
+        directoryLabel: "Нормативы образования отходов",
         directoryTo: routes.directories.standards.list,
       }),
     ).toEqual([
       { label: "Справочники", to: routes.directories.index },
-      { label: "Нормативы", to: undefined },
+      { label: "Нормативы образования отходов", to: undefined },
     ]);
   });
 
   it("on a form page links back to the directory list", () => {
     expect(
       directoryBreadcrumbItems({
-        directoryLabel: "Нормативы",
+        directoryLabel: "Нормативы образования отходов",
         directoryTo: routes.directories.standards.list,
         current: "Новый норматив",
       }),
     ).toEqual([
       { label: "Справочники", to: routes.directories.index },
-      { label: "Нормативы", to: routes.directories.standards.list },
+      {
+        label: "Нормативы образования отходов",
+        to: routes.directories.standards.list,
+      },
       { label: "Новый норматив" },
     ]);
   });

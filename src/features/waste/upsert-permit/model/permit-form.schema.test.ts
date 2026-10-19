@@ -13,6 +13,7 @@ const valid = {
   status: "active" as const,
   unit_id: "550e8400-e29b-41d4-a716-446655440000",
   burial_wastes: [],
+  storage_wastes: [],
 };
 
 describe("permitFormDefaultValues", () => {
@@ -58,6 +59,12 @@ describe("nextSyncedPermitEndDate", () => {
 describe("permitFormSchema", () => {
   it("accepts a permit without burial wastes", () => {
     expect(permitFormSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts an empty end date", () => {
+    expect(permitFormSchema.safeParse({ ...valid, end_date: "" }).success).toBe(
+      true,
+    );
   });
 
   it("accepts missing unit_id", () => {
@@ -108,6 +115,45 @@ describe("permitFormSchema", () => {
       burial_wastes: [
         { waste_id: wasteId, amount: "1", label: "A", uomLabel: "т" },
         { waste_id: wasteId, amount: "2", label: "A", uomLabel: "т" },
+      ],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("allows the same waste in burial and storage", () => {
+    const wasteId = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+    const row = { waste_id: wasteId, amount: "1", label: "A", uomLabel: "т" };
+    expect(
+      permitFormSchema.safeParse({
+        ...valid,
+        burial_wastes: [row],
+        storage_wastes: [{ ...row, amount: "2" }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a duplicate waste inside storage limits", () => {
+    const wasteId = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+    const parsed = permitFormSchema.safeParse({
+      ...valid,
+      storage_wastes: [
+        { waste_id: wasteId, amount: "1", label: "A", uomLabel: "т" },
+        { waste_id: wasteId, amount: "2", label: "A", uomLabel: "т" },
+      ],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("requires a storage amount when a waste is selected", () => {
+    const parsed = permitFormSchema.safeParse({
+      ...valid,
+      storage_wastes: [
+        {
+          waste_id: "6ba7b810-9dad-41d1-80b4-00c04fd430c8",
+          amount: "",
+          label: "A",
+          uomLabel: "т",
+        },
       ],
     });
     expect(parsed.success).toBe(false);

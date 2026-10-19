@@ -20,7 +20,7 @@ function ttnsColumns(setDeleting: (ttn: Ttn) => void): ColumnDef<Ttn>[] {
       ),
       cell: ({ row }) => (
         <Link
-          to={routes.waste.ttns.detail}
+          to={routes.ttns.detail}
           params={{ ttnId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -63,7 +63,7 @@ function ttnsColumns(setDeleting: (ttn: Ttn) => void): ColumnDef<Ttn>[] {
       cell: ({ row }) => (
         <DataTableRowActions>
           <DataTableRowAction asChild label="Изменить ТТН">
-            <Link to={routes.waste.ttns.detail} params={{ ttnId: row.original.id }}>
+            <Link to={routes.ttns.detail} params={{ ttnId: row.original.id }}>
               <Pencil />
               Изменить
             </Link>

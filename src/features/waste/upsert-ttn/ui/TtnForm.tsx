@@ -62,7 +62,7 @@ export function TtnForm({
         eyebrow={
           <DirectoryBreadcrumb
             directoryLabel="ТТН"
-            directoryTo={routes.waste.ttns.list}
+            directoryTo={routes.ttns.list}
             current={title}
           />
         }

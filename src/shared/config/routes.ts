@@ -15,8 +15,8 @@ function directoryPath<const Slug extends string>(
   return `/directories/${slug}`;
 }
 
-function wastePath<const Slug extends string>(slug: Slug): `/waste/${Slug}` {
-  return `/waste/${slug}`;
+function wastePath<const Slug extends string>(slug: Slug): `/${Slug}` {
+  return `/${slug}`;
 }
 
 function crud<const Base extends string, const Param extends string>(
@@ -65,13 +65,11 @@ export const routes = {
     persons: crud(directoryPath("persons"), "personId"),
     vehicles: crud(directoryPath("vehicles"), "vehicleId"),
   },
-  waste: {
-    operations: listDetail(wastePath("operations"), "operationId"),
-    passports: crud(wastePath("passports"), "passportId"),
-    ttns: crud(wastePath("ttns"), "ttnId"),
-    /** Пункт меню есть, экрана нет — 404. */
-    balances: wastePath("balances"),
-  },
+
+  operations: listDetail(wastePath("operations"), "operationId"),
+  passports: crud(wastePath("passports"), "passportId"),
+  ttns: crud(wastePath("ttns"), "ttnId"),
+
   reports: {
     pod9: "/reports/pod-9",
     pod10: "/reports/pod-10",

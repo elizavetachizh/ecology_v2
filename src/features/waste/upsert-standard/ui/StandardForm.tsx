@@ -58,7 +58,7 @@ export function StandardForm({
       <PageContextBar
         eyebrow={
           <DirectoryBreadcrumb
-            directoryLabel="Нормативы"
+            directoryLabel="Нормативы образования отходов"
             directoryTo={routes.directories.standards.list}
             current={title}
           />

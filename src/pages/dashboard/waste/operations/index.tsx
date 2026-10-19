@@ -56,8 +56,8 @@ function invalidateOperationQueries() {
 
 export function WasteOperationsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: routes.waste.operations.list });
-  const search = useSearch({ from: routes.waste.operations.list });
+  const navigate = useNavigate({ from: routes.operations.list });
+  const search = useSearch({ from: routes.operations.list });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [deleting, setDeleting] = useState<Operation | null>(null);
@@ -209,7 +209,7 @@ export function WasteOperationsPage() {
           }}
           onRowClick={(row) => {
             void navigate({
-              to: routes.waste.operations.detail,
+              to: routes.operations.detail,
               params: { operationId: row.original.id },
             });
           }}

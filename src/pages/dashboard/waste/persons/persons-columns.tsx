@@ -31,21 +31,7 @@ function personsColumns(
         </Link>
       ),
     },
-    {
-      id: "last_seen_at",
-      accessorKey: "last_seen_at",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Последнее посещение" />
-      ),
-      cell: ({ row }) => {
-        const lastSeenAt = row.original.user?.last_seen_at;
-        return (
-          <span className="text-muted-foreground">
-            {lastSeenAt ? formatDateTime(lastSeenAt) : "—"}
-          </span>
-        );
-      },
-    },
+
     {
       id: "units",
       header: "Подразделения",
@@ -67,6 +53,21 @@ function personsColumns(
               </Badge>
             ))}
           </div>
+        );
+      },
+    },
+    {
+      id: "last_seen_at",
+      accessorKey: "last_seen_at",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Последнее посещение" />
+      ),
+      cell: ({ row }) => {
+        const lastSeenAt = row.original.user?.last_seen_at;
+        return (
+          <span className="text-muted-foreground">
+            {lastSeenAt ? formatDateTime(lastSeenAt) : "—"}
+          </span>
         );
       },
     },

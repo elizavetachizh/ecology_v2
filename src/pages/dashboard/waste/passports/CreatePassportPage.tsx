@@ -7,7 +7,7 @@ import { routes } from "../../../../shared/config/routes";
 export function CreatePassportPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-  const search = useSearch({ from: routes.waste.passports.new });
+  const search = useSearch({ from: routes.passports.new });
 
   return (
     <TenantRequiredGate
@@ -20,12 +20,12 @@ export function CreatePassportPage() {
         onSaved={(passport) => {
           toast.success("Паспорт успешно создан");
           void navigate({
-            to: routes.waste.passports.detail,
+            to: routes.passports.detail,
             params: { passportId: passport.id },
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: routes.waste.passports.list })}
+        onCancel={() => void navigate({ to: routes.passports.list })}
       />
     </TenantRequiredGate>
   );

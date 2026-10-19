@@ -34,8 +34,8 @@ export const PERMIT_STATUS_BADGE_VARIANT: Record<
   inactive: "secondary",
 };
 
-/** PermitBurialWasteRead */
-export type PermitBurialWaste = {
+/** PermitBurialWasteRead и PermitStorageWasteRead — одинаковый набор полей. */
+export type PermitLimitWaste = {
   id: string;
   tenant_id: string;
   permit_id: string;
@@ -48,6 +48,9 @@ export type PermitBurialWaste = {
   updated_by: UserProfile;
 };
 
+export type PermitBurialWaste = PermitLimitWaste;
+export type PermitStorageWaste = PermitLimitWaste;
+
 /** PermitRead */
 export type Permit = {
   id: string;
@@ -59,16 +62,20 @@ export type Permit = {
   unit_id: string | null;
   unit: UnitBrief | null;
   burial_wastes: PermitBurialWaste[];
+  storage_wastes: PermitStorageWaste[];
   created_at: string;
   updated_at: string;
   created_by: UserProfile;
   updated_by: UserProfile;
 };
 
-export type PermitBurialWasteWrite = {
+export type PermitLimitWasteWrite = {
   waste_id: string;
   amount: string;
 };
+
+export type PermitBurialWasteWrite = PermitLimitWasteWrite;
+export type PermitStorageWasteWrite = PermitLimitWasteWrite;
 
 export type PermitCreate = {
   number: string;
@@ -77,9 +84,13 @@ export type PermitCreate = {
   status?: PermitStatus;
   unit_id?: string | null;
   burial_wastes?: PermitBurialWasteWrite[];
+  storage_wastes?: PermitStorageWasteWrite[];
 };
 
-/** PATCH burial_wastes: omit = не трогать; [] = очистить перечень. */
+/**
+ * PATCH каждой коллекции: omit = не трогать; [] / [...] = полная замена.
+ * burial_wastes и storage_wastes заменяются независимо.
+ */
 export type PermitUpdate = {
   number?: string;
   start_date?: string;
@@ -87,6 +98,7 @@ export type PermitUpdate = {
   status?: PermitStatus;
   unit_id?: string | null;
   burial_wastes?: PermitBurialWasteWrite[];
+  storage_wastes?: PermitStorageWasteWrite[];
 };
 
 export const PermitSortFields = [

@@ -3,18 +3,19 @@ export function UnitInstructionWastesCreateHint() {
     <section className="mx-auto max-w-4xl space-y-4 rounded-xl border border-border bg-card p-4">
       <div className="space-y-1">
         <h2 className="text-sm font-semibold text-foreground">
-          Привязка отходов по инструкции
+          Учет отходов по инструкции
         </h2>
       </div>
 
       <div className="flex h-28 items-center justify-center rounded-lg border border-dashed border-border px-4 text-center">
         <div className="mx-auto max-w-md space-y-1">
           <p className="text-sm font-medium text-foreground">
-            Привязки станут доступны после создания
+            Учет отходов станет доступен после создания
           </p>
           <p className="text-sm text-muted-foreground">
-            После сохранения ПОД-9 вы сможете выбрать инструкцию и привязать
-            отходы из справочника, указав источники образования.
+            После сохранения ПОД-9 вы сможете выбрать инструкцию и добавить
+            отходы из справочника, указав источники образования согласно
+            инструкции.
           </p>
         </div>
       </div>

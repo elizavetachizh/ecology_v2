@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Controller } from "react-hook-form";
 import { Link } from "@tanstack/react-router";
 import type { Permit } from "../../../../entities/waste/permits";
@@ -15,7 +16,7 @@ import {
 } from "../../../../shared/ui";
 import { useUpsertPermitForm } from "../model/use-upsert-permit-form";
 import { nextSyncedPermitEndDate } from "../model/permit-form.schema";
-import { PermitBurialWastesEditor } from "./PermitBurialWastesEditor";
+import { PermitLimitWastesEditor } from "./PermitLimitWastesEditor";
 import { routes } from "../../../../shared/config/routes";
 
 type PermitFormProps = {
@@ -57,7 +58,7 @@ export function PermitForm({
       <PageContextBar
         eyebrow={
           <DirectoryBreadcrumb
-            directoryLabel="Разрешения"
+            directoryLabel="Разрешения на хранение и захоронение отходов"
             directoryTo={routes.directories.permits.list}
             current={
               mode === "create"
@@ -179,29 +180,23 @@ export function PermitForm({
         </FormField>
       </div>
 
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-        <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-foreground">
-            Лимиты на захоронение
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Не нашли нужного отхода?{" "}
-            <Link
-              to={routes.directories.wastes.list}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Справочник отходов
-            </Link>
-          </p>
-        </div>
-        <PermitBurialWastesEditor
+      <PermitLimitsSection title="Лимиты на захоронение">
+        <PermitLimitWastesEditor
           form={form}
           tenantId={activeTenantId}
           pending={pending}
+          name="burial_wastes"
         />
-      </section>
+      </PermitLimitsSection>
+
+      <PermitLimitsSection title="Лимиты на хранение">
+        <PermitLimitWastesEditor
+          form={form}
+          tenantId={activeTenantId}
+          pending={pending}
+          name="storage_wastes"
+        />
+      </PermitLimitsSection>
 
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
@@ -231,5 +226,33 @@ export function PermitForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function PermitLimitsSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <div className="space-y-1">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <p className="text-sm text-muted-foreground">
+          Не нашли нужного отхода?{" "}
+          <Link
+            to={routes.directories.wastes.list}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Справочник отходов
+          </Link>
+        </p>
+      </div>
+      {children}
+    </section>
   );
 }

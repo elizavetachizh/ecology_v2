@@ -44,14 +44,6 @@ function standardsColumns(
     },
 
     {
-      id: "status",
-      accessorKey: "status",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Статус" />
-      ),
-      cell: ({ row }) => <StandardStatusBadge status={row.original.status} />,
-    },
-    {
       id: "wastes",
       header: "Отходы",
       size: 300,
@@ -73,6 +65,14 @@ function standardsColumns(
           ))}
         </div>
       ),
+    },
+    {
+      id: "status",
+      accessorKey: "status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Статус" />
+      ),
+      cell: ({ row }) => <StandardStatusBadge status={row.original.status} />,
     },
     {
       id: "actions",

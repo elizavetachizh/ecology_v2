@@ -37,14 +37,14 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
 
   {
     id: "permits",
-    title: "Разрешения",
+    title: "Разрешения на хранение и захоронение отходов",
     description:
       "Разрешения на захоронение отходов: номер, подразделение, сроки, лимиты",
     to: routes.directories.permits.list,
   },
   {
     id: "standards",
-    title: "Нормативы",
+    title: "Нормативы образования отходов",
     description:
       "Нормативы образования отходов: подразделение, дата начала, перечень отходов",
     to: routes.directories.standards.list,
@@ -62,6 +62,9 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     description: "Ответственные за экологическое мониторинг",
     to: routes.directories.persons.list,
   },
+];
+
+export const EXPORT_CARDS: DirectoryCard[] = [
   {
     id: "vehicles",
     title: "Транспортные средства",
@@ -80,5 +83,17 @@ export const DIRECTORY_CARDS: DirectoryCard[] = [
     description:
       "Договоры утилизации и перевозки: контрагент, сроки, перечень отходов",
     to: routes.directories.contracts.list,
+  },
+  {
+    id: "passports",
+    title: "Сопроводительные паспорта",
+    description: "Сопроводительные паспорта для вывоза отходов",
+    to: routes.passports.list,
+  },
+  {
+    id: "ttns",
+    title: "ТТН",
+    description: "Транспортные накладные для вывоза отходов",
+    to: routes.ttns.list,
   },
 ];

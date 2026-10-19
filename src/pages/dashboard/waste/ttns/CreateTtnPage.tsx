@@ -7,7 +7,7 @@ import { routes } from "../../../../shared/config/routes";
 export function CreateTtnPage() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-  const search = useSearch({ from: routes.waste.ttns.new });
+  const search = useSearch({ from: routes.ttns.new });
 
   return (
     <TenantRequiredGate
@@ -20,12 +20,12 @@ export function CreateTtnPage() {
         onSaved={(ttn) => {
           toast.success("ТТН успешно создана");
           void navigate({
-            to: routes.waste.ttns.detail,
+            to: routes.ttns.detail,
             params: { ttnId: ttn.id },
             replace: true,
           });
         }}
-        onCancel={() => void navigate({ to: routes.waste.ttns.list })}
+        onCancel={() => void navigate({ to: routes.ttns.list })}
       />
     </TenantRequiredGate>
   );

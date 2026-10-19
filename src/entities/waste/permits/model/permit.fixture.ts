@@ -1,5 +1,9 @@
 import { userProfileFixture } from "../../persons";
-import type { Permit, PermitBurialWaste } from "./permits.types";
+import type {
+  Permit,
+  PermitBurialWaste,
+  PermitStorageWaste,
+} from "./permits.types";
 
 export const permitBurialWasteFixture: PermitBurialWaste = {
   id: "pbw-1",
@@ -20,6 +24,12 @@ export const permitBurialWasteFixture: PermitBurialWaste = {
   updated_by: userProfileFixture,
 };
 
+export const permitStorageWasteFixture: PermitStorageWaste = {
+  ...permitBurialWasteFixture,
+  id: "psw-1",
+  amount: "4.000000",
+};
+
 export const permitFixture: Permit = {
   id: "permit-1",
   tenant_id: "tenant-1",
@@ -30,6 +40,7 @@ export const permitFixture: Permit = {
   unit_id: "unit-1",
   unit: { id: "unit-1", name: "Цех №1", short_name: "Ц1" },
   burial_wastes: [permitBurialWasteFixture],
+  storage_wastes: [permitStorageWasteFixture],
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-02T00:00:00Z",
   created_by: userProfileFixture,

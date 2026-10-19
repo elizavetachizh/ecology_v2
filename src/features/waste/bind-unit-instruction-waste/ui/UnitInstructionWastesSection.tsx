@@ -140,9 +140,9 @@ export function UnitInstructionWastesSection({
 
   return (
     <InstructionScopedBindingsSection
-      title="Привязка отходов по инструкции"
-      description="Выберите инструкцию на вкладке — ниже список привязанных отходов для этого ПОД-9."
-      bindLabel="Привязать отход"
+      title="Учет отходов по инструкции"
+      description="Выберите инструкцию на вкладке — ниже список добавленных отходов для этого ПОД-9."
+      bindLabel="Добавить отход"
       bindDisabled={!activeInstructionId}
       onBind={() => {
         setEditing(null);

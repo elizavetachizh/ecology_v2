@@ -11,7 +11,7 @@ export function useWasteClassifierOptions() {
     queryKey: ["waste-classifiers", debouncedSearch],
     queryFn: ({ signal }) =>
       getWasteClassifiers(
-        { search: debouncedSearch, limit: 20, offset: 0 },
+        { search: debouncedSearch, limit: 100, offset: 0 },
         signal,
       ),
     select: (data) => data.items,

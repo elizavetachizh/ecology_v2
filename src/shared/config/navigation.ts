@@ -1,14 +1,12 @@
 import {
   BookOpen,
   ClipboardList,
-  FileText,
   LayoutDashboard,
   Library,
-  Trash2,
   Truck,
   type LucideIcon,
 } from "lucide-react";
-import { DIRECTORY_CARDS } from "./directories";
+import { DIRECTORY_CARDS, EXPORT_CARDS } from "./directories";
 import { REPORT_NAV_ITEMS } from "./reports";
 import { routes } from "./routes";
 
@@ -48,29 +46,18 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
+    id: "export",
+    title: "Вывоз отходов",
+    icon: Truck,
+    children: EXPORT_CARDS,
+  },
+  {
     id: "operations",
     title: "Журнал операций",
     icon: ClipboardList,
-    to: routes.waste.operations.list,
+    to: routes.operations.list,
   },
-  {
-    id: "passports",
-    title: "Сопроводительные паспорта",
-    icon: FileText,
-    to: routes.waste.passports.list,
-  },
-  {
-    id: "ttns",
-    title: "ТТН",
-    icon: Truck,
-    to: routes.waste.ttns.list,
-  },
-  {
-    id: "balances",
-    title: "Остатки отходов",
-    icon: Trash2,
-    to: routes.waste.balances,
-  },
+
   {
     id: "reports",
     title: "Отчеты",

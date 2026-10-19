@@ -17,6 +17,7 @@ import { useUpsertInstructionForm } from "../model/use-upsert-instruction-form";
 import { InstructionFormHint } from "./InstructionFormHint";
 import { InstructionNextStepCta } from "./InstructionNextStepCta";
 import { routes } from "../../../../shared/config/routes";
+import { nextSyncedInstructionEndDate } from "../model/instruction-form.schema";
 
 type InstructionFormProps = {
   mode: "create" | "edit";
@@ -43,11 +44,15 @@ export function InstructionForm({
   const {
     register,
     watch,
+    setValue,
+    getValues,
     formState: { errors },
   } = form;
 
   const status = watch("status");
   const datesRequired = status === "active";
+  const startDateField = register("start_date");
+  const endDateField = register("end_date");
 
   return (
     <form
@@ -127,7 +132,24 @@ export function InstructionForm({
           error={errors.start_date?.message}
           description="Обязательна для статуса «Действует»."
         >
-          <Input id="start_date" type="date" {...register("start_date")} />
+          <Input
+            id="start_date"
+            type="date"
+            {...startDateField}
+            onChange={(event) => {
+              const previousStart = getValues("start_date");
+              const currentEnd = getValues("end_date");
+              void startDateField.onChange(event);
+              const nextEnd = nextSyncedInstructionEndDate({
+                previousStart,
+                nextStart: event.target.value,
+                currentEnd,
+              });
+              if (nextEnd != null) {
+                setValue("end_date", nextEnd, { shouldValidate: true });
+              }
+            }}
+          />
         </FormField>
 
         <FormField
@@ -137,7 +159,7 @@ export function InstructionForm({
           error={errors.end_date?.message}
           description="Обязательна для статуса «Действует»."
         >
-          <Input id="end_date" type="date" {...register("end_date")} />
+          <Input id="end_date" type="date" {...endDateField} />
         </FormField>
       </div>
 

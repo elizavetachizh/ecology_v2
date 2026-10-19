@@ -144,7 +144,7 @@ const indexRoute = createRoute({
 
 const wasteOperationsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.operations.list,
+  path: routes.operations.list,
   validateSearch: (search: Record<string, unknown>): OperationsSearch => ({
     unit_id: parseSearchQuery(search.unit_id),
     waste_id: parseSearchQuery(search.waste_id),
@@ -161,13 +161,13 @@ const wasteOperationsRoute = createRoute({
 
 const wasteEditOperationRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.operations.detail,
+  path: routes.operations.detail,
   component: EditOperationPage,
 });
 
 const wastePassportsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.passports.list,
+  path: routes.passports.list,
   validateSearch: (search: Record<string, unknown>): PassportsSearch => ({
     q: parseSearchQuery(search.q),
     status: parseSearchEnum(search.status, PassportStatusValues),
@@ -189,7 +189,7 @@ const wastePassportsRoute = createRoute({
 
 const wasteCreatePassportRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.passports.new,
+  path: routes.passports.new,
   validateSearch: (search: Record<string, unknown>): CreatePassportSearch => ({
     recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
   }),
@@ -198,13 +198,13 @@ const wasteCreatePassportRoute = createRoute({
 
 const wasteEditPassportRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.passports.detail,
+  path: routes.passports.detail,
   component: EditPassportPage,
 });
 
 const wasteTtnsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.ttns.list,
+  path: routes.ttns.list,
   validateSearch: (search: Record<string, unknown>): TtnsSearch => ({
     q: parseSearchQuery(search.q),
     status: parseSearchEnum(search.status, TtnStatusValues),
@@ -222,7 +222,7 @@ const wasteTtnsRoute = createRoute({
 
 const wasteCreateTtnRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.ttns.new,
+  path: routes.ttns.new,
   validateSearch: (search: Record<string, unknown>): CreateTtnSearch => ({
     recycling_contract_id: parseSearchQuery(search.recycling_contract_id),
   }),
@@ -231,7 +231,7 @@ const wasteCreateTtnRoute = createRoute({
 
 const wasteEditTtnRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: routes.waste.ttns.detail,
+  path: routes.ttns.detail,
   component: EditTtnPage,
 });
 

@@ -16,10 +16,10 @@ import { routes } from "../../../../shared/config/routes";
 
 export function EditPassportPage() {
   const { passportId } = useParams({
-    from: routes.waste.passports.detail,
+    from: routes.passports.detail,
   });
   const navigate = useNavigate({
-    from: routes.waste.passports.detail,
+    from: routes.passports.detail,
   });
   const { activeTenantId } = useTenant();
 
@@ -36,7 +36,7 @@ export function EditPassportPage() {
   if (passportQuery.isError || !passportQuery.data) {
     return (
       <AlertDetailPageError
-        directoryTo={routes.waste.passports.list}
+        directoryTo={routes.passports.list}
         linkLabel="К паспортам"
         description="Паспорт не найден."
       />
@@ -61,7 +61,7 @@ export function EditPassportPage() {
         onSaved={() => {
           toast.success("Паспорт успешно обновлён");
         }}
-        onCancel={() => void navigate({ to: routes.waste.passports.list })}
+        onCancel={() => void navigate({ to: routes.passports.list })}
       />
     </TenantRequiredGate>
   );

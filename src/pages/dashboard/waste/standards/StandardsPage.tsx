@@ -102,10 +102,10 @@ export function StandardsPage() {
       error={error}
       errorTitle="Не удалось загрузить нормативы"
       header={{
-        title: "Нормативы",
+        title: "Нормативы образования отходов",
         description:
           "Нормативы образования отходов: дата начала и перечень по местам учёта ПОД-9. Документ бессрочный. На одну дату — один норматив.",
-        directoryLabel: "Нормативы",
+        directoryLabel: "Нормативы образования отходов",
         directoryTo: routes.directories.standards.list,
         createTo: routes.directories.standards.new,
         createLabel: "Создать норматив",

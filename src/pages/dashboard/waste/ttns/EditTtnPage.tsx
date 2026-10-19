@@ -11,8 +11,8 @@ import {
 import { routes } from "../../../../shared/config/routes";
 
 export function EditTtnPage() {
-  const { ttnId } = useParams({ from: routes.waste.ttns.detail });
-  const navigate = useNavigate({ from: routes.waste.ttns.detail });
+  const { ttnId } = useParams({ from: routes.ttns.detail });
+  const navigate = useNavigate({ from: routes.ttns.detail });
   const { activeTenantId } = useTenant();
 
   const ttnQuery = useQuery({
@@ -28,7 +28,7 @@ export function EditTtnPage() {
   if (ttnQuery.isError || !ttnQuery.data) {
     return (
       <AlertDetailPageError
-        directoryTo={routes.waste.ttns.list}
+        directoryTo={routes.ttns.list}
         linkLabel="К журналу ТТН"
         description="ТТН не найдена."
       />
@@ -47,7 +47,7 @@ export function EditTtnPage() {
         onSaved={() => {
           toast.success("ТТН успешно обновлена");
         }}
-        onCancel={() => void navigate({ to: routes.waste.ttns.list })}
+        onCancel={() => void navigate({ to: routes.ttns.list })}
       />
     </TenantRequiredGate>
   );

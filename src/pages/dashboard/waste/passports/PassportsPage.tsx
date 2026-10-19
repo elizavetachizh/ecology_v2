@@ -37,8 +37,8 @@ import { routes } from "../../../../shared/config/routes";
 
 export function PassportsPage() {
   const { activeTenantId } = useTenant();
-  const navigate = useNavigate({ from: routes.waste.passports.list });
-  const search = useSearch({ from: routes.waste.passports.list });
+  const navigate = useNavigate({ from: routes.passports.list });
+  const search = useSearch({ from: routes.passports.list });
 
   const [deleting, setDeleting] = useState<Passport | null>(null);
   const [previewing, setPreviewing] = useState<Passport | null>(null);
@@ -153,8 +153,8 @@ export function PassportsPage() {
         title: "Сопроводительные паспорта",
         description: "Сопроводительные паспорта организации.",
         directoryLabel: "Сопроводительные паспорта",
-        directoryTo: routes.waste.passports.list,
-        createTo: routes.waste.passports.new,
+        directoryTo: routes.passports.list,
+        createTo: routes.passports.new,
         createLabel: "Создать паспорт",
         actions: (
           <PrintPassportsJournalButton

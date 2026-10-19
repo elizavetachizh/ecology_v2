@@ -113,7 +113,7 @@ export function PassportForm({
         eyebrow={
           <DirectoryBreadcrumb
             directoryLabel="Сопроводительные паспорта"
-            directoryTo={routes.waste.passports.list}
+            directoryTo={routes.passports.list}
             current={title}
           />
         }

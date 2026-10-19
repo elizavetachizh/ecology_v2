@@ -37,7 +37,7 @@ export function ContractNextStepCta({
         {canCreatePassport ? (
           <Button asChild size="sm">
             <Link
-              to={routes.waste.passports.new}
+              to={routes.passports.new}
               search={{ recycling_contract_id: contractId }}
             >
               Создать сопроводительный паспорт
@@ -56,7 +56,7 @@ export function ContractNextStepCta({
           variant={canCreatePassport ? "outline" : "default"}
         >
           <Link
-            to={routes.waste.ttns.new}
+            to={routes.ttns.new}
             search={{ recycling_contract_id: contractId }}
           >
             Создать ТТН

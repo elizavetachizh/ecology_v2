@@ -30,7 +30,7 @@ export function nextSyncedPermitEndDate(params: {
 
 const isoDate = isoDateZodSchema();
 
-const burialAmount = z
+const limitAmount = z
   .string()
   .trim()
   .refine((value) => {
@@ -39,6 +39,46 @@ const burialAmount = z
     const n = Number(value);
     return Number.isFinite(n) && n > 0 && n <= 999_999.999_999;
   }, "Лимит должен быть больше 0 и не больше 999999.999999");
+
+const limitWasteRow = z.object({
+  waste_id: z.union([z.uuid(), z.literal("")]),
+  amount: limitAmount,
+  label: z.string(),
+  uomLabel: z.string(),
+});
+
+function addDuplicateAndAmountIssues(
+  rows: { waste_id: string; amount: string }[],
+  field: "burial_wastes" | "storage_wastes",
+  emptyAmountMessage: string,
+  ctx: {
+    addIssue: (issue: {
+      code: "custom";
+      path: (string | number)[];
+      message: string;
+    }) => void;
+  },
+) {
+  const seen = new Set<string>();
+  rows.forEach((item, index) => {
+    if (!item.waste_id) return;
+    if (!item.amount) {
+      ctx.addIssue({
+        code: "custom",
+        path: [field, index, "amount"],
+        message: emptyAmountMessage,
+      });
+    }
+    if (seen.has(item.waste_id)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [field, index, "waste_id"],
+        message: "Этот отход уже есть в перечне",
+      });
+    }
+    seen.add(item.waste_id);
+  });
+}
 
 export const permitFormSchema = z
   .object({
@@ -56,14 +96,8 @@ export const permitFormSchema = z
         z.null(),
       ])
       .optional(),
-    burial_wastes: z.array(
-      z.object({
-        waste_id: z.union([z.uuid(), z.literal("")]),
-        amount: burialAmount,
-        label: z.string(),
-        uomLabel: z.string(),
-      }),
-    ),
+    burial_wastes: z.array(limitWasteRow),
+    storage_wastes: z.array(limitWasteRow),
   })
   .superRefine((values, ctx) => {
     if (values.end_date && values.end_date < values.start_date) {
@@ -73,31 +107,24 @@ export const permitFormSchema = z
         message: "Дата окончания не может быть раньше даты начала",
       });
     }
-    const seen = new Set<string>();
-    values.burial_wastes.forEach((item, index) => {
-      if (!item.waste_id) return;
-      if (!item.amount) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["burial_wastes", index, "amount"],
-          message: "Укажите лимит на захоронение",
-        });
-      }
-      if (seen.has(item.waste_id)) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["burial_wastes", index, "waste_id"],
-          message: "Этот отход уже есть в перечне",
-        });
-      }
-      seen.add(item.waste_id);
-    });
+    addDuplicateAndAmountIssues(
+      values.burial_wastes,
+      "burial_wastes",
+      "Укажите лимит на захоронение",
+      ctx,
+    );
+    addDuplicateAndAmountIssues(
+      values.storage_wastes,
+      "storage_wastes",
+      "Укажите лимит на хранение",
+      ctx,
+    );
   });
 
 export type PermitFormValues = z.infer<typeof permitFormSchema>;
-export type PermitFormBurialWaste = PermitFormValues["burial_wastes"][number];
+export type PermitFormLimitWaste = PermitFormValues["burial_wastes"][number];
 
-export const emptyPermitBurialWasteRow: PermitFormBurialWaste = {
+export const emptyPermitLimitWasteRow: PermitFormLimitWaste = {
   waste_id: "",
   amount: "",
   label: "",
@@ -112,5 +139,6 @@ export const permitFormDefaultValues: PermitFormValues = {
   start_date: startDate,
   end_date: endDate,
   unit_id: "",
-  burial_wastes: [{ ...emptyPermitBurialWasteRow }],
+  burial_wastes: [{ ...emptyPermitLimitWasteRow }],
+  storage_wastes: [{ ...emptyPermitLimitWasteRow }],
 };

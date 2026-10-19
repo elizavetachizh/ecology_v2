@@ -71,16 +71,7 @@ export function CreateUnitPage() {
                 ? "Журнал ПОД-9 успешно создан"
                 : "Единица успешно создана",
             );
-            // После создания ПОД-9 всегда открываем карточку с привязками отходов.
-            if (unit.is_pod9) {
-              void navigate({
-                to: routes.directories.units.detail,
-                params: { unitId: unit.id },
-                search: { instructionId: undefined },
-                replace: true,
-              });
-              return;
-            }
+
             if (close) {
               void navigate({
                 to: routes.directories.units.list,

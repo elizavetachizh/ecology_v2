@@ -31,7 +31,7 @@ function passportsColumns(
       ),
       cell: ({ row }) => (
         <Link
-          to={routes.waste.passports.detail}
+          to={routes.passports.detail}
           params={{ passportId: row.original.id }}
           className="font-medium hover:underline"
         >
@@ -117,7 +117,7 @@ function passportsColumns(
           )}
           <DataTableRowAction asChild label="Изменить паспорт">
             <Link
-              to={routes.waste.passports.detail}
+              to={routes.passports.detail}
               params={{ passportId: row.original.id }}
             >
               <Pencil />

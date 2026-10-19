@@ -36,7 +36,7 @@ export function EditPermitPage() {
     return (
       <AlertDetailPageError
         directoryTo={routes.directories.permits.list}
-        linkLabel="К разрешениям"
+        linkLabel="К разрешениям на хранение и захоронение отходов"
         description="Разрешение не найдено."
       />
     );

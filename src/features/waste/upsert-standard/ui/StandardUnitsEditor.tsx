@@ -80,7 +80,7 @@ export function StandardUnitsEditor({
 
       {fields.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Добавьте место учёта, чтобы задать нормативы по отходам.
+          Добавьте место учёта, чтобы задать нормативы образования отходов.
         </p>
       ) : null}
 
