@@ -3,6 +3,8 @@ import type {
   GetDashboardBalanceStatParams,
   GetDashboardBurialPermitStatParams,
   GetDashboardBurialPermitsParams,
+  GetDashboardFormedParams,
+  GetDashboardFormedStatParams,
 } from "./dashboards.types";
 
 export const dashboardsQueryKeys = {
@@ -22,4 +24,10 @@ export const dashboardsQueryKeys = {
     tenantId: string,
     params: GetDashboardBurialPermitStatParams,
   ) => [...dashboardsQueryKeys.burialPermitStats(), tenantId, params] as const,
+  formedLists: () => [...dashboardsQueryKeys.all, "formed"] as const,
+  formed: (tenantId: string, params: GetDashboardFormedParams) =>
+    [...dashboardsQueryKeys.formedLists(), tenantId, params] as const,
+  formedStats: () => [...dashboardsQueryKeys.all, "formed-stat"] as const,
+  formedStat: (tenantId: string, params: GetDashboardFormedStatParams) =>
+    [...dashboardsQueryKeys.formedStats(), tenantId, params] as const,
 };

@@ -42,6 +42,7 @@ describe("parseHomeSearch", () => {
       year: undefined,
       permit_id: undefined,
       permit_waste_id: undefined,
+      formed_waste_id: undefined,
     });
   });
 
@@ -59,6 +60,7 @@ describe("parseHomeSearch", () => {
       year: undefined,
       permit_id: undefined,
       permit_waste_id: undefined,
+      formed_waste_id: undefined,
     });
   });
 
@@ -77,7 +79,29 @@ describe("parseHomeSearch", () => {
       year: 2026,
       permit_id: "permit-1",
       permit_waste_id: "waste-1",
+      formed_waste_id: undefined,
     });
+  });
+
+  it("parses formed waste selection without a second year", () => {
+    expect(
+      parseHomeSearch({
+        year: "2026",
+        formed_waste_id: "waste-formed",
+      }),
+    ).toEqual({
+      on_date: undefined,
+      unit_id: undefined,
+      waste_id: undefined,
+      months: undefined,
+      year: 2026,
+      permit_id: undefined,
+      permit_waste_id: undefined,
+      formed_waste_id: "waste-formed",
+    });
+    expect(parseHomeSearch({ formed_waste_id: "  " }).formed_waste_id).toBe(
+      undefined,
+    );
   });
 });
 

@@ -18,11 +18,15 @@ import { getDashboardBalance } from "../../entities/waste/dashboards";
 import { getDashboardBalanceStat } from "../../entities/waste/dashboards";
 import { getDashboardBurialPermits } from "../../entities/waste/dashboards";
 import { getDashboardBurialPermitStat } from "../../entities/waste/dashboards";
+import { getDashboardFormed } from "../../entities/waste/dashboards";
+import { getDashboardFormedStat } from "../../entities/waste/dashboards";
 import {
   dashboardBalanceFixture,
   dashboardBalanceStatFixture,
   dashboardBurialPermitFixture,
   dashboardBurialPermitStatFixture,
+  dashboardFormedFixture,
+  dashboardFormedStatFixture,
 } from "../../entities/waste/dashboards/model/dashboard.fixture";
 import { HomePage } from "./HomePage";
 
@@ -61,12 +65,25 @@ vi.mock(
   }),
 );
 
+vi.mock("../../entities/waste/dashboards/api/get-dashboard-formed", () => ({
+  getDashboardFormed: vi.fn(),
+}));
+
+vi.mock(
+  "../../entities/waste/dashboards/api/get-dashboard-formed-stat",
+  () => ({
+    getDashboardFormedStat: vi.fn(),
+  }),
+);
+
 const getDashboardBalanceMock = vi.mocked(getDashboardBalance);
 const getDashboardBalanceStatMock = vi.mocked(getDashboardBalanceStat);
 const getDashboardBurialPermitsMock = vi.mocked(getDashboardBurialPermits);
 const getDashboardBurialPermitStatMock = vi.mocked(
   getDashboardBurialPermitStat,
 );
+const getDashboardFormedMock = vi.mocked(getDashboardFormed);
+const getDashboardFormedStatMock = vi.mocked(getDashboardFormedStat);
 
 const user = currentUser({ email: null });
 
@@ -127,6 +144,10 @@ describe("HomePage", () => {
     getDashboardBurialPermitStatMock.mockResolvedValue(
       dashboardBurialPermitStatFixture,
     );
+    getDashboardFormedMock.mockReset();
+    getDashboardFormedStatMock.mockReset();
+    getDashboardFormedMock.mockResolvedValue(dashboardFormedFixture);
+    getDashboardFormedStatMock.mockResolvedValue(dashboardFormedStatFixture);
   });
 
   it("asks to pick an organization when tenant is missing", () => {
@@ -134,17 +155,18 @@ describe("HomePage", () => {
     expect(screen.getByText("Выберите организацию")).toBeInTheDocument();
     expect(getDashboardBalanceMock).not.toHaveBeenCalled();
     expect(getDashboardBurialPermitsMock).not.toHaveBeenCalled();
+    expect(getDashboardFormedMock).not.toHaveBeenCalled();
+    expect(getDashboardFormedStatMock).not.toHaveBeenCalled();
   });
 
   it("loads the as-of snapshot and the first series", async () => {
     renderPage();
 
     expect(await screen.findByText("Остатки отходов")).toBeInTheDocument();
-    expect(
-      (await screen.findAllByText("Test waste")).length,
-    ).toBeGreaterThan(0);
-    expect(screen.getByText("Подразделений")).toBeInTheDocument();
-    expect(screen.getByText("Позиций")).toBeInTheDocument();
+    expect((await screen.findAllByText("Test waste")).length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.getByText("Динамика остатка")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(getDashboardBalanceMock).toHaveBeenCalledWith(
@@ -175,6 +197,22 @@ describe("HomePage", () => {
         {
           year: 2026,
           permit_id: "permit-1",
+          waste_id: "waste-1",
+        },
+        expect.any(AbortSignal),
+      );
+    });
+    expect(await screen.findByText("Образование отходов")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getDashboardFormedMock).toHaveBeenCalledWith(
+        { year: 2026 },
+        expect.any(AbortSignal),
+      );
+    });
+    await waitFor(() => {
+      expect(getDashboardFormedStatMock).toHaveBeenCalledWith(
+        {
+          year: 2026,
           waste_id: "waste-1",
         },
         expect.any(AbortSignal),
@@ -211,6 +249,23 @@ describe("HomePage", () => {
       on_date: "2026-08-15",
       permit_id: "permit-1",
       permit_waste_id: "waste-2",
+    });
+  });
+
+  it("writes the clicked formed waste to search params", async () => {
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getAllByText("Zero waste")).toHaveLength(3);
+    });
+    fireEvent.click(screen.getAllByText("Zero waste")[2]!);
+
+    expect(navigateMock).toHaveBeenCalled();
+    const updater = navigateMock.mock.calls[0]![0].search as (prev: {
+      on_date?: string;
+    }) => unknown;
+    expect(updater({ on_date: "2026-08-15" })).toEqual({
+      on_date: "2026-08-15",
+      formed_waste_id: "waste-2",
     });
   });
 

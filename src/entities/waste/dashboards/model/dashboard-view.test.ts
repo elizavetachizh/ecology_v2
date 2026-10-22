@@ -3,16 +3,21 @@ import {
   currentCalendarYear,
   firstBurialPermitSelection,
   firstDashboardSelection,
+  firstFormedSelection,
   flattenDashboardBalance,
   formatBalanceAmount,
   sumChartAmounts,
   toChartPoints,
+  toFormedMonthPoints,
+  toFormedUnitPoints,
   wasteTitle,
   yearFromIsoDate,
 } from "./dashboard-view";
 import {
   dashboardBalanceFixture,
   dashboardBurialPermitFixture,
+  dashboardFormedFixture,
+  dashboardFormedStatFixture,
 } from "./dashboard.fixture";
 import { todayIsoDate } from "../../../../shared/lib/format-date";
 
@@ -152,5 +157,65 @@ describe("sumChartAmounts", () => {
         { date: "2026-02-28", amount: "3" },
       ]),
     ).toBe(8);
+  });
+});
+
+describe("firstFormedSelection", () => {
+  it("prefers the first non-zero amount", () => {
+    expect(
+      firstFormedSelection([
+        dashboardFormedFixture[1]!,
+        dashboardFormedFixture[0]!,
+      ]),
+    ).toEqual({ waste_id: "waste-1" });
+  });
+
+  it("falls back to the first row when every amount is zero", () => {
+    expect(firstFormedSelection([dashboardFormedFixture[1]!])).toEqual({
+      waste_id: "waste-2",
+    });
+  });
+
+  it("returns null when there are no rows", () => {
+    expect(firstFormedSelection([])).toBeNull();
+  });
+});
+
+describe("toFormedUnitPoints", () => {
+  it("uses the short unit name and converts amounts", () => {
+    expect(toFormedUnitPoints(dashboardFormedStatFixture.units)).toEqual([
+      { name: "А", amount: 10.5 },
+      { name: "Цех Б", amount: 4.5 },
+    ]);
+  });
+
+  it("treats a non-numeric amount as 0", () => {
+    expect(
+      toFormedUnitPoints([
+        { unit: dashboardBalanceFixture.unit, amount: "bad" },
+      ]),
+    ).toEqual([{ name: "А", amount: 0 }]);
+  });
+});
+
+describe("toFormedMonthPoints", () => {
+  it("maps current and previous amounts and keeps the month number", () => {
+    expect(toFormedMonthPoints(dashboardFormedStatFixture.months)).toEqual([
+      { month: 1, current: 1.5, previous: 0 },
+      { month: 2, current: 0, previous: 2 },
+      ...Array.from({ length: 10 }, (_, index) => ({
+        month: index + 3,
+        current: 0,
+        previous: 0,
+      })),
+    ]);
+  });
+
+  it("treats non-numeric amounts as 0", () => {
+    expect(
+      toFormedMonthPoints([
+        { month: 3, current_amount: "n/a", previous_amount: "bad" },
+      ]),
+    ).toEqual([{ month: 3, current: 0, previous: 0 }]);
   });
 });

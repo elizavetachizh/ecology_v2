@@ -92,3 +92,47 @@ export type GetDashboardBurialPermitStatParams = {
   permit_id: string;
   waste_id: string;
 };
+
+export type DashboardFormed = {
+  waste: WasteBrief;
+  amount: string;
+};
+
+export type DashboardFormedUnit = {
+  unit: UnitBrief;
+  amount: string;
+};
+
+export type DashboardFormedMonth = {
+  month: number;
+  current_amount: string;
+  previous_amount: string;
+};
+
+export type DashboardFormedStat = {
+  waste: WasteBrief;
+  year: number;
+  previous_year: number;
+  units: DashboardFormedUnit[];
+  months: DashboardFormedMonth[];
+};
+
+export type GetDashboardFormedParams = {
+  year: number;
+};
+
+export type GetDashboardFormedStatParams = {
+  year: number;
+  waste_id: string;
+};
+
+export type DashboardFormedUnitPoint = {
+  name: string;
+  amount: number;
+};
+
+export type DashboardFormedMonthPoint = {
+  month: number;
+  current: number;
+  previous: number;
+};

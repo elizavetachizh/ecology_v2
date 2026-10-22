@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import {
   Area,
   AreaChart,
@@ -20,6 +19,7 @@ import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
 import { Select } from "../../../../shared/ui";
+import { ChartEmpty, ChartFrame, ChartHeader } from "./dashboard-chart";
 
 type DashboardBalanceChartProps = {
   stat: DashboardBalanceStat | null;
@@ -30,14 +30,6 @@ type DashboardBalanceChartProps = {
   selected: boolean;
 };
 
-function ChartFrame({ children }: { children: ReactNode }) {
-  return (
-    <section className="flex min-h-80 flex-col rounded-xl border border-border bg-card p-4">
-      {children}
-    </section>
-  );
-}
-
 function monthOptions(months: number): number[] {
   if (DASHBOARD_MONTHS_PRESETS.some((preset) => preset === months)) {
     return [...DASHBOARD_MONTHS_PRESETS];
@@ -45,56 +37,26 @@ function monthOptions(months: number): number[] {
   return [...DASHBOARD_MONTHS_PRESETS, months].sort((a, b) => a - b);
 }
 
-function ChartHeader({
-  title,
-  description,
-  amount,
-  months,
-  onMonthsChange,
-}: {
-  title: string;
-  description?: string;
-  amount?: string;
-  months: number;
-  onMonthsChange: (months: number) => void;
-}) {
+function monthActions(
+  months: number,
+  onMonthsChange: (months: number) => void,
+) {
   return (
-    <div className="mb-3 flex flex-col items-start justify-between gap-2">
-      <div className="min-w-0 space-y-1">
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        ) : null}
-        {amount ? (
-          <p className="text-2xl font-semibold tabular-nums tracking-tight">
-            {amount}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm text-muted-foreground">месяцев</span>
-        <Select
-          aria-label="Число точек графика"
-          className="w-20"
-          value={String(months)}
-          onChange={(event) => onMonthsChange(Number(event.target.value))}
-        >
-          {monthOptions(months).map((preset) => (
-            <option key={preset} value={preset}>
-              {preset}
-            </option>
-          ))}
-        </Select>
-      </div>
-    </div>
-  );
-}
-
-function ChartEmpty({ children }: { children: ReactNode }) {
-  return (
-    <p className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-      {children}
-    </p>
+    <>
+      <span className="text-sm text-muted-foreground">месяцев</span>
+      <Select
+        aria-label="Число точек графика"
+        className="w-20"
+        value={String(months)}
+        onChange={(event) => onMonthsChange(Number(event.target.value))}
+      >
+        {monthOptions(months).map((preset) => (
+          <option key={preset} value={preset}>
+            {preset}
+          </option>
+        ))}
+      </Select>
+    </>
   );
 }
 
@@ -147,8 +109,7 @@ export function DashboardBalanceChart({
         <ChartHeader
           title="Динамика остатка"
           description="Выберите отход в таблице, чтобы увидеть график."
-          months={months}
-          onMonthsChange={onMonthsChange}
+          actions={monthActions(months, onMonthsChange)}
         />
         <ChartEmpty>Нет выбранной пары подразделение / отход.</ChartEmpty>
       </ChartFrame>
@@ -161,8 +122,7 @@ export function DashboardBalanceChart({
       <ChartFrame>
         <ChartHeader
           title="Динамика остатка"
-          months={months}
-          onMonthsChange={onMonthsChange}
+          actions={monthActions(months, onMonthsChange)}
         />
         <ChartEmpty>
           {notFound
@@ -183,8 +143,7 @@ export function DashboardBalanceChart({
         amount={
           last ? `${formatBalanceAmount(String(last.amount))} ${uom}` : "-"
         }
-        months={months}
-        onMonthsChange={onMonthsChange}
+        actions={monthActions(months, onMonthsChange)}
       />
       <div
         className="h-72 w-full min-w-0"

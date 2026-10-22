@@ -1,15 +1,19 @@
 import { useMemo } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import type { HomeSearch } from "../../app/router/search-params";
 import { useTenant } from "../../entities/tenant";
 import {
   currentCalendarYear,
   DEFAULT_DASHBOARD_MONTHS,
   firstBurialPermitSelection,
   firstDashboardSelection,
+  firstFormedSelection,
   useDashboardBalanceQuery,
   useDashboardBalanceStatQuery,
   useDashboardBurialPermitStatQuery,
   useDashboardBurialPermitsQuery,
+  useDashboardFormedQuery,
+  useDashboardFormedStatQuery,
   yearFromIsoDate,
 } from "../../entities/waste/dashboards";
 import {
@@ -19,15 +23,13 @@ import {
   DashboardBurialPermitChart,
   DashboardBurialPermitTable,
   DashboardFilters,
+  DashboardFormedCharts,
+  DashboardFormedFilters,
+  DashboardFormedTable,
+  DashboardSection,
 } from "../../features/waste/view-dashboard";
 import { routes } from "../../shared/config/routes";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  PageContextBar,
-  TenantRequiredGate,
-} from "../../shared/ui";
+import { TenantRequiredGate } from "../../shared/ui";
 import { todayIsoDate } from "../../shared/lib/format-date";
 
 export function HomePage() {
@@ -82,15 +84,27 @@ export function HomePage() {
     enabled: burialSelected,
   });
 
-  const patchSearch = (patch: {
-    on_date?: string;
-    unit_id?: string;
-    waste_id?: string;
-    months?: number;
-    year?: number;
-    permit_id?: string;
-    permit_waste_id?: string;
-  }) => {
+  const formedQuery = useDashboardFormedQuery({
+    tenantId: activeTenantId,
+    params: { year },
+  });
+  const formedFallback = useMemo(
+    () => firstFormedSelection(formedQuery.groups),
+    [formedQuery.groups],
+  );
+  const formedWasteId = search.formed_waste_id ?? formedFallback?.waste_id;
+  const formedSelected = Boolean(formedWasteId);
+
+  const formedStatQuery = useDashboardFormedStatQuery({
+    tenantId: activeTenantId,
+    params: {
+      year,
+      waste_id: formedWasteId ?? "",
+    },
+    enabled: formedSelected,
+  });
+
+  const patchSearch = (patch: Partial<HomeSearch>) => {
     void navigate({
       search: (prev) => ({ ...prev, ...patch }),
     });
@@ -103,91 +117,105 @@ export function HomePage() {
       description="Чтобы увидеть остатки отходов, выберите организацию в верхней панели."
     >
       <div className="space-y-8">
-        {error ? (
-          <Alert variant="error">
-            <AlertTitle>Не удалось загрузить остатки</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            <PageContextBar
-              sticky={false}
-              title="Остатки отходов"
-              description="Снимок на выбранную дату. Нажмите строку, чтобы открыть динамику."
-              actions={
-                <DashboardFilters
-                  values={{ on_date: onDate }}
-                  onChange={(patch) => patchSearch(patch)}
-                />
+        <DashboardSection
+          error={error}
+          errorTitle="Не удалось загрузить остатки"
+          title="Остатки отходов"
+          description="Снимок на выбранную дату. Нажмите строку, чтобы открыть динамику."
+          actions={
+            <DashboardFilters
+              values={{ on_date: onDate }}
+              onChange={(patch) => patchSearch(patch)}
+            />
+          }
+          table={
+            <DashboardBalanceTable
+              groups={groups}
+              loading={loading}
+              selectedUnitId={unitId}
+              selectedWasteId={wasteId}
+              onSelect={(selection) => patchSearch(selection)}
+            />
+          }
+          chart={
+            <DashboardBalanceChart
+              stat={statQuery.stat}
+              loading={statQuery.loading}
+              error={statQuery.error}
+              months={months}
+              selected={selected}
+              onMonthsChange={(nextMonths) =>
+                patchSearch({ months: nextMonths })
               }
             />
+          }
+        />
 
-            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
-              <DashboardBalanceTable
-                groups={groups}
-                loading={loading}
-                selectedUnitId={unitId}
-                selectedWasteId={wasteId}
-                onSelect={(selection) => patchSearch(selection)}
-              />
-              <div className="xl:sticky xl:top-4">
-                <DashboardBalanceChart
-                  stat={statQuery.stat}
-                  loading={statQuery.loading}
-                  error={statQuery.error}
-                  months={months}
-                  selected={selected}
-                  onMonthsChange={(nextMonths) =>
-                    patchSearch({ months: nextMonths })
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {burialQuery.error ? (
-          <Alert variant="error">
-            <AlertTitle>Не удалось загрузить разрешения</AlertTitle>
-            <AlertDescription>{burialQuery.error.message}</AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            <PageContextBar
-              sticky={false}
-              title="Захоронение"
-              description="Факт вывоза на захоронение за год по разрешениям. Нажмите строку, чтобы открыть график по месяцам."
-              actions={
-                <DashboardBurialFilters
-                  values={{ year }}
-                  onChange={(patch) => patchSearch(patch)}
-                />
+        <DashboardSection
+          error={burialQuery.error}
+          errorTitle="Не удалось загрузить разрешения"
+          title="Захоронение"
+          description="Факт вывоза на захоронение за год по разрешениям. Нажмите строку, чтобы открыть график по месяцам."
+          actions={
+            <DashboardBurialFilters
+              values={{ year }}
+              onChange={(patch) => patchSearch(patch)}
+            />
+          }
+          table={
+            <DashboardBurialPermitTable
+              groups={burialQuery.groups}
+              loading={burialQuery.loading}
+              selectedPermitId={permitId}
+              selectedWasteId={permitWasteId}
+              onSelect={(selection) =>
+                patchSearch({
+                  permit_id: selection.permit_id,
+                  permit_waste_id: selection.waste_id,
+                })
               }
             />
-            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
-              <DashboardBurialPermitTable
-                groups={burialQuery.groups}
-                loading={burialQuery.loading}
-                selectedPermitId={permitId}
-                selectedWasteId={permitWasteId}
-                onSelect={(selection) =>
-                  patchSearch({
-                    permit_id: selection.permit_id,
-                    permit_waste_id: selection.waste_id,
-                  })
-                }
-              />
-              <div className="xl:sticky xl:top-4">
-                <DashboardBurialPermitChart
-                  stat={burialStatQuery.stat}
-                  loading={burialStatQuery.loading}
-                  error={burialStatQuery.error}
-                  selected={burialSelected}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+          }
+          chart={
+            <DashboardBurialPermitChart
+              stat={burialStatQuery.stat}
+              loading={burialStatQuery.loading}
+              error={burialStatQuery.error}
+              selected={burialSelected}
+            />
+          }
+        />
+
+        <DashboardSection
+          error={formedQuery.error}
+          errorTitle="Не удалось загрузить образование отходов"
+          title="Образование отходов"
+          description="Сумма образования за год. Нажмите строку, чтобы открыть распределение по подразделениям и динамику по месяцам."
+          actions={
+            <DashboardFormedFilters
+              values={{ year }}
+              onChange={(patch) => patchSearch(patch)}
+            />
+          }
+          table={
+            <DashboardFormedTable
+              rows={formedQuery.groups}
+              loading={formedQuery.loading}
+              selectedWasteId={formedWasteId}
+              onSelect={(selection) =>
+                patchSearch({ formed_waste_id: selection.waste_id })
+              }
+            />
+          }
+          chart={
+            <DashboardFormedCharts
+              stat={formedStatQuery.stat}
+              loading={formedStatQuery.loading}
+              error={formedStatQuery.error}
+              selected={formedSelected}
+            />
+          }
+        />
       </div>
     </TenantRequiredGate>
   );

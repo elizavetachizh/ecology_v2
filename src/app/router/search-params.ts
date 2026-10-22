@@ -133,7 +133,7 @@ export type OrdersSearch = ListSearchParams<OrderSortField> & {
   unit_id?: string;
 };
 
-/** Главная: as-of остатки + выбранная цепочка для графика + захоронение. */
+/** Главная: as-of остатки + выбранная цепочка для графика + захоронение + образование. */
 export type HomeSearch = {
   on_date?: string;
   unit_id?: string;
@@ -142,6 +142,7 @@ export type HomeSearch = {
   year?: number;
   permit_id?: string;
   permit_waste_id?: string;
+  formed_waste_id?: string;
 };
 
 export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
@@ -161,6 +162,7 @@ export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
     ),
     permit_id: parseSearchQuery(search.permit_id),
     permit_waste_id: parseSearchQuery(search.permit_waste_id),
+    formed_waste_id: parseSearchQuery(search.formed_waste_id),
   };
 }
 

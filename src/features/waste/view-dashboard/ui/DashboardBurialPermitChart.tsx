@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -19,6 +18,7 @@ import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { ChartEmpty, ChartFrame, ChartHeader } from "./dashboard-chart";
 
 type DashboardBurialPermitChartProps = {
   stat: DashboardBurialPermitStat | null;
@@ -26,46 +26,6 @@ type DashboardBurialPermitChartProps = {
   error?: Error | null;
   selected: boolean;
 };
-
-function ChartFrame({ children }: { children: ReactNode }) {
-  return (
-    <section className="flex min-h-80 flex-col rounded-xl border border-border bg-card p-4">
-      {children}
-    </section>
-  );
-}
-
-function ChartHeader({
-  title,
-  description,
-  amount,
-}: {
-  title: string;
-  description?: string;
-  amount?: string;
-}) {
-  return (
-    <div className="mb-3 min-w-0 space-y-1">
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      {description ? (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      ) : null}
-      {amount ? (
-        <p className="text-2xl font-semibold tabular-nums tracking-tight">
-          {amount}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function ChartEmpty({ children }: { children: ReactNode }) {
-  return (
-    <p className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-      {children}
-    </p>
-  );
-}
 
 function tooltipValue(payload: unknown): string | number | undefined {
   if (!Array.isArray(payload) || payload[0] == null) return undefined;

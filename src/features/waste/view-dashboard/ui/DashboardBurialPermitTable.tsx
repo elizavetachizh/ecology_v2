@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../shared/ui";
+import { selectOnActivate } from "../lib/select-on-activate";
 
 type DashboardBurialPermitTableProps = {
   groups: DashboardBurialPermit[];
@@ -26,16 +27,6 @@ type DashboardBurialPermitTableProps = {
   selectedWasteId?: string;
   onSelect: (selection: { permit_id: string; waste_id: string }) => void;
 };
-
-function selectOnActivate(
-  event: { key: string; preventDefault: () => void },
-  select: () => void,
-) {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    select();
-  }
-}
 
 function permitPeriod(startDate: string, endDate: string | null): string {
   const start = formatDate(startDate);

@@ -3,6 +3,8 @@ import type {
   DashboardBalanceStat,
   DashboardBurialPermit,
   DashboardBurialPermitStat,
+  DashboardFormed,
+  DashboardFormedStat,
 } from "./dashboards.types";
 
 export const dashboardBalanceFixture: DashboardBalance = {
@@ -95,4 +97,33 @@ export const dashboardBurialPermitStatFixture: DashboardBurialPermitStat = {
     { date: "2026-11-30", amount: "0" },
     { date: "2026-12-31", amount: "0" },
   ],
+};
+
+export const dashboardFormedFixture: DashboardFormed[] = [
+  {
+    waste: dashboardBalanceFixture.wastes[0]!.waste,
+    amount: "15.000000",
+  },
+  {
+    waste: dashboardBalanceFixture.wastes[1]!.waste,
+    amount: "0",
+  },
+];
+
+export const dashboardFormedStatFixture: DashboardFormedStat = {
+  waste: dashboardFormedFixture[0]!.waste,
+  year: 2026,
+  previous_year: 2025,
+  units: [
+    { unit: dashboardBalanceFixture.unit, amount: "10.500000" },
+    {
+      unit: { id: "unit-2", name: "Цех Б", short_name: null },
+      amount: "4.500000",
+    },
+  ],
+  months: Array.from({ length: 12 }, (_, index) => ({
+    month: index + 1,
+    current_amount: index === 0 ? "1.500000" : "0",
+    previous_amount: index === 1 ? "2.000000" : "0",
+  })),
 };

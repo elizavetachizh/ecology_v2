@@ -51,5 +51,22 @@ describe("dashboardsQueryKeys", () => {
       "tenant-1",
       burialStatParams,
     ]);
+
+    const formedParams = { year: 2026 };
+    const formedStatParams = { year: 2026, waste_id: "waste-1" };
+    expect(dashboardsQueryKeys.formedLists()).toEqual(["dashboards", "formed"]);
+    expect(dashboardsQueryKeys.formed("tenant-1", formedParams)).toEqual([
+      "dashboards",
+      "formed",
+      "tenant-1",
+      formedParams,
+    ]);
+    expect(dashboardsQueryKeys.formedStats()).toEqual([
+      "dashboards",
+      "formed-stat",
+    ]);
+    expect(
+      dashboardsQueryKeys.formedStat("tenant-1", formedStatParams),
+    ).toEqual(["dashboards", "formed-stat", "tenant-1", formedStatParams]);
   });
 });

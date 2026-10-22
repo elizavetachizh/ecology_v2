@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../shared/ui";
+import { selectOnActivate } from "../lib/select-on-activate";
 
 type DashboardBalanceTableProps = {
   groups: DashboardBalance[];
@@ -27,16 +28,6 @@ type DashboardBalanceTableProps = {
   selectedWasteId?: string;
   onSelect: (selection: { unit_id: string; waste_id: string }) => void;
 };
-
-function selectOnActivate(
-  event: { key: string; preventDefault: () => void },
-  select: () => void,
-) {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    select();
-  }
-}
 
 export function DashboardBalanceTable({
   groups,

@@ -1,3 +1,4 @@
+import { unitLabel } from "../../units";
 import { wasteLabel, type WasteBrief } from "../../wastes";
 import type {
   DashboardBalance,
@@ -5,6 +6,11 @@ import type {
   DashboardBalanceRow,
   DashboardBurialPermit,
   DashboardChartPoint,
+  DashboardFormed,
+  DashboardFormedMonth,
+  DashboardFormedMonthPoint,
+  DashboardFormedUnit,
+  DashboardFormedUnitPoint,
 } from "./dashboards.types";
 
 export function formatBalanceAmount(value: string): string {
@@ -86,4 +92,36 @@ export function firstBurialPermitSelection(
 
 export function sumChartAmounts(points: DashboardBalancePoint[]): number {
   return toChartPoints(points).reduce((sum, point) => sum + point.amount, 0);
+}
+
+export function firstFormedSelection(
+  rows: DashboardFormed[],
+): { waste_id: string } | null {
+  const row = rows.find((item) => isNonZeroAmount(item.amount)) ?? rows[0];
+  if (!row) return null;
+  return { waste_id: row.waste.id };
+}
+
+function chartAmount(value: string): number {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+export function toFormedUnitPoints(
+  units: DashboardFormedUnit[],
+): DashboardFormedUnitPoint[] {
+  return units.map((item) => ({
+    name: unitLabel(item.unit),
+    amount: chartAmount(item.amount),
+  }));
+}
+
+export function toFormedMonthPoints(
+  months: DashboardFormedMonth[],
+): DashboardFormedMonthPoint[] {
+  return months.map((item) => ({
+    month: item.month,
+    current: chartAmount(item.current_amount),
+    previous: chartAmount(item.previous_amount),
+  }));
 }
