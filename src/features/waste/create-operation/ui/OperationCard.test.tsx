@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   makeOperation,
@@ -53,7 +53,12 @@ vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
   };
 });
 
-function renderCard(operation = operationFixture) {
+const SOURCE_ID = "33333333-3333-4333-8333-333333333333";
+
+function renderCard(
+  operation = operationFixture,
+  lockDate: string | null = null,
+) {
   const client = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -64,6 +69,7 @@ function renderCard(operation = operationFixture) {
     <QueryClientProvider client={client}>
       <OperationCard
         operation={operation}
+        lockDate={lockDate}
         onCancel={vi.fn()}
         onDeleted={vi.fn()}
         onSaved={vi.fn()}
@@ -164,6 +170,68 @@ describe("OperationCard", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Сохранить" }),
+    ).toBeInTheDocument();
+  });
+
+  it("is read-only when the operation date is inside the closed period", () => {
+    renderCard(
+      makeOperation({
+        status: "confirmation_required",
+        balance: null,
+        date: "2026-03-01",
+      }),
+      "2026-03-01",
+    );
+
+    expect(
+      screen.getByText(
+        "Закрыт по 01.03.2026. Операции с этой датой и раньше нельзя создавать и изменять.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Дата операции/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Сохранить" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Удалить" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Подтвердить" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Отклонить" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Закрыть" })).toBeInTheDocument();
+  });
+
+  it("keeps editors when the operation date is after the lock", () => {
+    renderCard(makeOperation({ date: "2026-03-02" }), "2026-03-01");
+
+    expect(screen.getByLabelText(/Дата операции/)).toHaveValue("2026-03-02");
+    expect(
+      screen.getByRole("button", { name: "Сохранить" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Закрыт по/)).not.toBeInTheDocument();
+  });
+
+  it("rejects a new date on or before the lock date", async () => {
+    renderCard(
+      makeOperation({
+        date: "2026-03-15",
+        waste_source_id: SOURCE_ID,
+      }),
+      "2026-03-01",
+    );
+
+    fireEvent.change(screen.getByLabelText(/Дата операции/), {
+      target: { value: "2026-03-01" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+
+    expect(
+      await screen.findByText(
+        "Дата попадает в закрытый период (по 01.03.2026)",
+      ),
     ).toBeInTheDocument();
   });
 });

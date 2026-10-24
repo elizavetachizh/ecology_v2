@@ -6,6 +6,9 @@ import {
   firstFormedSelection,
   flattenDashboardBalance,
   formatBalanceAmount,
+  isAmountOverLimit,
+  resolveSummaryRange,
+  summaryPresetRange,
   sumChartAmounts,
   toChartPoints,
   toFormedMonthPoints,
@@ -41,6 +44,17 @@ describe("formatBalanceAmount", () => {
 
   it("returns the original value when not a number", () => {
     expect(formatBalanceAmount("n/a")).toBe("n/a");
+  });
+});
+
+describe("isAmountOverLimit", () => {
+  it("is true only when the year fact is greater than the permit limit", () => {
+    expect(isAmountOverLimit("120.000000", "100.000000")).toBe(true);
+    expect(isAmountOverLimit(12, "10.000000")).toBe(true);
+    expect(isAmountOverLimit("100.000000", "100.000000")).toBe(false);
+    expect(isAmountOverLimit("12.000000", "100.000000")).toBe(false);
+    expect(isAmountOverLimit("n/a", "100")).toBe(false);
+    expect(isAmountOverLimit("12", "n/a")).toBe(false);
   });
 });
 
@@ -133,6 +147,89 @@ describe("currentCalendarYear", () => {
     vi.setSystemTime(new Date(2026, 8, 1, 12, 0, 0));
     expect(currentCalendarYear()).toBe(2026);
     vi.useRealTimers();
+  });
+});
+
+describe("summaryPresetRange", () => {
+  const friday = new Date(2026, 9, 23, 12, 0, 0);
+
+  it("uses the local calendar day for today", () => {
+    expect(summaryPresetRange("this_day", friday)).toEqual({
+      date_from: "2026-10-23",
+      date_to: "2026-10-23",
+    });
+  });
+
+  it("uses Monday–Sunday for the week that contains Friday 2026-10-23", () => {
+    expect(summaryPresetRange("this_week", friday)).toEqual({
+      date_from: "2026-10-19",
+      date_to: "2026-10-25",
+    });
+  });
+
+  it("keeps the same week when today is Sunday", () => {
+    expect(summaryPresetRange("this_week", new Date(2026, 9, 25, 12))).toEqual({
+      date_from: "2026-10-19",
+      date_to: "2026-10-25",
+    });
+  });
+
+  it("uses the first and last day of the month", () => {
+    expect(summaryPresetRange("this_month", friday)).toEqual({
+      date_from: "2026-10-01",
+      date_to: "2026-10-31",
+    });
+  });
+
+  it("uses 1 January through 31 December", () => {
+    expect(summaryPresetRange("this_year", friday)).toEqual({
+      date_from: "2026-01-01",
+      date_to: "2026-12-31",
+    });
+  });
+});
+
+describe("resolveSummaryRange", () => {
+  const friday = new Date(2026, 9, 23, 12, 0, 0);
+
+  it("resolves a named preset and ignores custom dates", () => {
+    expect(
+      resolveSummaryRange("this_week", "2020-01-01", "2020-01-02", friday),
+    ).toEqual({
+      date_from: "2026-10-19",
+      date_to: "2026-10-25",
+      error: null,
+    });
+  });
+
+  it("accepts a custom window when the start is not after the end", () => {
+    expect(
+      resolveSummaryRange("custom", "2026-10-01", "2026-10-23", friday),
+    ).toEqual({
+      date_from: "2026-10-01",
+      date_to: "2026-10-23",
+      error: null,
+    });
+  });
+
+  it("refuses an incomplete custom window", () => {
+    expect(
+      resolveSummaryRange("custom", "2026-10-01", undefined, friday),
+    ).toEqual({
+      date_from: "2026-10-01",
+      date_to: undefined,
+      error: "Укажите начало и конец периода",
+    });
+  });
+
+  it("refuses a custom window whose start is after the end", () => {
+    expect(
+      resolveSummaryRange("custom", "2026-10-31", "2026-10-01", friday),
+    ).toEqual({
+      date_from: "2026-10-31",
+      date_to: "2026-10-01",
+      error: "Дата начала позже даты окончания",
+    });
   });
 });
 

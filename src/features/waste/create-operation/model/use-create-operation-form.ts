@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -10,21 +10,27 @@ import { toOperationWriteBody } from "./map-operation-form";
 import { invalidateOperationQueries } from "./invalidate-operation-queries";
 import {
   createEmptyOperationFormValues,
-  operationFormSchema,
+  createOperationFormSchema,
   type OperationFormValues,
 } from "./operation-form.schema";
 
 type UseCreateOperationFormParams = {
   onSaved: (operation: Operation) => void;
+  lockDate?: string | null;
 };
 
 export function useCreateOperationForm({
   onSaved,
+  lockDate = null,
 }: UseCreateOperationFormParams) {
   const [error, setError] = useState<string | null>(null);
+  const schema = useMemo(
+    () => createOperationFormSchema(lockDate),
+    [lockDate],
+  );
 
   const form = useForm<OperationFormValues>({
-    resolver: zodResolver(operationFormSchema),
+    resolver: zodResolver(schema),
     defaultValues: createEmptyOperationFormValues(),
   });
 

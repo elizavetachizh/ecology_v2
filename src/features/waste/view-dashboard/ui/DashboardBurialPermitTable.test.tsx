@@ -43,11 +43,34 @@ describe("DashboardBurialPermitTable", () => {
 
     expect(screen.getByText("Р-001")).toBeInTheDocument();
     expect(screen.getByText("Test waste")).toBeInTheDocument();
+    expect(
+      screen.getByText("на срок разрешения, не на год"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("12 кг")).not.toHaveClass("text-destructive");
+    expect(screen.getByText("0 кг")).not.toHaveClass("text-destructive");
 
     fireEvent.click(screen.getByText("Zero waste"));
     expect(onSelect).toHaveBeenCalledWith({
       permit_id: "permit-1",
       waste_id: "waste-2",
     });
+  });
+
+  it("highlights a year fact above the permit-term limit", () => {
+    const waste = dashboardBurialPermitFixture.wastes[0]!;
+    render(
+      <DashboardBurialPermitTable
+        groups={[
+          {
+            ...dashboardBurialPermitFixture,
+            wastes: [{ ...waste, amount: "120.000000", limit: "100.000000" }],
+          },
+        ]}
+        onSelect={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("120 кг")).toHaveClass("text-destructive");
+    expect(screen.getByText("100 кг")).not.toHaveClass("text-destructive");
   });
 });

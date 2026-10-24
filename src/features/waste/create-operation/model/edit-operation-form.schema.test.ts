@@ -33,4 +33,34 @@ describe("createEditOperationFormSchema", () => {
     );
     expect(schema.safeParse({ ...base, amount: "0" }).success).toBe(false);
   });
+
+  it("accepts any date when the period is open", () => {
+    expect(createEditOperationFormSchema(false).parse(base)).toEqual(base);
+    expect(createEditOperationFormSchema(false, null).parse(base)).toEqual(
+      base,
+    );
+  });
+
+  it("rejects a date on or before the lock date and accepts a later one", () => {
+    const schema = createEditOperationFormSchema(false, "2026-03-01");
+    const onLock = schema.safeParse(base);
+    expect(onLock.success).toBe(false);
+    if (!onLock.success) {
+      expect(onLock.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["date"],
+            message: "Дата попадает в закрытый период (по 01.03.2026)",
+          }),
+        ]),
+      );
+    }
+    expect(schema.safeParse({ ...base, date: "2026-02-28" }).success).toBe(
+      false,
+    );
+    expect(schema.parse({ ...base, date: "2026-03-02" })).toEqual({
+      ...base,
+      date: "2026-03-02",
+    });
+  });
 });

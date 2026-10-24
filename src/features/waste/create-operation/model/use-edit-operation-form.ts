@@ -17,17 +17,23 @@ import { operationWriteErrorMessage } from "./operation-write-error";
 
 type UseEditOperationFormParams = {
   operation: Operation;
+  lockDate?: string | null;
   onSaved: (operation: Operation, meta: { close: boolean }) => void;
 };
 
 export function useEditOperationForm({
   operation,
+  lockDate = null,
   onSaved,
 }: UseEditOperationFormParams) {
   const [error, setError] = useState<string | null>(null);
   const schema = useMemo(
-    () => createEditOperationFormSchema(operation.operation_type === "formed"),
-    [operation.operation_type],
+    () =>
+      createEditOperationFormSchema(
+        operation.operation_type === "formed",
+        lockDate,
+      ),
+    [lockDate, operation.operation_type],
   );
 
   const values = useMemo(

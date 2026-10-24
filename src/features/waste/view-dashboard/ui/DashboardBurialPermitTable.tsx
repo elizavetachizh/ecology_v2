@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   formatBalanceAmount,
+  isAmountOverLimit,
   isNonZeroAmount,
   type DashboardBurialPermit,
 } from "../../../../entities/waste/dashboards";
@@ -18,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../shared/ui";
+import { BURIAL_PERMIT_LIMIT_CAPTION } from "../lib/burial-permit-limit";
 import { selectOnActivate } from "../lib/select-on-activate";
 
 type DashboardBurialPermitTableProps = {
@@ -47,8 +49,13 @@ export function DashboardBurialPermitTable({
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[16%]">Код</TableHead>
             <TableHead>Наименование</TableHead>
-            <TableHead className="w-[22%] text-right">Факт за год</TableHead>
-            <TableHead className="w-[18%] text-right">Лимит</TableHead>
+            <TableHead className="w-[20%] text-right">Факт за год</TableHead>
+            <TableHead className="h-auto w-[26%] py-2 text-right leading-tight">
+              <span className="block">Лимит</span>
+              <span className="mt-0.5 block font-normal">
+                {BURIAL_PERMIT_LIMIT_CAPTION}
+              </span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -119,6 +126,8 @@ export function DashboardBurialPermitTable({
                     waste_id: item.waste.id,
                   });
                 const uom = UOM_LABEL[item.waste.uom];
+                const overLimit = isAmountOverLimit(item.amount, item.limit);
+                const factLabel = `${formatBalanceAmount(item.amount)} ${uom}`;
                 return (
                   <TableRow
                     key={`${group.permit.id}:${item.waste.id}`}
@@ -140,13 +149,23 @@ export function DashboardBurialPermitTable({
                     <TableCell
                       className={cn(
                         "text-right tabular-nums",
-                        !isNonZeroAmount(item.amount) &&
-                          "text-muted-foreground",
+                        overLimit
+                          ? "font-medium text-destructive"
+                          : !isNonZeroAmount(item.amount) &&
+                              "text-muted-foreground",
                       )}
+                      title={
+                        overLimit
+                          ? "Факт за год выше лимита разрешения"
+                          : undefined
+                      }
                     >
-                      {`${formatBalanceAmount(item.amount)} ${uom}`}
+                      {factLabel}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell
+                      className="text-right tabular-nums"
+                      title={BURIAL_PERMIT_LIMIT_CAPTION}
+                    >
                       {`${formatBalanceAmount(item.limit)} ${uom}`}
                     </TableCell>
                   </TableRow>

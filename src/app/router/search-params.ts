@@ -45,6 +45,8 @@ import {
   DASHBOARD_MONTHS_MIN,
   DASHBOARD_YEAR_MAX,
   DASHBOARD_YEAR_MIN,
+  SUMMARY_PRESET_VALUES,
+  type SummaryPreset,
 } from "../../entities/waste/dashboards";
 
 export type RouterContext = {
@@ -133,16 +135,26 @@ export type OrdersSearch = ListSearchParams<OrderSortField> & {
   unit_id?: string;
 };
 
-/** Главная: as-of остатки + выбранная цепочка для графика + захоронение + образование. */
+/**
+ * Главная: сводка за окно дат, as-of остатки, захоронение и образование.
+ * `summary_preset` по умолчанию `this_month` (на странице, не в URL).
+ * Даты custom живут в `summary_from` / `summary_to`; имя пресета на API не уходит.
+ * `burial_year` и `formed_year` независимы. Пока параметра нет, страница берёт
+ * текущий календарный год. Старый общий `year` не читается.
+ */
 export type HomeSearch = {
   on_date?: string;
   unit_id?: string;
   waste_id?: string;
   months?: number;
-  year?: number;
+  burial_year?: number;
+  formed_year?: number;
   permit_id?: string;
   permit_waste_id?: string;
   formed_waste_id?: string;
+  summary_preset?: SummaryPreset;
+  summary_from?: string;
+  summary_to?: string;
 };
 
 export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
@@ -155,14 +167,22 @@ export function parseHomeSearch(search: Record<string, unknown>): HomeSearch {
       DASHBOARD_MONTHS_MIN,
       DASHBOARD_MONTHS_MAX,
     ),
-    year: parseSearchIntRange(
-      search.year,
+    burial_year: parseSearchIntRange(
+      search.burial_year,
+      DASHBOARD_YEAR_MIN,
+      DASHBOARD_YEAR_MAX,
+    ),
+    formed_year: parseSearchIntRange(
+      search.formed_year,
       DASHBOARD_YEAR_MIN,
       DASHBOARD_YEAR_MAX,
     ),
     permit_id: parseSearchQuery(search.permit_id),
     permit_waste_id: parseSearchQuery(search.permit_waste_id),
     formed_waste_id: parseSearchQuery(search.formed_waste_id),
+    summary_preset: parseSearchEnum(search.summary_preset, SUMMARY_PRESET_VALUES),
+    summary_from: parseSearchIsoDate(search.summary_from),
+    summary_to: parseSearchIsoDate(search.summary_to),
   };
 }
 

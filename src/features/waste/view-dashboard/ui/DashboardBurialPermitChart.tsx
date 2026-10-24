@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import {
   formatBalanceAmount,
+  isAmountOverLimit,
   sumChartAmounts,
   toChartPoints,
   wasteTitle,
@@ -18,6 +19,7 @@ import { unitLabel } from "../../../../entities/waste/units";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { ApiError } from "../../../../shared/api/api-client";
 import { formatDate } from "../../../../shared/lib/format-date";
+import { BURIAL_PERMIT_LIMIT_CAPTION } from "../lib/burial-permit-limit";
 import { ChartEmpty, ChartFrame, ChartHeader } from "./dashboard-chart";
 
 type DashboardBurialPermitChartProps = {
@@ -67,6 +69,9 @@ export function DashboardBurialPermitChart({
   const points = stat ? toChartPoints(stat.points) : [];
   const uom = stat ? UOM_LABEL[stat.waste.uom] : "";
   const yearTotal = stat ? sumChartAmounts(stat.points) : 0;
+  const yearOverLimit = stat
+    ? isAmountOverLimit(yearTotal, stat.limit)
+    : false;
 
   if (!selected) {
     return (
@@ -113,10 +118,23 @@ export function DashboardBurialPermitChart({
             : undefined
         }
         amount={
-          stat
-            ? `${formatBalanceAmount(String(yearTotal))} / ${formatBalanceAmount(stat.limit)} ${uom}`
-            : undefined
+          stat ? (
+            <>
+              <span
+                className={yearOverLimit ? "text-destructive" : undefined}
+                title={
+                  yearOverLimit
+                    ? "Факт за год выше лимита разрешения"
+                    : undefined
+                }
+              >
+                {formatBalanceAmount(String(yearTotal))}
+              </span>
+              {` / ${formatBalanceAmount(stat.limit)} ${uom}`}
+            </>
+          ) : undefined
         }
+        note={stat ? BURIAL_PERMIT_LIMIT_CAPTION : undefined}
       />
       <div
         className="h-72 w-full min-w-0"

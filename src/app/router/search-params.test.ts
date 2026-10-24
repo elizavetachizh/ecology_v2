@@ -39,10 +39,14 @@ describe("parseHomeSearch", () => {
       unit_id: "unit-1",
       waste_id: "waste-1",
       months: 12,
-      year: undefined,
+      burial_year: undefined,
+      formed_year: undefined,
       permit_id: undefined,
       permit_waste_id: undefined,
       formed_waste_id: undefined,
+      summary_preset: undefined,
+      summary_from: undefined,
+      summary_to: undefined,
     });
   });
 
@@ -57,36 +61,24 @@ describe("parseHomeSearch", () => {
       unit_id: undefined,
       waste_id: undefined,
       months: undefined,
-      year: undefined,
+      burial_year: undefined,
+      formed_year: undefined,
       permit_id: undefined,
       permit_waste_id: undefined,
       formed_waste_id: undefined,
+      summary_preset: undefined,
+      summary_from: undefined,
+      summary_to: undefined,
     });
   });
 
-  it("parses burial year and permit selection", () => {
+  it("parses burial and formed years independently", () => {
     expect(
       parseHomeSearch({
-        year: "2026",
+        burial_year: "2025",
+        formed_year: "2024",
         permit_id: "permit-1",
         permit_waste_id: "waste-1",
-      }),
-    ).toEqual({
-      on_date: undefined,
-      unit_id: undefined,
-      waste_id: undefined,
-      months: undefined,
-      year: 2026,
-      permit_id: "permit-1",
-      permit_waste_id: "waste-1",
-      formed_waste_id: undefined,
-    });
-  });
-
-  it("parses formed waste selection without a second year", () => {
-    expect(
-      parseHomeSearch({
-        year: "2026",
         formed_waste_id: "waste-formed",
       }),
     ).toEqual({
@@ -94,14 +86,60 @@ describe("parseHomeSearch", () => {
       unit_id: undefined,
       waste_id: undefined,
       months: undefined,
-      year: 2026,
-      permit_id: undefined,
-      permit_waste_id: undefined,
+      burial_year: 2025,
+      formed_year: 2024,
+      permit_id: "permit-1",
+      permit_waste_id: "waste-1",
       formed_waste_id: "waste-formed",
+      summary_preset: undefined,
+      summary_from: undefined,
+      summary_to: undefined,
     });
     expect(parseHomeSearch({ formed_waste_id: "  " }).formed_waste_id).toBe(
       undefined,
     );
+  });
+
+  it("ignores the legacy shared year and drops years outside 1900…2100", () => {
+    expect(
+      parseHomeSearch({
+        year: "2020",
+        burial_year: "1899",
+        formed_year: "2101",
+      }),
+    ).toMatchObject({
+      burial_year: undefined,
+      formed_year: undefined,
+    });
+  });
+
+  it("parses the summary preset and custom dates", () => {
+    expect(
+      parseHomeSearch({
+        summary_preset: "custom",
+        summary_from: "2026-10-01",
+        summary_to: "2026-10-23",
+      }),
+    ).toMatchObject({
+      summary_preset: "custom",
+      summary_from: "2026-10-01",
+      summary_to: "2026-10-23",
+    });
+    expect(parseHomeSearch({}).summary_preset).toBeUndefined();
+  });
+
+  it("drops an unknown summary preset and broken custom dates", () => {
+    expect(
+      parseHomeSearch({
+        summary_preset: "today",
+        summary_from: "01.10.2026",
+        summary_to: "2026-10-23",
+      }),
+    ).toMatchObject({
+      summary_preset: undefined,
+      summary_from: undefined,
+      summary_to: "2026-10-23",
+    });
   });
 });
 

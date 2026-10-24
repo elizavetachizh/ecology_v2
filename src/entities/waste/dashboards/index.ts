@@ -4,6 +4,7 @@ export { getDashboardBurialPermits } from "./api/get-dashboard-burial-permits";
 export { getDashboardBurialPermitStat } from "./api/get-dashboard-burial-permit-stat";
 export { getDashboardFormed } from "./api/get-dashboard-formed";
 export { getDashboardFormedStat } from "./api/get-dashboard-formed-stat";
+export { getDashboardSummary } from "./api/get-dashboard-summary";
 export type {
   DashboardBalance,
   DashboardBalanceItem,
@@ -21,17 +22,25 @@ export type {
   DashboardFormedUnitPoint,
   DashboardMonthsPreset,
   DashboardPermitBrief,
+  DashboardSummary,
+  DashboardSummaryOpen,
+  DashboardSummaryOperationCounts,
+  DashboardSummaryOperationType,
+  DashboardSummaryPeriod,
+  DashboardSummaryUnit,
   GetDashboardBalanceParams,
   GetDashboardBalanceStatParams,
   GetDashboardBurialPermitStatParams,
   GetDashboardBurialPermitsParams,
   GetDashboardFormedParams,
   GetDashboardFormedStatParams,
+  GetDashboardSummaryParams,
 } from "./model/dashboards.types";
 export {
   DASHBOARD_MONTHS_MAX,
   DASHBOARD_MONTHS_MIN,
   DASHBOARD_MONTHS_PRESETS,
+  DASHBOARD_SUMMARY_OPERATION_TYPES,
   DASHBOARD_YEAR_MAX,
   DASHBOARD_YEAR_MIN,
   DEFAULT_DASHBOARD_MONTHS,
@@ -43,18 +52,30 @@ export { useDashboardBurialPermitsQuery } from "./model/use-dashboard-burial-per
 export { useDashboardBurialPermitStatQuery } from "./model/use-dashboard-burial-permit-stat-query";
 export { useDashboardFormedQuery } from "./model/use-dashboard-formed-query";
 export { useDashboardFormedStatQuery } from "./model/use-dashboard-formed-stat-query";
+export { useDashboardSummaryQuery } from "./model/use-dashboard-summary-query";
 export {
   currentCalendarYear,
+  DEFAULT_SUMMARY_PRESET,
   firstBurialPermitSelection,
   firstDashboardSelection,
   firstFormedSelection,
   flattenDashboardBalance,
   formatBalanceAmount,
+  isAmountOverLimit,
   isNonZeroAmount,
+  resolveSummaryRange,
+  SUMMARY_PRESET_LABEL,
+  SUMMARY_PRESET_VALUES,
+  summaryPresetRange,
   sumChartAmounts,
   toChartPoints,
   toFormedMonthPoints,
   toFormedUnitPoints,
   wasteTitle,
   yearFromIsoDate,
+} from "./model/dashboard-view";
+export type {
+  SummaryDateRange,
+  SummaryPreset,
+  SummaryRangeResolution,
 } from "./model/dashboard-view";

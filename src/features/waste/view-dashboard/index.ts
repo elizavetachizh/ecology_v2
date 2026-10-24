@@ -10,4 +10,5 @@ export { DashboardBurialPermitTable } from "./ui/DashboardBurialPermitTable";
 export { DashboardBurialPermitChart } from "./ui/DashboardBurialPermitChart";
 export { DashboardFormedTable } from "./ui/DashboardFormedTable";
 export { DashboardFormedCharts } from "./ui/DashboardFormedCharts";
+export { DashboardSummarySection } from "./ui/DashboardSummarySection";
 export { DashboardSection } from "./ui/DashboardSection";

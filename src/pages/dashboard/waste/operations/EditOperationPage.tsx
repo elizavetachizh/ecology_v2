@@ -4,6 +4,7 @@ import { useTenant } from "../../../../entities/tenant";
 import {
   getOperation,
   operationsQueryKeys,
+  usePeriodLockQuery,
 } from "../../../../entities/waste/operations";
 import { OperationCard } from "../../../../features/waste/create-operation";
 import {
@@ -23,6 +24,10 @@ export function EditOperationPage() {
     from: routes.operations.detail,
   });
   const { activeTenantId } = useTenant();
+  const { periodLock, loading: periodLockLoading } = usePeriodLockQuery({
+    tenantId: activeTenantId,
+  });
+  const lockDate = periodLock?.lock_date ?? null;
 
   const operationQuery = useQuery({
     queryKey: operationsQueryKeys.detail(activeTenantId ?? "none", operationId),
@@ -30,7 +35,10 @@ export function EditOperationPage() {
     enabled: Boolean(activeTenantId),
   });
 
-  if (operationQuery.isLoading) {
+  if (
+    operationQuery.isLoading ||
+    (operationQuery.isSuccess && periodLockLoading)
+  ) {
     return <p className="text-sm text-muted-foreground">Загрузка…</p>;
   }
 
@@ -53,8 +61,9 @@ export function EditOperationPage() {
       description="Чтобы открыть операцию, выберите организацию в верхней панели."
     >
       <OperationCard
-        key={operationQuery.data.id}
+        key={`${operationQuery.data.id}:${lockDate ?? "open"}`}
         operation={operationQuery.data}
+        lockDate={lockDate}
         onCancel={() => void navigate({ to: routes.operations.list })}
         onSaved={(_operation, { close }) => {
           toast.success("Операция успешно обновлена");

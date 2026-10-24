@@ -136,3 +136,52 @@ export type DashboardFormedMonthPoint = {
   current: number;
   previous: number;
 };
+
+export const DASHBOARD_SUMMARY_OPERATION_TYPES = [
+  "formed",
+  "used",
+  "neutralized",
+  "received_in",
+  "transferred_in",
+  "received_out",
+  "transferred_out",
+] as const;
+
+export type DashboardSummaryOperationType =
+  (typeof DASHBOARD_SUMMARY_OPERATION_TYPES)[number];
+
+export type DashboardSummaryOperationCounts = Record<
+  DashboardSummaryOperationType,
+  number
+>;
+
+export type DashboardSummaryUnit = {
+  unit: UnitBrief;
+  total: number;
+  types: DashboardSummaryOperationCounts;
+};
+
+export type DashboardSummaryPeriod = {
+  date_from: string;
+  date_to: string;
+  operations: number;
+  passports: number;
+  ttns: number;
+  operations_by_unit: DashboardSummaryUnit[];
+};
+
+export type DashboardSummaryOpen = {
+  operations_confirmation_required: number;
+  passports_without_transfer: number;
+  ttns_without_transfer: number;
+};
+
+export type DashboardSummary = {
+  period: DashboardSummaryPeriod;
+  open: DashboardSummaryOpen;
+};
+
+export type GetDashboardSummaryParams = {
+  date_from: string;
+  date_to: string;
+};

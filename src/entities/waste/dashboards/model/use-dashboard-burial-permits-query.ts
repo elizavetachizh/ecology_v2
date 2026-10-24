@@ -28,6 +28,7 @@ export function useDashboardBurialPermitsQuery({
     groups: query.data ?? [],
     loading: canFetch && query.isLoading,
     fetching: canFetch && query.isFetching,
+    ready: query.isSuccess,
     error: query.error,
     refetch: query.refetch,
   };

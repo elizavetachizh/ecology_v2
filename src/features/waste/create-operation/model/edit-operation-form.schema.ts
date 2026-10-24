@@ -1,5 +1,9 @@
 import { z } from "zod";
-import type { Operation } from "../../../../entities/waste/operations";
+import {
+  isOperationDateLocked,
+  type Operation,
+} from "../../../../entities/waste/operations";
+import { formatDate } from "../../../../shared/lib/format-date";
 import {
   operationAmountSchema,
   operationDateSchema,
@@ -7,7 +11,10 @@ import {
 
 const uuidValue = z.uuid();
 
-export function createEditOperationFormSchema(requireWasteSource: boolean) {
+export function createEditOperationFormSchema(
+  requireWasteSource: boolean,
+  lockDate: string | null = null,
+) {
   return z
     .object({
       date: operationDateSchema,
@@ -15,14 +22,23 @@ export function createEditOperationFormSchema(requireWasteSource: boolean) {
       waste_source_id: z.string(),
     })
     .superRefine((values, ctx) => {
-      if (!requireWasteSource) return;
-      if (!uuidValue.safeParse(values.waste_source_id).success) {
+      if (
+        requireWasteSource &&
+        !uuidValue.safeParse(values.waste_source_id).success
+      ) {
         ctx.addIssue({
           code: "custom",
           path: ["waste_source_id"],
           message: "Выберите источник образования",
         });
       }
+
+      if (!lockDate || !isOperationDateLocked(values.date, lockDate)) return;
+      ctx.addIssue({
+        code: "custom",
+        path: ["date"],
+        message: `Дата попадает в закрытый период (по ${formatDate(lockDate)})`,
+      });
     });
 }
 

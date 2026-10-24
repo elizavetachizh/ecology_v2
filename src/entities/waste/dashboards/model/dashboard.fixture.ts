@@ -5,6 +5,7 @@ import type {
   DashboardBurialPermitStat,
   DashboardFormed,
   DashboardFormedStat,
+  DashboardSummary,
 } from "./dashboards.types";
 
 export const dashboardBalanceFixture: DashboardBalance = {
@@ -109,6 +110,51 @@ export const dashboardFormedFixture: DashboardFormed[] = [
     amount: "0",
   },
 ];
+
+const zeroSummaryTypes = {
+  formed: 0,
+  used: 0,
+  neutralized: 0,
+  received_in: 0,
+  transferred_in: 0,
+  received_out: 0,
+  transferred_out: 0,
+} as const;
+
+export const dashboardSummaryFixture: DashboardSummary = {
+  period: {
+    date_from: "2026-10-01",
+    date_to: "2026-10-31",
+    operations: 40,
+    passports: 12,
+    ttns: 7,
+    operations_by_unit: [
+      {
+        unit: { id: "unit-1", name: "Цех №1", short_name: "Ц1" },
+        total: 18,
+        types: {
+          formed: 10,
+          used: 2,
+          neutralized: 1,
+          received_in: 2,
+          transferred_in: 1,
+          received_out: 0,
+          transferred_out: 2,
+        },
+      },
+      {
+        unit: { id: "unit-2", name: "Цех №2", short_name: null },
+        total: 0,
+        types: zeroSummaryTypes,
+      },
+    ],
+  },
+  open: {
+    operations_confirmation_required: 5,
+    passports_without_transfer: 6,
+    ttns_without_transfer: 3,
+  },
+};
 
 export const dashboardFormedStatFixture: DashboardFormedStat = {
   waste: dashboardFormedFixture[0]!.waste,

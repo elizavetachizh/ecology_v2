@@ -143,6 +143,29 @@ describe("api client", () => {
     expect(headers.get("X-Tenant-Id")).toBe("tenant-id");
   });
 
+  it("sends PUT and keeps null fields in the JSON body", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ lock_date: null }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(
+      apiSendJson("/api/v1/operations/period-lock", {
+        method: "PUT",
+        body: { lock_date: null },
+      }),
+    ).resolves.toEqual({ lock_date: null });
+
+    const init = fetchMock.mock.calls[0]![1];
+    const headers = new Headers(init?.headers);
+    expect(init?.method).toBe("PUT");
+    expect(init?.body).toBe(JSON.stringify({ lock_date: null }));
+    expect(headers.get("Content-Type")).toBe("application/json");
+  });
+
   it("sends DELETE without a body for apiDelete", async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));

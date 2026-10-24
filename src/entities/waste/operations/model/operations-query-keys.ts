@@ -17,4 +17,6 @@ export const operationsQueryKeys = {
   current: () => [...operationsQueryKeys.all, "current"] as const,
   currentBalance: (tenantId: string, unitId: string, wasteId: string) =>
     [...operationsQueryKeys.current(), tenantId, unitId, wasteId] as const,
+  periodLock: (tenantId: string) =>
+    [...operationsQueryKeys.all, "period-lock", tenantId] as const,
 };

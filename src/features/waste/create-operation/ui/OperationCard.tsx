@@ -8,6 +8,7 @@ import {
   canMutateOperation,
   canReviewOperation,
   deleteOperation,
+  isOperationDateLocked,
   NEUTRALIZATION_METHOD_LABEL,
   OPERATION_TYPE_LABEL,
   OperationStatusBadge,
@@ -33,6 +34,7 @@ import { OperationEditFields } from "./OperationEditFields";
 
 type OperationCardProps = {
   operation: Operation;
+  lockDate?: string | null;
   onCancel: () => void;
   onDeleted: () => void;
   onSaved: (operation: Operation, meta: { close: boolean }) => void;
@@ -46,6 +48,7 @@ function formatAmount(value: string): string {
 
 export function OperationCard({
   operation,
+  lockDate = null,
   onCancel,
   onDeleted,
   onSaved,
@@ -54,8 +57,9 @@ export function OperationCard({
   const [rejecting, setRejecting] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const canMutate = canMutateOperation(operation.status);
-  const canReview = canReviewOperation(operation.status);
+  const dateLocked = isOperationDateLocked(operation.date, lockDate);
+  const canMutate = canMutateOperation(operation.status) && !dateLocked;
+  const canReview = canReviewOperation(operation.status) && !dateLocked;
   const {
     form,
     error,
@@ -63,6 +67,7 @@ export function OperationCard({
     onSubmit,
   } = useEditOperationForm({
     operation,
+    lockDate,
     onSaved,
   });
 
@@ -145,6 +150,14 @@ export function OperationCard({
         {error ? (
           <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {dateLocked && lockDate ? (
+          <Alert variant="warning">
+            <AlertDescription>
+              {`Закрыт по ${formatDate(lockDate)}. Операции с этой датой и раньше нельзя создавать и изменять.`}
+            </AlertDescription>
           </Alert>
         ) : null}
 

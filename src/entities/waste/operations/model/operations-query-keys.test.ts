@@ -36,5 +36,10 @@ describe("operationsQueryKeys", () => {
     expect(
       operationsQueryKeys.currentBalance("tenant-1", "unit-1", "waste-1"),
     ).toEqual(["operations", "current", "tenant-1", "unit-1", "waste-1"]);
+    expect(operationsQueryKeys.periodLock("tenant-1")).toEqual([
+      "operations",
+      "period-lock",
+      "tenant-1",
+    ]);
   });
 });

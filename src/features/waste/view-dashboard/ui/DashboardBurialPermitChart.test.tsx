@@ -45,7 +45,28 @@ describe("DashboardBurialPermitChart", () => {
     expect(
       screen.getByRole("img", { name: "Вывоз на захоронение по месяцам" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/12 \/ 100/)).toBeInTheDocument();
+    expect(screen.getByText("12").closest("p")).toHaveTextContent(
+      "12 / 100 кг",
+    );
+    expect(screen.getByText("12")).not.toHaveClass("text-destructive");
+    expect(
+      screen.getByText("на срок разрешения, не на год"),
+    ).toBeInTheDocument();
+  });
+
+  it("highlights a year fact above the permit-term limit", () => {
+    render(
+      <DashboardBurialPermitChart
+        stat={{ ...dashboardBurialPermitStatFixture, limit: "10.000000" }}
+        selected
+      />,
+    );
+
+    expect(screen.getByText("12")).toHaveClass("text-destructive");
+    expect(screen.getByText("12").closest("p")).toHaveTextContent("12 / 10 кг");
+    expect(
+      screen.getByText("на срок разрешения, не на год"),
+    ).toBeInTheDocument();
   });
 
   it("explains a 404 from the stat endpoint", () => {

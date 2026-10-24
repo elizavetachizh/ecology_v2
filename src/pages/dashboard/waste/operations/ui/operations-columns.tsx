@@ -2,6 +2,7 @@ import { Check, Trash2, X } from "lucide-react";
 import {
   canMutateOperation,
   canReviewOperation,
+  isOperationDateLocked,
   OPERATION_TYPE_LABEL,
   OperationStatusBadge,
   type Operation,
@@ -28,12 +29,14 @@ type OperationsColumnActions = {
   onDelete: (operation: Operation) => void;
   onApprove: (operation: Operation) => void;
   onReject: (operation: Operation) => void;
+  lockDate?: string | null;
 };
 
 function operationsColumns({
   onDelete,
   onApprove,
   onReject,
+  lockDate = null,
 }: OperationsColumnActions): ColumnDef<Operation>[] {
   return [
     {
@@ -148,6 +151,7 @@ function operationsColumns({
       enableSorting: false,
       cell: ({ row }) => {
         const operation = row.original;
+        if (isOperationDateLocked(operation.date, lockDate)) return null;
         const canReview = canReviewOperation(operation.status);
         const canMutate = canMutateOperation(operation.status);
         if (!canReview && !canMutate) return null;

@@ -25,7 +25,7 @@ type ApiRequestOptions = RequestInit & {
 };
 
 type ApiSendJsonOptions = {
-  method: "POST" | "PATCH";
+  method: "POST" | "PATCH" | "PUT";
   body: unknown;
   signal?: AbortSignal;
   tenantScoped?: boolean;

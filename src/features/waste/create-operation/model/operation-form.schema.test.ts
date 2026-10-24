@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { operationFormSchema } from "./operation-form.schema";
+import {
+  createOperationFormSchema,
+  operationFormSchema,
+} from "./operation-form.schema";
 
 const UNIT_ID = "11111111-1111-4111-8111-111111111111";
 const WASTE_ID = "22222222-2222-4222-8222-222222222222";
@@ -207,5 +210,41 @@ describe("operationFormSchema", () => {
         unit_id: "",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("createOperationFormSchema", () => {
+  const formed = {
+    ...base,
+    operation_type: "formed" as const,
+    waste_source_id: SOURCE_ID,
+  };
+
+  it("accepts any date when the period is open", () => {
+    expect(createOperationFormSchema().parse(formed)).toEqual(formed);
+    expect(createOperationFormSchema(null).parse(formed)).toEqual(formed);
+  });
+
+  it("rejects a date on or before the lock date", () => {
+    const schema = createOperationFormSchema("2026-03-01");
+    const onLock = schema.safeParse(formed);
+    expect(onLock.success).toBe(false);
+    if (!onLock.success) {
+      expect(onLock.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["date"],
+            message: "Дата попадает в закрытый период (по 01.03.2026)",
+          }),
+        ]),
+      );
+    }
+    expect(schema.safeParse({ ...formed, date: "2026-02-28" }).success).toBe(
+      false,
+    );
+    expect(schema.parse({ ...formed, date: "2026-03-02" })).toEqual({
+      ...formed,
+      date: "2026-03-02",
+    });
   });
 });

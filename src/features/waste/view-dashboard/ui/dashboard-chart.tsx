@@ -12,10 +12,12 @@ function ChartHeading({
   title,
   description,
   amount,
+  note,
 }: {
   title: string;
   description?: string;
-  amount?: string;
+  amount?: ReactNode;
+  note?: string;
 }) {
   return (
     <>
@@ -28,6 +30,7 @@ function ChartHeading({
           {amount}
         </p>
       ) : null}
+      {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
     </>
   );
 }
@@ -36,11 +39,13 @@ export function ChartHeader({
   title,
   description,
   amount,
+  note,
   actions,
 }: {
   title: string;
   description?: string;
-  amount?: string;
+  amount?: ReactNode;
+  note?: string;
   actions?: ReactNode;
 }) {
   if (actions) {
@@ -51,6 +56,7 @@ export function ChartHeader({
             title={title}
             description={description}
             amount={amount}
+            note={note}
           />
         </div>
         <div className="flex items-center gap-1.5">{actions}</div>
@@ -60,7 +66,12 @@ export function ChartHeader({
 
   return (
     <div className="mb-3 min-w-0 space-y-1">
-      <ChartHeading title={title} description={description} amount={amount} />
+      <ChartHeading
+        title={title}
+        description={description}
+        amount={amount}
+        note={note}
+      />
     </div>
   );
 }

@@ -8,7 +8,9 @@ import {
   type TenantContextValue,
 } from "../../../../entities/tenant";
 import { currentUser } from "../../../../entities/user";
+import { getPeriodLock } from "../../../../entities/waste/operations/api/get-period-lock";
 import { getOperation } from "../../../../entities/waste/operations";
+import { makeOperation } from "../../../../entities/waste/operations/model/operation.fixture";
 import { EditOperationPage } from "./EditOperationPage";
 
 vi.mock("@tanstack/react-router", () => ({
@@ -17,6 +19,10 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => (
     <a href={typeof to === "string" ? to : "/"}>{children}</a>
   ),
+}));
+
+vi.mock("../../../../entities/waste/operations/api/get-period-lock", () => ({
+  getPeriodLock: vi.fn(),
 }));
 
 vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
@@ -31,6 +37,15 @@ vi.mock("../../../../entities/waste/operations", async (importOriginal) => {
 });
 
 const getOperationMock = vi.mocked(getOperation);
+const getPeriodLockMock = vi.mocked(getPeriodLock);
+
+const openPeriodLock = {
+  lock_date: null,
+  created_at: null,
+  updated_at: null,
+  created_by: null,
+  updated_by: null,
+};
 
 const user = currentUser({ email: null });
 
@@ -73,6 +88,8 @@ afterEach(cleanup);
 describe("EditOperationPage", () => {
   beforeEach(() => {
     getOperationMock.mockReset();
+    getPeriodLockMock.mockReset();
+    getPeriodLockMock.mockResolvedValue(openPeriodLock);
   });
 
   it("shows not-found when the operation is missing", async () => {
@@ -85,5 +102,31 @@ describe("EditOperationPage", () => {
     expect(
       screen.getByRole("link", { name: "К журналу операций" }),
     ).toBeInTheDocument();
+  });
+
+  it("renders a locked operation as read-only", async () => {
+    getOperationMock.mockResolvedValue(
+      makeOperation({ date: "2026-01-31", status: "confirmation_required" }),
+    );
+    getPeriodLockMock.mockResolvedValue({
+      ...openPeriodLock,
+      lock_date: "2026-01-31",
+    });
+    renderPage();
+
+    expect(
+      await screen.findByText(
+        "Закрыт по 31.01.2026. Операции с этой датой и раньше нельзя создавать и изменять.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Сохранить" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Подтвердить" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Отклонить" }),
+    ).not.toBeInTheDocument();
   });
 });

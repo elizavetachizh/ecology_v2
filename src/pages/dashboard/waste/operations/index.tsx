@@ -11,10 +11,12 @@ import {
   operationsQueryKeys,
   rejectOperation,
   useOperationsListQuery,
+  usePeriodLockQuery,
   type Operation,
   type OperationSortField,
 } from "../../../../entities/waste/operations";
 import { CreateOperationModal } from "../../../../features/waste/create-operation";
+import { PeriodLockBanner } from "../../../../features/waste/set-period-lock";
 import { queryClient } from "../../../../shared/lib/query-client";
 import { formatDate } from "../../../../shared/lib/format-date";
 import {
@@ -60,17 +62,25 @@ export function WasteOperationsPage() {
   const search = useSearch({ from: routes.operations.list });
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [periodLockOpen, setPeriodLockOpen] = useState(false);
   const [deleting, setDeleting] = useState<Operation | null>(null);
   const [approving, setApproving] = useState<Operation | null>(null);
   const [rejecting, setRejecting] = useState<Operation | null>(null);
+  const {
+    periodLock,
+    loading: periodLockLoading,
+    error: periodLockError,
+  } = usePeriodLockQuery({ tenantId: activeTenantId });
+  const lockDate = periodLock?.lock_date ?? null;
   const columns = useMemo(
     () =>
       operationsColumns({
         onDelete: setDeleting,
         onApprove: setApproving,
         onReject: setRejecting,
+        lockDate,
       }),
-    [],
+    [lockDate],
   );
 
   const listParams = useMemo(
@@ -178,11 +188,34 @@ export function WasteOperationsPage() {
           title="Журнал операций"
           description="Здесь вы можете просматривать и управлять операциями по отходам."
           actions={
-            <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="size-3.5" />
-              Создать операцию
-            </Button>
+            <>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Plus className="size-3.5" />
+                Создать операцию
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => setPeriodLockOpen(true)}
+              >
+                Настроить операционный период
+              </Button>
+            </>
           }
+        />
+
+        <PeriodLockBanner
+          open={periodLockOpen}
+          onOpenChange={setPeriodLockOpen}
+          periodLock={periodLock}
+          loading={periodLockLoading}
+          error={periodLockError}
         />
 
         <OperationsFilters
@@ -224,6 +257,7 @@ export function WasteOperationsPage() {
 
         <CreateOperationModal
           open={createOpen}
+          lockDate={lockDate}
           onOpenChange={setCreateOpen}
           onSaved={() => {
             toast.success("Операция успешно создана");

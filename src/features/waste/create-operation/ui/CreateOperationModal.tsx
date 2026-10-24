@@ -25,12 +25,14 @@ type CreateOperationModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: (operation: Operation) => void;
+  lockDate?: string | null;
 };
 
 export function CreateOperationModal({
   open,
   onOpenChange,
   onSaved,
+  lockDate = null,
 }: CreateOperationModalProps) {
   const pendingRef = useRef(false);
 
@@ -44,6 +46,7 @@ export function CreateOperationModal({
       {open ? (
         <CreateOperationModalForm
           pendingRef={pendingRef}
+          lockDate={lockDate}
           onOpenChange={handleOpenChange}
           onSaved={onSaved}
         />
@@ -58,6 +61,7 @@ type CreateOperationModalFormProps = Omit<CreateOperationModalProps, "open"> & {
 
 function CreateOperationModalForm({
   pendingRef,
+  lockDate,
   onOpenChange,
   onSaved,
 }: CreateOperationModalFormProps) {
@@ -65,6 +69,7 @@ function CreateOperationModalForm({
   const { form, error, pending, onSubmit, clearError } = useCreateOperationForm(
     {
       onSaved,
+      lockDate,
     },
   );
 

@@ -20,6 +20,7 @@ import { getDashboardBurialPermits } from "../../entities/waste/dashboards";
 import { getDashboardBurialPermitStat } from "../../entities/waste/dashboards";
 import { getDashboardFormed } from "../../entities/waste/dashboards";
 import { getDashboardFormedStat } from "../../entities/waste/dashboards";
+import { getDashboardSummary } from "../../entities/waste/dashboards";
 import {
   dashboardBalanceFixture,
   dashboardBalanceStatFixture,
@@ -27,13 +28,27 @@ import {
   dashboardBurialPermitStatFixture,
   dashboardFormedFixture,
   dashboardFormedStatFixture,
+  dashboardSummaryFixture,
 } from "../../entities/waste/dashboards/model/dashboard.fixture";
 import { HomePage } from "./HomePage";
 
 const navigateMock = vi.hoisted(() => vi.fn());
+const searchState = vi.hoisted(() => ({
+  current: {
+    on_date: "2026-08-15",
+  } as {
+    on_date?: string;
+    burial_year?: number;
+    formed_year?: number;
+    summary_preset?:
+      "this_day" | "this_week" | "this_month" | "this_year" | "custom";
+    summary_from?: string;
+    summary_to?: string;
+  },
+}));
 
 vi.mock("@tanstack/react-router", () => ({
-  useSearch: () => ({ on_date: "2026-08-15" }),
+  useSearch: () => searchState.current,
   useNavigate: () => navigateMock,
   Link: ({ children, to }: { children: ReactNode; to: string }) => (
     <a href={typeof to === "string" ? to : "/"}>{children}</a>
@@ -76,6 +91,10 @@ vi.mock(
   }),
 );
 
+vi.mock("../../entities/waste/dashboards/api/get-dashboard-summary", () => ({
+  getDashboardSummary: vi.fn(),
+}));
+
 const getDashboardBalanceMock = vi.mocked(getDashboardBalance);
 const getDashboardBalanceStatMock = vi.mocked(getDashboardBalanceStat);
 const getDashboardBurialPermitsMock = vi.mocked(getDashboardBurialPermits);
@@ -84,6 +103,7 @@ const getDashboardBurialPermitStatMock = vi.mocked(
 );
 const getDashboardFormedMock = vi.mocked(getDashboardFormed);
 const getDashboardFormedStatMock = vi.mocked(getDashboardFormedStat);
+const getDashboardSummaryMock = vi.mocked(getDashboardSummary);
 
 const user = currentUser({ email: null });
 
@@ -111,6 +131,13 @@ const noTenantValue: TenantContextValue = {
   activeTenant: null,
 };
 
+function counterValue(label: string): string | null {
+  return (
+    screen.getByText(label).parentElement?.querySelector(".text-2xl")
+      ?.textContent ?? null
+  );
+}
+
 function renderPage(value: TenantContextValue = tenantValue) {
   const client = new QueryClient({
     defaultOptions: {
@@ -127,10 +154,16 @@ function renderPage(value: TenantContextValue = tenantValue) {
   );
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 describe("HomePage", () => {
   beforeEach(() => {
+    searchState.current = { on_date: "2026-08-15" };
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 23, 12, 0, 0));
     navigateMock.mockReset();
     getDashboardBalanceMock.mockReset();
     getDashboardBalanceStatMock.mockReset();
@@ -148,6 +181,15 @@ describe("HomePage", () => {
     getDashboardFormedStatMock.mockReset();
     getDashboardFormedMock.mockResolvedValue(dashboardFormedFixture);
     getDashboardFormedStatMock.mockResolvedValue(dashboardFormedStatFixture);
+    getDashboardSummaryMock.mockReset();
+    getDashboardSummaryMock.mockImplementation(async (params) => ({
+      ...dashboardSummaryFixture,
+      period: {
+        ...dashboardSummaryFixture.period,
+        date_from: params.date_from,
+        date_to: params.date_to,
+      },
+    }));
   });
 
   it("asks to pick an organization when tenant is missing", () => {
@@ -157,6 +199,7 @@ describe("HomePage", () => {
     expect(getDashboardBurialPermitsMock).not.toHaveBeenCalled();
     expect(getDashboardFormedMock).not.toHaveBeenCalled();
     expect(getDashboardFormedStatMock).not.toHaveBeenCalled();
+    expect(getDashboardSummaryMock).not.toHaveBeenCalled();
   });
 
   it("loads the as-of snapshot and the first series", async () => {
@@ -267,6 +310,258 @@ describe("HomePage", () => {
       on_date: "2026-08-15",
       formed_waste_id: "waste-2",
     });
+  });
+
+  it("loads this month's summary above the balances and shows the response window", async () => {
+    renderPage();
+
+    const headings = await screen.findAllByRole("heading", { level: 1 });
+    expect(headings[0]).toHaveTextContent("Сводка");
+    expect(headings.map((heading) => heading.textContent)).toContain(
+      "Остатки отходов",
+    );
+
+    await waitFor(() => {
+      expect(getDashboardSummaryMock).toHaveBeenCalledWith(
+        { date_from: "2026-10-01", date_to: "2026-10-31" },
+        expect.any(AbortSignal),
+      );
+    });
+
+    expect(
+      await screen.findByText("01.10.2026 — 31.10.2026"),
+    ).toBeInTheDocument();
+    expect(counterValue("Подтверждённые операции")).toBe("40");
+    expect(counterValue("Паспорта")).toBe("12");
+    expect(counterValue("ТТН")).toBe("7");
+    expect(screen.getByRole("heading", { name: "Сейчас" })).toBeInTheDocument();
+    expect(counterValue("Операции на подтверждении")).toBe("5");
+    expect(counterValue("Паспорта без вывоза")).toBe("6");
+    expect(counterValue("ТТН без вывоза")).toBe("3");
+    expect(screen.getByText("Цех №1")).toBeInTheDocument();
+    expect(screen.getByText("Цех №2")).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Образовано" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Вывезено" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Цех №2").closest("tr")).toHaveTextContent("0");
+  });
+
+  it("writes a named summary preset and clears custom dates", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("radio", { name: "Сегодня" }));
+
+    expect(navigateMock).toHaveBeenCalled();
+    const updater = navigateMock.mock.calls[0]![0].search as (prev: {
+      on_date?: string;
+      summary_from?: string;
+    }) => unknown;
+    expect(
+      updater({ on_date: "2026-08-15", summary_from: "2026-01-01" }),
+    ).toEqual({
+      on_date: "2026-08-15",
+      summary_from: undefined,
+      summary_preset: "this_day",
+      summary_to: undefined,
+    });
+  });
+
+  it("seeds custom dates from the current month preset", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("radio", { name: "Период" }));
+
+    const updater = navigateMock.mock.calls[0]![0].search as (prev: {
+      on_date?: string;
+    }) => unknown;
+    expect(updater({ on_date: "2026-08-15" })).toEqual({
+      on_date: "2026-08-15",
+      summary_preset: "custom",
+      summary_from: "2026-10-01",
+      summary_to: "2026-10-31",
+    });
+  });
+
+  it("requests the custom window stored in the url", async () => {
+    searchState.current = {
+      on_date: "2026-08-15",
+      summary_preset: "custom",
+      summary_from: "2026-10-19",
+      summary_to: "2026-10-25",
+    };
+    renderPage();
+
+    await waitFor(() => {
+      expect(getDashboardSummaryMock).toHaveBeenCalledWith(
+        { date_from: "2026-10-19", date_to: "2026-10-25" },
+        expect.any(AbortSignal),
+      );
+    });
+    expect(
+      await screen.findByText("19.10.2026 — 25.10.2026"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not request summary when the custom window is reversed", async () => {
+    searchState.current = {
+      on_date: "2026-08-15",
+      summary_preset: "custom",
+      summary_from: "2026-10-31",
+      summary_to: "2026-10-01",
+    };
+    renderPage();
+
+    expect(
+      await screen.findByText("Дата начала позже даты окончания"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Подтверждённые операции"),
+    ).not.toBeInTheDocument();
+    expect(getDashboardSummaryMock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(getDashboardBalanceMock).toHaveBeenCalled();
+    });
+  });
+
+  it("keeps burial and formed on the calendar year when the balance date is another year", async () => {
+    searchState.current = { on_date: "2025-08-15" };
+    renderPage();
+
+    await waitFor(() => {
+      expect(getDashboardBalanceMock).toHaveBeenCalledWith(
+        { on_date: "2025-08-15" },
+        expect.any(AbortSignal),
+      );
+    });
+    await waitFor(() => {
+      expect(getDashboardBurialPermitsMock).toHaveBeenCalledWith(
+        { year: 2026 },
+        expect.any(AbortSignal),
+      );
+      expect(getDashboardBurialPermitStatMock).toHaveBeenCalledWith(
+        expect.objectContaining({ year: 2026 }),
+        expect.any(AbortSignal),
+      );
+    });
+    await waitFor(() => {
+      expect(getDashboardFormedMock).toHaveBeenCalledWith(
+        { year: 2026 },
+        expect.any(AbortSignal),
+      );
+      expect(getDashboardFormedStatMock).toHaveBeenCalledWith(
+        expect.objectContaining({ year: 2026 }),
+        expect.any(AbortSignal),
+      );
+    });
+    expect(screen.getByLabelText("Год разрешений")).toHaveValue(2026);
+    expect(screen.getByLabelText("Год образования")).toHaveValue(2026);
+  });
+
+  it("requests burial and formed years from the url independently", async () => {
+    searchState.current = {
+      on_date: "2025-08-15",
+      burial_year: 2024,
+      formed_year: 2023,
+    };
+    renderPage();
+
+    await waitFor(() => {
+      expect(getDashboardBurialPermitsMock).toHaveBeenCalledWith(
+        { year: 2024 },
+        expect.any(AbortSignal),
+      );
+      expect(getDashboardBurialPermitStatMock).toHaveBeenCalledWith(
+        expect.objectContaining({ year: 2024 }),
+        expect.any(AbortSignal),
+      );
+    });
+    await waitFor(() => {
+      expect(getDashboardFormedMock).toHaveBeenCalledWith(
+        { year: 2023 },
+        expect.any(AbortSignal),
+      );
+      expect(getDashboardFormedStatMock).toHaveBeenCalledWith(
+        expect.objectContaining({ year: 2023 }),
+        expect.any(AbortSignal),
+      );
+    });
+    expect(getDashboardBalanceMock).toHaveBeenCalledWith(
+      { on_date: "2025-08-15" },
+      expect.any(AbortSignal),
+    );
+    expect(screen.getByLabelText("Год разрешений")).toHaveValue(2024);
+    expect(screen.getByLabelText("Год образования")).toHaveValue(2023);
+  });
+
+  it("writes only the burial year when the burial filter changes", async () => {
+    renderPage();
+    fireEvent.change(await screen.findByLabelText("Год разрешений"), {
+      target: { value: "2025" },
+    });
+
+    expect(navigateMock).toHaveBeenCalled();
+    const updater = navigateMock.mock.calls.at(-1)![0].search as (prev: {
+      on_date?: string;
+      formed_year?: number;
+    }) => unknown;
+    expect(updater({ on_date: "2026-08-15", formed_year: 2024 })).toEqual({
+      on_date: "2026-08-15",
+      formed_year: 2024,
+      burial_year: 2025,
+    });
+  });
+
+  it("writes only the formed year when the formed filter changes", async () => {
+    renderPage();
+    fireEvent.change(await screen.findByLabelText("Год образования"), {
+      target: { value: "2024" },
+    });
+
+    expect(navigateMock).toHaveBeenCalled();
+    const updater = navigateMock.mock.calls.at(-1)![0].search as (prev: {
+      on_date?: string;
+      burial_year?: number;
+    }) => unknown;
+    expect(updater({ on_date: "2026-08-15", burial_year: 2025 })).toEqual({
+      on_date: "2026-08-15",
+      burial_year: 2025,
+      formed_year: 2024,
+    });
+  });
+
+  it("highlights a burial fact above the permit-term limit", async () => {
+    const waste = dashboardBurialPermitFixture.wastes[0]!;
+    getDashboardBurialPermitsMock.mockResolvedValue([
+      {
+        ...dashboardBurialPermitFixture,
+        wastes: [{ ...waste, amount: "150.000000", limit: "100.000000" }],
+      },
+    ]);
+    getDashboardBurialPermitStatMock.mockResolvedValue({
+      ...dashboardBurialPermitStatFixture,
+      limit: "10.000000",
+    });
+    renderPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByTitle("Факт за год выше лимита разрешения"),
+      ).toHaveLength(2);
+    });
+    const highlighted = screen.getAllByTitle(
+      "Факт за год выше лимита разрешения",
+    );
+    expect(highlighted.map((node) => node.textContent)).toEqual([
+      "150 кг",
+      "12",
+    ]);
+    for (const node of highlighted) {
+      expect(node).toHaveClass("text-destructive");
+    }
+    expect(screen.getAllByText("на срок разрешения, не на год")).toHaveLength(
+      2,
+    );
   });
 
   it("shows an error when the snapshot request fails", async () => {

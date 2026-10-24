@@ -164,6 +164,19 @@ export type OperationCreate = Pick<
 
 export type OperationUpdate = Partial<OperationCreate>;
 
+/** Одна запись на тенант. `lock_date: null` — период открыт, строка на бэке может отсутствовать. */
+export type PeriodLock = {
+  lock_date: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  created_by: UserProfile | null;
+  updated_by: UserProfile | null;
+};
+
+export type PeriodLockUpdate = {
+  lock_date: string | null;
+};
+
 /** Поля sort из GET /api/v1/operations/operations. waste — по WasteClassifier.code, unit — по Unit.name. */
 export const OperationSortFields = [
   "id",

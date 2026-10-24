@@ -68,5 +68,17 @@ describe("dashboardsQueryKeys", () => {
     expect(
       dashboardsQueryKeys.formedStat("tenant-1", formedStatParams),
     ).toEqual(["dashboards", "formed-stat", "tenant-1", formedStatParams]);
+
+    const summaryParams = {
+      date_from: "2026-10-01",
+      date_to: "2026-10-31",
+    };
+    expect(dashboardsQueryKeys.summaries()).toEqual(["dashboards", "summary"]);
+    expect(dashboardsQueryKeys.summary("tenant-1", summaryParams)).toEqual([
+      "dashboards",
+      "summary",
+      "tenant-1",
+      summaryParams,
+    ]);
   });
 });

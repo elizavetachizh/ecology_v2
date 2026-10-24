@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  isOperationDateLocked,
   NeutralizationMethodValues,
   OperationTypeValues,
   TransferReceiptPurposeValues,
@@ -7,6 +8,7 @@ import {
   type OperationType,
 } from "../../../../entities/waste/operations";
 import {
+  formatDate,
   isoDateZodSchema,
   todayIsoDate,
 } from "../../../../shared/lib/format-date";
@@ -181,6 +183,17 @@ export const operationFormSchema = z
   });
 
 export type OperationFormValues = z.infer<typeof operationFormSchema>;
+
+export function createOperationFormSchema(lockDate: string | null = null) {
+  return operationFormSchema.superRefine((values, ctx) => {
+    if (!lockDate || !isOperationDateLocked(values.date, lockDate)) return;
+    ctx.addIssue({
+      code: "custom",
+      path: ["date"],
+      message: `Дата попадает в закрытый период (по ${formatDate(lockDate)})`,
+    });
+  });
+}
 
 export const EMPTY_TYPE_SPECIFIC_VALUES: Pick<
   OperationFormValues,
