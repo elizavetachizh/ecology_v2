@@ -55,7 +55,8 @@ export function DashboardBurialPermitTable({
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[16%]">Код</TableHead>
             <TableHead>Наименование</TableHead>
-            <TableHead>Заполненность</TableHead>
+            <TableHead>Факт/Лимит</TableHead>
+            <TableHead className="text-right">%</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,7 +71,7 @@ export function DashboardBurialPermitTable({
             </TableRow>
           ) : groups.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={3} className="h-28 px-3 text-center">
+              <TableCell colSpan={4} className="h-28 px-3 text-center">
                 <div className="mx-auto max-w-sm space-y-2">
                   <p className="text-sm font-medium text-foreground">
                     За выбранный год разрешений нет
@@ -95,7 +96,7 @@ export function DashboardBurialPermitTable({
                 className="bg-muted/40 hover:bg-muted/40"
               >
                 <TableCell
-                  colSpan={3}
+                  colSpan={4}
                   className="py-2 text-sm font-medium text-foreground"
                 >
                   <span className="mr-2">{group.permit.number}</span>
@@ -111,9 +112,6 @@ export function DashboardBurialPermitTable({
                     status={group.permit.status}
                     className="ml-2 align-middle"
                   />
-                  <span className="ml-2 font-normal text-muted-foreground">
-                    {group.wastes.length}
-                  </span>
                 </TableCell>
               </TableRow>,
               ...group.wastes.map((item) => {
@@ -147,6 +145,13 @@ export function DashboardBurialPermitTable({
                     <TableCell className="font-medium">
                       {item.waste.waste_classifier.name}
                     </TableCell>
+                    <TableCell>
+                      {" "}
+                      <span className="text-xs">
+                        {" "}
+                        {`${item.amount} из ${formatBalanceAmount(item.limit)} ${uom}`}
+                      </span>
+                    </TableCell>
                     <TableCell
                       className={cn(
                         "text-right tabular-nums",
@@ -162,12 +167,8 @@ export function DashboardBurialPermitTable({
                       }
                     >
                       {percent !== null ? (
-                        <FillMeter percent={percent} />
+                        <FillMeter percent={percent} leading="" />
                       ) : null}
-                      <span className="text-xs">
-                        {" "}
-                        {`${item.amount} из ${formatBalanceAmount(item.limit)} ${uom}`}
-                      </span>
                     </TableCell>
                   </TableRow>
                 );

@@ -15,10 +15,7 @@ import {
   type Passport,
 } from "../../../../entities/waste/passports";
 import { useTenant } from "../../../../entities/tenant";
-import {
-  UnitHierarchicalSelect,
-  UnitSelect,
-} from "../../../../entities/waste/units";
+import { UnitHierarchicalSelect } from "../../../../entities/waste/units";
 import { VehicleSelect } from "../../../../entities/waste/vehicles";
 import {
   Alert,
@@ -105,6 +102,7 @@ export function PassportForm({
           setValue("waste_ids", [], { shouldValidate: true });
           return;
         }
+
         onSubmit({ ...values, waste_ids: kept });
       })}
       className="mx-auto max-w-4xl space-y-6"

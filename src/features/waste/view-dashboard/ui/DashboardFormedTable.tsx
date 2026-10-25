@@ -4,7 +4,10 @@ import {
   isNonZeroAmount,
   type DashboardFormed,
 } from "../../../../entities/waste/dashboards";
-import { UOM_LABEL } from "../../../../entities/waste/wastes";
+import {
+  HAZARD_CLASS_LABEL,
+  UOM_LABEL,
+} from "../../../../entities/waste/wastes";
 import { routes } from "../../../../shared/config/routes";
 import { cn } from "../../../../shared/lib/cn";
 import {
@@ -37,6 +40,7 @@ export function DashboardFormedTable({
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[16%]">Код</TableHead>
             <TableHead>Наименование</TableHead>
+            <TableHead className="w-[22%]">Класс опасности</TableHead>
             <TableHead className="w-[28%] text-right">Сумма</TableHead>
           </TableRow>
         </TableHeader>
@@ -91,6 +95,9 @@ export function DashboardFormedTable({
                   </TableCell>
                   <TableCell className="font-medium">
                     {item.waste.waste_classifier.name}
+                  </TableCell>
+                  <TableCell>
+                    {HAZARD_CLASS_LABEL[item.waste.hazard_class]}
                   </TableCell>
                   <TableCell
                     className={cn(
