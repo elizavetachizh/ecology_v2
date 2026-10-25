@@ -151,7 +151,7 @@ export function DashboardFormedCharts({
   const previousYear = String(stat.previous_year);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-[1fr_1fr] gap-4">
       <ChartFrame>
         <ChartHeader title="По подразделениям" description={waste} />
         <div

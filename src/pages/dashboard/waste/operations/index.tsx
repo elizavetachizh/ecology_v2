@@ -8,6 +8,7 @@ import {
   approveOperation,
   DEFAULT_OPERATIONS_LIST_LIMIT,
   deleteOperation,
+  isOperationDateLocked,
   operationsQueryKeys,
   rejectOperation,
   useOperationsListQuery,
@@ -16,7 +17,10 @@ import {
   type OperationSortField,
 } from "../../../../entities/waste/operations";
 import { CreateOperationModal } from "../../../../features/waste/create-operation";
-import { PeriodLockBanner } from "../../../../features/waste/set-period-lock";
+import {
+  PeriodLockBanner,
+  PeriodLockInfo,
+} from "../../../../features/waste/set-period-lock";
 import { queryClient } from "../../../../shared/lib/query-client";
 import { formatDate } from "../../../../shared/lib/format-date";
 import {
@@ -78,7 +82,6 @@ export function WasteOperationsPage() {
         onDelete: setDeleting,
         onApprove: setApproving,
         onReject: setRejecting,
-        lockDate,
       }),
     [lockDate],
   );
@@ -185,7 +188,12 @@ export function WasteOperationsPage() {
       <div className="space-y-4">
         <PageContextBar
           sticky={false}
-          title="Журнал операций"
+          title={
+            <span className="inline-flex items-center gap-1">
+              Журнал операций
+              {lockDate ? <PeriodLockInfo lockDate={lockDate} /> : null}
+            </span>
+          }
           description="Здесь вы можете просматривать и управлять операциями по отходам."
           actions={
             <>
@@ -204,7 +212,7 @@ export function WasteOperationsPage() {
                 className="shrink-0"
                 onClick={() => setPeriodLockOpen(true)}
               >
-                Настроить операционный период
+                Закрыть период
               </Button>
             </>
           }
@@ -308,17 +316,27 @@ export function WasteOperationsPage() {
 
         <ConfirmDialog
           open={deleting !== null}
-          confirmDisabled={deleteMutation.isPending}
+          confirmDisabled={
+            (deleting && isOperationDateLocked(deleting.date, lockDate)) ||
+            deleteMutation.isPending
+          }
           onOpenChange={(open) => {
             if (!open) setDeleting(null);
           }}
+
           title="Удалить операцию?"
           confirmLabel="Удалить"
           description={
             <>
-              Операция от {formatDate(deleting?.date ?? null)} по «
-              {deleting?.waste.waste_classifier.name ?? "—"}» будет удалена.
-              Остатки по этой единице и отходу будут пересчитаны.
+              {deleting && isOperationDateLocked(deleting.date, lockDate) ? (
+                `Операционный период закрыт ${formatDate(lockDate)}. Операции с этой датой и раньше удалить нельзя.`
+              ) : (
+                <>
+                  Операция от {formatDate(deleting?.date ?? null)} по «
+                  {deleting?.waste.waste_classifier.name ?? "—"}» будет удалена.
+                  Остатки по этой единице и отходу будут пересчитаны.
+                </>
+              )}
             </>
           }
           onConfirm={() => {

@@ -1,9 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PeriodLock } from "../../../../entities/waste/operations";
 import { userProfileFixture } from "../../../../entities/waste/persons";
-import { formatDateTime } from "../../../../shared/lib/format-date";
 import { PeriodLockBanner } from "./PeriodLockBanner";
 
 vi.mock("../../../../entities/tenant", () => ({
@@ -41,6 +40,7 @@ function renderBanner(props: {
   periodLock: PeriodLock | null;
   loading?: boolean;
   error?: Error | null;
+  open?: boolean;
 }) {
   const client = new QueryClient({
     defaultOptions: {
@@ -50,7 +50,7 @@ function renderBanner(props: {
   });
   return render(
     <QueryClientProvider client={client}>
-      <PeriodLockBanner {...props} />
+      <PeriodLockBanner open={false} onOpenChange={() => {}} {...props} />
     </QueryClientProvider>,
   );
 }
@@ -58,54 +58,38 @@ function renderBanner(props: {
 afterEach(cleanup);
 
 describe("PeriodLockBanner", () => {
-  it("shows an open period and the settings button", () => {
+  it("renders no closed-period alert when the period is open", () => {
     renderBanner({ periodLock: openLock });
 
-    expect(screen.getByText("Период открыт")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Настроить" }),
-    ).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Операционный период закрыт/),
+    ).not.toBeInTheDocument();
   });
 
-  it("warns when the period is closed and shows the audit line", () => {
+  it("does not warn in the banner when the period is closed", () => {
     renderBanner({ periodLock: closedLock });
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Закрыт по 31.01.2026. Операции с этой датой и раньше нельзя создавать и изменять.",
-    );
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      `Изменил tester, ${formatDateTime(closedLock.updated_at)}`,
-    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Операционный период закрыт/),
+    ).not.toBeInTheDocument();
   });
 
-  it("omits the audit line when the lock has no editor", () => {
-    renderBanner({
-      periodLock: { ...closedLock, updated_by: null, updated_at: null },
-    });
-
-    expect(screen.getByRole("alert")).toHaveTextContent("Закрыт по 31.01.2026");
-    expect(screen.getByRole("alert")).not.toHaveTextContent("Изменил");
-  });
-
-  it("hides settings while the lock request is loading and does not offer save", () => {
-    renderBanner({ periodLock: null, loading: true });
+  it("hides the dialog while the lock request is loading", () => {
+    renderBanner({ periodLock: null, loading: true, open: true });
 
     expect(
       screen.getByText("Загрузка операционного периода…"),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Настроить" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Сохранить" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("shows a load error without the settings button", () => {
+  it("shows a load error without the dialog", () => {
     renderBanner({
       periodLock: null,
       error: new Error("Сервер вернул ошибку 500"),
+      open: true,
     });
 
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -114,15 +98,11 @@ describe("PeriodLockBanner", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Сервер вернул ошибку 500",
     );
-    expect(
-      screen.queryByRole("button", { name: "Настроить" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("opens the settings dialog", () => {
-    renderBanner({ periodLock: closedLock });
-
-    fireEvent.click(screen.getByRole("button", { name: "Настроить" }));
+    renderBanner({ periodLock: closedLock, open: true });
 
     expect(
       screen.getByRole("dialog", { name: "Операционный период" }),
@@ -130,8 +110,5 @@ describe("PeriodLockBanner", () => {
     expect(screen.getByLabelText(/Последний закрытый день/)).toHaveValue(
       "2026-01-31",
     );
-    expect(
-      screen.getByText("Сдвиг даты назад снова открывает хвост."),
-    ).toBeInTheDocument();
   });
 });

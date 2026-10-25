@@ -253,6 +253,7 @@ export function HomePage() {
         />
 
         <DashboardSection
+          className="xl:grid-cols-[1fr]"
           error={formedQuery.error}
           errorTitle="Не удалось загрузить образование отходов"
           title="Образование отходов"

@@ -156,7 +156,7 @@ export function OperationCard({
         {dateLocked && lockDate ? (
           <Alert variant="warning">
             <AlertDescription>
-              {`Закрыт по ${formatDate(lockDate)}. Операции с этой датой и раньше нельзя создавать и изменять.`}
+              {`Операционный период закрыт ${formatDate(lockDate)}. Операции с этой датой и раньше нельзя создавать и изменять.`}
             </AlertDescription>
           </Alert>
         ) : null}

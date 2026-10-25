@@ -65,6 +65,7 @@ export {
 } from "./field-label";
 export { Switch } from "./switch";
 export { Badge, type BadgeProps } from "./badge";
+export { FillMeter, type FillMeterProps } from "./fill-meter";
 export { Toaster } from "./toaster";
 export { toast } from "./toast-store";
 export { PdfPreviewPanel } from "./pdf-preview/PdfPreviewPanel";

@@ -9,9 +9,11 @@ import { unitLabel } from "../../../../entities/waste/units";
 import { PermitStatusBadge } from "../../../../entities/waste/permits";
 import { UOM_LABEL } from "../../../../entities/waste/wastes";
 import { routes } from "../../../../shared/config/routes";
-import { formatDate } from "../../../../shared/lib/format-date";
 import { cn } from "../../../../shared/lib/cn";
+import { fillPercent } from "../../../../shared/lib/fill-percent";
+import { formatDate } from "../../../../shared/lib/format-date";
 import {
+  FillMeter,
   Table,
   TableBody,
   TableCell,
@@ -19,8 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../shared/ui";
-import { BURIAL_PERMIT_LIMIT_CAPTION } from "../lib/burial-permit-limit";
 import { selectOnActivate } from "../lib/select-on-activate";
+import { useCallback } from "react";
 
 type DashboardBurialPermitTableProps = {
   groups: DashboardBurialPermit[];
@@ -42,6 +44,10 @@ export function DashboardBurialPermitTable({
   selectedWasteId,
   onSelect,
 }: DashboardBurialPermitTableProps) {
+  const getPercent = useCallback((amount: string, limit: string) => {
+    return fillPercent(amount, limit);
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <Table className="table-fixed">
@@ -49,20 +55,14 @@ export function DashboardBurialPermitTable({
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[16%]">Код</TableHead>
             <TableHead>Наименование</TableHead>
-            <TableHead className="w-[20%] text-right">Факт за год</TableHead>
-            <TableHead className="h-auto w-[26%] py-2 text-right leading-tight">
-              <span className="block">Лимит</span>
-              <span className="mt-0.5 block font-normal">
-                {BURIAL_PERMIT_LIMIT_CAPTION}
-              </span>
-            </TableHead>
+            <TableHead>Заполненность</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow className="hover:bg-transparent">
               <TableCell
-                colSpan={4}
+                colSpan={3}
                 className="h-28 text-center text-muted-foreground"
               >
                 Загрузка…
@@ -70,7 +70,7 @@ export function DashboardBurialPermitTable({
             </TableRow>
           ) : groups.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={4} className="h-28 px-3 text-center">
+              <TableCell colSpan={3} className="h-28 px-3 text-center">
                 <div className="mx-auto max-w-sm space-y-2">
                   <p className="text-sm font-medium text-foreground">
                     За выбранный год разрешений нет
@@ -95,7 +95,7 @@ export function DashboardBurialPermitTable({
                 className="bg-muted/40 hover:bg-muted/40"
               >
                 <TableCell
-                  colSpan={4}
+                  colSpan={3}
                   className="py-2 text-sm font-medium text-foreground"
                 >
                   <span className="mr-2">{group.permit.number}</span>
@@ -127,7 +127,8 @@ export function DashboardBurialPermitTable({
                   });
                 const uom = UOM_LABEL[item.waste.uom];
                 const overLimit = isAmountOverLimit(item.amount, item.limit);
-                const factLabel = `${formatBalanceAmount(item.amount)} ${uom}`;
+                const percent = getPercent(item.amount, item.limit);
+
                 return (
                   <TableRow
                     key={`${group.permit.id}:${item.waste.id}`}
@@ -160,13 +161,13 @@ export function DashboardBurialPermitTable({
                           : undefined
                       }
                     >
-                      {factLabel}
-                    </TableCell>
-                    <TableCell
-                      className="text-right tabular-nums"
-                      title={BURIAL_PERMIT_LIMIT_CAPTION}
-                    >
-                      {`${formatBalanceAmount(item.limit)} ${uom}`}
+                      {percent !== null ? (
+                        <FillMeter percent={percent} />
+                      ) : null}
+                      <span className="text-xs">
+                        {" "}
+                        {`${item.amount} из ${formatBalanceAmount(item.limit)} ${uom}`}
+                      </span>
                     </TableCell>
                   </TableRow>
                 );

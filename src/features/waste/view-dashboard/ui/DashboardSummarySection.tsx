@@ -1,8 +1,17 @@
-import type { ReactNode } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ClipboardList,
+  FileText,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
 import {
   type DashboardSummary,
+  type DashboardSummaryOpen,
   type SummaryPreset,
 } from "../../../../entities/waste/dashboards";
+import { cn } from "../../../../shared/lib/cn";
 import {
   Alert,
   AlertDescription,
@@ -24,20 +33,37 @@ type DashboardSummarySectionProps = {
   onRangeChange: (range: { date_from?: string; date_to?: string }) => void;
 };
 
-const PERIOD_COUNTERS = [
-  { key: "operations", label: "Подтверждённые операции" },
-  { key: "passports", label: "Паспорта" },
-  { key: "ttns", label: "ТТН" },
-] as const;
+type PeriodKey = "operations" | "passports" | "ttns";
 
-const OPEN_COUNTERS = [
+const SUMMARY_CARDS: {
+  periodKey: PeriodKey;
+  openKey: keyof DashboardSummaryOpen;
+  label: string;
+  queuePhrase: string;
+  icon: LucideIcon;
+}[] = [
   {
-    key: "operations_confirmation_required",
-    label: "Операции на подтверждении",
+    periodKey: "operations",
+    openKey: "operations_confirmation_required",
+    label: "Подтверждённые операции",
+    queuePhrase: "ожидают подтверждения",
+    icon: ClipboardList,
   },
-  { key: "passports_without_transfer", label: "Паспорта без вывоза" },
-  { key: "ttns_without_transfer", label: "ТТН без вывоза" },
-] as const;
+  {
+    periodKey: "passports",
+    openKey: "passports_without_transfer",
+    label: "Паспорта",
+    queuePhrase: "без вывоза",
+    icon: FileText,
+  },
+  {
+    periodKey: "ttns",
+    openKey: "ttns_without_transfer",
+    label: "ТТН",
+    queuePhrase: "без вывоза",
+    icon: Truck,
+  },
+];
 
 export function DashboardSummarySection({
   preset,
@@ -51,13 +77,14 @@ export function DashboardSummarySection({
   onRangeChange,
 }: DashboardSummarySectionProps) {
   const showData = !rangeError && !error;
+  const countersLoading = loading && !summary;
 
   return (
     <div className="space-y-4">
       <PageContextBar
         sticky={false}
         title="Сводка"
-        description="Подтверждённые операции, паспорта и ТТН за выбранное окно. Очереди ниже считаются на текущий момент."
+        description="Подтверждённые операции, паспорта и ТТН за выбранный период."
         actions={
           <div className="flex flex-col gap-2 sm:items-end">
             <DashboardSummaryFilters
@@ -83,59 +110,104 @@ export function DashboardSummarySection({
       {showData ? (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
-            {PERIOD_COUNTERS.map((counter) => (
+            {SUMMARY_CARDS.map((card) => (
               <SummaryCounter
-                key={counter.key}
-                label={counter.label}
-                value={summary ? summary.period[counter.key] : null}
-                loading={loading && !summary}
+                key={card.periodKey}
+                label={card.label}
+                queuePhrase={card.queuePhrase}
+                icon={card.icon}
+                periodValue={summary ? summary.period[card.periodKey] : null}
+                openValue={summary ? summary.open[card.openKey] : null}
+                loading={countersLoading}
               />
             ))}
           </div>
 
           <DashboardSummaryTable
             rows={summary?.period.operations_by_unit ?? []}
-            loading={loading && !summary}
+            loading={countersLoading}
           />
-
-          <div className="space-y-3">
-            <h2 className="text-sm font-medium text-foreground">Сейчас</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {OPEN_COUNTERS.map((counter) => (
-                <SummaryCounter
-                  key={counter.key}
-                  label={counter.label}
-                  value={summary ? summary.open[counter.key] : null}
-                  loading={loading && !summary}
-                />
-              ))}
-            </div>
-          </div>
         </>
       ) : null}
     </div>
   );
 }
 
+function formatCounter(value: number | null, loading: boolean): string {
+  if (loading) return "…";
+  if (value === null) return "—";
+  return value.toLocaleString("ru-RU");
+}
+
 function SummaryCounter({
   label,
-  value,
+  queuePhrase,
+  icon: Icon,
+  periodValue,
+  openValue,
   loading,
 }: {
   label: string;
-  value: number | null;
+  queuePhrase: string;
+  icon: LucideIcon;
+  periodValue: number | null;
+  openValue: number | null;
   loading: boolean;
 }) {
-  let display: ReactNode = "—";
-  if (loading) display = "…";
-  else if (value !== null) display = value.toLocaleString("ru-RU");
+  const openKnown = !loading && openValue !== null;
+  const hasQueue = openKnown && openValue > 0;
+  const queueTone = hasQueue ? "text-warning-foreground" : "text-success";
 
   return (
-    <div className="rounded-xl border border-border bg-card px-4 py-3">
-      <div className="text-2xl font-semibold tabular-nums text-foreground">
-        {display}
+    <div
+      className={cn(
+        "rounded-xl border bg-card px-4 py-3",
+        hasQueue ? "border-warning/40" : "border-border",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-2xl font-semibold tabular-nums text-foreground">
+          {formatCounter(periodValue, loading)}
+        </div>
+        <div
+          className={cn(
+            "flex size-9 shrink-0 items-center justify-center rounded-lg",
+            openKnown
+              ? hasQueue
+                ? "bg-warning-muted text-warning"
+                : "bg-info-muted text-info"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
+          <Icon className="size-4" aria-hidden />
+        </div>
       </div>
       <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="mt-1 flex items-center gap-1.5 text-sm">
+        {hasQueue ? (
+          <AlertTriangle
+            className="size-3.5 shrink-0 text-warning"
+            aria-hidden
+          />
+        ) : openKnown ? (
+          <CheckCircle2
+            className="size-3.5 shrink-0 text-success"
+            aria-hidden
+          />
+        ) : null}
+        {openKnown ? (
+          <span>
+            <span className={cn("font-medium tabular-nums", queueTone)}>
+              {formatCounter(openValue, false)}
+            </span>{" "}
+            <span className={queueTone}>{queuePhrase}</span>{" "}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">
+            {formatCounter(openValue, loading)}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

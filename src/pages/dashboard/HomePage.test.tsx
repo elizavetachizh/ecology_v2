@@ -334,10 +334,15 @@ describe("HomePage", () => {
     expect(counterValue("Подтверждённые операции")).toBe("40");
     expect(counterValue("Паспорта")).toBe("12");
     expect(counterValue("ТТН")).toBe("7");
-    expect(screen.getByRole("heading", { name: "Сейчас" })).toBeInTheDocument();
-    expect(counterValue("Операции на подтверждении")).toBe("5");
-    expect(counterValue("Паспорта без вывоза")).toBe("6");
-    expect(counterValue("ТТН без вывоза")).toBe("3");
+    expect(
+      screen.getByText("Подтверждённые операции").parentElement,
+    ).toHaveTextContent("5 на подтверждении");
+    expect(screen.getByText("Паспорта").parentElement).toHaveTextContent(
+      "6 без вывоза",
+    );
+    expect(screen.getByText("ТТН").parentElement).toHaveTextContent(
+      "3 без вывоза",
+    );
     expect(screen.getByText("Цех №1")).toBeInTheDocument();
     expect(screen.getByText("Цех №2")).toBeInTheDocument();
     expect(

@@ -1,10 +1,9 @@
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { PeriodLock } from "../../../../entities/waste/operations";
 import {
   Button,
-  ConfirmDialog,
   FormField,
   Input,
   Modal,
@@ -20,6 +19,7 @@ import {
   type PeriodLockFormValues,
 } from "../model/period-lock-form.schema";
 import { useUpdatePeriodLock } from "../model/use-update-period-lock";
+import { formatDateTime } from "../../../../shared/lib/format-date";
 
 type PeriodLockDialogProps = {
   open: boolean;
@@ -66,10 +66,11 @@ function PeriodLockDialogForm({
   onDismiss,
   onSaved,
 }: PeriodLockDialogFormProps) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const mutation = useUpdatePeriodLock();
   const pending = mutation.isPending;
   const lockDate = periodLock?.lock_date ?? null;
+  const updatedBy = periodLock?.updated_by ?? null;
+  const updatedAt = periodLock?.updated_at ?? null;
 
   const {
     register,
@@ -111,7 +112,8 @@ function PeriodLockDialogForm({
           <ModalHeader>
             <ModalTitle>Операционный период</ModalTitle>
             <ModalDescription>
-              Операции с этой датой и раньше нельзя создавать и изменять.
+              Пользователям будет недоступно создание новых и изменение
+              существующих операций в закрытом периоде.
             </ModalDescription>
           </ModalHeader>
           <FormField
@@ -119,7 +121,12 @@ function PeriodLockDialogForm({
             label="Последний закрытый день"
             required
             error={errors.lock_date?.message}
-            description="Сдвиг даты назад снова открывает хвост."
+
+            description={
+              updatedBy && updatedAt
+                ? `Изменил ${updatedBy.username}, ${formatDateTime(updatedAt)}`
+                : null
+            }
           >
             <Input
               id="period-lock-date"
@@ -129,6 +136,7 @@ function PeriodLockDialogForm({
               {...register("lock_date")}
             />
           </FormField>
+
           <ModalFooter>
             <Button
               type="button"
@@ -138,34 +146,13 @@ function PeriodLockDialogForm({
             >
               Отмена
             </Button>
-            {lockDate ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={pending}
-                onClick={() => setConfirmOpen(true)}
-              >
-                Открыть период
-              </Button>
-            ) : null}
+
             <Button type="submit" disabled={pending}>
               {pending ? "Сохранение…" : "Сохранить"}
             </Button>
           </ModalFooter>
         </form>
       </ModalContent>
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Открыть период?"
-        confirmLabel="Открыть период"
-        confirmVariant="default"
-        confirmDisabled={pending}
-        description="Период будет открыт. Операции можно будет создавать и изменять за любую дату."
-        onConfirm={() => {
-          mutation.mutate({ lock_date: null }, { onSuccess: onSaved });
-        }}
-      />
     </>
   );
 }

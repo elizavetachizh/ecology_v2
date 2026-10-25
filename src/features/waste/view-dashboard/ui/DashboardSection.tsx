@@ -5,6 +5,7 @@ import {
   AlertTitle,
   PageContextBar,
 } from "../../../../shared/ui";
+import { cn } from "../../../../shared/lib/cn";
 
 type DashboardSectionProps = {
   error: Error | null;
@@ -14,6 +15,7 @@ type DashboardSectionProps = {
   actions?: ReactNode;
   table: ReactNode;
   chart: ReactNode;
+  className?: string;
 };
 
 export function DashboardSection({
@@ -24,6 +26,7 @@ export function DashboardSection({
   actions,
   table,
   chart,
+  className,
 }: DashboardSectionProps) {
   if (error) {
     return (
@@ -42,7 +45,12 @@ export function DashboardSection({
         description={description}
         actions={actions}
       />
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
+      <div
+        className={cn(
+          "grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]",
+          className,
+        )}
+      >
         {table}
         <div className="xl:sticky xl:top-4">{chart}</div>
       </div>

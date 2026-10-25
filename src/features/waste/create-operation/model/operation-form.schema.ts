@@ -13,10 +13,10 @@ import {
   todayIsoDate,
 } from "../../../../shared/lib/format-date";
 
-export const operationDateSchema = isoDateZodSchema().min(
-  1,
-  "Укажите дату операции",
-);
+export const operationDateSchema = z
+  .string()
+  .min(1, "Укажите дату операции")
+  .pipe(isoDateZodSchema());
 
 function normalizeDecimalSeparator(value: string): string {
   return value.replace(",", ".");
